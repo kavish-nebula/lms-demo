@@ -1,0 +1,12 @@
+{
+  "name": "@lms/fixtures",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Mock data shaped like the content schema and data model, used by the UI until the API exists.",
+  "exports": {
+    "./*.json": "./*.json"
+  },
+  "files": [
+    "*.json"
+  ]
+}

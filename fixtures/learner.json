@@ -1,0 +1,34 @@
+{
+  "$comment": "Learner fixtures. Enrolment, setup answers and progress are client-side (localStorage) until the API exists, so the learner starts with nothing enrolled.",
+  "user": {
+    "user_id": "u-1001",
+    "name": "Jack Okafor",
+    "email": "jack@example.com",
+    "avatar": null,
+    "locale": "en",
+    "roles": [{ "role": "learner", "scope_type": "self", "scope_id": "u-1001" }],
+    "settings": {}
+  },
+  "due_reviews": [],
+  "assignments": [
+    {
+      "id": "as-1",
+      "title": "Finish Module 1: Your first working workflow",
+      "course_title": "Automate Real Work with n8n",
+      "course_id": "n8n",
+      "due": "2026-10-14",
+      "assigned_by": "Priya (instructor)"
+    }
+  ],
+  "daily_progress": [
+    { "day": "2026-10-01", "minutes": 0 },
+    { "day": "2026-10-02", "minutes": 0 },
+    { "day": "2026-10-03", "minutes": 0 },
+    { "day": "2026-10-04", "minutes": 0 },
+    { "day": "2026-10-05", "minutes": 0 },
+    { "day": "2026-10-06", "minutes": 0 },
+    { "day": "2026-10-07", "minutes": 0 }
+  ],
+  "credentials": [],
+  "history": []
+}

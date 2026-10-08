@@ -1,0 +1,289 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Design tokens: Frosted Aura (light) + Aurora (dark). Single source of truth. */
+@import "@lms/ui/tokens.css";
+
+/* shadcn "dark:" utilities follow the Aurora theme attribute, not a .dark class. */
+@custom-variant dark (&:is([data-theme="aurora"] *));
+
+/* ------------------------------------------------------------------
+   Map the token layer onto the semantic names shadcn components use.
+   Only names that do not collide with design.md tokens are defined as
+   CSS variables; colliding ones (muted, accent) are mapped in @theme.
+   ------------------------------------------------------------------ */
+:root {
+  /* next/font hands us hashed family names through these variables. */
+  --font: var(--font-dm-sans), "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: var(--font-jetbrains-mono), "JetBrains Mono", ui-monospace, "Cascadia Mono", monospace;
+
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--panel);
+  --card-foreground: var(--text);
+  --popover: var(--panel);
+  --popover-foreground: var(--text);
+  --primary: var(--accent-deep);
+  --primary-foreground: var(--on-accent);
+  --secondary: var(--panel2);
+  --secondary-foreground: var(--text);
+  --destructive: var(--err);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--accent-ink);
+  --radius: 0.75rem;
+  --sidebar: var(--panel);
+  --sidebar-foreground: var(--text);
+  --sidebar-primary: var(--accent-deep);
+  --sidebar-primary-foreground: var(--on-accent);
+  --sidebar-accent: var(--accent-soft);
+  --sidebar-accent-foreground: var(--accent-ink);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--accent-ink);
+}
+
+@theme inline {
+  /* fonts */
+  --font-sans: var(--font);
+  --font-mono: var(--mono);
+  --font-heading: var(--font);
+
+  /* surfaces and inks */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--panel2);
+  --color-muted-foreground: var(--muted);
+  --color-accent: var(--accent-soft);
+  --color-accent-foreground: var(--accent-ink);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* design.md names exposed as Tailwind colours */
+  --color-canvas: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel2);
+  --color-line: var(--line);
+  --color-ink: var(--text);
+  --color-ink-muted: var(--muted);
+  --color-ink-faint: var(--faint);
+  --color-brand: var(--accent);
+  --color-brand-ink: var(--accent-ink);
+  --color-brand-deep: var(--accent-deep);
+  --color-brand-soft: var(--accent-soft);
+  --color-brand-line: var(--accent-line);
+  --color-on-brand: var(--on-accent);
+  --color-on-ok: var(--on-ok);
+  --color-on-stage: var(--on-stage);
+  --color-coral: var(--coral);
+  --color-teal: var(--teal);
+  --color-amber: var(--amber);
+  --color-plum: var(--plum);
+
+  /* status triples */
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-ok-line: var(--ok-line);
+  --color-err: var(--err);
+  --color-err-soft: var(--err-soft);
+  --color-err-line: var(--err-line);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-info-line: var(--info-line);
+  --color-warn: var(--warn-ink);
+  --color-warn-soft: var(--warn-soft);
+  --color-warn-line: var(--warn-line);
+
+  /* nine stages */
+  --color-stage-hook: var(--stage-hook);
+  --color-stage-hook-soft: var(--stage-hook-soft);
+  --color-stage-hook-line: var(--stage-hook-line);
+  --color-stage-explainer: var(--stage-explain);
+  --color-stage-explainer-soft: var(--stage-explain-soft);
+  --color-stage-explainer-line: var(--stage-explain-line);
+  --color-stage-worked: var(--stage-worked);
+  --color-stage-worked-soft: var(--stage-worked-soft);
+  --color-stage-worked-line: var(--stage-worked-line);
+  --color-stage-guided: var(--stage-guided);
+  --color-stage-guided-soft: var(--stage-guided-soft);
+  --color-stage-guided-line: var(--stage-guided-line);
+  --color-stage-lab: var(--stage-lab);
+  --color-stage-lab-soft: var(--stage-lab-soft);
+  --color-stage-lab-line: var(--stage-lab-line);
+  --color-stage-project: var(--stage-project);
+  --color-stage-project-soft: var(--stage-project-soft);
+  --color-stage-project-line: var(--stage-project-line);
+  --color-stage-gate: var(--stage-gate);
+  --color-stage-gate-soft: var(--stage-gate-soft);
+  --color-stage-gate-line: var(--stage-gate-line);
+  --color-stage-reflection: var(--stage-reflect);
+  --color-stage-reflection-soft: var(--stage-reflect-soft);
+  --color-stage-reflection-line: var(--stage-reflect-line);
+  --color-stage-review: var(--stage-review);
+  --color-stage-review-soft: var(--stage-review-soft);
+  --color-stage-review-line: var(--stage-review-line);
+
+  /* charts and sidebar */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-track: var(--chart-track);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* glass */
+  --color-glass: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+
+  /* radius: shadcn scale derived from --radius, plus design.md names */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-card: var(--r);
+  --radius-card-lg: var(--r-lg);
+  --radius-pill: var(--r-pill);
+
+  /* elevation */
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+
+  /* motion */
+  --ease-out: var(--ease-out);
+  --ease-in-out: var(--ease-in-out);
+  --ease-spring: var(--ease-spring);
+}
+
+/* Type scale from design.md (static, so plain @theme). */
+@theme {
+  /* design.md: one soft breakpoint at 900px where the shell collapses */
+  --breakpoint-nav: 56.25rem;
+
+  --text-xs: 13.5px;
+  --text-xs--line-height: 1.4;
+  --text-sm: 15.5px;
+  --text-sm--line-height: 1.5;
+  --text-base: 17px;
+  --text-base--line-height: 1.55;
+  --text-lg: 19.5px;
+  --text-lg--line-height: 1.45;
+  --text-xl: 24px;
+  --text-xl--line-height: 1.3;
+  --text-2xl: 32px;
+  --text-2xl--line-height: 1.2;
+  --text-3xl: 43.5px;
+  --text-3xl--line-height: 1.1;
+  --text-4xl: 56px;
+  --text-4xl--line-height: 1.05;
+  --text-5xl: 72px;
+  --text-5xl--line-height: 1;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground;
+    min-height: 100dvh;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: var(--ls-heading);
+    line-height: var(--lh-tight);
+    font-weight: 600;
+  }
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: var(--mono);
+  }
+  /* Learners copy what they see: ">=" must not render as a single glyph. */
+  code,
+  kbd,
+  pre,
+  samp,
+  .font-mono {
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "calt" 0;
+  }
+}
+
+@utility page-pad {
+  padding-inline: var(--page-pad);
+}
+
+@utility content-max {
+  max-width: var(--content-max);
+  margin-inline: auto;
+}
+
+@utility prose-max {
+  max-width: var(--prose-max);
+}
+
+@keyframes grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* A lit top edge that makes a translucent panel read as glass, not film. */
+@utility glass-edge {
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    var(--shadow-md);
+}

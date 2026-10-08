@@ -1,0 +1,45 @@
+{
+  "$comment": "MOCK ONLY. Stands in for server-side scoring; never ship keys to the client in production.",
+  "final": {
+    "f1": "b",
+    "f2": "a",
+    "f3": "c",
+    "f4": "d",
+    "f5": "b",
+    "f6": "c",
+    "f7": "a",
+    "f8": "d",
+    "f9": "b",
+    "f10": "b",
+    "f11": "c",
+    "f12": "d"
+  },
+  "final_explain": {
+    "f1": "The trigger starts the execution; the items travel inside it, and every node handles them one by one.",
+    "f2": "The trigger and the middle of the pipeline are already proven by the green runs. The only unknown is what the other system answered — and that is in the last node’s response.",
+    "f3": "Set reshapes, Filter decides. Confusing the two is how data gets “cleaned” by silently dropping it.",
+    "f4": "300 − 36 − 41 = 223. Move the duplicate guard downstream and the 41 repeats are alerted before anything checks them: 300 − 36 = 264.",
+    "f5": "Success describes the node, not the outcome. The outcome is in the response it got back.",
+    "f6": "The guard compares values exactly. Until case and spacing are made uniform, one address is two different strings.",
+    "f7": "Expressions are per item and on the fly — which is why one misspelled field name fails on every item.",
+    "f8": "Normalise before you compare or default. Otherwise “FREE ” and “free” live side by side as two plans.",
+    "f9": "A guard placed after the action runs, shows green, and protects nothing.",
+    "f10": "Nothing errored: the expression simply found no such field. Quiet failures like this are why field names are tidied once, upstream.",
+    "f11": "A trustworthy pipeline can say how many rows each guard stopped and why — not just that it ran.",
+    "f12": "Two ordering faults at once: nothing protects the write, and the guards compare values that have not been cleaned yet."
+  },
+  "precheck": {
+    "p1": "a",
+    "p2": "c",
+    "p3": "b",
+    "p4": "a",
+    "p5": "c",
+    "p6": "b",
+    "p7": "a",
+    "p8": "c",
+    "p9": "b",
+    "p10": "a",
+    "p11": "c",
+    "p12": "b"
+  }
+}

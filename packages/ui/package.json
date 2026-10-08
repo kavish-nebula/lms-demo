@@ -1,0 +1,12 @@
+{
+  "name": "@lms/ui",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Design tokens for the LMS platform (Frosted Aura light + Aurora dark).",
+  "exports": {
+    "./tokens.css": "./tokens.css"
+  },
+  "files": [
+    "tokens.css"
+  ]
+}

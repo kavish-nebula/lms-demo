@@ -1,0 +1,39 @@
+/*
+ * n8n look-alikes: node colours for the sandbox and the guided-practice
+ * screens. These stand for n8n's own node colours, so they are kept apart
+ * from the app's tokens on purpose.
+ */
+:root {
+  --nx-sheets: #2bb673;
+  --nx-schedule: #8f9bb3;
+  --nx-webhook: #b989f5;
+  --nx-set: #63a4ff;
+  --nx-filter: #9a90ff;
+  --nx-if: #2fbfae;
+  --nx-dedupe: #e9b04a;
+  --nx-hubspot: #ff8a65;
+  --nx-slack: #ef5b8c;
+  --nx-http: #7d9bff;
+  --nx-wait: #a8a8b3;
+  --nx-noop: #a8a8b3;
+  --nx-manual: #ff7a66;
+  --nx-form: #ff7a66;
+  /* numbered marks on screens, and the matching numbers in instructions */
+  --nx-mark: #ffd84d;
+  --nx-mark-ink: #1b1b1b;
+}
+
+.nx-glyph[data-glyph="sheets"] { color: var(--nx-sheets); }
+.nx-glyph[data-glyph="schedule"] { color: var(--nx-schedule); }
+.nx-glyph[data-glyph="webhook"] { color: var(--nx-webhook); }
+.nx-glyph[data-glyph="set"] { color: var(--nx-set); }
+.nx-glyph[data-glyph="filter"] { color: var(--nx-filter); }
+.nx-glyph[data-glyph="if"] { color: var(--nx-if); }
+.nx-glyph[data-glyph="dedupe"] { color: var(--nx-dedupe); }
+.nx-glyph[data-glyph="hubspot"] { color: var(--nx-hubspot); }
+.nx-glyph[data-glyph="slack"] { color: var(--nx-slack); }
+.nx-glyph[data-glyph="http"] { color: var(--nx-http); }
+.nx-glyph[data-glyph="wait"] { color: var(--nx-wait); }
+.nx-glyph[data-glyph="noop"] { color: var(--nx-noop); }
+.nx-glyph[data-glyph="manual"] { color: var(--nx-manual); }
+.nx-glyph[data-glyph="form"] { color: var(--nx-form); }

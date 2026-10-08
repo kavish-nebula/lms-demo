@@ -1,0 +1,12 @@
+{
+  "name": "@lms/i18n",
+  "private": true,
+  "version": "0.1.0",
+  "description": "UI message catalogs. en.json is the base language.",
+  "exports": {
+    "./en.json": "./en.json"
+  },
+  "files": [
+    "*.json"
+  ]
+}

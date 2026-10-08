@@ -1,0 +1,134 @@
+/*
+  Concept video: narrated HTML/CSS slides that play like a video. Ported from
+  the prototype (src/index.css .vl-*) onto the app's tokens. Every size is in
+  container units (cqw) so a slide looks the same at any width.
+*/
+.vl-stage {
+  position: relative;
+  container-type: inline-size;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  background:
+    radial-gradient(60% 70% at 100% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 60%),
+    radial-gradient(60% 70% at 0% 100%, color-mix(in srgb, var(--coral, #ef795e) 10%, transparent), transparent 60%),
+    var(--panel);
+  color: var(--text);
+}
+.vl-stage:fullscreen {
+  border-radius: 0;
+  aspect-ratio: auto;
+  height: 100%;
+}
+.vl-slide { position: absolute; inset: 0; padding: 4.4cqw 6cqw; }
+.vl-frame { width: 100%; height: 100%; overflow: hidden; }
+.vl-body { min-height: 100%; display: flex; flex-direction: column; gap: 2.2cqw; transform-origin: top left; }
+.vl-body * { overflow-wrap: break-word; }
+.vl-cols > *, .vl-define > *, .vl-split > *, .vl-cards > *, .vl-flow-step, .vl-node { min-width: 0; }
+.vl-title { font-size: clamp(18px, 3.5cqw, 44px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; padding-bottom: 1.4cqw; border-bottom: 3px solid var(--accent); align-self: flex-start; }
+.vl-slide p, .vl-slide li, .vl-slide b, .vl-slide span { font-size: clamp(12px, 2.05cqw, 26px); line-height: 1.45; }
+.vl-kicker { font-size: clamp(11px, 1.5cqw, 18px) !important; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--warn-ink); }
+.vl-lead { color: var(--muted); max-width: 60cqw; }
+.vl-slide ul, .vl-slide ol { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1.3cqw; }
+
+.vl-cover { margin: auto; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1.6cqw; max-width: 70cqw; }
+.vl-cover-ic { width: 9cqw; height: 9cqw; min-width: 56px; min-height: 56px; border-radius: 26%; display: grid; place-items: center; background: linear-gradient(140deg, var(--accent-deep), var(--accent)); color: #fff; box-shadow: var(--shadow-lg); }
+.vl-cover-ic svg { width: 48%; height: 48%; }
+.vl-cover-title { font-size: clamp(24px, 6cqw, 76px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; }
+.vl-cover-sub { color: var(--muted); font-size: clamp(13px, 2.3cqw, 28px) !important; }
+
+.vl-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3cqw; flex: 1; align-content: center; }
+.vl-col { border-radius: var(--r); padding: 2.6cqw; border: 1px solid var(--line); background: var(--panel2); box-shadow: var(--shadow-sm); }
+.vl-col.bad { border-top: 5px solid var(--err); }
+.vl-col.ok { border-top: 5px solid var(--ok); }
+.vl-col.info { border-top: 5px solid var(--accent); }
+.vl-col-head { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: clamp(14px, 2.4cqw, 30px); margin-bottom: 1.6cqw; }
+.vl-col.bad .vl-col-head { color: var(--err); }
+.vl-col.ok .vl-col-head { color: var(--ok); }
+.vl-col.info .vl-col-head { color: var(--accent-ink); }
+.vl-col li { padding-left: 2.2cqw; position: relative; }
+.vl-col li::before { content: ""; position: absolute; left: 0; top: 0.75em; width: 0.9cqw; height: 0.9cqw; min-width: 5px; min-height: 5px; border-radius: 50%; background: var(--faint); }
+
+.vl-define { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 3cqw; flex: 1; align-content: center; align-items: start; }
+.vl-def-card { border-radius: var(--r); padding: 3cqw; background: linear-gradient(150deg, var(--accent-deep), color-mix(in srgb, var(--accent-deep) 70%, var(--accent))); color: #fff; box-shadow: var(--shadow-lg); }
+.vl-def-card .vl-kicker { color: #f6c98a; }
+.vl-def { font-size: clamp(15px, 2.9cqw, 36px) !important; font-weight: 700; line-height: 1.3 !important; margin: 1.2cqw 0 2cqw; }
+.vl-def-parts { display: flex; flex-wrap: wrap; gap: 1cqw; }
+.vl-chip { padding: 0.6cqw 1.4cqw; border-radius: 99px; background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.3); font-weight: 600; font-size: clamp(11px, 1.7cqw, 21px); }
+.vl-aside { display: flex; gap: 1.4cqw; align-items: flex-start; padding: 2.2cqw; border-radius: var(--r); background: var(--warn-soft); border-left: 4px solid var(--amber); }
+.vl-aside svg { color: var(--warn-ink); flex: 0 0 auto; margin-top: 0.3cqw; width: 2.4cqw; height: 2.4cqw; min-width: 18px; min-height: 18px; }
+.vl-aside b { display: block; color: var(--warn-ink); margin-bottom: 0.4cqw; }
+.vl-aside.tall { align-self: center; }
+
+.vl-flowwrap { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 3.4cqw; }
+.vl-flow { display: flex; align-items: center; justify-content: center; }
+.vl-flow-step { display: flex; align-items: center; }
+.vl-node { width: min(21cqw, calc((88cqw - (var(--n, 3) - 1) * 5.4cqw) / var(--n, 3))); padding: 2.2cqw 1.6cqw; border-radius: var(--r); background: var(--panel2); border: 2px solid var(--line); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.6cqw; box-shadow: var(--shadow-md); transition: border-color 0.4s, background 0.4s; }
+.vl-node b { font-size: clamp(13px, 2.3cqw, 28px); }
+.vl-node span:last-child { color: var(--muted); font-size: clamp(11px, 1.6cqw, 20px); }
+.vl-node-ic { width: 5.6cqw; height: 5.6cqw; min-width: 38px; min-height: 38px; border-radius: 30%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-ink); }
+.vl-node-ic svg { width: 50%; height: 50%; }
+.vl-node.trigger .vl-node-ic { background: var(--warn-soft); color: var(--warn-ink); }
+.vl-node.action .vl-node-ic { background: var(--ok-soft); color: var(--ok); }
+.vl-node.logic .vl-node-ic { background: var(--err-soft); color: var(--err); }
+.vl-node b, .vl-node span { overflow-wrap: anywhere; }
+.vl-node.ran { border-color: var(--ok); background: var(--ok-soft); }
+.vl-node.ran .vl-node-ic { background: var(--ok); color: var(--on-ok, #fff); }
+.vl-arrow { display: flex; align-items: center; color: var(--faint); margin: 0 0.6cqw; }
+.vl-arrow span { width: 4cqw; height: 3px; background: currentColor; border-radius: 2px; margin-right: -6px; }
+.vl-arrow.live { color: var(--ok); }
+.vl-note { align-self: center; text-align: center; padding: 1.5cqw 2.6cqw; border-radius: var(--r); background: var(--panel2); border: 1px solid var(--line); font-weight: 600; font-size: clamp(12px, 2.05cqw, 26px); max-width: 80cqw; }
+.vl-note.ok { background: var(--ok-soft); border-color: var(--ok-line); color: var(--ok); }
+
+.vl-split { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 3.4cqw; flex: 1; align-content: center; }
+.vl-bullets { margin-top: 1.8cqw !important; }
+.vl-bullet, .vl-step, .vl-recap-row { display: flex; align-items: center; gap: 1.4cqw; font-weight: 600; font-size: clamp(12px, 2.05cqw, 26px); }
+.vl-bullet-ic { flex: 0 0 auto; width: 4cqw; height: 4cqw; min-width: 28px; min-height: 28px; border-radius: 28%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-ink); }
+.vl-bullet-ic svg { width: 52%; height: 52%; }
+
+.vl-example { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 2cqw; }
+.vl-example .vl-lead { max-width: none; color: var(--text); }
+.vl-time-tag { font-family: var(--mono); font-size: clamp(10px, 1.5cqw, 19px) !important; color: var(--faint); min-width: 8.5cqw; }
+.vl-step { padding: 1.1cqw 1.6cqw; border-radius: var(--r-sm); background: var(--panel2); border: 1px solid var(--line); font-weight: 500; }
+
+.vl-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.2cqw; flex: 1; align-content: center; }
+.vl-card { border-radius: var(--r); padding: 2.2cqw; background: var(--panel2); border: 1px solid var(--line); box-shadow: var(--shadow-md); display: flex; flex-direction: column; gap: 1.2cqw; }
+.vl-card-head { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: clamp(13px, 2.3cqw, 28px); color: var(--accent-ink); }
+.vl-card-head svg { width: 2.4cqw; height: 2.4cqw; min-width: 18px; min-height: 18px; }
+.vl-card-row { font-size: clamp(11px, 1.75cqw, 22px); line-height: 1.35; }
+.vl-card-tag { display: block; font-size: clamp(9px, 1.15cqw, 14px) !important; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--warn-ink); }
+
+.vl-tablewrap { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 2.6cqw; }
+.vl-table { border-radius: var(--r); overflow: hidden; border: 1px solid var(--line); background: var(--panel2); box-shadow: var(--shadow-md); }
+.vl-tr { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 1cqw; padding: 1.3cqw 2cqw; border-top: 1px solid var(--line); }
+.vl-tr span { overflow-wrap: anywhere; white-space: pre-wrap; }
+.vl-tr.head { border-top: 0; background: var(--accent-deep); color: #fff; }
+.vl-tr.head span { font-weight: 700; }
+.vl-tr.bad { background: var(--err-soft); }
+.vl-code { margin-top: 1.8cqw; display: flex; flex-direction: column; gap: 1.3cqw; }
+.vl-code-row { display: grid; grid-template-columns: minmax(0, 1.25fr) auto minmax(0, 1fr); align-items: center; gap: 1.2cqw; }
+.vl-code-row code { font-family: var(--mono); font-size: clamp(11px, 1.7cqw, 21px); padding: 1cqw 1.3cqw; border-radius: var(--r-sm); background: color-mix(in srgb, var(--accent-deep) 85%, black); color: #ece9f7; overflow-wrap: anywhere; }
+.vl-code-row svg { color: var(--faint); }
+.vl-code-row span { font-weight: 600; }
+.vl-recap { flex: 1; justify-content: center; gap: 2cqw !important; }
+.vl-recap-row { padding: 1.6cqw 2cqw; border-radius: var(--r); background: var(--panel2); border: 1px solid var(--line); box-shadow: var(--shadow-sm); }
+.vl-recap-row svg { color: var(--ok); flex: 0 0 auto; width: 2.6cqw; height: 2.6cqw; min-width: 18px; min-height: 18px; }
+
+/* the checks and the end screen sit over the (dimmed) slide */
+.vl-overlay { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, var(--panel) 55%, transparent); backdrop-filter: blur(3px); overflow: auto; }
+
+/* phones: the slide grows to fit its content instead of scaling down */
+@media (max-width: 760px) {
+  .vl-stage { aspect-ratio: auto; min-height: 520px; }
+  .vl-cols, .vl-define, .vl-split, .vl-cards { grid-template-columns: 1fr; }
+  .vl-flow { flex-direction: column; }
+  .vl-flow-step { flex-direction: column; }
+  .vl-arrow { transform: rotate(90deg); margin: 6px 0; }
+  .vl-node { width: 60cqw; }
+  .vl-slide { position: relative; }
+  .vl-frame { overflow: visible; height: auto; }
+  .vl-body { transform: none !important; width: auto !important; }
+}

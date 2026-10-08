@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Feature Ideas · Nebula KnowLab</title>
+<style>
+  :root {
+    --ink: #1d1b26;
+    --muted: #55536a;
+    --faint: #7d7a91;
+    --line: #e3e0ee;
+    --panel: #f7f6fb;
+    --brand: #6b5bff;
+    --brand-soft: #efecff;
+    --brand-ink: #4a3bd6;
+    --ok: #157f5b;
+    --ok-soft: #e6f4ee;
+    --warn: #9a5b12;
+    --warn-soft: #fdf1e1;
+    --coral: #d4553a;
+  }
+  @page { size: A4; margin: 16mm 15mm 16mm 15mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #fff; color: var(--ink); }
+  body { font: 10.5pt/1.5 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  .page { max-width: 180mm; margin: 0 auto; padding: 8mm 0; }
+  h1 { font-size: 24pt; line-height: 1.15; margin: 0 0 4px; letter-spacing: -0.02em; }
+  h2 { font-size: 14pt; margin: 22px 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--brand); break-after: avoid; }
+  h3 { font-size: 11pt; margin: 0; }
+  p { margin: 0 0 8px; }
+  a { color: var(--brand-ink); text-decoration: none; }
+  .kicker { font-size: 9pt; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand-ink); }
+  .meta { color: var(--muted); font-size: 9.5pt; margin-bottom: 14px; }
+  .lead { font-size: 11pt; color: var(--ink); }
+  .box { border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 12px 14px; margin: 12px 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 9pt; color: var(--muted); }
+  .chip { display: inline-block; font-size: 8pt; font-weight: 600; padding: 1px 7px; border-radius: 99px; border: 1px solid var(--line); background: #fff; color: var(--muted); white-space: nowrap; }
+  .chip.s { background: var(--ok-soft); border-color: #b9e2cf; color: var(--ok); }
+  .chip.m { background: var(--brand-soft); border-color: #d6d0ff; color: var(--brand-ink); }
+  .chip.l { background: var(--warn-soft); border-color: #f2d6ac; color: var(--warn); }
+  .chip.be { background: #fdebe6; border-color: #f4c7bb; color: var(--coral); }
+  .idea { border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; margin: 0 0 8px; break-inside: avoid; }
+  .idea-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 3px; }
+  .num { font: 700 9pt/1 ui-monospace, "Cascadia Mono", Consolas, monospace; color: var(--faint); min-width: 18px; }
+  .idea h3 { flex: 1 1 auto; }
+  .from { font-size: 9pt; color: var(--faint); font-style: italic; margin-bottom: 3px; }
+  .idea p { margin: 0; color: var(--muted); }
+  .today { margin-top: 5px; font-size: 9pt; color: var(--ok); }
+  .today b { color: var(--ok); }
+  ol.plain, ul.plain { margin: 0; padding-left: 18px; }
+  ul.plain li, ol.plain li { margin-bottom: 4px; }
+  .batch { border-left: 3px solid var(--brand); padding: 6px 12px; margin: 0 0 10px; background: var(--brand-soft); border-radius: 0 8px 8px 0; break-inside: avoid; }
+  .batch h3 { margin-bottom: 3px; }
+  .batch p { color: var(--muted); margin: 0; }
+  .sources li { font-size: 9pt; margin-bottom: 3px; word-break: break-word; }
+  .sources a { color: var(--brand-ink); }
+  .footer { margin-top: 18px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 8.5pt; color: var(--faint); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 640px) { .two { grid-template-columns: 1fr; } .page { padding: 16px; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="kicker">Nebula KnowLab · Automate Real Work with n8n</div>
+  <h1>Feature ideas from learning-platform research</h1>
+  <div class="meta">Prepared 7 October 2026 · 26 ideas in 7 themes · status notes reflect the build as of the same day</div>
+
+  <p class="lead">These ideas come from studying how established learning platforms keep learners engaged, then fitting each one to what this platform already does. That covers the setup questions that adapt the course, the method behind every module, the workflow diagrams, the tutor and the learning plan.</p>
+
+  <div class="box">
+    <p><b>Platforms studied:</b> Duolingo, Coursera Coach, Khan Academy and Khanmigo, Brilliant, DataCamp, Codecademy, Scrimba, Exercism, Sololearn, LinkedIn Learning and Udemy Role Play, Maven cohorts, n8n Academy, Google Learn Your Way, NotebookLM, plus research on spaced repetition (the FSRS scheduler), the hypercorrection effect and Open Badges 3.0.</p>
+    <p style="margin:0"><b>House rules every idea keeps:</b> no leaderboards, no invented numbers, a static version under reduced motion, and every string in the English messages file.</p>
+  </div>
+
+  <div class="legend">
+    <span><span class="chip s">S</span> about half a day</span>
+    <span><span class="chip m">M</span> one to two days</span>
+    <span><span class="chip l">L</span> three days or more</span>
+    <span><span class="chip">UI-only</span> works now with browser storage and fixtures</span>
+    <span><span class="chip be">Backend</span> needs a server</span>
+    <span><b style="color:var(--ok)">Today:</b> partly built since the ideas were written</span>
+  </div>
+
+  <h2>A. Personalisation, building on the setup</h2>
+  <div class="idea"><div class="idea-head"><span class="num">01</span><h3>Skip-ahead check</h3><span class="chip m">M</span><span class="chip">UI-only</span></div>
+    <div class="from">Khan Academy course challenge, n8n Academy quickstart</div>
+    <p>After setup, an optional five-question check. Lessons the learner already knows get a "you know this" badge, and they can go straight to the final check.</p>
+    <div class="today"><b>Today:</b> a 12-question quick check runs at enrolment and sets the help in each lesson. It does not let learners skip lessons yet.</div></div>
+  <div class="idea"><div class="idea-head"><span class="num">02</span><h3>My automation idea</h3><span class="chip s">S</span><span class="chip">UI-only</span></div>
+    <div class="from">Coursera Coach career goals, Learn Your Way interests</div>
+    <p>The learner describes one manual task they want to automate. Lessons and the capstone brief then refer to it, for example "your weekly invoice export".</p></div>
+  <div class="idea"><div class="idea-head"><span class="num">03</span><h3>Time-back calculator</h3><span class="chip s">S</span><span class="chip">UI-only</span></div>
+    <p>Minutes per run and runs per week give hours back per year for the learner's own task, labelled as their estimate. Pairs with idea 2.</p></div>
+  <div class="idea"><div class="idea-head"><span class="num">04</span><h3>"Simpler / more technical" toggle on explanations</h3><span class="chip s">S</span><span class="chip">UI-only, two levels</span></div>
+    <div class="from">Learn Your Way re-levelling</div>
+    <p>Swaps between the main explanation and the alternative one already in the content. A real third version needs authored text or a model.</p></div>
+  <div class="idea"><div class="idea-head"><span class="num">05</span><h3>Listen mode</h3><span class="chip s">S</span><span class="chip">UI-only</span></div>
+    <div class="from">NotebookLM audio overviews, Learn Your Way audio lessons</div>
+    <p>A play button reads the narration aloud, highlighting the current sentence. Good for commutes and accessibility.</p>
+    <div class="today"><b>Today:</b> every module's concept topic is now a narrated slide video with a recorded voice, captions and speed control. Other topics are not read aloud yet.</div></div>
+  <div class="idea"><div class="idea-head"><span class="num">06</span><h3>Pace check-in after Module 1</h3><span class="chip s">S</span><span class="chip">UI-only</span></div>
+    <p>Two quick questions, "too fast / right / too slow" and "time per session", adjust the support level and the plan's session length.</p>
+    <div class="today"><b>Today:</b> study days and session length are set on the Customise screen at enrolment. There is no check-in after Module 1 yet.</div></div>
+
+  <h2>B. Learning by doing</h2>
+  <div class="idea"><div class="idea-head"><span class="num">07</span><h3>Edit the run</h3><span class="chip m">M</span><span class="chip">UI-only</span></div>
+    <div class="from">Scrimba pause-and-edit screencasts, Brilliant interactive problems</div>
+    <p>In a worked example, pause the run, change a node such as a filter condition, and run it again to watch different items flow through. Needs a small mock runner over sample rows.</p></div>
+  <div class="idea"><div class="idea-head"><span class="num">08</span><h3>Playground page</h3><span class="chip l">L</span><span class="chip">UI-only</span></div>
+    <div class="from">DataCamp Workspace, n8n Academy practice APIs, Sololearn code playground</div>
+    <p>Free building on a canvas with the node palette and sample data, with no grading. Reuses the guided-build pieces.</p></div>
+  <div class="idea"><div class="idea-head"><span class="num">09</span><h3>Bug hunts</h3><span class="chip m">M</span><span class="chip">UI-only</span></div>
+    <p>A broken workflow and an error log; find and fix the fault, like the 2:07 AM incident. Doubles as practice for the final check and fits the reliability module.</p></div>
+  <div class="idea"><div class="idea-head"><span class="num">10</span><h3>Confidence check</h3><span class="chip s">S</span><span class="chip">UI-only</span></div>
+    <div class="from">Research on the hypercorrection effect</div>
+    <p>Before submitting an answer, the learner taps how sure they are. Confident errors get stronger feedback, and the dashboard shows how well confidence matches results.</p></div>
+
+  <h2>C. AI tutor upgrades</h2>
+  <div class="idea"><div class="idea-head"><span class="num">11</span><h3>Socratic tutor mode</h3><span class="chip m">M</span><span class="chip be">Model for full version</span></div>
+    <div class="from">Khanmigo, Coursera Coach Dialogues</div>
+    <p>The tutor asks a guiding question before giving the answer, with a choice of hint, nudge or full answer. Scripted from the content first.</p></div>
+  <div class="idea"><div class="idea-head"><span class="num">12</span><h3>Role-play</h3><span class="chip m">M</span><span class="chip be">Model for free conversation</span></div>
+    <div class="from">LinkedIn Learning and Udemy AI Role Play, Duolingo Video Call</div>
+    <p>A short scripted chat: explain the outage to Ana the founder, or pitch an automation to a manager. The persona follows the learner's role from setup.</p></div>
+  <div class="idea"><div class="idea-head"><span class="num">13</span><h3>Ask the course</h3><span class="chip s">S</span><span class="chip">UI-only</span></div>
+    <div class="from">Coursera Coach, NotebookLM questions over sources</div>
+    <p>Search the lesson notes from the Ctrl+K menu ("where did we cover pagination?") and jump to that exact point.</p>
+    <div class="today"><b>Today:</b> the tutor now answers from the video narration and cites the lesson and slide. Ctrl+K search over lessons is not built yet.</div></div>
+
+  <h2>D. Retention and habit, without guilt</h2>
+  <div class="idea"><div class="idea-head"><span class="num">14</span><h3>Memory strength per concept</h3><span class="chip m">M</span><span class="chip">UI-only, approximate</span></div>
+    <div class="from">FSRS and Anki, Duolingo practice hub</div>
+    <p>Each concept (Trigger, Item, Filter and so on) shows as strong, fading or due, with one "Practise fading ideas" button.</p></div>
+  <div class="idea"><div class="idea-head"><span class="num">15</span><h3>Planned-days streak</h3><span class="chip s">S</span><span class="chip">UI-only</span></div>
+    <div class="from">Duolingo and Sololearn streaks, made gentler</div>
+    <p>Counts the study days the learner planned and kept, not every calendar day. Rest days never break it.</p></div>
+  <div class="idea"><div class="idea-head"><span class="num">16</span><h3>Reminders where you work</h3><span class="chip s">S</span><span class="chip be">Backend to deliver</span></div>
+    <div class="from">Slack and Teams microlearning (Arist)</div>
+    <p>Settings to receive the planned session and a two-minute review card by email, Slack or Teams, with a preview of the message.</p></div>
+  <div class="idea"><div class="idea-head"><span class="num">17</span><h3>Weekly recap</h3><span class="chip s">S</span><span class="chip">UI-only</span></div>
+    <p>A short "this week" story: topics finished, ideas reviewed, the workflow built and hours back on the learner's own task. Shareable.</p></div>
+
+  <h2>E. Mastery and proof</h2>
+  <div class="idea"><div class="idea-head"><span class="num">18</span><h3>Skills map with mastery levels</h3><span class="chip m">M</span><span class="chip">UI-only</span></div>
+    <div class="from">Khan Academy: Attempted, Familiar, Proficient, Mastered</div>
+    <p>Each course objective gets a level fed by checks, the final check and recall checks, shown on the dashboard and course page.</p></div>
+  <div class="idea"><div class="idea-head"><span class="num">19</span><h3>Portfolio and "Take it to n8n"</h3><span class="chip m">M</span><span class="chip">UI-only</span></div>
+    <div class="from">Codecademy portfolio projects, the prototype's Portfolio page</div>
+    <p>Each workflow the learner builds becomes a portfolio card with its checks and a JSON download they can import into n8n.</p>
+    <div class="today"><b>Today:</b> the wrap-up lists what the learner built. There is no portfolio page or n8n export yet.</div></div>
+  <div class="idea"><div class="idea-head"><span class="num">20</span><h3>Verifiable badges</h3><span class="chip s">S</span><span class="chip be">Backend to sign</span></div>
+    <div class="from">Open Badges 3.0, n8n Academy verifiable badges</div>
+    <p>An add-to-LinkedIn button and a public verify page.</p>
+    <div class="today"><b>Today:</b> a course credential is issued at the wrap-up and shown on the Credentials page. It is not signed, and there is no LinkedIn button yet.</div></div>
+
+  <h2>F. Community (needs a backend)</h2>
+  <div class="two">
+    <div class="idea"><div class="idea-head"><span class="num">21</span><h3>Workflow review requests</h3><span class="chip l">L</span></div>
+      <div class="from">Exercism mentoring, Coursera peer review</div>
+      <p>Submit the capstone for review against a rubric.</p></div>
+    <div class="idea"><div class="idea-head"><span class="num">22</span><h3>Cohort mode</h3><span class="chip l">L</span></div>
+      <div class="from">Maven</div>
+      <p>A start date, a weekly live session and a discussion thread per module.</p></div>
+    <div class="idea"><div class="idea-head"><span class="num">23</span><h3>Questions others asked here</h3><span class="chip m">M</span></div>
+      <p>Anonymised questions and answers anchored to each lesson point.</p></div>
+    <div class="idea"><div class="idea-head"><span class="num">24</span><h3>Showcase by field</h3><span class="chip m">M</span></div>
+      <p>A gallery of learner workflows, filtered by Manufacturing, Retail and other fields.</p></div>
+  </div>
+
+  <h2>G. Convenience</h2>
+  <div class="two">
+    <div class="idea"><div class="idea-head"><span class="num">25</span><h3>Notes and highlights</h3><span class="chip m">M</span><span class="chip">UI-only</span></div>
+      <div class="from">NotebookLM study guides</div>
+      <p>Highlight lesson text, keep it in a notebook, and turn highlights into review cards.</p></div>
+    <div class="idea"><div class="idea-head"><span class="num">26</span><h3>Bilingual glossary</h3><span class="chip s">S</span><span class="chip">UI-only</span></div>
+      <p>Hover a key term such as Trigger to see its definition in English and Hindi, a language the course already lists.</p></div>
+  </div>
+
+  <h2>Deliberately left out</h2>
+  <ul class="plain">
+    <li><b>Leaderboards and leagues.</b> The course design framework warns that extrinsic rewards crowd out motivation.</li>
+    <li><b>Hearts and lives limits.</b> They punish mistakes, which conflicts with treating errors as part of learning.</li>
+  </ul>
+
+  <h2>Recommended first batch</h2>
+  <p>Five ideas that are distinctive, backed by learning research, buildable without a backend, and that extend existing code. They are still open.</p>
+  <div class="batch"><h3>1. Confidence check (idea 10)</h3><p>A three-step "how sure are you?" control on lesson checks and the final check. Confident wrong answers get stronger feedback, and the dashboard shows calibration.</p></div>
+  <div class="batch"><h3>2. Skills map with mastery levels (idea 18)</h3><p>A level per objective from the final check, lesson checks and recall checks, on the dashboard and the course page's Outcomes section.</p></div>
+  <div class="batch"><h3>3. Edit the run (idea 7)</h3><p>After a worked example runs, change a filter condition or mapped field and re-run the same diagram, with items in and out per node.</p></div>
+  <div class="batch"><h3>4. My automation idea and time-back calculator (ideas 2 and 3)</h3><p>An optional card on the course page and dashboard. Hours per year are labelled as the learner's estimate and referenced in the capstone brief.</p></div>
+  <div class="batch"><h3>5. Listen mode (idea 5)</h3><p>Now partly covered by the narrated concept videos. The remaining work is reading the other topics aloud.</p></div>
+
+  <h2>Sources</h2>
+  <ol class="sources plain">
+    <li>Duolingo gamification and retention: <a href="https://www.strivecloud.io/blog/blog-gamification-examples-boost-user-retention-duolingo">strivecloud.io</a></li>
+    <li>Duolingo Max, Explain My Answer and Video Call: <a href="https://blog.duolingo.com/duolingo-max">blog.duolingo.com</a></li>
+    <li>Coursera Coach for educators (Coach Dialogues): <a href="https://blog.coursera.org/announcing-ai-powered-capabilities-enabling-educators-to-use-coursera-coach-to-deliver-interactive-personalized-instruction">blog.coursera.org</a></li>
+    <li>Coursera AI grading in peer reviews: <a href="https://blog.coursera.org/ai-grading-in-peer-reviews-enhancing-courseras-learning-experience-with-faster-high-quality-feedback/">blog.coursera.org</a></li>
+    <li>Khanmigo Socratic tutoring: <a href="https://cut-the-saas.com/ai/how-khan-academy-leveraged-ai-to-change-education">cut-the-saas.com</a></li>
+    <li>Khan Academy mastery levels: <a href="https://support.khanacademy.org/hc/en-us/articles/115002552631">support.khanacademy.org</a></li>
+    <li>Brilliant, learn by doing: <a href="https://apps.apple.com/us/app/-/id913335252">apps.apple.com</a></li>
+    <li>Scrimba interactive screencasts: <a href="https://survivejs.com/blog/scrimba-interview/">survivejs.com</a></li>
+    <li>Exercism mentoring: <a href="https://xebia.com/blog/learning-programming-languages-with-exercism/">xebia.com</a></li>
+    <li>DataCamp Workspace: <a href="https://www.datacamp.com/resources/webinars/bridging-the-gap-with-datacamp-workspace">datacamp.com</a></li>
+    <li>Codecademy features: <a href="https://todaytesting.com/codecademy-review/">todaytesting.com</a></li>
+    <li>n8n Academy launch: <a href="https://community.n8n.io/t/the-n8n-academy-is-here/299695">community.n8n.io</a></li>
+    <li>LinkedIn Learning AI role play: <a href="https://hr.arizona.edu/news/2025/master-difficult-workplace-conversations-linkedin-learnings-ai-coaching">hr.arizona.edu</a></li>
+    <li>Udemy Role Play expansion: <a href="https://www.cxodigitalpulse.com/?p=53627">cxodigitalpulse.com</a></li>
+    <li>Maven cohort review: <a href="https://skillscouter.com/maven-review/">skillscouter.com</a></li>
+    <li>Google Learn Your Way: <a href="https://research.google/blog/learn-your-way-reimagining-textbooks-with-generative-ai/">research.google</a></li>
+    <li>NotebookLM features: <a href="https://cyfuture.cloud/kb/ai/what-is-notebooklm-features-and-how-to-use-it-in-2026">cyfuture.cloud</a></li>
+    <li>FSRS compared with SM-2: <a href="https://www.diane.app/en/guides/fsrs-vs-sm2">diane.app</a></li>
+    <li>Hypercorrection effect: <a href="https://pubmed.ncbi.nlm.nih.gov/21989771/">pubmed.ncbi.nlm.nih.gov</a></li>
+    <li>Confidence scores and learning: <a href="https://eedi.substack.com/p/how-confidence-scores-can-increase">eedi.substack.com</a></li>
+    <li>Open Badges 3.0: <a href="https://www.pok.tech/blog/posts/open-badge-3-0-complete-guide-digital-credentials">pok.tech</a></li>
+    <li>Learning in the flow of work: <a href="https://arist.com/resources/blogs/best-flow-of-work-learning-platforms">arist.com</a></li>
+  </ol>
+
+  <div class="footer">Nebula KnowLab · Feature ideation · 7 October 2026. Effort figures are rough estimates for planning, not commitments.</div>
+</div>
+</body>
+</html>

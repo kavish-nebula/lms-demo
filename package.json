@@ -1,0 +1,21 @@
+{
+  "name": "lms-platform",
+  "private": true,
+  "version": "0.1.0",
+  "description": "LMS platform monorepo: Next.js web app, shared UI tokens, i18n messages, fixtures.",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "fixtures"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/web",
+    "build": "npm run build --workspace=apps/web",
+    "start": "npm run start --workspace=apps/web",
+    "lint": "npm run lint --workspace=apps/web",
+    "typecheck": "npm run typecheck --workspace=apps/web"
+  },
+  "dependencies": {
+    "shadcn": "^4.21.4"
+  }
+}

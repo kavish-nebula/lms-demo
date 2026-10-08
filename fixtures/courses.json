@@ -1,0 +1,487 @@
+{
+  "$comment": "Converted from the prototype course spine (content/course.js). One open course.",
+  "courses": [
+    {
+      "course_id": "n8n",
+      "slug": "n8n",
+      "title": "Automate Real Work with n8n",
+      "tagline": "Nebula runs on spreadsheets, a flaky CRM and hope. Every week, hours vanish into copy-paste work that a machine should do. Over five modules, you become the person who fixes that — by shipping real, working automations.",
+      "goal": "Design, build, debug and maintain real n8n workflows — from a silent Slack alert to clean, reliable data pipelines.",
+      "domain": "Workflow automation",
+      "provider": "Nebula KnowLab",
+      "level": "Beginner",
+      "estimated_hours": 6,
+      "locales": [
+        "en",
+        "hi"
+      ],
+      "languages": [
+        {
+          "code": "en",
+          "name": "English",
+          "native": "English"
+        },
+        {
+          "code": "hi",
+          "name": "Hindi",
+          "native": "हिन्दी"
+        }
+      ],
+      "version": "1.0.0",
+      "skills": [
+        "n8n",
+        "Workflow Automation",
+        "Data Transformation",
+        "Expressions",
+        "REST APIs & HTTP Requests",
+        "Conditional Logic (IF / Switch)",
+        "Error Handling",
+        "AI in the Loop",
+        "Sub-workflows",
+        "Code Node",
+        "Data Deduplication",
+        "Triggers & Executions",
+        "Pagination & Rate Limits",
+        "Files & Binary Data",
+        "Debugging Runs"
+      ],
+      "learn": [
+        "Build n8n workflows that start from a trigger, guard against bad data, alert the right people, and prove the work was done.",
+        "Clean, reshape and de-duplicate messy data with expressions, Set and Filter nodes before it ever reaches your CRM.",
+        "Route work with IF and Switch, merge branches back together, and call REST APIs that paginate and rate-limit.",
+        "Make workflows survive failure with retries and error workflows, keep AI under control, and prove it all in a capstone build."
+      ],
+      "tools": [
+        "n8n",
+        "Slack",
+        "Spreadsheets",
+        "Webhooks",
+        "HTTP Request",
+        "Code node (JavaScript)",
+        "AI language models"
+      ],
+      "modules": [
+        {
+          "module_id": "m1",
+          "title": "Foundations: Your First Working Workflow",
+          "minutes": 83,
+          "stages": [
+            "hook",
+            "explainer",
+            "worked",
+            "guided",
+            "review"
+          ],
+          "state": "available",
+          "lite": false,
+          "pain": "The lead alert workflow died at 2:07 AM. 40 leads lost before anyone noticed.",
+          "hours_saved": 6,
+          "lead_in": null,
+          "lessons": [
+            {
+              "id": "1.1",
+              "title": "Workflow anatomy",
+              "notes": [
+                "A workflow starts with a trigger — no trigger, no run.",
+                "One trigger event starts one execution, which passes through the nodes in order.",
+                "Actions do the visible work, and only run when an execution reaches them."
+              ]
+            },
+            {
+              "id": "1.2",
+              "title": "Data & items",
+              "notes": [
+                "Each row is one item; every node runs once per item.",
+                "Tidy field names once, early, so every later node reads clean names.",
+                "A Filter is a guard: items that fail it stop there."
+              ]
+            },
+            {
+              "id": "1.3",
+              "title": "Build the lead alert",
+              "notes": [
+                "The shape to remember: trigger → clean → guard → alert.",
+                "A guard only protects what comes after it.",
+                "Green means the node ran — read its response to know the work was done."
+              ]
+            }
+          ],
+          "topics": [
+            {
+              "stage": "hook",
+              "title": "2:07 AM: the alert that went silent",
+              "summary": "A lead alert died overnight and 40 leads were lost. Guess why before you learn how."
+            },
+            {
+              "stage": "explainer",
+              "title": "How a workflow runs",
+              "summary": "Triggers, executions, items and guards, in three short lessons."
+            },
+            {
+              "stage": "worked",
+              "title": "Watch the lead alert run",
+              "summary": "Three runs, from a minimal workflow to the full rebuild."
+            },
+            {
+              "stage": "guided",
+              "title": "Build the lead alert yourself",
+              "summary": "Build it in your own n8n, step by step, with the screen for every step."
+            },
+            {
+              "stage": "review",
+              "title": "Lock it in: triggers, items, guards",
+              "summary": "Short recall questions that come back after 3, 10 and 30 days."
+            }
+          ],
+          "outcomes": [
+            "Explain how a trigger starts an execution and how items travel through it",
+            "Tidy messy field names once, early, so every later node reads clean data",
+            "Guard an action with a filter so only valid items get through",
+            "Read run data to prove a green run really did its work"
+          ],
+          "skills": [
+            "Triggers",
+            "Executions and items",
+            "Filters",
+            "Slack alerts",
+            "Run data"
+          ]
+        },
+        {
+          "module_id": "m2",
+          "title": "Data Transformation: Taming Messy Data",
+          "minutes": 88,
+          "stages": [
+            "hook",
+            "explainer",
+            "worked",
+            "guided",
+            "review"
+          ],
+          "state": "available",
+          "lite": false,
+          "pain": "A 500-row export with mixed date formats, duplicate IDs and blank emails. Ana wants it CRM-ready.",
+          "hours_saved": 5,
+          "lead_in": "You can now move data safely from a trigger to an action. Next you learn to change it on the way: clean messy fields, reshape each item and remove duplicates — inside the same trigger → guard → action shape.",
+          "lessons": [
+            {
+              "id": "2.1",
+              "title": "Expressions",
+              "notes": [
+                "Expressions run for each item, on the fly.",
+                "Trim and lower-case values before comparing them.",
+                "“Undefined” almost always means a misspelled or missing field name."
+              ]
+            },
+            {
+              "id": "2.2",
+              "title": "Reshaping with Set",
+              "notes": [
+                "Set renames, adds and reshapes fields — it never stops an item.",
+                "Fill defaults in one place, upstream.",
+                "Normalise before you default, or one value turns into two."
+              ]
+            },
+            {
+              "id": "2.3",
+              "title": "Cleaning real data",
+              "notes": [
+                "The order: normalise → guard → guard → write.",
+                "Dedup compares values, so they must share one format first.",
+                "Count every rejection, and be able to explain each one."
+              ]
+            }
+          ],
+          "topics": [
+            {
+              "stage": "hook",
+              "title": "The spreadsheet from hell",
+              "summary": "A 500-row export with mixed dates, duplicate IDs and blank emails. Ana wants it CRM-ready."
+            },
+            {
+              "stage": "explainer",
+              "title": "Reshape and clean data",
+              "summary": "Expressions, the Set node and cleaning real data, in three short lessons."
+            },
+            {
+              "stage": "worked",
+              "title": "Watch 500 messy rows get cleaned",
+              "summary": "One messy field, then twelve, then the 500-row gauntlet."
+            },
+            {
+              "stage": "guided",
+              "title": "Build the cleaning pipeline yourself",
+              "summary": "Build the 500-row cleanup in your own n8n, step by step, and watch it become 376."
+            },
+            {
+              "stage": "review",
+              "title": "Lock it in: expressions and clean data",
+              "summary": "Short recall questions that come back after 3, 10 and 30 days."
+            }
+          ],
+          "outcomes": [
+            "Write expressions that run for each item, on the fly",
+            "Rename, add and default fields with the Set node",
+            "Normalise values before comparing them, so one record never becomes two",
+            "Turn a messy 500-row export into CRM-ready data, counting every rejection"
+          ],
+          "skills": [
+            "Expressions",
+            "Set node",
+            "Data cleaning",
+            "Deduplication"
+          ]
+        },
+        {
+          "module_id": "m3",
+          "title": "Logic, Branching & APIs",
+          "minutes": 30,
+          "stages": [
+            "explainer",
+            "review"
+          ],
+          "state": "available",
+          "lite": true,
+          "pain": "VIP and standard orders, digital and physical — and a CRM API that paginates and rate-limits.",
+          "hours_saved": 7,
+          "lead_in": "So far your pipelines run in a straight line. Next they branch: different paths for different cases, merging them back together, and talking to outside systems through their APIs.",
+          "lessons": [
+            {
+              "id": "3.1",
+              "title": "Conditional logic",
+              "notes": [
+                "Filter drops items; IF and Switch route them.",
+                "IF has two paths, Switch has many.",
+                "Always give Switch a path for “everything else”."
+              ]
+            },
+            {
+              "id": "3.2",
+              "title": "Merging branches",
+              "notes": [
+                "Append stacks items; Combine pairs them by a shared field.",
+                "Merge waits for both inputs.",
+                "Normalise the matching field first, then count."
+              ]
+            },
+            {
+              "id": "3.3",
+              "title": "Talking to APIs",
+              "notes": [
+                "A request has a method, a URL, authentication and a body.",
+                "Read the status code first: 200, 401, 404, 429.",
+                "Expect pagination and rate limits."
+              ]
+            }
+          ],
+          "topics": [
+            {
+              "stage": "explainer",
+              "title": "Branch, merge and call APIs",
+              "summary": "IF and Switch, merging branches, and talking to APIs."
+            },
+            {
+              "stage": "review",
+              "title": "Lock it in: branches and APIs",
+              "summary": "Short recall questions that come back after 3, 10 and 30 days."
+            }
+          ],
+          "outcomes": [
+            "Route items with IF and Switch, including an “everything else” path",
+            "Merge branches by appending or pairing items on a shared field",
+            "Call an API with the right method, URL, authentication and body",
+            "Read status codes and handle pagination and rate limits"
+          ],
+          "skills": [
+            "IF and Switch",
+            "Merge",
+            "HTTP Request",
+            "REST APIs"
+          ]
+        },
+        {
+          "module_id": "m4",
+          "title": "Reliability & AI",
+          "minutes": 30,
+          "stages": [
+            "explainer",
+            "review"
+          ],
+          "state": "available",
+          "lite": true,
+          "pain": "Duplicate invoices, silent failures, and 200 tickets a day that an AI could triage.",
+          "hours_saved": 12,
+          "lead_in": "Next comes what happens when things break: catching errors, retrying safely, and putting AI in the loop without losing control.",
+          "lessons": [
+            {
+              "id": "4.1",
+              "title": "When things break",
+              "notes": [
+                "Failures are temporary or permanent.",
+                "Retry the temporary ones; continue past bad items and keep them.",
+                "Anything retried must be safe to run twice."
+              ]
+            },
+            {
+              "id": "4.2",
+              "title": "Error workflows",
+              "notes": [
+                "An error workflow starts with an Error Trigger.",
+                "A good alert says what failed, where, and links to the run.",
+                "Use Stop and Error when nothing broke but the result is wrong."
+              ]
+            },
+            {
+              "id": "4.3",
+              "title": "AI in the loop",
+              "notes": [
+                "Use a model for reading, rules for exact tests.",
+                "Ask for a fixed set of answers and validate them.",
+                "A person approves anything that cannot be undone."
+              ]
+            }
+          ],
+          "topics": [
+            {
+              "stage": "explainer",
+              "title": "Handle failure, add AI",
+              "summary": "When things break, error workflows, and AI in the loop."
+            },
+            {
+              "stage": "review",
+              "title": "Lock it in: errors and AI steps",
+              "summary": "Short recall questions that come back after 3, 10 and 30 days."
+            }
+          ],
+          "outcomes": [
+            "Tell temporary failures from permanent ones, and retry only what is safe",
+            "Set up an error workflow that says what failed, where, with a link to the run",
+            "Use a model for reading and rules for exact tests, validating its answers",
+            "Keep a person in the loop for anything that cannot be undone"
+          ],
+          "skills": [
+            "Error handling",
+            "Retries",
+            "Error workflows",
+            "AI steps"
+          ]
+        },
+        {
+          "module_id": "m5",
+          "title": "Bigger Workflows: Reuse, Code & Files",
+          "minutes": 30,
+          "stages": [
+            "explainer",
+            "review"
+          ],
+          "state": "available",
+          "lite": true,
+          "pain": "The same cleaning steps copied into five workflows, a tax rule no node can express, and invoices that arrive as PDFs.",
+          "hours_saved": 6,
+          "lead_in": "Your workflows now survive failure and can use AI. Next they grow up: reusable sub-workflows, a few lines of your own code when no node fits, and files.",
+          "lessons": [
+            {
+              "id": "5.1",
+              "title": "Sub-workflows",
+              "notes": [
+                "A sub-workflow does one job for a parent workflow.",
+                "Build once, reuse everywhere.",
+                "Small parts are easier to read and test."
+              ]
+            },
+            {
+              "id": "5.2",
+              "title": "The Code node",
+              "notes": [
+                "Use a node if one exists; code if none does.",
+                "Choose the mode: each item, or all items.",
+                "Always return items, and keep secrets out of code."
+              ]
+            },
+            {
+              "id": "5.3",
+              "title": "Files and binary data",
+              "notes": [
+                "An item can carry fields and a file.",
+                "Extract from File: file → items. Convert to File: items → file.",
+                "Check the file is still attached after each node."
+              ]
+            }
+          ],
+          "topics": [
+            {
+              "stage": "explainer",
+              "title": "Reuse, code and files",
+              "summary": "Sub-workflows, the Code node, and files and binary data."
+            },
+            {
+              "stage": "review",
+              "title": "Lock it in: reuse, code and files",
+              "summary": "Short recall questions that come back after 3, 10 and 30 days."
+            }
+          ],
+          "outcomes": [
+            "Split repeated steps into a sub-workflow you build once and reuse",
+            "Choose between a node and the Code node, and keep secrets out of code",
+            "Turn files into items and items back into files",
+            "Keep a file attached as it moves through the workflow"
+          ],
+          "skills": [
+            "Sub-workflows",
+            "Code node",
+            "Files and binary data",
+            "Workflow design"
+          ]
+        }
+      ],
+      "finale": {
+        "title": "After all modules",
+        "summary": "One project, one check and a wrap-up to finish the course.",
+        "steps": [
+          {
+            "id": "capstone",
+            "stage": "project",
+            "kicker": "Capstone project",
+            "title": "Launch week, end to end",
+            "summary": "Build the whole sign-up pipeline yourself in the sandbox, then prove it against hidden launch-day data.",
+            "minutes": 60,
+            "outcomes": [
+              "Build the whole sign-up pipeline yourself in an n8n-style sandbox, with no step-by-step help",
+              "Clean, guard, write, then alert, and route failures so nothing is lost without a word",
+              "Run it on sample sign-ups and read every node's input and output",
+              "Pass eight requirements against launch-day data you haven't seen"
+            ]
+          },
+          {
+            "id": "final-check",
+            "stage": "gate",
+            "kicker": "Final check",
+            "title": "From the first lesson to the last",
+            "summary": "12 questions across the course. Score 80% to finish; retakes allowed.",
+            "minutes": 15,
+            "outcomes": [
+              "Show what you know across every lesson, from 1.1 to 2.3",
+              "Answer twelve questions: ideas and real scenarios",
+              "Score 80%, with at least one correct answer per lesson",
+              "See exactly which lessons to revisit if you miss the mark"
+            ]
+          },
+          {
+            "id": "wrap-up",
+            "stage": "reflection",
+            "kicker": "Wrap-up",
+            "title": "What you built",
+            "summary": "Reflect, see everything you built and collect your credential.",
+            "minutes": 10,
+            "outcomes": [
+              "Look back on what worked and what you would automate next",
+              "See every workflow you built and the manual work it takes over",
+              "Collect your shareable course credential",
+              "Keep ideas fresh with recall checks after 3, 10 and 30 days"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,2740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch 13: ILD Pipeline Framework — ILD Master Document</title>
+<link rel="stylesheet" href="../shared/styles.css">
+</head>
+<body>
+<nav class="nav-sidebar" id="navSidebar"></nav>
+<button class="nav-toggle" id="navToggle" onclick="toggleNav()">☰</button>
+<div class="main-content" id="mainContent">
+  <div class="breadcrumb" id="breadcrumb"></div>
+  <section class="hero">
+    <div class="hero-badge">Chapter 13</div>
+    <h1>ILD Pipeline Process Framework</h1>
+    <p class="hero-subtitle">An end-to-end workflow for producing evidence-based e-learning content — from SME content dump to production-ready materials, grounded in the ILD Master Document's research.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-value">8</div><div class="hero-stat-label">Pipeline Stages</div></div>
+      <div class="hero-stat"><div class="hero-stat-value">7</div><div class="hero-stat-label">Quality Gates</div></div>
+      <div class="hero-stat"><div class="hero-stat-value">7</div><div class="hero-stat-label">AI Operations</div></div>
+      <div class="hero-stat"><div class="hero-stat-value">30+</div><div class="hero-stat-label">Tools Cataloged</div></div>
+      <div class="hero-stat"><div class="hero-stat-value">10</div><div class="hero-stat-label">Ready Templates</div></div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 0: Introduction & Guiding Principles                -->
+  <!-- ============================================================ -->
+  <div class="section stage-1" id="section-0">
+    <div class="section-header">
+      <div class="section-number">0</div>
+      <div>
+        <h2 class="section-title">Introduction & Guiding Principles</h2>
+        <p class="section-desc">Pipeline overview, core principles, and research grounding.</p>
+      </div>
+    </div>
+
+    <h3>The Pipeline at a Glance</h3>
+    <div class="flow-container">
+      <div class="flow-step">
+        <div class="flow-step-number">1</div>
+        <div class="flow-step-content">
+          <strong>SME Dump</strong><br>
+          <small>Raw content + sequence</small>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-number">2</div>
+        <div class="flow-step-content">
+          <strong>AI Processing</strong><br>
+          <small>7 operations, single pass</small>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-number">3</div>
+        <div class="flow-step-content">
+          <strong>SME QC</strong><br>
+          <small>Accuracy + alignment review</small>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-number">4</div>
+        <div class="flow-step-content">
+          <strong>Content Creation</strong><br>
+          <small>Assets + SME task loop</small>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-number">5</div>
+        <div class="flow-step-content">
+          <strong>ILD QC</strong><br>
+          <small>9-dimension rubric</small>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-number">6</div>
+        <div class="flow-step-content">
+          <strong>SME Final QC</strong><br>
+          <small>Sign-off + release</small>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-number">7</div>
+        <div class="flow-step-content">
+          <strong>Learner Pilot</strong><br>
+          <small>Usability + validation</small>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-number">8</div>
+        <div class="flow-step-content">
+          <strong>Post-Release</strong><br>
+          <small>Analytics + iteration</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout-info">
+      <strong>Quality Gates</strong> are positioned between every stage (Gates 0–6). Each gate has explicit pass/fail criteria — no subjective judgment. The pipeline does not advance until the gate is cleared.
+    </div>
+
+    <h3>Two Guiding Principles</h3>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">🧠</span>
+          <div>
+            <div class="card-title">Lowest Cognitive Load</div>
+            <div class="card-subtitle">Minimize extraneous load. Scaffold intrinsic load. Maximize germane load.</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>Every design decision must pass the cognitive load test. If a visual, interaction, or content element does not directly serve learning, it is extraneous and must be removed. This principle draws from Sweller's Cognitive Load Theory (Ch 8) and Mayer's 12 multimedia principles.</p>
+          <p><strong>Operational rules:</strong></p>
+          <ul>
+            <li>Zero tolerance for decorative elements in learning materials</li>
+            <li>Maximum 4–5 new concepts per chunk (working memory limit: 4±1 chunks)</li>
+            <li>Worked examples before independent practice (worked-example effect)</li>
+            <li>Guidance fading: fully worked → partially completed → independent</li>
+            <li>Video segments capped at 5–12 minutes</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">🎯</span>
+          <div>
+            <div class="card-title">Maximum Learning</div>
+            <div class="card-subtitle">Evidence-based interventions. Measurable outcomes. Research-grounded design.</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <p>Every learning activity must be traceable to an evidence-based principle with a documented effect size. This principle draws from the ILD Master Document's entire research foundation (Ch 00–12).</p>
+          <p><strong>Operational rules:</strong></p>
+          <ul>
+            <li>Every objective mapped to a specific Bloom's level and knowledge type</li>
+            <li>Spaced repetition scheduled for all critical content (d = 0.50–0.70)</li>
+            <li>Retrieval practice embedded every 3–5 minutes (d = 0.65)</li>
+            <li>Formative assessment density maximized (d = 0.40–0.70)</li>
+            <li>ARCS motivation check on every sub-module</li>
+            <li>Authentic assessment for higher-order objectives (Bloom's Apply+)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <h3>Research Grounding Summary</h3>
+    <p>The pipeline embeds the ILD Master Document's research at the point of use — practitioners never need to read the full document. Research surfaces through templates, checklists, AI recommendations, and quality gates.</p>
+
+    <div class="data-table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Research Domain</th>
+            <th>Key Finding</th>
+            <th>Where Embedded in Pipeline</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Bloom's Taxonomy (Ch 3)</td><td>Only 2/10 platforms cover all 6 levels; Evaluate and Create are underserved</td><td>SME input template, AI Op 1, ILD QC rubric</td></tr>
+          <tr><td>Constructive Alignment (Ch 4)</td><td>Platforms combining 2–3 frameworks show fewest gaps</td><td>AI Op 1, Content Creator Brief, ILD QC Dimension 1</td></tr>
+          <tr><td>Motivation Models (Ch 5)</td><td>Duolingo: 12% → 55% retention via ARCS + SDT + gamification</td><td>AI Op 7, Content Creation motivation layer</td></tr>
+          <tr><td>Assessment (Ch 6)</td><td>Formative assessment d = 0.40–0.70; 6 evidence-backed design patterns</td><td>AI Op 6, Quiz Blueprint, ILD QC Dimension 5</td></tr>
+          <tr><td>QA Standards (Ch 7)</td><td>Quality Matters 85% threshold; WCAG 2.1 AA as baseline</td><td>All quality gates, ILD QC rubric, accessibility checklist</td></tr>
+          <tr><td>Cognitive Science (Ch 8)</td><td>Mayer's 12 principles validated in 200+ studies; CLT 20–60% improvement</td><td>AI Op 2, Content Creation Standards, ILD QC Dimensions 3–4</td></tr>
+          <tr><td>Success Patterns (Ch 12)</td><td>No single theory dominates; community is largest untapped opportunity</td><td>AI Op 3 theory blend, pipeline design philosophy</td></tr>
+          <tr><td>Embodied Cognition &amp; Psychomotor Skills (Ch 2.13, Ch 3.6, Ch 8.8, Ch 10 VR/AR)</td><td>Active learning g=0.47; procedural memory; psychomotor skill progression; VR/AR outcome data</td><td>Theory blending (Op 3), Cognitive load audit (Op 2), Assessment design (Op 6), Toolset recommendations</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 0.1: Roles & RACI Matrix                             -->
+  <!-- ============================================================ -->
+  <div class="section stage-1" id="section-0-1">
+    <div class="section-header">
+      <div class="section-number">0.1</div>
+      <div>
+        <h2 class="section-title">Roles & RACI Matrix</h2>
+        <p class="section-desc">Who does what. Clear ownership prevents bottlenecks and finger-pointing.</p>
+      </div>
+    </div>
+
+    <!-- Role Definitions -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">👥</span>
+        <div>
+          <div class="card-title">Pipeline Roles</div>
+          <div class="card-subtitle">Four core roles. Every task in the pipeline maps to exactly one of these.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="role-card role-sme">
+            <h4>Subject Matter Expert (SME)</h4>
+            <p><strong>Owns:</strong> Content accuracy, authenticity, and domain validity.</p>
+            <p><strong>Skills required:</strong></p>
+            <ul>
+              <li>Deep domain expertise in the course subject</li>
+              <li>Ability to articulate learning objectives at multiple Bloom's levels</li>
+              <li>Knowledge of real-world performance standards in the domain</li>
+              <li>Willingness to review and provide structured feedback</li>
+            </ul>
+            <p><strong>Time commitment:</strong> Heavy in Stages 1 & 3, moderate in Stage 4 (task loop), light in Stage 6.</p>
+            <p><strong>Typical profile:</strong> Industry practitioner, academic faculty, senior engineer, clinical educator.</p>
+          </div>
+          <div class="role-card role-lead">
+            <h4>Pipeline Lead</h4>
+            <p><strong>Owns:</strong> Pipeline flow, quality gate decisions, timeline, and escalation resolution.</p>
+            <p><strong>Skills required:</strong></p>
+            <ul>
+              <li>Project management (deadline tracking, blocker resolution)</li>
+              <li>Basic instructional design literacy (can read ILD output and spot obvious gaps)</li>
+              <li>Familiarity with the pipeline stages and quality gate criteria</li>
+              <li>Authority to enforce gate pass/fail decisions</li>
+            </ul>
+            <p><strong>Time commitment:</strong> Steady throughout. Lightweight but constant — like a scrum master.</p>
+            <p><strong>Typical profile:</strong> Project manager, program coordinator, senior instructional designer.</p>
+          </div>
+          <div class="role-card role-creator">
+            <h4>Content Creator</h4>
+            <p><strong>Owns:</strong> Producing learning assets — videos, interactives, assessments, simulations.</p>
+            <p><strong>Skills required:</strong></p>
+            <ul>
+              <li>Proficiency in 2–3 authoring tools from the Toolset Library (Section 7)</li>
+              <li>Ability to follow Mayer's principles without needing theoretical explanation</li>
+              <li>Visual design sensibility (layout, typography, color)</li>
+              <li>Technical ability to produce accessible content (captions, alt text, keyboard navigation)</li>
+            </ul>
+            <p><strong>Time commitment:</strong> Heaviest in Stage 4. Mostly absent from Stages 1–3 and 5–6.</p>
+            <p><strong>Typical profile:</strong> E-learning developer, multimedia designer, video producer, interactive developer.</p>
+          </div>
+          <div class="role-card role-reviewer">
+            <h4>ILD Reviewer</h4>
+            <p><strong>Owns:</strong> Instructional design quality — the Stage 5 ILD QC rubric.</p>
+            <p><strong>Skills required:</strong></p>
+            <ul>
+              <li>Strong instructional design background (ID models, learning theories, taxonomies)</li>
+              <li>Working knowledge of cognitive science principles (Mayer, CLT, spaced repetition)</li>
+              <li>Assessment design expertise (formative vs. summative, authentic assessment, SOLO)</li>
+              <li>Ability to evaluate against the 9-dimension ILD QC rubric objectively</li>
+            </ul>
+            <p><strong>Time commitment:</strong> Concentrated in Stage 5. May consult during Stage 2 if AI output needs interpretation.</p>
+            <p><strong>Typical profile:</strong> Senior instructional designer, learning experience designer, educational researcher.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RACI Matrix -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📊</span>
+        <div>
+          <div class="card-title">RACI Matrix</div>
+          <div class="card-subtitle"><strong>R</strong> = Responsible (does the work) · <strong>A</strong> = Accountable (owns the outcome) · <strong>C</strong> = Consulted · <strong>I</strong> = Informed</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Activity</th>
+                <th>SME</th>
+                <th>Pipeline Lead</th>
+                <th>Content Creator</th>
+                <th>ILD Reviewer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Stage 1:</strong> Fill SME Input Template</td><td style="text-align:center;"><strong>R</strong></td><td style="text-align:center;">I</td><td style="text-align:center;">—</td><td style="text-align:center;">—</td></tr>
+              <tr><td><strong>Gate 0:</strong> Completeness check</td><td style="text-align:center;">C</td><td style="text-align:center;"><strong>R/A</strong></td><td style="text-align:center;">—</td><td style="text-align:center;">—</td></tr>
+              <tr><td><strong>Stage 2:</strong> AI Processing</td><td style="text-align:center;">I</td><td style="text-align:center;"><strong>R</strong></td><td style="text-align:center;">—</td><td style="text-align:center;">C</td></tr>
+              <tr><td><strong>Stage 3:</strong> SME QC review</td><td style="text-align:center;"><strong>R/A</strong></td><td style="text-align:center;">I</td><td style="text-align:center;">—</td><td style="text-align:center;">—</td></tr>
+              <tr><td><strong>Gate 1:</strong> SME QC pass decision</td><td style="text-align:center;"><strong>A</strong></td><td style="text-align:center;"><strong>R</strong></td><td style="text-align:center;">—</td><td style="text-align:center;">—</td></tr>
+              <tr><td><strong>Stage 4:</strong> Content creation</td><td style="text-align:center;">C (tasks only)</td><td style="text-align:center;">I</td><td style="text-align:center;"><strong>R</strong></td><td style="text-align:center;">—</td></tr>
+              <tr><td><strong>Stage 4:</strong> SME task review loop</td><td style="text-align:center;"><strong>R</strong></td><td style="text-align:center;">I</td><td style="text-align:center;"><strong>R</strong></td><td style="text-align:center;">—</td></tr>
+              <tr><td><strong>Gate 2:</strong> Content completion check</td><td style="text-align:center;">C</td><td style="text-align:center;"><strong>R/A</strong></td><td style="text-align:center;"><strong>R</strong></td><td style="text-align:center;">—</td></tr>
+              <tr><td><strong>Stage 5:</strong> ILD QC rubric review</td><td style="text-align:center;">—</td><td style="text-align:center;">I</td><td style="text-align:center;">—</td><td style="text-align:center;"><strong>R/A</strong></td></tr>
+              <tr><td><strong>Gate 3:</strong> ILD QC pass decision</td><td style="text-align:center;">—</td><td style="text-align:center;"><strong>R</strong></td><td style="text-align:center;">I</td><td style="text-align:center;"><strong>A</strong></td></tr>
+              <tr><td><strong>Stage 6:</strong> SME Final review</td><td style="text-align:center;"><strong>R/A</strong></td><td style="text-align:center;">I</td><td style="text-align:center;">—</td><td style="text-align:center;">—</td></tr>
+              <tr><td><strong>Gate 4:</strong> Release sign-off</td><td style="text-align:center;"><strong>A</strong></td><td style="text-align:center;"><strong>R</strong></td><td style="text-align:center;">I</td><td style="text-align:center;">I</td></tr>
+              <tr><td><strong>Escalation</strong> (gate failures, loop deadlocks)</td><td style="text-align:center;">C</td><td style="text-align:center;"><strong>R/A</strong></td><td style="text-align:center;">C</td><td style="text-align:center;">C</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout-info">
+          <strong>Key principle:</strong> Every activity has exactly one <strong>A</strong> (Accountable). If something goes wrong, there's no ambiguity about who owns the fix. The Pipeline Lead is the default escalation point for any conflict.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 1: Stage 1 — SME Content Dump                       -->
+  <!-- ============================================================ -->
+  <div class="section stage-1" id="section-1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div>
+        <h2 class="section-title">Stage 1: SME Content Dump</h2>
+        <p class="section-desc">The Subject Matter Expert provides structured raw content that feeds into AI processing.</p>
+      </div>
+    </div>
+
+    <!-- 1.1 SME Input Template -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📋</span>
+        <div>
+          <div class="card-title">1.1 SME Input Template</div>
+          <div class="card-subtitle">Complete this template before submitting content for AI processing.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h4>A. Course Information</h4>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Field</th><th>Description</th><th>Required</th></tr></thead>
+            <tbody>
+              <tr><td>Course/Module Title</td><td>Clear, learner-facing title</td><td><span class="tag-red">Yes</span></td></tr>
+              <tr><td>Domain</td><td>Subject area (e.g., Data Science, Nursing, Mechanical Engineering)</td><td><span class="tag-red">Yes</span></td></tr>
+              <tr><td>Target Audience</td><td>Learner personas, prerequisite knowledge level, expected motivation type</td><td><span class="tag-red">Yes</span></td></tr>
+              <tr><td>Estimated Duration</td><td>Total learning hours expected</td><td>Recommended</td></tr>
+              <tr><td>Delivery Context</td><td>Self-paced, instructor-led, blended, cohort-based</td><td>Recommended</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>B. Learning Objectives (by Bloom's Level)</h4>
+        <p>State measurable objectives. Aim for at least <strong>3 Bloom's levels</strong> to ensure cognitive variety.</p>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Bloom's Level</th><th>Verb Examples</th><th>Your Objectives</th></tr></thead>
+            <tbody>
+              <tr><td><span class="tag-blue">Remember</span></td><td>Define, list, identify, recall</td><td><em>(enter objectives)</em></td></tr>
+              <tr><td><span class="tag-blue">Understand</span></td><td>Explain, summarize, classify, compare</td><td><em>(enter objectives)</em></td></tr>
+              <tr><td><span class="tag-green">Apply</span></td><td>Solve, demonstrate, implement, use</td><td><em>(enter objectives)</em></td></tr>
+              <tr><td><span class="tag-purple">Analyze</span></td><td>Differentiate, examine, contrast, investigate</td><td><em>(enter objectives)</em></td></tr>
+              <tr><td><span class="tag-amber">Evaluate</span></td><td>Assess, judge, critique, recommend</td><td><em>(enter objectives)</em></td></tr>
+              <tr><td><span class="tag-teal">Create</span></td><td>Design, construct, develop, compose</td><td><em>(enter objectives)</em></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>B.2 Psychomotor Skill Objectives (if applicable)</h4>
+        <div class="callout-info">
+          <strong>Note:</strong> Complete this section ONLY if the course includes physical/kinesthetic skills (medical procedures, lab techniques, trades, performing arts, etc.). If NO psychomotor objectives exist, write "N/A — Cognitive course only" and skip to Section C.
+        </div>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Skill</th><th>Dave's Level (1–7)</th><th>Ferris &amp; Aziz Level (1–5)</th><th>Online Feasibility (Full / Partial / Requires Physical)</th><th>Assessment Method</th></tr></thead>
+            <tbody>
+              <tr><td><em>(enter skill)</em></td><td><em>(1=Imitation – 7=Origination)</em></td><td><em>(1=Perception – 5=Adaptation)</em></td><td><em>(Full / Partial / Requires Physical)</em></td><td><em>(e.g., video quiz, simulation, in-person demo)</em></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><small>Reference: See Ch 3, Section 3.6 for psychomotor taxonomy definitions (Dave's 7-level taxonomy and Ferris &amp; Aziz 5-level taxonomy for online contexts).</small></p>
+
+        <h4>C. Raw Content &amp; Sequence</h4>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Field</th><th>Description</th><th>Required</th></tr></thead>
+            <tbody>
+              <tr><td>Content Dump</td><td>Text, diagrams, code samples, procedures, case studies, reference materials</td><td><span class="tag-red">Yes</span></td></tr>
+              <tr><td>Content Sequence</td><td>Ordered list of topics with dependencies noted (A must come before B)</td><td><span class="tag-red">Yes</span></td></tr>
+              <tr><td>Known Difficulty Areas</td><td>Topics where learners typically struggle or require extra scaffolding</td><td>Recommended</td></tr>
+              <tr><td>Real-World Contexts</td><td>Authentic scenarios, job tasks, or professional situations where this knowledge applies</td><td><span class="tag-red">Yes</span></td></tr>
+              <tr><td>Performance Standards</td><td>What "mastery" looks like — how an expert performs in this domain</td><td>Recommended</td></tr>
+              <tr><td>Existing Assets</td><td>Any existing diagrams, videos, code, datasets, or simulations to incorporate</td><td>Optional</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1.2 SME Onboarding Guide -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📖</span>
+        <div>
+          <div class="card-title">1.2 SME Onboarding Guide</div>
+          <div class="card-subtitle">Quick-reference for writing effective content inputs.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div>
+            <h4>Writing Objectives at Bloom's Levels</h4>
+            <ul>
+              <li><strong>Start with verbs.</strong> "The learner will be able to <em>design</em>..." not "The learner will <em>understand</em>..."</li>
+              <li><strong>One verb per objective.</strong> "Solve quadratic equations" not "Understand and solve quadratic equations"</li>
+              <li><strong>Make it measurable.</strong> Can you observe whether the learner achieved it?</li>
+              <li><strong>Aim for variety.</strong> If all objectives are "Remember" or "Understand," the course will be passive. Include at least one Apply or higher.</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Identifying Cognitive Load "Danger Zones"</h4>
+            <ul>
+              <li><strong>High element interactivity:</strong> Topics requiring learners to hold 5+ new concepts in mind simultaneously (e.g., multi-step procedures, systems with many interacting parts)</li>
+              <li><strong>Expertise reversal risk:</strong> Content that is natural for you as an expert but overwhelming for a novice. Flag topics where you might skip steps unconsciously.</li>
+              <li><strong>Prerequisite chains:</strong> Mark where Topic B absolutely requires Topic A to be mastered first. These need mastery gates.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quality Gate 0 -->
+    <div class="card quality-gate">
+      <div class="card-header">
+        <span class="card-icon">🚧</span>
+        <div>
+          <div class="card-title">Quality Gate 0: SME Dump Completeness</div>
+          <div class="card-subtitle">All items must pass before content enters AI processing.</div>
+        </div>
+      </div>
+      <div class="gate-badge gate-badge-fail">STOP — All items must pass</div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Criteria</th><th>Pass?</th></tr></thead>
+            <tbody>
+              <tr><td>0.1</td><td>All required fields in the SME Input Template are populated</td><td>☐</td></tr>
+              <tr><td>0.2</td><td>Learning objectives are stated and measurable (verb + observable outcome)</td><td>☐</td></tr>
+              <tr><td>0.3</td><td>At least 3 Bloom's levels are represented in objectives</td><td>☐</td></tr>
+              <tr><td>0.4</td><td>Real-world contexts are provided for authentic assessment design</td><td>☐</td></tr>
+              <tr><td>0.5</td><td>Content sequence with dependencies is documented</td><td>☐</td></tr>
+              <tr><td>0.6</td><td>Known difficulty areas are flagged</td><td>☐</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout-warning">
+          <strong>Gate Rule:</strong> ALL items must be checked. Incomplete dumps produce poor AI output and require rework.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 2: Stage 2 — AI Processing                          -->
+  <!-- ============================================================ -->
+  <div class="section stage-2" id="section-2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div>
+        <h2 class="section-title">Stage 2: AI Processing (Single Pass)</h2>
+        <p class="section-desc">The AI system performs 7 sequential analytical operations on the SME dump, grounded in ILD research. Each operation builds on the prior.</p>
+      </div>
+    </div>
+
+    <!-- AI Processing Flow -->
+    <div class="flow-container">
+      <div class="flow-step"><div class="flow-step-number">Op 1</div><div class="flow-step-content"><strong>Objective Classification</strong><br><small>Bloom's mapping + gap analysis</small></div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-number">Op 2</div><div class="flow-step-content"><strong>Cognitive Load Audit</strong><br><small>Element interactivity + scaffolding</small></div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-number">Op 3</div><div class="flow-step-content"><strong>Theory Blending</strong><br><small>Recommended pedagogy mix</small></div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-number">Op 4</div><div class="flow-step-content"><strong>Sub-Module Structure</strong><br><small>9-step module template</small></div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-number">Op 5</div><div class="flow-step-content"><strong>Task Design</strong><br><small>Practice + interleaving</small></div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-number">Op 6</div><div class="flow-step-content"><strong>Quiz & Assessment</strong><br><small>4 assessment layers</small></div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-number">Op 7</div><div class="flow-step-content"><strong>Motivation Layer</strong><br><small>ARCS + SDT analysis</small></div></div>
+    </div>
+
+    <!-- Operation 1 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">Op 1</span>
+        <div>
+          <div class="card-title">Objective Classification & Gap Analysis</div>
+          <div class="card-subtitle">Map objectives to Bloom's levels and knowledge types. Identify gaps in higher-order thinking.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>The AI maps each SME-stated objective to Bloom's Revised Taxonomy (6 cognitive process levels × 4 knowledge types = 24 possible objective types). It then identifies:</p>
+        <ul>
+          <li><strong>Cognitive gaps:</strong> Are Analyze, Evaluate, or Create represented? If all objectives cluster at Remember/Understand, the AI flags this (Ch 3 finding: most platforms leave higher levels underserved).</li>
+          <li><strong>Knowledge type variety:</strong> Are all four knowledge types (Factual, Conceptual, Procedural, Metacognitive) represented?</li>
+          <li><strong>Constructive alignment check:</strong> For each objective, does the provided content actually support it? (Ch 4: Biggs' Constructive Alignment)</li>
+        </ul>
+        <div class="callout-info">
+          <strong>Research anchor:</strong> Bloom's Revised Taxonomy (Anderson & Krathwohl, 2001) — Chapter 3. ~90% of instructional designers use Bloom's. The 4×6 matrix ensures no objective type is overlooked.
+        </div>
+      </div>
+    </div>
+
+    <!-- Operation 2 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">Op 2</span>
+        <div>
+          <div class="card-title">Cognitive Load Audit</div>
+          <div class="card-subtitle">Classify element interactivity per topic. Recommend scaffolding strategies.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>For each content topic, the AI classifies:</p>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Load Type</th><th>Definition</th><th>AI Action</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Intrinsic</strong></td><td>Inherent complexity of the content (element interactivity)</td><td>Classify as Low / Medium / High. Recommend scaffolding for High.</td></tr>
+              <tr><td><strong>Extraneous</strong></td><td>Load caused by poor design (split attention, redundancy, incoherence)</td><td>Identify specific sources. Flag for elimination in content creation.</td></tr>
+              <tr><td><strong>Germane</strong></td><td>Productive mental effort (schema construction, automation)</td><td>Maximize via worked examples, elaboration, and varied practice.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h4>Scaffolding Recommendations by Load Level</h4>
+        <div class="grid-3">
+          <div class="load-box low">
+            <strong>Low Intrinsic Load</strong><br>
+            <small>Simple concepts, few interacting elements</small><br>
+            → Direct instruction + retrieval practice
+          </div>
+          <div class="load-box medium">
+            <strong>Medium Intrinsic Load</strong><br>
+            <small>Multiple related concepts, some interaction</small><br>
+            → Chunked content + worked examples + guided practice
+          </div>
+          <div class="load-box high">
+            <strong>High Intrinsic Load</strong><br>
+            <small>Complex systems, many interacting elements</small><br>
+            → Segmenting + full worked examples + partial completion + mastery gate
+          </div>
+        </div>
+        <div class="callout-info">
+          <strong>Research anchor:</strong> Sweller's Cognitive Load Theory (1988) — Chapter 8. Reducing extraneous load produces 20–60% improvement in learning outcomes. Working memory: 4±1 chunks (Cowan, 2001).
+        </div>
+
+        <h4>Procedural Memory Encoding Check</h4>
+        <p>For content that includes psychomotor objectives (identified via Section B.2 of the SME Input Template), verify the following:</p>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Check</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>PM-1</td><td>Does this content include psychomotor objectives? (If yes, proceed; if no, skip this check)</td><td>☐ Yes / ☐ No (skip)</td></tr>
+              <tr><td>PM-2</td><td>Are physical practice opportunities provided (even if simulated)?</td><td>☐</td></tr>
+              <tr><td>PM-3</td><td>Is the practice → feedback → automaticity progression (Fitts &amp; Posner, 1967) built into the task design?</td><td>☐</td></tr>
+              <tr><td>PM-4</td><td>Does the design distinguish between declarative knowledge (hippocampus-dependent) and procedural knowledge (basal ganglia/cerebellum)?</td><td>☐</td></tr>
+              <tr><td>PM-5</td><td>Are video demonstrations included to activate mirror neuron pathways before practice?</td><td>☐</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout-info">
+          <strong>Reference:</strong> See Ch 8, Section 8.8 for the neural basis of procedural memory; Ch 3, Section 3.6 for psychomotor taxonomy.
+        </div>
+      </div>
+    </div>
+
+    <!-- Operation 3 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">Op 3</span>
+        <div>
+          <div class="card-title">Learning Theory Blending Recommendation</div>
+          <div class="card-subtitle">No single theory suffices. The AI recommends a domain-appropriate blend.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>Based on content type and domain, the AI recommends a <strong>domain-adaptive theory blend</strong> with rationale. Fixed percentages do not serve all domains — the blend must match the content's nature:</p>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Domain / Content Type</th><th>Cognitivism</th><th>Constructivism</th><th>Experiential</th><th>Behaviorism</th><th>SRL</th><th>Social</th><th>Embodied Cognition</th><th>Rationale</th></tr></thead>
+            <tbody>
+              <tr><td><strong>STEM / Foundational</strong><br><small>Math, physics, programming basics</small></td><td>30%</td><td>15%</td><td>5%</td><td>25%</td><td>20%</td><td>5%</td><td>5%</td><td>Strong cognitivism for schema building; behaviorism for procedural fluency; SRL for metacognitive monitoring</td></tr>
+              <tr><td><strong>Applied / Professional</strong><br><small>Engineering, nursing, business</small></td><td>20%</td><td>30%</td><td>25%</td><td>5%</td><td>10%</td><td>5%</td><td>10%</td><td>Constructivist projects + experiential simulations dominate; cognitivism scaffolds complex concepts</td></tr>
+              <tr><td><strong>Creative / Exploratory</strong><br><small>Design, writing, music, art</small></td><td>5%</td><td>35%</td><td>20%</td><td>5%</td><td>10%</td><td>20%</td><td>5%</td><td>Social critique and peer feedback are central; constructivist portfolios capture creative process</td></tr>
+              <tr><td><strong>Compliance / Safety</strong><br><small>Certification, regulatory, onboarding</small></td><td>30%</td><td>10%</td><td>5%</td><td>35%</td><td>15%</td><td>5%</td><td>5%</td><td>Behaviorist drills ensure procedural compliance; cognitivism builds conceptual understanding of regulations</td></tr>
+              <tr><td><strong>Physical / Psychomotor</strong><br><small>Medical, trades, lab science, culinary</small></td><td>10%</td><td>10%</td><td>20%</td><td>20%</td><td>5%</td><td>5%</td><td>30%</td><td>Embodied cognition anchors procedural skill in physical experience; experiential simulation and behaviorist automaticity build psychomotor fluency; constructivism supports adaptive transfer to novel contexts</td></tr>
+              <tr><td><strong>Language / Communication</strong><br><small>Foreign language, writing, public speaking</small></td><td>20%</td><td>15%</td><td>15%</td><td>25%</td><td>5%</td><td>10%</td><td>10%</td><td>Behaviorist spaced repetition for vocabulary; cognitivism for grammar; social for conversation practice; embodied cognition for gesture-based and physical context learning</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout-info">
+          <strong>Embodied Cognition column:</strong> Embodied Cognition (Wilson &amp; Foglia, 2011; see Ch 2.13, Ch 8.8) applies when content involves physical interaction, simulation, or procedural skill development. For purely cognitive/abstract content, this column may be 0%.
+        </div>
+        <div class="callout callout-info">
+          <div class="callout-title">Important</div>
+          <div class="callout-text"><strong>These are starting recommendations, not prescriptions.</strong> The ILD Reviewer should adjust based on specific content requirements, learner population, and delivery context. Research consistently shows that <strong>2–3 theories blended effectively outperform 6 theories applied shallowly</strong> (Ch 12, Pattern 1; Ch 2: 91% of practicing IDs blend models). Start with the 2–3 highest-weighted theories for the domain and add others only where they serve a clear purpose. Duolingo succeeds with behaviorism + cognitivism + SRL; Coursera succeeds with cognitivism + constructivism + social — neither uses all six.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Operation 3.5 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">Op 3.5</span>
+        <div>
+          <div class="card-title">Psychomotor Feasibility Check</div>
+          <div class="card-subtitle">Activated ONLY when Section B.2 of the SME Input Template is completed (i.e., the course has psychomotor objectives).</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="callout-warning">
+          <strong>Conditional Operation:</strong> This operation runs only if the SME Input Template includes psychomotor skill objectives in Section B.2. If Section B.2 reads "N/A — Cognitive course only," skip this operation entirely.
+        </div>
+        <p>For each psychomotor skill identified in Section B.2, determine online feasibility and map to appropriate delivery and assessment methods:</p>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Online Feasibility</th><th>Applicable Psychomotor Levels</th><th>Recommended Approach</th><th>Example Tools</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Full online feasibility</strong><br><small>Perception, Set, Guided Response levels (Dave 1–3)</small></td>
+                <td>Learner can observe, imitate, and practice basic movements through digital media</td>
+                <td>Video demos + interactive simulations + virtual labs</td>
+                <td>PhET, Labster, Three.js, H5P interactive video</td>
+              </tr>
+              <tr>
+                <td><strong>Partial online feasibility</strong><br><small>Mechanism, Complex Overt Response (Dave 4–5)</small></td>
+                <td>Learner can build cognitive readiness and practice some aspects online, but requires physical practice for proficiency</td>
+                <td>Blended: online cognitive prep + in-person practice</td>
+                <td>Video + checklists + in-person lab sessions, Articulate Storyline scenarios</td>
+              </tr>
+              <tr>
+                <td><strong>Requires physical presence</strong><br><small>Adaptation, Origination, haptic skills (Dave 6–7)</small></td>
+                <td>Skill requires tactile feedback, real-world muscle memory, or safety-critical physical environments</td>
+                <td>Online handles cognitive prerequisites only; physical practice in controlled environment</td>
+                <td>Pre-lab videos + in-person supervised practice, VR pre-training (where available)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout-info">
+          <strong>Reference:</strong> Based on the "What Works Online vs. Requires Physical Presence" framework (Ch 3, Section 3.6). Dave's (1970) psychomotor taxonomy levels used for classification. Ferris &amp; Aziz (2005) levels provide supplementary technology-mediated assessment guidance.
+        </div>
+      </div>
+    </div>
+
+    <!-- Operation 4 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">Op 4</span>
+        <div>
+          <div class="card-title">Sub-Module Structure Generation</div>
+          <div class="card-subtitle">Content is broken into sub-modules using the 9-step evidence-based module template.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>Each sub-module follows this structure, synthesizing Gagne's 9 Events, Merrill's First Principles, CLT, mastery learning, SRL, and spaced repetition:</p>
+        <div class="flow-container">
+          <div class="flow-step flow-step-gradient"><div class="flow-step-number">1</div><div class="flow-step-content"><strong>Problem Hook</strong><br><small>Real-world problem relevant to domain</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step flow-step-gradient"><div class="flow-step-number">2</div><div class="flow-step-content"><strong>Concept Explainer</strong><br><small>Short explanation + visual</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step flow-step-gradient"><div class="flow-step-number">3</div><div class="flow-step-content"><strong>Worked Example</strong><br><small>Complete demonstration</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step flow-step-gradient"><div class="flow-step-number">4</div><div class="flow-step-content"><strong>Guided Practice</strong><br><small>Small task with hints + instant feedback</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step flow-step-gradient"><div class="flow-step-number">5</div><div class="flow-step-content"><strong>Scenario Lab</strong><br><small>Realistic challenge in domain's native environment</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step flow-step-gradient"><div class="flow-step-number">6</div><div class="flow-step-content"><strong>Mini Project</strong><br><small>Meaningful deliverable</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step flow-step-gradient"><div class="flow-step-number">7</div><div class="flow-step-content"><strong>Mastery Gate</strong><br><small>Demonstrate competence before progressing</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step flow-step-gradient"><div class="flow-step-number">8</div><div class="flow-step-content"><strong>Reflection</strong><br><small>What failed, changed, transfers</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step flow-step-gradient"><div class="flow-step-number">9</div><div class="flow-step-content"><strong>Spaced Review</strong><br><small>Resurface concept in new context later</small></div></div>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Step</th><th>Bloom's Level</th><th>Cognitive Load</th><th>Duration</th><th>Assessment</th></tr></thead>
+            <tbody>
+              <tr><td>1. Problem Hook</td><td>Understand</td><td>Low</td><td>2–3 min</td><td>None (engagement)</td></tr>
+              <tr><td>2. Concept Explainer</td><td>Understand</td><td>Medium</td><td>5–8 min</td><td>Concept check (formative)</td></tr>
+              <tr><td>3. Worked Example</td><td>Apply</td><td>Low (scaffolded)</td><td>5–10 min</td><td>Follow-along verification</td></tr>
+              <tr><td>4. Guided Practice</td><td>Apply</td><td>Medium</td><td>5–10 min</td><td>Auto-graded (formative)</td></tr>
+              <tr><td>5. Scenario Lab</td><td>Apply–Analyze</td><td>High</td><td>10–20 min</td><td>Performance task</td></tr>
+              <tr><td>6. Mini Project</td><td>Create</td><td>High</td><td>20–45 min</td><td>Authentic assessment</td></tr>
+              <tr><td>7. Mastery Gate</td><td>Apply–Analyze</td><td>Medium</td><td>5–10 min</td><td>Summative (pass/fail)</td></tr>
+              <tr><td>8. Reflection</td><td>Evaluate</td><td>Low</td><td>3–5 min</td><td>Self-assessment</td></tr>
+              <tr><td>9. Spaced Review</td><td>Remember–Apply</td><td>Low</td><td>3–5 min</td><td>Retrieval quiz (formative)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout-info">
+          <strong>Research anchors:</strong> Gagne's 9 Events (Ch 1), Merrill's First Principles (Ch 1), CLT worked-example effect (Ch 8), mastery learning (Ch 12 Pattern 5), SRL reflection phase (Ch 2), spaced repetition (Ch 8, d = 0.50–0.70).
+        </div>
+      </div>
+    </div>
+
+    <!-- Operation 5 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">Op 5</span>
+        <div>
+          <div class="card-title">Task Design</div>
+          <div class="card-subtitle">Practice, application, and extension tasks with evidence-based difficulty calibration.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>For each sub-module, the AI generates three tiers of tasks:</p>
+        <div class="grid-3">
+          <div class="card task-tier practice">
+            <div class="card-title">Practice Tasks</div>
+            <small>Guided + unguided</small>
+            <ul>
+              <li>Follow worked-example pattern</li>
+              <li>Guidance fading: fully worked → partial → independent</li>
+              <li>Immediate feedback on every submission</li>
+            </ul>
+          </div>
+          <div class="card task-tier application">
+            <div class="card-title">Application Tasks</div>
+            <small>Real-world scenarios</small>
+            <ul>
+              <li>Authentic contexts from SME's domain</li>
+              <li>Require integration of multiple concepts</li>
+              <li>Open-ended with rubric-based evaluation</li>
+            </ul>
+          </div>
+          <div class="card task-tier extension">
+            <div class="card-title">Extension Tasks</div>
+            <small>For advanced learners</small>
+            <ul>
+              <li>Transfer to new contexts</li>
+              <li>Higher Bloom's levels (Analyze/Evaluate/Create)</li>
+              <li>Self-directed with minimal scaffolding</li>
+            </ul>
+          </div>
+        </div>
+        <h4>Evidence-Based Task Design Rules</h4>
+        <ul>
+          <li><strong>Interleaving:</strong> Mix problem types within practice sessions, not blocked by category (Ch 8: d = 0.42, 43% better delayed performance)</li>
+          <li><strong>Retrieval practice:</strong> Tasks require active recall, not recognition or re-reading (Ch 8: d = 0.65)</li>
+          <li><strong>Desirable difficulties:</strong> Calibrate difficulty to be challenging but not frustrating (Ch 8: d = 0.50–0.70 combined)</li>
+          <li><strong>Guidance fading:</strong> Fully worked → partially completed → independent (CLT worked-example effect)</li>
+          <li><strong>Authentic context:</strong> Tasks reflect real-world professional situations from SME's domain (Ch 6: authentic assessment)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Operation 6 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">Op 6</span>
+        <div>
+          <div class="card-title">Quiz & Assessment Design</div>
+          <div class="card-subtitle">Four assessment layers mapped to Bloom's levels and SOLO taxonomy, plus an optional psychomotor layer (L5).</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="flow-container">
+          <div class="flow-step"><div class="flow-step-number">L1</div><div class="flow-step-content"><strong>Concept Checks</strong><br><small>Short, frequent, adaptive</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-number">L2</div><div class="flow-step-content"><strong>Practice Checks</strong><br><small>Domain-specific tasks</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-number">L3</div><div class="flow-step-content"><strong>Simulations</strong><br><small>Performance assessments</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-number">L4</div><div class="flow-step-content"><strong>Mastery Gates</strong><br><small>Unlock progression</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-number">L5</div><div class="flow-step-content"><strong>Psychomotor</strong><br><small>Skills assessment (if applicable)</small></div></div>
+        </div>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Layer</th><th>Type</th><th>Bloom's</th><th>SOLO</th><th>Frequency</th><th>Formative/Summative</th></tr></thead>
+            <tbody>
+              <tr><td>L1: Concept Checks</td><td>Multiple choice, fill-in, drag-drop</td><td>Remember–Understand</td><td>Unistructural–Multistructural</td><td>Every 3–5 min</td><td>Formative</td></tr>
+              <tr><td>L2: Practice Checks</td><td>Coding tasks, short answer, problem-solving</td><td>Apply–Analyze</td><td>Multistructural–Relational</td><td>End of sub-module</td><td>Formative</td></tr>
+              <tr><td>L3: Simulations</td><td>Scenario-based, portfolio tasks, case studies</td><td>Apply–Evaluate</td><td>Relational–Extended Abstract</td><td>End of module</td><td>Summative</td></tr>
+              <tr><td>L4: Mastery Gates</td><td>Comprehensive assessment, pass/fail</td><td>Apply–Create</td><td>Relational–Extended Abstract</td><td>Before progression</td><td>Summative</td></tr>
+              <tr><td>L5: Psychomotor Assessment <span class="tag-amber">(if applicable)</span></td><td>Video quiz, video submission, simulator performance, VR scenario</td><td>Perception–Origination (Dave)</td><td>—</td><td>Per skill objective</td><td>Formative + Summative</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout-info">
+          <strong>Research anchors:</strong> Formative assessment d = 0.40–0.70 (Ch 6: Black & Wiliam, 1998). Authentic assessment for higher-order objectives (Ch 6). Bloom's for objectives + SOLO for rubric quality (Ch 3). Six evidence-backed design patterns from Ch 6 (quiz after 3–5 min video, immediate feedback, mastery gates, portfolios, peer review, spaced retrieval).
+        </div>
+
+        <h4>L5: Psychomotor Assessment Layer (if applicable)</h4>
+        <div class="callout-warning">
+          <strong>Conditional layer:</strong> This layer is active ONLY for courses where Section B.2 of the SME Input Template has been completed with psychomotor skill objectives. If no psychomotor objectives exist, L5 is not used.
+        </div>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Dave's Taxonomy Level</th><th>Assessment Method</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Perception / Set</strong> (Levels 1–2)</td><td>Video quiz + self-assessment checklist</td><td>Learner watches a demonstration, identifies correct form, and self-rates readiness to attempt</td></tr>
+              <tr><td><strong>Guided Response</strong> (Level 3)</td><td>Video submission + expert review</td><td>Learner records themselves performing the skill; instructor or peer evaluates against rubric</td></tr>
+              <tr><td><strong>Mechanism</strong> (Level 4)</td><td>Timed simulator performance</td><td>Learner completes a procedural task in a simulated environment with time and accuracy metrics</td></tr>
+              <tr><td><strong>Complex Overt Response</strong> (Level 5)</td><td>Full scenario in VR / simulation</td><td>Learner navigates a multi-step scenario requiring integrated psychomotor skills (e.g., virtual surgery, virtual lab experiment)</td></tr>
+              <tr><td><strong>Adaptation</strong> (Level 6)</td><td>Novel scenario with modified parameters</td><td>Learner adapts a practiced skill to a new situation (e.g., unexpected patient complication, modified recipe constraint)</td></tr>
+              <tr><td><strong>Origination</strong> (Level 7)</td><td>Creative skill application</td><td>Learner develops a novel procedure or technique, documented via portfolio or presentation</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout-info">
+          <strong>Reference:</strong> Ferris &amp; Aziz (2005) for technology-mediated assessment of psychomotor skills; Dave (1970) for behavioral objectives mapped to psychomotor taxonomy levels (Ch 3, Section 3.6).
+        </div>
+      </div>
+    </div>
+
+    <!-- Operation 7 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">Op 7</span>
+        <div>
+          <div class="card-title">Motivation & Engagement Layer</div>
+          <div class="card-subtitle">ARCS model applied per sub-module. SDT needs identified. "Dip" risk zones flagged.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div>
+            <h4>ARCS Analysis Per Sub-Module</h4>
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead><tr><th>Component</th><th>Design Question</th><th>Check</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>Attention</strong></td><td>What novelty, surprise, or variability captures interest?</td><td>☐</td></tr>
+                  <tr><td><strong>Relevance</strong></td><td>How is content connected to learner goals and prior experience?</td><td>☐</td></tr>
+                  <tr><td><strong>Confidence</strong></td><td>What scaffolded success opportunities build expectation of success?</td><td>☐</td></tr>
+                  <tr><td><strong>Satisfaction</strong></td><td>What natural consequences and positive outcomes follow mastery?</td><td>☐</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h4>SDT Needs Check</h4>
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead><tr><th>Need</th><th>Design Strategy</th><th>Check</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>Autonomy</strong></td><td>Meaningful choices (path, pace, project topic)</td><td>☐</td></tr>
+                  <tr><td><strong>Competence</strong></td><td>Scaffolded success, clear progress, mastery gates</td><td>☐</td></tr>
+                  <tr><td><strong>Relatedness</strong></td><td>Community features, peer review, shared galleries</td><td>☐</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="callout-warning">
+          <strong>"The Dip" Risk Zones:</strong> Motivation typically collapses at 25–35% completion (Ch 5). The AI flags modules at this position and recommends specific interventions: milestone celebrations, difficulty reduction, social proof, or a "why this matters" reconnect.
+        </div>
+        <div class="callout-info">
+          <strong>Research anchors:</strong> ARCS Model (Keller, 1987) — Ch 5. SDT (Deci & Ryan, 1985) — Ch 5. EVT (Motivation = Expectancy × Value) — Ch 5. Crowding-out effect: avoid extrinsic rewards that undermine intrinsic motivation.
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Output Specification -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📄</span>
+        <div>
+          <div class="card-title">AI Output Specification</div>
+          <div class="card-subtitle">The structured document produced by the AI processing stage.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Output Section</th><th>Contents</th><th>Research Grounding</th></tr></thead>
+            <tbody>
+              <tr><td>1. ILD Recommendations Report</td><td>Objective gaps, cognitive load profile, theory blend, key risks</td><td>Ch 3, 4, 5, 8</td></tr>
+              <tr><td>2. Sub-Module Structure</td><td>9-step modules with duration, Bloom's level, media type, assessment type</td><td>Ch 1, 8, 12</td></tr>
+              <tr><td>3. Task Specifications</td><td>Practice, application, extension tasks with difficulty calibration</td><td>Ch 6, 8</td></tr>
+              <tr><td>4. Quiz/Assessment Blueprint</td><td>4-layer assessments mapped to Bloom's + SOLO</td><td>Ch 3, 6</td></tr>
+              <tr><td>5. Motivation Strategy Map</td><td>ARCS analysis, SDT check, Dip interventions per module</td><td>Ch 5</td></tr>
+              <tr><td>6. Tool Recommendations</td><td>Matched tools + templates from Toolset Library</td><td>Ch 7, 8</td></tr>
+              <tr><td>7. Accessibility Pre-Check Notes</td><td>WCAG considerations for planned content types</td><td>Ch 7</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 3: Stage 3 — SME Quality Control                    -->
+  <!-- ============================================================ -->
+  <div class="section stage-3" id="section-3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div>
+        <h2 class="section-title">Stage 3: SME Quality Control</h2>
+        <p class="section-desc">The Subject Matter Expert reviews AI output for accuracy, alignment, and authenticity.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">✅</span>
+        <div>
+          <div class="card-title">3.1 SME Review Checklist</div>
+          <div class="card-subtitle">Complete for every sub-module in the AI output.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Review Criteria</th><th>Pass</th><th>Revise</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>3.1.1</td><td><strong>Content Accuracy:</strong> Is the AI's interpretation of the subject matter factually correct?</td><td>☐</td><td>☐</td><td></td></tr>
+              <tr><td>3.1.2</td><td><strong>Objective Alignment:</strong> Do AI recommendations match my stated learning objectives?</td><td>☐</td><td>☐</td><td></td></tr>
+              <tr><td>3.1.3</td><td><strong>Sequence Validity:</strong> Is the sub-module structure logically ordered with correct dependencies?</td><td>☐</td><td>☐</td><td></td></tr>
+              <tr><td>3.1.4</td><td><strong>Difficulty Calibration:</strong> Are tasks appropriately challenging for the target audience?</td><td>☐</td><td>☐</td><td></td></tr>
+              <tr><td>3.1.5</td><td><strong>Authenticity:</strong> Do scenarios and tasks reflect real-world practice in this domain?</td><td>☐</td><td>☐</td><td></td></tr>
+              <tr><td>3.1.6</td><td><strong>Completeness:</strong> Has any critical content been dropped or overlooked?</td><td>☐</td><td>☐</td><td></td></tr>
+              <tr><td>3.1.7</td><td><strong>Assessment Validity:</strong> Do quizzes actually test the stated objectives?</td><td>☐</td><td>☐</td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📝</span>
+        <div>
+          <div class="card-title">3.2 SME Feedback Template</div>
+          <div class="card-subtitle">Structured feedback format for each sub-module.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Field</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>Sub-Module ID</td><td>Reference number from AI output</td></tr>
+              <tr><td>Verdict</td><td><span class="tag-green">Accept</span> / <span class="tag-red">Reject</span> / <span class="tag-amber">Revise</span></td></tr>
+              <tr><td>Revision Instructions</td><td>Specific, numbered instructions tied to elements in the AI output</td></tr>
+              <tr><td>Priority</td><td><span class="tag-red">Critical</span> (blocks progress) / <span class="tag-amber">Recommended</span> / <span class="tag-blue">Optional</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quality Gate 1 -->
+    <div class="card quality-gate">
+      <div class="card-header">
+        <span class="card-icon">🚧</span>
+        <div>
+          <div class="card-title">Quality Gate 1: SME QC Pass Criteria</div>
+          <div class="card-subtitle">ALL criteria must be met before content creation begins.</div>
+        </div>
+      </div>
+      <div class="gate-badge gate-badge-fail">STOP — All items must pass</div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Criteria</th><th>Pass?</th></tr></thead>
+            <tbody>
+              <tr><td>1.1</td><td>All content is factually accurate (no AI hallucinations or misinterpretations)</td><td>☐</td></tr>
+              <tr><td>1.2</td><td>All learning objectives are addressed in the sub-module structure</td><td>☐</td></tr>
+              <tr><td>1.3</td><td>Task difficulty is appropriately calibrated for target audience</td><td>☐</td></tr>
+              <tr><td>1.4</td><td>Real-world scenarios are authentic to the domain</td><td>☐</td></tr>
+              <tr><td>1.5</td><td>No critical content has been omitted</td><td>☐</td></tr>
+              <tr><td>1.6</td><td>SME has explicitly approved or provided revision instructions for every sub-module</td><td>☐</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 4: Stage 4 — Content Creation                       -->
+  <!-- ============================================================ -->
+  <div class="section stage-4" id="section-4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div>
+        <h2 class="section-title">Stage 4: Content Creation</h2>
+        <p class="section-desc">Content creators build assets based on the approved structure. Task sections trigger an SME feedback loop.</p>
+      </div>
+    </div>
+
+    <!-- 4.1 Content Creator Brief Template -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🎨</span>
+        <div>
+          <div class="card-title">4.1 Content Creator Brief Template</div>
+          <div class="card-subtitle">One brief per sub-module. This is the content creator's work order.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Field</th><th>Contents</th></tr></thead>
+            <tbody>
+              <tr><td>Sub-Module ID & Title</td><td>From approved AI output</td></tr>
+              <tr><td>Module Step</td><td>Which of the 9 steps (Problem Hook through Spaced Review)</td></tr>
+              <tr><td>Content Type</td><td>Video script, interactive exercise, text, simulation, animation, assessment, etc.</td></tr>
+              <tr><td>Cognitive Load Budget</td><td>Classified level (Low/Medium/High) + maximum intrinsic load guidance</td></tr>
+              <tr><td>Mayer's Principles Checklist</td><td>Applicable principles for this content type (see 4.2)</td></tr>
+              <tr><td>Recommended Tool</td><td>From Toolset Library (Section 7), matched to content type + Bloom's level</td></tr>
+              <tr><td>Template</td><td>Ready-to-use template from the Toolset Library</td></tr>
+              <tr><td>Duration Spec</td><td>Target length per module template (e.g., video 5–12 min, exercise 5–10 min)</td></tr>
+              <tr><td>Accessibility Requirements</td><td>WCAG 2.1 Level AA checklist (captions, alt text, keyboard nav, contrast)</td></tr>
+              <tr><td>Assessment Items</td><td>Quiz questions/answers/distractor rationale from AI Quiz Blueprint</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4.2 Content Creation Standards -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📏</span>
+        <div>
+          <div class="card-title">4.2 Content Creation Standards</div>
+          <div class="card-subtitle">Mandatory rules drawn from ILD research. Not optional guidelines — hard constraints.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h4>Mayer's CTML Principles as Hard Rules</h4>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Principle</th><th>Effect Size</th><th>Rule</th></tr></thead>
+            <tbody>
+              <tr><td>Coherence</td><td>d = 0.86</td><td>No extraneous text, images, sounds, or music. If it doesn't serve learning, remove it.</td></tr>
+              <tr><td>Signaling</td><td>d = 0.52</td><td>Use visual/verbal cues to highlight organization and key points.</td></tr>
+              <tr><td>Redundancy</td><td>d = 0.72</td><td>Graphics explained by narration alone, not narration + identical on-screen text.</td></tr>
+              <tr><td>Spatial Contiguity</td><td>d = 1.12</td><td>Corresponding words and pictures must be near each other on screen.</td></tr>
+              <tr><td>Temporal Contiguity</td><td>d = 1.22</td><td>Narration and corresponding visuals must be presented simultaneously.</td></tr>
+              <tr><td>Segmenting</td><td>d = 0.79</td><td>Complex lessons must be broken into learner-paced segments.</td></tr>
+              <tr><td>Pre-Training</td><td>d = 0.85</td><td>Key terms and concepts must be introduced before the main lesson.</td></tr>
+              <tr><td>Modality</td><td>d = 1.02</td><td>Graphics explained by narration, not on-screen text.</td></tr>
+              <tr><td>Multimedia</td><td>d = 1.40</td><td>Words and pictures together, not words alone.</td></tr>
+              <tr><td>Personalization</td><td>d = 0.52</td><td>Conversational style, not formal. Use "you" and "we."</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Cognitive Load Management Rules</h4>
+        <ul>
+          <li>Maximum intrinsic load per segment: classify using element interactivity (Ch 8)</li>
+          <li>Zero tolerance for extraneous load from decorative elements</li>
+          <li>Worked examples before independent practice (worked-example effect)</li>
+          <li>Guidance fading: fully worked → partially completed → independent</li>
+        </ul>
+
+        <h4>Duration Guidelines</h4>
+        <ul>
+          <li><strong>Video segments:</strong> 5–12 minutes maximum (cognitivist chunking, Ch 2)</li>
+          <li><strong>Interactive exercises:</strong> Immediate feedback within 2 seconds (behaviorist reinforcement, Ch 2)</li>
+          <li><strong>Reflection prompts:</strong> Built into every module (SRL self-reflection phase, Ch 2)</li>
+          <li><strong>Quiz density:</strong> Concept check every 3–5 minutes of content (Ch 6: Szpunar et al. 2013 — reduced mind-wandering by 50%)</li>
+        </ul>
+
+        <h4>VR/AR-Specific Standards (when applicable)</h4>
+        <ul>
+          <li><strong>Frame rate:</strong> Minimum 60 FPS for VR (below 45 FPS causes simulator sickness)</li>
+          <li><strong>Session duration:</strong> Task completion time limit: 20 minutes max per VR session (fatigue threshold)</li>
+          <li><strong>Haptic feedback alignment:</strong> Physical resistance must match real-world forces within ±15%</li>
+          <li><strong>Accessibility:</strong> Provide non-VR alternative for learners prone to motion sickness or without VR hardware</li>
+          <li><strong>Research cross-reference:</strong> Ch 8.8 (procedural memory encoding requires actual practice, not just observation); Ch 10 VR/AR section for platform evidence</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 4.3 SME ↔ Content Creator Task Loop -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🔄</span>
+        <div>
+          <div class="card-title">4.3 SME ↔ Content Creator Feedback Loop (Tasks Only)</div>
+          <div class="card-subtitle">When the content creator reaches task sections, a structured review loop activates.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="callout-warning">
+          <strong>This loop applies ONLY to task sections</strong> (Steps 4–6 in the 9-step module: Guided Practice, Scenario Lab, Mini Project). Concept explanations, worked examples, and quizzes follow the linear path without this loop.
+        </div>
+        <div class="flow-container">
+          <div class="flow-step"><div class="flow-step-number">1</div><div class="flow-step-content"><strong>Creator drafts task</strong><br><small>Based on approved spec</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-number">2</div><div class="flow-step-content"><strong>SME reviews</strong><br><small>Authenticity + accuracy</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-number">3</div><div class="flow-step-content"><strong>SME feedback</strong><br><small>Accept / Revise / Reject</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-number">4</div><div class="flow-step-content"><strong>Creator revises</strong><br><small>Address feedback</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-number">5</div><div class="flow-step-content"><strong>SME signs off</strong><br><small>or returns to step 2</small></div></div>
+        </div>
+        <h4>Loop Rules</h4>
+        <ul>
+          <li><strong>Maximum 3 cycles</strong> before escalation to project lead</li>
+          <li>Each cycle has a defined turnaround expectation (recommended: 48 hours)</li>
+          <li>SME uses the same Feedback Template from Stage 3 (Section 3.2)</li>
+          <li>After cycle 3 without resolution, a joint review meeting is scheduled</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Quality Gate 2 -->
+    <div class="card quality-gate">
+      <div class="card-header">
+        <span class="card-icon">🚧</span>
+        <div>
+          <div class="card-title">Quality Gate 2: Content Creation Completion</div>
+          <div class="card-subtitle">ALL assets must pass before ILD QC review.</div>
+        </div>
+      </div>
+      <div class="gate-badge gate-badge-fail">STOP — All items must pass</div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Criteria</th><th>Pass?</th></tr></thead>
+            <tbody>
+              <tr><td>2.1</td><td>All assets created match the approved sub-module specifications</td><td>☐</td></tr>
+              <tr><td>2.2</td><td>Mayer's CTML principles checklist completed for every multimedia asset</td><td>☐</td></tr>
+              <tr><td>2.3</td><td>Cognitive load budget documented and not exceeded</td><td>☐</td></tr>
+              <tr><td>2.4</td><td>Accessibility checklist (WCAG 2.1 AA) passed for every asset</td><td>☐</td></tr>
+              <tr><td>2.5</td><td>SME has signed off on all task sections (loop completed)</td><td>☐</td></tr>
+              <tr><td>2.6</td><td>All formative assessment items have correct answers and distractor rationale documented</td><td>☐</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 5: Stage 5 — ILD Quality Control                    -->
+  <!-- ============================================================ -->
+  <div class="section stage-5" id="section-5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div>
+        <h2 class="section-title">Stage 5: ILD Quality Control</h2>
+        <p class="section-desc">Instructional design quality review against a 9-dimension rubric grounded in ILD research. Modeled on Quality Matters (Ch 7).</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🔍</span>
+        <div>
+          <div class="card-title">5.1 ILD QC Rubric (9 Dimensions)</div>
+          <div class="card-subtitle">Score each dimension: Not Met (0) / Partially Met (1) / Met (2) / Exemplary (3). Minimum 85% overall. Zero critical failures. Dimension 9 scored as N/A for purely cognitive courses.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p><strong>Score each dimension:</strong> Not Met (0) / Partially Met (1) / Met (2) / Exemplary (3). A module needs ≥ 85% overall (23/27 points) and zero "Not Met" scores to pass Gate 3. Dimension 9 (Kinesthetic &amp; Psychomotor Design) is scored as <strong>N/A</strong> for purely cognitive courses — see note below.</p>
+
+        <!-- Dimension 1: Constructive Alignment -->
+        <div class="rubric-dimension">
+          <h4>5.1.1 Constructive Alignment <span class="tag-blue">Ch 4: Biggs</span></h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Score</th><th>What It Looks Like</th></tr></thead>
+              <tbody>
+                <tr class="score-not-met"><td><strong>0 — Not Met</strong></td><td>Objectives, content, and assessments are misaligned. There are orphan objectives (stated but never taught or tested) or orphan assessments (testing something never taught). No traceable path from objective → content → assessment.</td></tr>
+                <tr class="score-partial"><td><strong>1 — Partially Met</strong></td><td>Most objectives are aligned, but 1–2 have gaps. For example, an objective is stated and content covers it, but no assessment tests it. Or an assessment tests content that wasn't explicitly taught.</td></tr>
+                <tr class="score-met"><td><strong>2 — Met</strong></td><td>Every stated objective has (a) corresponding content that teaches it, (b) at least one learning activity that practices it, and (c) at least one assessment item that measures it. No orphan elements. Alignment is traceable.</td></tr>
+                <tr class="score-exemplary"><td><strong>3 — Exemplary</strong></td><td>Met criteria PLUS: alignment is explicitly documented (each objective is annotated with its content source, activity, and assessment item). Learners can see the alignment (e.g., "This activity supports Objective 3"). Backward design is evident — assessments were clearly designed first.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Dimension 2: Bloom's Coverage -->
+        <div class="rubric-dimension">
+          <h4>5.1.2 Bloom's Coverage <span class="tag-purple">Ch 3: Bloom's</span></h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Score</th><th>What It Looks Like</th></tr></thead>
+              <tbody>
+                <tr class="score-not-met"><td><strong>0 — Not Met</strong></td><td>All objectives and assessments cluster at Remember/Understand only. No higher-order thinking is required. The "Bloom's Gap" identified in Ch 3 — most platforms leave Analyze/Evaluate/Create underserved.</td></tr>
+                <tr class="score-partial"><td><strong>1 — Partially Met</strong></td><td>At least 3 Bloom's levels are targeted, but the module doesn't assess all of them. For example, "Analyze" is in the objectives but assessments only test at Remember–Apply.</td></tr>
+                <tr class="score-met"><td><strong>2 — Met</strong></td><td>All Bloom's levels stated in the objectives have at least one corresponding assessment item. At least one Apply-level or higher objective exists. No level is claimed but untested.</td></tr>
+                <tr class="score-exemplary"><td><strong>3 — Exemplary</strong></td><td>Met criteria PLUS: all 4 knowledge types (Factual, Conceptual, Procedural, Metacognitive) are represented across objectives. Assessment items are mapped to specific cells in the 4×6 Bloom's matrix. At least one Create-level task exists.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Dimension 3: Cognitive Load Management -->
+        <div class="rubric-dimension">
+          <h4>5.1.3 Cognitive Load Management <span class="tag-amber">Ch 8: CLT</span></h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Score</th><th>What It Looks Like</th></tr></thead>
+              <tbody>
+                <tr class="score-not-met"><td><strong>0 — Not Met</strong></td><td>Evidence of extraneous load that hasn't been eliminated: decorative images, split-attention situations (key info separated from where it's needed), content chunks exceeding 4–5 new concepts, no worked examples before independent practice.</td></tr>
+                <tr class="score-partial"><td><strong>1 — Partially Met</strong></td><td>Extraneous load is mostly eliminated, but scaffolding is inconsistent. Some high-load topics have worked examples but others jump straight to independent practice. Guidance fading is present in some sections but not all.</td></tr>
+                <tr class="score-met"><td><strong>2 — Met</strong></td><td>Zero decorative elements. Every high-load topic has a worked example before practice. Guidance fading is implemented (fully worked → partial → independent). Content is chunked to max 4–5 new concepts per segment. Video segments are ≤ 12 minutes.</td></tr>
+                <tr class="score-exemplary"><td><strong>3 — Exemplary</strong></td><td>Met criteria PLUS: cognitive load is explicitly budgeted per sub-module (the Content Creator Brief includes a load classification). Scaffolding is adaptive — learners who struggle get additional worked examples. Pre-training is used for complex topics (key terms introduced before the main lesson).</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Dimension 4: Multimedia Compliance -->
+        <div class="rubric-dimension">
+          <h4>5.1.4 Multimedia Compliance <span class="tag-green">Ch 8: CTML</span></h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Score</th><th>What It Looks Like</th></tr></thead>
+              <tbody>
+                <tr class="score-not-met"><td><strong>0 — Not Met</strong></td><td>Mayer's principles are violated: on-screen text repeats narration verbatim (redundancy), corresponding words and pictures are separated (split attention), decorative visuals/audio are present (coherence violation), or content is words-only with no visuals (multimedia violation).</td></tr>
+                <tr class="score-partial"><td><strong>1 — Partially Met</strong></td><td>Most Mayer's principles are followed, but 1–2 violations exist. For example, a video has narration matching on-screen text in one segment, or a diagram has labels separated from the relevant part of the image.</td></tr>
+                <tr class="score-met"><td><strong>2 — Met</strong></td><td>All applicable Mayer's principles are followed. The Mayer's Principles Checklist (Section 4.2) is completed for every multimedia asset with zero violations. Words and pictures are paired. Narration explains visuals. No extraneous elements.</td></tr>
+                <tr class="score-exemplary"><td><strong>3 — Exemplary</strong></td><td>Met criteria PLUS: visuals are purpose-built (not stock photos or generic clip art). Personalization principle is applied throughout (conversational tone, "you" and "we" language). Embodiment cues are present in any on-screen agents. Visual complexity matches content complexity (simple visuals for simple concepts, rich visuals for complex systems).</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Dimension 5: Assessment Quality -->
+        <div class="rubric-dimension">
+          <h4>5.1.5 Assessment Quality <span class="tag-red">Ch 6</span></h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Score</th><th>What It Looks Like</th></tr></thead>
+              <tbody>
+                <tr class="score-not-met"><td><strong>0 — Not Met</strong></td><td>Assessment is summative-only (one test at the end). No formative checks during learning. Questions only test recall (Remember level). No distractor rationale documented. No authentic assessment for Apply+ objectives.</td></tr>
+                <tr class="score-partial"><td><strong>1 — Partially Met</strong></td><td>Some formative assessment exists, but not at the recommended density (every 3–5 minutes). Distractors exist but lack documented rationale. Authentic assessment is used for some but not all higher-order objectives.</td></tr>
+                <tr class="score-met"><td><strong>2 — Met</strong></td><td>Formative assessments embedded at regular intervals (every 3–5 min of content). All 4 assessment layers are represented (Concept Checks, Practice Checks, Simulations/Performance Tasks, Mastery Gates). Every distractor has documented rationale. Authentic assessment is used for all Apply+ objectives. SOLO level is appropriate for each item.</td></tr>
+                <tr class="score-exemplary"><td><strong>3 — Exemplary</strong></td><td>Met criteria PLUS: interleaving is present in all review quizzes (questions from multiple modules mixed). Adaptive difficulty is implemented where possible. Assessment items include transfer tasks (new context, not just rehearsed scenarios). Peer review option exists for project-based assessments. Effect sizes for each assessment pattern are documented.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Dimension 6: Motivation Design -->
+        <div class="rubric-dimension">
+          <h4>5.1.6 Motivation Design <span class="tag-amber">Ch 5</span></h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Score</th><th>What It Looks Like</th></tr></thead>
+              <tbody>
+                <tr class="score-not-met"><td><strong>0 — Not Met</strong></td><td>No ARCS analysis. No attention-capturing hooks. No visible connection to learner goals (relevance). Early tasks are too difficult for beginners (confidence). No sense of progress or achievement (satisfaction). Extrinsic rewards are the only motivator (crowding-out risk).</td></tr>
+                <tr class="score-partial"><td><strong>1 — Partially Met</strong></td><td>Some ARCS elements are present but not all 4. For example, hooks exist (attention) and tasks are scaffolded (confidence), but no relevance to learner goals is shown and there's no meaningful satisfaction mechanism. "The Dip" at 25–35% is not addressed.</td></tr>
+                <tr class="score-met"><td><strong>2 — Met</strong></td><td>All 4 ARCS components are present in every sub-module: a hook captures attention, content connects to learner goals/reality, scaffolded tasks build confidence, and mastery provides natural satisfaction. SDT needs (autonomy, competence, relatedness) are addressed. "The Dip" zone has a planned intervention.</td></tr>
+                <tr class="score-exemplary"><td><strong>3 — Exemplary</strong></td><td>Met criteria PLUS: autonomy is meaningful (genuine choices in path, pace, or project topics — not fake choices). Relatedness includes community features (peer review, galleries, discussion). Motivation is intrinsic-first — gamification serves pedagogy, not the other way around. EVT expectancy is protected: early experiences guarantee success to prevent the 2.3x disengagement risk.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Dimension 7: Accessibility -->
+        <div class="rubric-dimension">
+          <h4>5.1.7 Accessibility <span class="tag-teal">Ch 7</span></h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Score</th><th>What It Looks Like</th></tr></thead>
+              <tbody>
+                <tr class="score-not-met"><td><strong>0 — Not Met</strong></td><td>Videos lack captions. Images lack alt text. Keyboard navigation doesn't work. Color contrast fails WCAG AA standards. Interactive elements are screen-reader inaccessible. No text resize support.</td></tr>
+                <tr class="score-partial"><td><strong>1 — Partially Met</strong></td><td>Basic accessibility is present (captions exist, some alt text), but not comprehensive. For example, captions exist but aren't accurate or synchronized. Some images have alt text but decorative images aren't marked as decorative. Keyboard nav works for most but not all interactions.</td></tr>
+                <tr class="score-met"><td><strong>2 — Met</strong></td><td>WCAG 2.1 Level AA is fully met: all videos have accurate synchronized captions, all images have meaningful alt text (decorative images marked), full keyboard navigation works, color contrast meets 4.5:1 ratio, screen reader compatibility is verified, text can be resized to 200%. The accessibility checklist from Ch 7 is completed.</td></tr>
+                <tr class="score-exemplary"><td><strong>3 — Exemplary</strong></td><td>Met criteria PLUS: UDL principles are applied — content is available in multiple formats (video + text + interactive). Multiple means of expression are offered (learners can demonstrate learning in different ways). Audio descriptions are provided for visual-only content. Content has been tested with actual assistive technology users.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Dimension 8: Spaced Retrieval -->
+        <div class="rubric-dimension">
+          <h4>5.1.8 Spaced Retrieval <span class="tag-blue">Ch 8</span></h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Score</th><th>What It Looks Like</th></tr></thead>
+              <tbody>
+                <tr class="score-not-met"><td><strong>0 — Not Met</strong></td><td>No review schedule. Concepts are taught once and never revisited. All quizzes test only current-module content. No interleaving. Retrieval practice is not embedded — students can passively re-read or re-watch without active recall.</td></tr>
+                <tr class="score-partial"><td><strong>1 — Partially Met</strong></td><td>Some review exists but it's ad hoc rather than scheduled. A quiz at the end of a module might include 1–2 questions from prior modules, but there's no systematic spaced review plan. Retrieval practice is present in some but not all sections.</td></tr>
+                <tr class="score-met"><td><strong>2 — Met</strong></td><td>A spaced review schedule is documented: Review 1 appears in the next module, Review 2 appears 2 modules later, Review 3 appears 4 modules later (expanding intervals). Interleaving is implemented — review quizzes mix questions from 2+ prior modules. Retrieval practice is embedded (active recall, not recognition). At least 1 spaced review quiz exists per prior module.</td></tr>
+                <tr class="score-exemplary"><td><strong>3 — Exemplary</strong></td><td>Met criteria PLUS: review questions appear in new contexts (far transfer, not just re-testing in the original context). Difficulty increases with each review cycle (Bloom's level escalates). Cumulative mastery gates exist that test across all prior modules. The spacing schedule is informed by learner performance data (items learners struggled with are reviewed more frequently).</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Dimension 9: Kinesthetic & Psychomotor Design -->
+        <div class="rubric-dimension">
+          <h4>5.1.9 Kinesthetic &amp; Psychomotor Design <span class="tag-purple">Ch 8.8, Ch 10 VR/AR</span></h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Score</th><th>What It Looks Like</th></tr></thead>
+              <tbody>
+                <tr class="score-not-met"><td><strong>0 — Not Met</strong></td><td>Course includes psychomotor objectives but provides no hands-on practice, simulation, or physical interaction. All instruction is text/video only. No distinction between declarative and procedural knowledge.</td></tr>
+                <tr class="score-partial"><td><strong>1 — Partially Met</strong></td><td>Some simulation or interactive elements present but not mapped to psychomotor taxonomy levels. Video demos exist but no guided practice follows. Procedural memory pathway (Fitts &amp; Posner) not intentionally designed.</td></tr>
+                <tr class="score-met"><td><strong>2 — Met</strong></td><td>Psychomotor objectives classified using Dave or Ferris &amp; Aziz taxonomy. Practice→feedback→automaticity progression designed into tasks. Video demos activate mirror neuron pathways before practice. Simulations match online feasibility assessment. N/A for purely cognitive courses.</td></tr>
+                <tr class="score-exemplary"><td><strong>3 — Exemplary</strong></td><td>VR/haptic simulation for applicable skills with documented outcome data. Procedural vs. declarative memory distinction explicit in design. Psychomotor assessment uses authentic performance tasks. Adaptive difficulty in simulation. Transfer tasks in novel contexts. Evidence from Ch 8.8 and Ch 10 VR/AR integrated.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Score Calculation -->
+        <div class="callout-info">
+          <strong>Score Calculation:</strong> Add all 9 dimension scores. Maximum = 27 points. Pass threshold = 23/27 (85%). Zero dimensions can score "Not Met" (0). A single "Not Met" is a critical failure regardless of total score.<br><br>
+          <strong>N/A Rule for Dimension 9:</strong> Score as N/A if SME Input Template Section B.2 is marked "N/A — Cognitive course only." In this case, use the 24-point maximum (Dimensions 1–8) and 20-point pass threshold (85%). Dimension 9 is excluded from both numerator and denominator.
+        </div>
+        <div class="callout-warning">
+          <strong>Important:</strong> "Partially Met" (1) is not a failure — it's a flag. The module can still pass Gate 3 with Partially Met scores if the overall threshold is met and there are zero Not Met scores. However, Partially Met dimensions should be flagged in the ILD Reviewer's notes for future improvement.
+        </div>
+      </div>
+    </div>
+
+    <!-- Quality Gate 3 -->
+    <div class="card quality-gate">
+      <div class="card-header">
+        <span class="card-icon">🚧</span>
+        <div>
+          <div class="card-title">Quality Gate 3: ILD QC Pass Criteria</div>
+          <div class="card-subtitle">Threshold modeled on Quality Matters certification (Ch 7: 85% overall, all Essential Standards met).</div>
+        </div>
+      </div>
+      <div class="gate-badge gate-badge-fail">STOP — All items must pass</div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Criteria</th><th>Pass?</th></tr></thead>
+            <tbody>
+              <tr><td>3.1</td><td>Overall rubric score ≥ 85% (minimum 23 out of 27 points across 9 dimensions; if Dimension 9 is N/A, minimum 20 out of 24)</td><td>☐</td></tr>
+              <tr><td>3.2</td><td>Zero dimensions scored as "Not Met" (critical failure)</td><td>☐</td></tr>
+              <tr><td>3.3</td><td>All Mayer's principles verified for multimedia content</td><td>☐</td></tr>
+              <tr><td>3.4</td><td>All Bloom's levels targeted in objectives have corresponding assessments</td><td>☐</td></tr>
+              <tr><td>3.5</td><td>Spaced review schedule is documented and implemented</td><td>☐</td></tr>
+              <tr><td>3.6</td><td>All identified revisions are completed and re-checked</td><td>☐</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout-warning">
+          <strong>Gate Rule:</strong> If any dimension scores "Not Met," the module returns to Content Creation (Stage 4) for revision. It does NOT proceed to SME Final QC until all critical failures are resolved.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 6: Stage 6 — SME Final QC                           -->
+  <!-- ============================================================ -->
+  <div class="section stage-6" id="section-6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div>
+        <h2 class="section-title">Stage 6: SME Final QC & Sign-Off</h2>
+        <p class="section-desc">The SME reviews the complete, assembled module for final sign-off before release.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">签字</span>
+        <div>
+          <div class="card-title">6.1 Final SME Review Checklist</div>
+          <div class="card-subtitle">SME reviews the assembled module as a learner would experience it.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Criteria</th><th>Pass?</th></tr></thead>
+            <tbody>
+              <tr><td>6.1.1</td><td>Content is complete — all topics from the original dump are covered</td><td>☐</td></tr>
+              <tr><td>6.1.2</td><td>Learning objectives are fully addressed</td><td>☐</td></tr>
+              <tr><td>6.1.3</td><td>Tasks are authentic and appropriately challenging</td><td>☐</td></tr>
+              <tr><td>6.1.4</td><td>Assessments measure what they claim to measure</td><td>☐</td></tr>
+              <tr><td>6.1.5</td><td>Overall quality meets professional standards</td><td>☐</td></tr>
+              <tr><td>6.1.6</td><td>No factual errors or misrepresentations</td><td>☐</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">✍️</span>
+        <div>
+          <div class="card-title">6.2 Sign-Off Protocol</div>
+          <div class="card-subtitle">Formal approval or revision request.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <ul>
+          <li>SME reviews the complete, assembled module end-to-end</li>
+          <li>SME completes the Final Review Checklist above</li>
+          <li>SME provides one of:
+            <ul>
+              <li><span class="tag-green">Approved</span> — module is production-ready</li>
+              <li><span class="tag-amber">Conditional Approval</span> — minor revisions required, no re-review needed</li>
+              <li><span class="tag-red">Revision Required</span> — significant issues, module returns to appropriate stage</li>
+            </ul>
+          </li>
+          <li>Upon approval, the module is released</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Quality Gate 4 -->
+    <div class="card quality-gate gate-pass">
+      <div class="card-header">
+        <span class="card-icon">🚧</span>
+        <div>
+          <div class="card-title">Quality Gate 4: Final Release</div>
+          <div class="card-subtitle">The module is production-ready upon passing.</div>
+        </div>
+      </div>
+      <div class="gate-badge">PASS — Module released</div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Criteria</th><th>Pass?</th></tr></thead>
+            <tbody>
+              <tr><td>4.1</td><td>SME formal sign-off obtained (Approved or Conditional Approval)</td><td>☐</td></tr>
+              <tr><td>4.2</td><td>All prior quality gate criteria documented as passed (Gates 0–3)</td><td>☐</td></tr>
+              <tr><td>4.3</td><td>Module is production-ready — assets are in final format and integrated</td><td>☐</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout-success">
+          <strong>Gate 4 passed = Module released.</strong> All quality gates cleared. The module is ready for learners.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 7: Stage 7 — Learner Pilot Testing                   -->
+  <!-- ============================================================ -->
+  <div class="section stage-7" id="section-7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div>
+        <h2 class="section-title">Stage 7: Learner Pilot Testing</h2>
+        <p class="section-desc">Before general release, modules must be validated with real learners. No rubric can catch confusing navigation, ambiguous questions, or broken interactions — only learners can.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🧪</span>
+        <div>
+          <div class="card-title">Pilot Protocol</div>
+          <div class="card-subtitle">A lightweight validation phase with 5–10 representative learners before general release.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr><th>Step</th><th>Activity</th><th>Duration</th><th>What to Observe</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>7.1</strong></td><td><strong>Recruit pilot learners</strong> — 5–10 learners matching target audience profile. Include at least 1 learner using assistive technology.</td><td>Day 1</td><td>—</td></tr>
+              <tr><td><strong>7.2</strong></td><td><strong>Facilitated walkthrough</strong> — Learners complete the module without assistance. Observer takes notes on hesitations, confusion points, and errors.</td><td>1–2 hrs</td><td>Navigation confusion, skipped instructions, tool failures</td></tr>
+              <tr><td><strong>7.3</strong></td><td><strong>Usability checklist</strong> — Systematic evaluation: navigation intuitive? content readable? interactions functional? accessibility features work?</td><td>30 min</td><td>UI/UX issues, broken links, formatting problems</td></tr>
+              <tr><td><strong>7.4</strong></td><td><strong>Assessment validation</strong> — Are questions measuring what they intend? Do distractors work? Are difficulty levels appropriate? Any ambiguous items?</td><td>30 min</td><td>Item difficulty, distractor effectiveness, ambiguous wording</td></tr>
+              <tr><td><strong>7.5</strong></td><td><strong>Learner feedback form</strong> — Collect structured feedback: clarity (1–5), engagement (1–5), difficulty calibration, specific improvement suggestions.</td><td>15 min</td><td>Satisfaction scores, qualitative feedback themes</td></tr>
+              <tr><td><strong>7.6</strong></td><td><strong>Debrief &amp; triage</strong> — Categorize issues: Critical (blocks learning), Important (degrades experience), Nice-to-have (polish). Route critical items for immediate fix.</td><td>1 hr</td><td>Issue count by severity, required rework scope</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quality Gate 5 -->
+    <div class="card quality-gate" style="margin-top:2rem">
+      <div class="card-header">
+        <span class="card-icon">🚧</span>
+        <div>
+          <div class="card-title">Quality Gate 5: Pilot Validation</div>
+          <div class="card-subtitle">Module must pass pilot testing before general release.</div>
+        </div>
+      </div>
+      <div class="gate-badge gate-badge-fail">STOP — All items must pass</div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr><th>ID</th><th>Criterion</th><th>Pass Condition</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>5.1</strong></td><td>Pilot completed with minimum 5 learners</td><td>≥5 learners completed the full module</td></tr>
+              <tr><td><strong>5.2</strong></td><td>No critical usability failures</td><td>Zero issues classified as "Critical" (blocks learning)</td></tr>
+              <tr><td><strong>5.3</strong></td><td>Assessment items validated</td><td>No ambiguous questions; all distractors have documented rationale; difficulty appropriate</td></tr>
+              <tr><td><strong>5.4</strong></td><td>Learner satisfaction adequate</td><td>Average satisfaction ≥3.5/5 across clarity, engagement, and difficulty</td></tr>
+              <tr><td><strong>5.5</strong></td><td>Accessibility tested</td><td>At least 1 pilot learner using assistive technology (screen reader, keyboard navigation) completed successfully</td></tr>
+              <tr><td><strong>5.6</strong></td><td>All pilot feedback addressed</td><td>Critical items fixed and re-tested; Important items documented with action plan; Nice-to-have items logged</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout-info">
+          <strong>Routing:</strong> If Gate 5 fails on 5.2 or 5.3, route back to Stage 4 (Content Creation) for fixes. If 5.4 fails, review cognitive load budget (may need Stage 2 re-processing). Re-check Gate 2 or Gate 3 after fixes.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 8: Stage 8 — Post-Release Monitoring & Iteration      -->
+  <!-- ============================================================ -->
+  <div class="section stage-7" id="section-8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div>
+        <h2 class="section-title">Stage 8: Post-Release Monitoring &amp; Iteration</h2>
+        <p class="section-desc">Release is not the end. An evidence-based pipeline must monitor real learner outcomes and iterate based on data — not just theoretical quality.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📊</span>
+        <div>
+          <div class="card-title">Learner Analytics Dashboard Specification</div>
+          <div class="card-subtitle">Key metrics to track post-release for every module.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr><th>Metric</th><th>What It Measures</th><th>Healthy Range</th><th>Red Flag</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Completion rate</strong></td><td>% of learners who finish the module</td><td>≥70%</td><td>&lt;50%</td></tr>
+              <tr><td><strong>Drop-off points</strong></td><td>Specific steps where learners exit</td><td>No single step &gt;20% drop</td><td>Any step &gt;35% drop</td></tr>
+              <tr><td><strong>Mastery gate pass rate</strong></td><td>% passing on first attempt</td><td>60–80%</td><td>&lt;50% or &gt;95%</td></tr>
+              <tr><td><strong>Average time-on-task</strong></td><td>Actual vs. estimated duration</td><td>±20% of estimate</td><td>&gt;50% over estimate</td></tr>
+              <tr><td><strong>Assessment item analysis</strong></td><td>Per-question difficulty and discrimination</td><td>Difficulty 0.3–0.7; discrimination &gt;0.2</td><td>Difficulty &lt;0.2 or &gt;0.9</td></tr>
+              <tr><td><strong>Learner satisfaction</strong></td><td>Post-module rating</td><td>≥4.0/5</td><td>&lt;3.0/5</td></tr>
+              <tr><td><strong>Spaced review success</strong></td><td>Retention at +1, +3, +6 intervals</td><td>≥70% correct at +6</td><td>&lt;50% at +3</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem">
+      <div class="card-header">
+        <span class="card-icon">🔄</span>
+        <div>
+          <div class="card-title">Iteration Workflow</div>
+          <div class="card-subtitle">What happens when analytics flag a problem.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="flow-container" style="flex-wrap:wrap">
+          <div class="flow-step"><div class="flow-step-number">1</div><div class="flow-step-content"><strong>Identify</strong><br><small>Dashboard metric hits red flag</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-number">2</div><div class="flow-step-content"><strong>Diagnose</strong><br><small>Root cause analysis: content? assessment? UX?</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-number">3</div><div class="flow-step-content"><strong>Route</strong><br><small>Enter pipeline at appropriate stage</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-number">4</div><div class="flow-step-content"><strong>Re-gate</strong><br><small>Pass relevant quality gates</small></div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-number">5</div><div class="flow-step-content"><strong>Re-release</strong><br><small>Version bump + changelog</small></div></div>
+        </div>
+        <h4 style="margin-top:1.5rem">Routing Rules</h4>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr><th>Flag Type</th><th>Route To</th><th>Version Bump</th><th>Gates to Re-check</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Content accuracy error</td><td>Stage 1 (SME Dump fix) → Stage 2</td><td>Minor</td><td>Gate 0, Gate 1</td></tr>
+              <tr><td>Assessment quality issue</td><td>Stage 4 (Content Creation)</td><td>Iteration</td><td>Gate 2, Gate 3</td></tr>
+              <tr><td>Cognitive overload (high drop-off)</td><td>Stage 2 (AI re-processing)</td><td>Minor</td><td>Gate 1, Gate 3</td></tr>
+              <tr><td>UX / usability issue</td><td>Stage 4 (Content Creation)</td><td>Iteration</td><td>Gate 2</td></tr>
+              <tr><td>Accessibility failure</td><td>Stage 4 (Content Creation)</td><td>Minor</td><td>Gate 2, Gate 3</td></tr>
+              <tr><td>Major restructure needed</td><td>Stage 1 (full re-dump)</td><td>Major</td><td>All gates</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quality Gate 6 -->
+    <div class="card quality-gate" style="margin-top:2rem">
+      <div class="card-header">
+        <span class="card-icon">🚧</span>
+        <div>
+          <div class="card-title">Quality Gate 6: Post-Release Health Check</div>
+          <div class="card-subtitle">Ensures monitoring is active and iteration is systematic — not ad-hoc.</div>
+        </div>
+      </div>
+      <div class="gate-badge gate-badge-fail">STOP — Must be active within 30 days of release</div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr><th>ID</th><th>Criterion</th><th>Pass Condition</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>6.1</strong></td><td>Analytics dashboard reviewed</td><td>Learner data reviewed within 30 days of release; metrics documented</td></tr>
+              <tr><td><strong>6.2</strong></td><td>All flagged modules have action plans</td><td>Every module with red-flag metrics has a documented diagnosis and scheduled fix</td></tr>
+              <tr><td><strong>6.3</strong></td><td>Content revisions re-enter pipeline</td><td>Any post-release content change routes through the appropriate pipeline stage and re-checks relevant gates</td></tr>
+              <tr><td><strong>6.4</strong></td><td>Learner feedback mechanism active</td><td>Structured feedback channel (survey, rating, report button) is functional and monitored</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 6.1: Revision Routing Logic                          -->
+  <!-- ============================================================ -->
+  <div class="section stage-6" id="section-6-1">
+    <div class="section-header">
+      <div class="section-number">6.1</div>
+      <div>
+        <h2 class="section-title">Revision Routing Logic</h2>
+        <p class="section-desc">When a quality gate fails, where does the module go? Explicit routing prevents rework loops and scope creep.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🔀</span>
+        <div>
+          <div class="card-title">Gate Failure Routing Map</div>
+          <div class="card-subtitle">Every failure has a defined return path and scope. No ambiguity.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr><th>Gate</th><th>Failure Type</th><th>Route Back To</th><th>Scope of Rework</th><th>Re-check Required</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Gate 0</strong><br><small>(SME Dump incomplete)</small></td>
+                <td>Missing fields, objectives not measurable, no real-world contexts</td>
+                <td><span class="tag-blue">Stage 1</span><br>SME re-works input</td>
+                <td>SME Input Template only</td>
+                <td>Gate 0 again</td>
+              </tr>
+              <tr>
+                <td><strong>Gate 1</strong><br><small>(SME QC — AI output inaccurate)</small></td>
+                <td>Factual errors, missing content, misaligned objectives, inauthentic scenarios</td>
+                <td><span class="tag-blue">Stage 2</span><br>AI re-processes with SME corrections</td>
+                <td>Affected sub-modules only (not full re-run). SME provides specific revision instructions per sub-module.</td>
+                <td>Gate 1 again (affected sub-modules only)</td>
+              </tr>
+              <tr>
+                <td><strong>Gate 2</strong><br><small>(Content creation incomplete)</small></td>
+                <td>Missing assets, Mayer's violations, accessibility failures, cognitive load exceeded, SME task sign-off missing</td>
+                <td><span class="tag-amber">Stage 4</span><br>Content Creator revises assets</td>
+                <td>Failed assets only. If failure is systematic (e.g., consistent Mayer's violations across all assets), Pipeline Lead may require a Content Creator re-brief.</td>
+                <td>Gate 2 again</td>
+              </tr>
+              <tr>
+                <td rowspan="2"><strong>Gate 3</strong><br><small>(ILD QC fails)</small></td>
+                <td><strong>Dimension-specific failures</strong><br>(e.g., missing spaced review, no ARCS elements, accessibility gaps)</td>
+                <td><span class="tag-amber">Stage 4</span><br>Content Creator fixes specific issues</td>
+                <td>Only the failed dimension(s). ILD Reviewer provides specific revision instructions citing which rubric items failed.</td>
+                <td rowspan="2">Gate 3 again (all dimensions, not just fixed ones — changes can introduce new issues)</td>
+              </tr>
+              <tr>
+                <td><strong>Structural failures</strong><br>(e.g., constructive alignment broken, Bloom's coverage fundamentally missing, objectives don't match content)</td>
+                <td><span class="tag-red">Stage 2</span><br>AI re-processes affected sub-modules with corrected brief</td>
+                <td>Affected sub-modules. Requires Pipeline Lead approval — structural re-routes are expensive. ILD Reviewer must justify why the fix can't be done at Stage 4.</td>
+              </tr>
+              <tr>
+                <td><strong>Gate 4</strong><br><small>(SME Final QC rejects)</small></td>
+                <td>Factual errors found in final review, missing content, quality below professional standard</td>
+                <td><span class="tag-amber">Stage 4</span> for asset fixes<br><span class="tag-blue">Stage 2</span> if structural (requires Pipeline Lead approval)</td>
+                <td>Depends on nature. Asset fixes → Stage 4. Structural → Stage 2 (rare, requires justification).</td>
+                <td>All gates from the return point forward</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Routing Decision Rules -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">⚙️</span>
+        <div>
+          <div class="card-title">Routing Decision Rules</div>
+          <div class="card-subtitle">Three rules that govern every gate failure routing decision.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="grid-3">
+          <div class="routing-rule-box rule-minimal">
+            <h4>Rule 1: Minimal Scope</h4>
+            <p>Route back to the <strong>latest possible stage</strong> that can fix the problem. Default is always Stage 4 (content revision). Routing to Stage 2 (AI re-processing) requires Pipeline Lead approval because it may cascade changes to sub-modules that already passed SME QC.</p>
+          </div>
+          <div class="routing-rule-box rule-bypass">
+            <h4>Rule 2: No Silent Bypass</h4>
+            <p>Every re-route is logged. The module's version history (see Section 6.2) must show which gate failed, why, where it was routed, and what changed. No gate failure is ever resolved without a record.</p>
+          </div>
+          <div class="routing-rule-box rule-escalate">
+            <h4>Rule 3: Escalation on Repeat</h4>
+            <p>If the <strong>same gate fails twice</strong> for the same reason, the Pipeline Lead escalates: convene a joint meeting of all involved roles, identify the root cause, and decide whether the brief, the SME input, or the process itself needs adjustment.</p>
+          </div>
+        </div>
+
+        <h4 style="margin-top: 1.5rem;">Quick Routing Decision Flowchart</h4>
+        <div class="flow-container">
+          <div class="flow-step" style="background: #fee2e2;">
+            <strong>Gate Failed</strong>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <strong>Is the fix an asset/content issue?</strong><br>
+            <small>(Mayer's, accessibility, load, task quality)</small>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step" style="background: #dcfce7;">
+            <strong>YES → Route to Stage 4</strong><br>
+            <small>Content Creator revises</small>
+          </div>
+        </div>
+        <div class="flow-container" style="margin-top: 0.5rem;">
+          <div class="flow-step" style="background: #fee2e2; visibility: hidden;">
+            <strong>Gate Failed</strong>
+          </div>
+          <div class="flow-arrow" style="visibility: hidden;">→</div>
+          <div class="flow-step">
+            <strong>Or is it a structural/alignment issue?</strong><br>
+            <small>(objectives mismatch, missing Bloom's levels, broken alignment)</small>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step" style="background: #fef3c7;">
+            <strong>YES → Route to Stage 2</strong><br>
+            <small>Requires Pipeline Lead approval</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 6.2: Versioning & Iteration Tracking                 -->
+  <!-- ============================================================ -->
+  <div class="section stage-6" id="section-6-2">
+    <div class="section-header">
+      <div class="section-number">6.2</div>
+      <div>
+        <h2 class="section-title">Versioning & Iteration Tracking</h2>
+        <p class="section-desc">Every deliverable has a version. Every change has a record. No confusion about which version is approved.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📌</span>
+        <div>
+          <div class="card-title">Version Numbering Scheme</div>
+          <div class="card-subtitle">Three-level versioning: Major.Minor.Iteration</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="metric-grid" style="max-width: 600px;">
+          <div class="metric-box">
+            <div class="metric-value version-metric-code major">v<strong>X</strong>.0.0</div>
+            <div class="metric-label"><strong>Major</strong> — AI Processing run number.<br>v1 = first AI output, v2 = full re-processing after structural route-back, etc.</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-value version-metric-code minor">v1.<strong>Y</strong>.0</div>
+            <div class="metric-label"><strong>Minor</strong> — Content creation revision cycle.<br>v1.0 = first asset draft, v1.1 = after Gate 2/3 revision, etc.</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-value version-metric-code iteration">v1.0.<strong>Z</strong></div>
+            <div class="metric-label"><strong>Iteration</strong> — SME task loop cycle.<br>v1.0.0 = creator's draft, v1.0.1 = after SME review #1, v1.0.2 = after review #2, etc.</div>
+          </div>
+        </div>
+
+        <h4>Examples</h4>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Version</th><th>What Happened</th></tr></thead>
+            <tbody>
+              <tr><td><code>v1.0.0</code></td><td>Initial AI output → SME approved → Content Creator's first draft</td></tr>
+              <tr><td><code>v1.0.1</code></td><td>SME reviewed task, requested revision → Content Creator revised</td></tr>
+              <tr><td><code>v1.0.2</code></td><td>SME reviewed again, approved task section</td></tr>
+              <tr><td><code>v1.1.0</code></td><td>ILD QC failed on accessibility → Content Creator fixed all assets</td></tr>
+              <tr><td><code>v1.1.0</code></td><td>ILD QC re-check passed → SME Final QC approved → <strong>Released</strong></td></tr>
+              <tr><td><code>v2.0.0</code></td><td>Gate 3 structural failure → routed back to Stage 2 → full AI re-processing with corrected brief</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Log Template -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📝</span>
+        <div>
+          <div class="card-title">Change Log Template</div>
+          <div class="card-subtitle">One change log per module. Maintained by the Pipeline Lead.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Version</th>
+                <th>Stage</th>
+                <th>What Changed</th>
+                <th>Why</th>
+                <th>Who</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><em>(date)</em></td>
+                <td><code>v1.0.0</code></td>
+                <td>Stage 2</td>
+                <td>AI processing complete — 8 sub-modules generated</td>
+                <td>Initial processing</td>
+                <td>Pipeline Lead</td>
+                <td><span class="tag-green">Approved</span></td>
+              </tr>
+              <tr>
+                <td><em>(date)</em></td>
+                <td><code>v1.0.0</code></td>
+                <td>Stage 3</td>
+                <td>SME QC — sub-modules 1–7 approved, sub-module 8 needs revision (scenario not authentic)</td>
+                <td>SME review</td>
+                <td>SME</td>
+                <td><span class="tag-amber">Partial</span></td>
+              </tr>
+              <tr>
+                <td><em>(date)</em></td>
+                <td><code>v1.0.0</code></td>
+                <td>Stage 2</td>
+                <td>Sub-module 8 re-processed with corrected scenario context</td>
+                <td>SME revision request</td>
+                <td>AI / Pipeline Lead</td>
+                <td><span class="tag-green">Approved</span></td>
+              </tr>
+              <tr>
+                <td><em>(date)</em></td>
+                <td><code>v1.0.1</code></td>
+                <td>Stage 4</td>
+                <td>Task 4.3 (Guided Practice) — SME requested more authentic dataset</td>
+                <td>SME task loop cycle 1</td>
+                <td>Content Creator</td>
+                <td><span class="tag-amber">In Review</span></td>
+              </tr>
+              <tr>
+                <td><em>(date)</em></td>
+                <td><code>v1.1.0</code></td>
+                <td>Stage 4</td>
+                <td>All assets revised — added captions, fixed contrast ratios, removed decorative images</td>
+                <td>Gate 2 failure (accessibility)</td>
+                <td>Content Creator</td>
+                <td><span class="tag-green">Passed</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Approval Stamp -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">✅</span>
+        <div>
+          <div class="card-title">Approval Stamps</div>
+          <div class="card-subtitle">Every gate passage requires a formal stamp in the change log.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr><th>Stamp</th><th>Meaning</th><th>Applied By</th><th>Required Fields</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="tag-green">GATE 0 PASSED</span></td>
+                <td>SME dump is complete and ready for AI processing</td>
+                <td>Pipeline Lead</td>
+                <td>Date, all checklist items checked, Pipeline Lead name</td>
+              </tr>
+              <tr>
+                <td><span class="tag-green">GATE 1 PASSED</span></td>
+                <td>SME has approved AI output for content creation</td>
+                <td>Pipeline Lead</td>
+                <td>Date, SME name, version number approved</td>
+              </tr>
+              <tr>
+                <td><span class="tag-green">GATE 2 PASSED</span></td>
+                <td>All assets created and SME task sign-offs obtained</td>
+                <td>Pipeline Lead</td>
+                <td>Date, all checklist items checked, task loop completion confirmed</td>
+              </tr>
+              <tr>
+                <td><span class="tag-green">GATE 3 PASSED</span></td>
+                <td>ILD QC rubric ≥ 85%, zero critical failures</td>
+                <td>ILD Reviewer</td>
+                <td>Date, rubric score, ILD Reviewer name, any conditions noted</td>
+              </tr>
+              <tr>
+                <td><span class="tag-green">RELEASED</span></td>
+                <td>SME has given final sign-off — module is production-ready</td>
+                <td>Pipeline Lead</td>
+                <td>Date, SME name, final version number, all prior gate stamps confirmed</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout-info">
+          <strong>Rule:</strong> A module cannot carry the <span class="tag-green">RELEASED</span> stamp unless all five prior stamps exist in the change log. Missing stamps indicate a skipped gate — this is a process violation.
+        </div>
+      </div>
+    </div>
+
+    <!-- Module Tracking Card -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📋</span>
+        <div>
+          <div class="card-title">Module Tracking Card</div>
+          <div class="card-subtitle">One card per module. Pinned to the module throughout its lifecycle.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Field</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Module ID</strong></td><td><em>(auto-generated or manual, e.g., MOD-2026-001)</em></td></tr>
+              <tr><td><strong>Module Title</strong></td><td><em>(from SME Input Template)</em></td></tr>
+              <tr><td><strong>SME</strong></td><td><em>(name)</em></td></tr>
+              <tr><td><strong>Content Creator</strong></td><td><em>(name)</em></td></tr>
+              <tr><td><strong>ILD Reviewer</strong></td><td><em>(name)</em></td></tr>
+              <tr><td><strong>Pipeline Lead</strong></td><td><em>(name)</em></td></tr>
+              <tr><td><strong>Current Version</strong></td><td><code>v_.__.__</code></td></tr>
+              <tr><td><strong>Current Stage</strong></td><td><em>(1–6)</em></td></tr>
+              <tr><td><strong>Gate Stamps</strong></td><td>☐ Gate 0 &nbsp; ☐ Gate 1 &nbsp; ☐ Gate 2 &nbsp; ☐ Gate 3 &nbsp; ☐ Released</td></tr>
+              <tr><td><strong>Task Loop Status</strong></td><td>Cycle __ of 3 &nbsp; | &nbsp; ☐ Active &nbsp; ☐ Complete &nbsp; ☐ Escalated</td></tr>
+              <tr><td><strong>Gate Failures</strong></td><td><em>(count and which gates)</em></td></tr>
+              <tr><td><strong>Routings</strong></td><td><em>(any route-backs: date, gate, target stage, reason)</em></td></tr>
+              <tr><td><strong>Start Date</strong></td><td><em>(Stage 1 began)</em></td></tr>
+              <tr><td><strong>Target Release</strong></td><td><em>(planned completion date)</em></td></tr>
+              <tr><td><strong>Actual Release</strong></td><td><em>(date RELEASED stamp applied)</em></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 7: Toolset Library                                   -->
+  <!-- ============================================================ -->
+  <div class="section stage-7" id="section-7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div>
+        <h2 class="section-title">Toolset Library</h2>
+        <p class="section-desc">Curated catalog of 2D/3D authoring tools matched to content types, cognitive load levels, and Bloom's taxonomy — with ready-to-use templates.</p>
+      </div>
+    </div>
+
+    <!-- 7.1 By Content Type -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🎬</span>
+        <div>
+          <div class="card-title">7.1 Tools by Content Type</div>
+          <div class="card-subtitle">Primary and secondary tool recommendations for each content type.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Content Type</th><th>Primary Tools</th><th>Secondary Tools</th><th>ILD Principle</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Interactive Video Lessons</strong></td><td>Articulate Storyline, Articulate Rise, Vyond</td><td>Camtasia, Loom, OBS Studio</td><td>Segmenting (d=0.79), Modality (d=1.02)</td></tr>
+              <tr><td><strong>2D Animation & Explainers</strong></td><td>Vyond, After Effects, Doodly</td><td>Powtoon, Biteable, CreateStudio</td><td>Multimedia (d=1.40), Dual Coding (d=0.55–0.75)</td></tr>
+              <tr><td><strong>3D Simulations & Visualizations</strong></td><td>Blender, Unity, Unreal Engine</td><td>Spline, Three.js, Cinema 4D</td><td>Embodied Cognition, Spatial reasoning</td></tr>
+              <tr><td><strong>Interactive Coding Exercises</strong></td><td>CodeSandbox, Replit, StackBlitz</td><td>JSFiddle, CodePen, GitHub Codespaces</td><td>"Try-it-yourself" pattern, Immediate feedback</td></tr>
+              <tr><td><strong>Diagrams & Concept Maps</strong></td><td>Miro, Lucidchart, Figma</td><td>Excalidraw, Draw.io, Whimsical</td><td>Dual Coding, Schema building</td></tr>
+              <tr><td><strong>Quiz & Assessment Authoring</strong></td><td>Articulate Storyline, H5P, Typeform</td><td>Google Forms, Qualtrics, Kahoot!</td><td>Retrieval practice (d=0.65), Formative assessment</td></tr>
+              <tr><td><strong>Spaced Repetition Flashcards</strong></td><td>Anki, Quizlet, Brainscape</td><td>RemNote, SuperMemo, Mochi</td><td>Spaced repetition (d=0.50–0.70)</td></tr>
+              <tr><td><strong>Scenario-Based Learning</strong></td><td>Articulate Storyline, Twine, BranchTrack</td><td>Scenario-based AI tools, Adapt</td><td>Experiential Learning (Kolb), Social Learning</td></tr>
+              <tr><td><strong>Infographics & Data Viz</strong></td><td>Canva, Piktochart, Tableau</td><td>D3.js, Flourish, Infogram</td><td>Dual Coding, Coherence (d=0.86)</td></tr>
+              <tr><td><strong>Audio & Podcast Content</strong></td><td>Audacity, Descript, Riverside</td><td>GarageBand, Adobe Audition, Murf AI</td><td>Modality (d=1.02), Personalization (d=0.52)</td></tr>
+              <tr><td><strong>Virtual Labs / Simulations</strong></td><td>Labster, PhET Interactive Simulations, OLabs</td><td>—</td><td>Experiential Learning, Procedural Memory (Fitts &amp; Posner)</td></tr>
+              <tr><td><strong>VR Training</strong></td><td>Unity WebGL, Spline, Three.js (WebGL)</td><td>Osso VR SDK</td><td>Embodied Cognition, Mirror Neuron Activation</td></tr>
+              <tr><td><strong>Haptic Systems</strong></td><td>Fundamental VR HapticVR (enterprise)</td><td>—</td><td>Procedural encoding, Psychomotor automaticity</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7.2 By Cognitive Load Level -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🧠</span>
+        <div>
+          <div class="card-title">7.2 Tools by Cognitive Load Level</div>
+          <div class="card-subtitle">Tool complexity must match content complexity (Ch 8: CLT).</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="grid-3">
+          <div class="load-box low">
+            <h4>Low Intrinsic Load</h4>
+            <p><small>Factual recall, vocabulary, simple procedures</small></p>
+            <p><strong>Tool characteristics:</strong> Simple, focused interfaces. Minimal distraction. Flashcard-style or single-purpose.</p>
+            <p><strong>Tools:</strong> Anki, Quizlet, H5P (simple interactions), Kahoot!, Google Forms</p>
+          </div>
+          <div class="load-box medium">
+            <h4>Medium Intrinsic Load</h4>
+            <p><small>Conceptual understanding, multi-step procedures</small></p>
+            <p><strong>Tool characteristics:</strong> Scaffolded environments. Step-by-step guidance. Integrated text + visuals.</p>
+            <p><strong>Tools:</strong> Articulate Rise, Codecademy-style sandboxes, Miro, Canva, Descript</p>
+          </div>
+          <div class="load-box high">
+            <h4>High Intrinsic Load</h4>
+            <p><small>Complex systems, analysis, multi-domain integration</small></p>
+            <p><strong>Tool characteristics:</strong> Simulation environments. Segmentable content. Branching scenarios.</p>
+            <p><strong>Tools:</strong> Articulate Storyline, Unity, Blender, Twine, Tableau, Figma</p>
+          </div>
+        </div>
+        <h4 style="margin-top:1.5rem;">Special Case: High Intrinsic Load + Psychomotor</h4>
+        <div class="callout-info">
+          <strong>When content has high element interactivity AND involves psychomotor skills:</strong> Use VR simulation with guided practice. Tools: Unity WebGL, Labster, Fundamental VR HapticVR. Design for Fitts &amp; Posner's 3-stage procedural memory model (Cognitive → Associative → Autonomous). Reference: Ch 8.8 procedural memory encoding; Ch 10 VR/AR section.
+        </div>
+      </div>
+    </div>
+
+    <!-- 7.3 By Bloom's Level -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📊</span>
+        <div>
+          <div class="card-title">7.3 Tools by Bloom's Taxonomy Level</div>
+          <div class="card-subtitle">Different cognitive levels require different interaction types (Ch 3).</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Bloom's Level</th><th>Content Requirements</th><th>Recommended Tools</th></tr></thead>
+            <tbody>
+              <tr><td><span class="tag-blue">Remember</span></td><td>Quick retrieval practice, flashcards, drills</td><td>Anki, Quizlet, H5P (drag-drop, fill-in), Kahoot!</td></tr>
+              <tr><td><span class="tag-blue">Understand</span></td><td>Explanations with visuals, concept maps, summaries</td><td>Canva (infographics), Miro (concept maps), Articulate Rise, Excalidraw</td></tr>
+              <tr><td><span class="tag-green">Apply</span></td><td>Practice environments, coding sandboxes, simulations</td><td>CodeSandbox, Articulate Storyline, Replit, Unity (basic sims)</td></tr>
+              <tr><td><span class="tag-purple">Analyze</span></td><td>Case studies, comparison tools, data exploration</td><td>Tableau, Excel/Sheets labs, Articulate Storyline (branching), Lucidchart</td></tr>
+              <tr><td><span class="tag-amber">Evaluate</span></td><td>Rubric-based peer review, critique frameworks, scenario judgments</td><td>Peer review LMS tools, Articulate Storyline (scenario branching), Twine</td></tr>
+              <tr><td><span class="tag-teal">Create</span></td><td>Project environments, portfolio builders, open-ended tools</td><td>Figma, Blender, Replit, GitHub, portfolio platforms, Unity</td></tr>
+              <tr><td><span class="tag-green">Apply</span> <small>(Psychomotor)</small></td><td>Virtual labs, guided simulations, hands-on practice with feedback</td><td>PhET Interactive Simulations, Labster, OLabs, Unity WebGL (basic sims)</td></tr>
+              <tr><td><span class="tag-teal">Create</span> <small>(Psychomotor)</small></td><td>Learner-created simulations, open-ended 3D environments</td><td>Unity WebGL, Spline, Three.js (WebGL)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7.4 Ready-to-Use Templates -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📐</span>
+        <div>
+          <div class="card-title">7.4 Ready-to-Use Templates</div>
+          <div class="card-subtitle">Ten production-ready templates. Copy, fill in your content, build. Each has structure, field descriptions, and an example.</div>
+        </div>
+      </div>
+      <div class="card-body">
+
+        <!-- T1: Video Lesson -->
+        <div class="template-section t1">
+          <h3>T1: Video Lesson</h3>
+          <p><span class="tag-purple">Gagne's 9 Events</span> <span class="tag-blue">Understand–Apply</span> <span class="tag-teal">Articulate Rise / Camtasia / Vyond</span> <span class="tag-amber">2–4 hours</span></p>
+
+          <h4>Structure</h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Section</th><th>Duration</th><th>What to Fill In</th><th>Production Rules</th></tr></thead>
+              <tbody>
+                <tr><td><strong>1. Hook</strong></td><td>15–30 sec</td><td>A surprising fact, provocative question, or real-world problem related to this topic</td><td>No decorative visuals. Hook must directly connect to the learning objective.</td></tr>
+                <tr><td><strong>2. Objective</strong></td><td>15–30 sec</td><td>"By the end of this lesson, you will be able to [Bloom's verb] [specific outcome]"</td><td>State in learner-facing language. Use conversational tone (Personalization d=0.52).</td></tr>
+                <tr><td><strong>3. Content Chunk 1</strong></td><td>2–4 min</td><td>Core concept explanation. One main idea. Paired visual (diagram, animation, or screen recording).</td><td>Max 4–5 new concepts per chunk. Words + picture (Multimedia d=1.40). Narration over on-screen text (Modality d=1.02).</td></tr>
+                <tr><td><strong>4. Checkpoint 1</strong></td><td>30 sec</td><td>A single question embedded in or immediately after the chunk. "Quick — before we move on, [question]?"</td><td>Answer revealed immediately. Not graded. Purpose: retrieval practice.</td></tr>
+                <tr><td><strong>5. Content Chunk 2</strong></td><td>2–4 min</td><td>Second concept or deeper dive. Builds on Chunk 1.</td><td>Same rules as Chunk 1. If complexity is high, split into Chunk 2a + 2b (Segmenting d=0.79).</td></tr>
+                <tr><td><strong>6. Checkpoint 2</strong></td><td>30 sec</td><td>Second retrieval question. Preferably interleaved — tests both Chunk 1 and Chunk 2.</td><td>Same rules as Checkpoint 1.</td></tr>
+                <tr><td><strong>7. Summary</strong></td><td>30–60 sec</td><td>"Here's what we covered: [point 1], [point 2]. Next up: [preview of next lesson]."</td><td>Signal key points with visual cues (Signaling d=0.52). Connect to next lesson.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="collapsible-toggle" onclick="toggleCollapsible(this)">
+            <span>Example (filled in)</span><span class="arrow">▼</span>
+          </div>
+          <div class="collapsible-content">
+          <div class="template-example">
+            <p><strong>Module:</strong> Intro to Python — Variables & Data Types</p>
+            <p><strong>Hook:</strong> "What if I told you this one line of code — <code>age = "25"</code> — would crash your program, but <code>age = 25</code> works perfectly? The difference matters. Let's see why."</p>
+            <p><strong>Objective:</strong> "By the end of this lesson, you'll be able to <em>assign</em> variables in Python and <em>distinguish</em> between string, integer, and float data types."</p>
+            <p><strong>Chunk 1:</strong> What is a variable? (2 min). Visual: labeled box analogy. Narration over animation. No on-screen text repeating narration.</p>
+            <p><strong>Checkpoint 1:</strong> "Which of these is a valid variable name: <code>2name</code>, <code>my_name</code>, <code>my-name</code>?" → Answer: <code>my_name</code></p>
+            <p><strong>Chunk 2:</strong> Data types — int, float, string (3 min). Visual: color-coded type badges on values. Shows <code>type()</code> function.</p>
+            <p><strong>Checkpoint 2:</strong> "What type is <code>3.14</code>? What type is <code>"hello"</code>?" → float, str</p>
+            <p><strong>Summary:</strong> "Variables store data. Python figures out the type automatically — int for whole numbers, float for decimals, str for text. Next lesson: how to convert between them."</p>
+          </div>
+          </div>
+        </div>
+
+        <!-- T2: Interactive Quiz -->
+        <div class="template-section t2">
+          <h3>T2: Interactive Quiz</h3>
+          <p><span class="tag-green">Formative Assessment</span> <span class="tag-blue">Remember–Apply</span> <span class="tag-teal">H5P / Articulate Storyline / Typeform</span> <span class="tag-amber">1–2 hours</span></p>
+
+          <h4>Structure</h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Field</th><th>What to Fill In</th><th>Rules</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Quiz Title</strong></td><td>[Sub-module name] — Concept Check</td><td>Learner-facing, descriptive</td></tr>
+                <tr><td><strong>Question 1</strong></td><td>Stem: a clear, specific question. 3–4 answer options. One correct. 2–3 distractors. Explanation for each option.</td><td>Every distractor must have a written rationale (why it's wrong). This prevents random guessing and provides learning on wrong answers.</td></tr>
+                <tr><td><strong>Question 2</strong></td><td>Different format than Q1 (e.g., if Q1 is MC, make Q2 drag-drop or fill-in)</td><td>Vary format. Reduces pattern-matching.</td></tr>
+                <tr><td><strong>Question 3–5</strong></td><td>Interleaved — test current AND prior sub-module content</td><td>At least 1 question must reference a prior topic. This is the interleaving requirement (d=0.42).</td></tr>
+                <tr><td><strong>Feedback</strong></td><td>Correct: brief confirmation + why. Incorrect: specific explanation + where to review.</td><td>Immediate. Within 2 seconds. Never just "Wrong" or "Incorrect."</td></tr>
+                <tr><td><strong>Pass Threshold</strong></td><td>For formative: none (learning tool). For mastery gate (T5): 80%.</td><td>Formative quizzes are not graded. They exist to trigger retrieval.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="collapsible-toggle" onclick="toggleCollapsible(this)">
+            <span>Example (filled in)</span><span class="arrow">▼</span>
+          </div>
+          <div class="collapsible-content">
+          <div class="template-example">
+            <p><strong>Quiz:</strong> Variables & Data Types — Concept Check</p>
+            <p><strong>Q1 (Multiple Choice):</strong> What is the value of <code>result</code> after running <code>result = 10 / 3</code>?<br>
+            A) <code>3</code> — Distractor: this is integer division in some languages, but Python 3 returns a float<br>
+            B) <code>3.333...</code> ✓ — Correct: Python 3 division always returns a float<br>
+            C) <code>3.0</code> — Distractor: this would be the result of <code>10 // 3</code> converted to float<br>
+            D) <code>Error</code> — Distractor: division by a non-zero integer is valid</p>
+            <p><strong>Q2 (Fill-in):</strong> Write the Python code to check the type of the variable <code>score</code>.<br>
+            Answer: <code>type(score)</code><br>
+            Feedback if wrong: "The <code>type()</code> function returns the data type. See Chunk 2 of the Variables lesson."</p>
+            <p><strong>Q3 (Interleaved — from prior module):</strong> Which symbol is used for comments in Python?<br>
+            A) <code>//</code> B) <code>#</code> ✓ C) <code>--</code> D) <code>/* */</code><br>
+            Feedback: Correct = "# is Python's comment symbol." Wrong = "Python uses # for single-line comments. You learned this in the Setup module."</p>
+          </div>
+          </div>
+        </div>
+
+        <!-- T3: Worked Example -->
+        <div class="template-section t3">
+          <h3>T3: Worked Example</h3>
+          <p><span class="tag-amber">CLT Worked-Example Effect</span> <span class="tag-green">Apply</span> <span class="tag-teal">Articulate Storyline / Camtasia / Vyond</span> <span class="tag-amber">2–3 hours</span></p>
+
+          <h4>Structure</h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Section</th><th>Duration</th><th>What to Fill In</th><th>Rules</th></tr></thead>
+              <tbody>
+                <tr><td><strong>1. Problem Statement</strong></td><td>30 sec</td><td>State the problem clearly. Show the starting point and what "solved" looks like.</td><td>Use a realistic, domain-specific problem from SME's real-world contexts.</td></tr>
+                <tr><td><strong>2. Step-by-Step Walkthrough</strong></td><td>3–8 min</td><td>Each step: (a) what we're doing, (b) why, (c) the action, (d) the result. Narrate reasoning, not just actions.</td><td>Show every step — no "as you can see, I've already done X." Expertise reversal risk. Annotate visually. Highlight what changed (Signaling d=0.52).</td></tr>
+                <tr><td><strong>3. Key Takeaway</strong></td><td>30 sec</td><td>"The pattern here is: [generalize the approach]. You'll use this same pattern whenever [condition]."</td><td>Generalize beyond the specific example. This is the germane load — productive abstraction.</td></tr>
+                <tr><td><strong>4. "Your Turn" Prompt</strong></td><td>15 sec</td><td>"Now try [similar but slightly different problem]. The steps are the same, but the values change."</td><td>This transitions to Guided Practice (Step 4 of the 9-step module). Not optional — must be stated.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="collapsible-toggle" onclick="toggleCollapsible(this)">
+            <span>Example (filled in)</span><span class="arrow">▼</span>
+          </div>
+          <div class="collapsible-content">
+          <div class="template-example">
+            <p><strong>Problem:</strong> "We have a list of student scores: <code>[85, 92, 78, 95, 88]</code>. We need to calculate the average and determine if the class performed above or below the passing threshold of 80."</p>
+            <p><strong>Step 1:</strong> "First, I need the sum. I'll use Python's built-in <code>sum()</code> function." [shows code, highlights output: 438]</p>
+            <p><strong>Step 2:</strong> "Now divide by the count. I need <code>len()</code> to get the number of scores." [shows code, highlights output: 87.6]</p>
+            <p><strong>Step 3:</strong> "Compare to the threshold. I'll use an if/else statement." [shows code, highlights output: "Above passing"]</p>
+            <p><strong>Key Takeaway:</strong> "The pattern is: aggregate → calculate → compare. This same pattern works for any dataset — sales figures, survey results, sensor readings."</p>
+            <p><strong>Your Turn:</strong> "Now try it with <code>[72, 65, 90, 81, 77]</code>. Same steps, different numbers. You'll find the average is 77.0 — below passing. What message does your program print?"</p>
+          </div>
+          </div>
+        </div>
+
+        <!-- T4: Scenario Lab -->
+        <div class="template-section t4">
+          <h3>T4: Scenario Lab</h3>
+          <p><span class="tag-purple">Experiential Learning</span> <span class="tag-green">Apply–Analyze</span> <span class="tag-teal">Articulate Storyline / Twine / BranchTrack</span> <span class="tag-amber">4–8 hours</span></p>
+
+          <h4>Structure</h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Field</th><th>What to Fill In</th><th>Rules</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Scenario Title</strong></td><td>Descriptive name (e.g., "Server Outage: Diagnose & Respond")</td><td>Must sound like a real situation, not a textbook exercise</td></tr>
+                <tr><td><strong>Context</strong></td><td>1–2 paragraphs setting the scene. Who are you? What just happened? What's at stake?</td><td>Use SME's real-world contexts. Specific details (names, numbers, systems) increase authenticity.</td></tr>
+                <tr><td><strong>Decision Point 1</strong></td><td>The situation presents a choice. 2–4 options. Each option leads to a consequence (not just right/wrong).</td><td>Every option must be plausible. The "wrong" options should reflect common real-world mistakes the SME has seen.</td></tr>
+                <tr><td><strong>Consequence A / B / C</strong></td><td>What happens after each choice. Does the situation get better, worse, or change in an unexpected way?</td><td>Consequences must be realistic. Not "Incorrect!" but "You restarted the service, but 30 seconds later it crashed again because the underlying database connection is still broken."</td></tr>
+                <tr><td><strong>Decision Point 2</strong></td><td>New choice based on the new situation. 2–4 options.</td><td>At least one branch should lead to a recovery path. No dead ends without learning.</td></tr>
+                <tr><td><strong>Debrief</strong></td><td>"Here's what an expert would do and why." Explain the reasoning, not just the correct path.</td><td>Show the expert's thinking process. Connect back to the concept taught in the module.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="collapsible-toggle" onclick="toggleCollapsible(this)">
+            <span>Example (filled in)</span><span class="arrow">▼</span>
+          </div>
+          <div class="collapsible-content">
+          <div class="template-example">
+            <p><strong>Title:</strong> Patient Triage: Chest Pain in the ER</p>
+            <p><strong>Context:</strong> "You're the triage nurse on a busy Friday night. A 55-year-old male walks in clutching his chest, sweating, and says the pain started 20 minutes ago while climbing stairs. His skin is pale and clammy."</p>
+            <p><strong>Decision 1:</strong> What do you do first?<br>
+            A) Take his full medical history and vital signs<br>
+            B) Immediately alert the attending physician and move him to a treatment bay<br>
+            C) Ask him to sit in the waiting room until a bed is available<br>
+            D) Give him an aspirin and water</p>
+            <p><strong>If B (expert path):</strong> "The attending orders an EKG immediately. It shows ST elevation — this is a STEMI. Cardiology is activated. Time is muscle." → Decision 2 about next steps.<br>
+            <strong>If A:</strong> "While you're asking about his family history, 5 minutes pass. He's deteriorating. A colleague notices and calls the physician." → Decision 2 but starting from a worse position.<br>
+            <strong>If C:</strong> "Critical fail. Chest pain + diaphoresis in a 55M is a cardiac event until proven otherwise. He collapses in the waiting room 3 minutes later." → Immediate debrief on why this was dangerous.</p>
+            <p><strong>Debrief:</strong> "In emergency triage, presentation trumps procedure. Chest pain with diaphoresis in a middle-aged male gets immediate physician notification — you don't finish paperwork first. The expert path isn't about skipping steps, it's about parallel processing: alert the physician while the team gets vitals."</p>
+          </div>
+          </div>
+        </div>
+
+        <!-- T5: Mastery Gate -->
+        <div class="template-section t5">
+          <h3>T5: Mastery Gate</h3>
+          <p><span class="tag-red">Mastery Learning</span> <span class="tag-green">Apply–Analyze</span> <span class="tag-teal">H5P / Articulate Storyline / LMS Quiz Engine</span> <span class="tag-amber">2–3 hours</span></p>
+
+          <h4>Structure</h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Field</th><th>What to Fill In</th><th>Rules</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Gate Title</strong></td><td>[Module Name] — Mastery Gate</td><td>Signals finality. This is a gate, not a quiz.</td></tr>
+                <tr><td><strong>Objectives Tested</strong></td><td>List the specific learning objectives this gate assesses</td><td>Must cover ALL objectives from the module. No objective left untested.</td></tr>
+                <tr><td><strong>Questions (8–12)</strong></td><td>Multiple question types. At least: 2 Remember, 2 Understand, 2 Apply, 1 Analyze (or higher). At least 2 questions must be in a new context (transfer test).</td><td>Every question mapped to a specific objective. No orphan questions. Interleaved: at least 2 questions from prior modules.</td></tr>
+                <tr><td><strong>Pass Threshold</strong></td><td>80% minimum. Every objective must have at least 1 correct answer (can't pass by acing one topic and failing another).</td><td>Binary: pass/fail. No partial credit on the gate itself.</td></tr>
+                <tr><td><strong>Remediation Path</strong></td><td>For each failed objective, specify: which sub-module to review, which worked example to re-watch, which practice task to retry.</td><td>Never just "review and try again." Specific remediation.</td></tr>
+                <tr><td><strong>Retry Policy</strong></td><td>How soon can the learner retry? Are questions the same or different?</td><td>Recommended: wait 24 hours (spaced repetition benefit). New question variants on retry, not the same questions.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="collapsible-toggle" onclick="toggleCollapsible(this)">
+            <span>Example (filled in)</span><span class="arrow">▼</span>
+          </div>
+          <div class="collapsible-content">
+          <div class="template-example">
+            <p><strong>Gate:</strong> Variables & Data Types — Mastery Gate</p>
+            <p><strong>Objectives tested:</strong> (1) Assign variables, (2) Distinguish int/float/str, (3) Use <code>type()</code>, (4) Identify valid variable names</p>
+            <p><strong>Q1 (Remember, Obj 2):</strong> What data type is <code>"42"</code>? → str (it's in quotes)<br>
+            <strong>Q2 (Understand, Obj 2):</strong> Why does <code>5 + "3"</code> cause an error? → Can't concatenate int and str<br>
+            <strong>Q3 (Apply, Obj 1):</strong> Write code to store your age in a variable and print it.<br>
+            <strong>Q4 (Apply, Obj 3):</strong> What does <code>type(3.0)</code> return? → <code>&lt;class 'float'&gt;</code><br>
+            <strong>Q5 (Analyze, Obj 4):</strong> Which variable names will cause errors: <code>my-var</code>, <code>_private</code>, <code>class</code>, <code>score2</code>? → <code>my-var</code> (hyphen) and <code>class</code> (keyword)<br>
+            <strong>Q6 (Transfer, new context):</strong> A temperature sensor returns <code>"23.5"</code> as a string. Write code to convert it to a number and check its type. → <code>type(float("23.5"))</code><br>
+            <strong>Q7–Q8 (Interleaved):</strong> Questions from prior module (Python setup/comments)</p>
+            <p><strong>Pass:</strong> 80% (7/8 correct minimum). Must get at least 1 correct per objective.<br>
+            <strong>Remediation:</strong> Fail Obj 2? → Re-watch Chunk 2 (data types), retry Practice Task 2. Fail Obj 4? → Review naming rules card, retry worked example naming exercise.<br>
+            <strong>Retry:</strong> 24 hours. New question variants provided.</p>
+          </div>
+          </div>
+        </div>
+
+        <!-- T6: Reflection Prompt -->
+        <div class="template-section t6">
+          <h3>T6: Reflection Prompt</h3>
+          <p><span class="tag-teal">SRL Self-Reflection</span> <span class="tag-amber">Evaluate</span> <span class="tag-teal">Any LMS journal / Google Forms</span> <span class="tag-amber">30 min</span></p>
+
+          <h4>Structure</h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Field</th><th>What to Fill In</th><th>Rules</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Prompt Title</strong></td><td>[Module Name] — Reflection</td><td>Signals it's about thinking, not producing</td></tr>
+                <tr><td><strong>Question 1: What Worked</strong></td><td>"What was the most useful thing you learned in this module? How does it connect to something you already knew?"</td><td>Must connect new learning to prior knowledge (activating prior knowledge is cognitivist best practice)</td></tr>
+                <tr><td><strong>Question 2: What Failed</strong></td><td>"What was the hardest part? Where did you get stuck? What would you do differently next time?"</td><td>Normalize struggle. This is the SRL self-reflection phase (Zimmerman, Ch 2).</td></tr>
+                <tr><td><strong>Question 3: What Transfers</strong></td><td>"Where else could you apply what you learned? Describe a situation outside this course where this concept would be useful."</td><td>Far-transfer question. Forces abstraction. This is the highest-value reflection question.</td></tr>
+                <tr><td><strong>Response Format</strong></td><td>Open text. Minimum 2–3 sentences per question. Not graded for correctness.</td><td>Don't grade reflection. Grade completion only. Grading reflection kills authenticity.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="collapsible-toggle" onclick="toggleCollapsible(this)">
+            <span>Example (filled in)</span><span class="arrow">▼</span>
+          </div>
+          <div class="collapsible-content">
+          <div class="template-example">
+            <p><strong>Reflection: Variables & Data Types</strong></p>
+            <p><strong>Q1:</strong> "You learned about Python's data types today. How is this similar to or different from how you think about types in everyday life? (For example, a phone number isn't really a number you'd do math with — it's more like text.)"</p>
+            <p><strong>Q2:</strong> "Where did you get stuck? Was it the syntax, the concept of types, or something else? What would help you understand it better?"</p>
+            <p><strong>Q3:</strong> "Imagine you're building a simple expense tracker. What variables would you need, and what data type would each one be? List at least 3 variables with their types."</p>
+          </div>
+          </div>
+        </div>
+
+        <!-- T7: Spaced Review -->
+        <div class="template-section t7">
+          <h3>T7: Spaced Review</h3>
+          <p><span class="tag-blue">Spaced Repetition</span> <span class="tag-blue">Remember–Apply</span> <span class="tag-teal">Anki / H5P / Quizlet / LMS Quiz</span> <span class="tag-amber">30–60 min</span></p>
+
+          <h4>Structure</h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Field</th><th>What to Fill In</th><th>Rules</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Review Title</strong></td><td>[Prior Module Name] — Spaced Review</td><td>Appears 1–3 modules after the original content</td></tr>
+                <tr><td><strong>Timing</strong></td><td>When to schedule: Review 1 = next module, Review 2 = 2 modules later, Review 3 = 4 modules later</td><td>Follows the expanding interval pattern (Ebbinghaus forgetting curve, Ch 8)</td></tr>
+                <tr><td><strong>Questions (3–5)</strong></td><td>Same concepts as the original module but in a NEW context. Not the same questions recycled.</td><td>Must be new context. Testing recall in the original context only proves recognition, not understanding.</td></tr>
+                <tr><td><strong>Interleaving</strong></td><td>Mix questions from multiple prior modules, not just one</td><td>At least 2 different source modules represented (interleaving d=0.42)</td></tr>
+                <tr><td><strong>Difficulty</strong></td><td>Slightly harder than original. Add one Bloom's level up.</td><td>If original was Remember, review should be Understand. If original was Apply, review should include Analyze.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="collapsible-toggle" onclick="toggleCollapsible(this)">
+            <span>Example (filled in)</span><span class="arrow">▼</span>
+          </div>
+          <div class="collapsible-content">
+          <div class="template-example">
+            <p><strong>Spaced Review:</strong> Appearing in Module 4 (originally taught in Module 1)</p>
+            <p><strong>Q1 (from Module 1 — Variables, upgraded from Remember to Understand):</strong><br>
+            "A colleague's code has <code>price = "19.99"</code>. They're trying to calculate <code>total = price * 3</code> and getting an error. Explain why and show the fix." → It's a string, not a float. Fix: <code>price = 19.99</code> or <code>float("19.99")</code>.</p>
+            <p><strong>Q2 (from Module 2 — Conditionals, interleaved):</strong><br>
+            "Write a conditional that prints 'Discount applied' if <code>total</code> is over 100, otherwise prints 'No discount'."</p>
+            <p><strong>Q3 (from Module 1 — Variables, new context):</strong><br>
+            "A weather API returns the temperature as <code>"72"</code> (a string). You need to check if it's above 80 degrees. What's wrong with <code>if temp > 80:</code> and how do you fix it?"</p>
+          </div>
+          </div>
+        </div>
+
+        <!-- T8: Mini-Project Brief -->
+        <div class="template-section t8">
+          <h3>T8: Mini-Project Brief</h3>
+          <p><span class="tag-pink">Constructivist / Authentic Assessment</span> <span class="tag-teal">Create</span> <span class="tag-teal">GitHub / Figma / Replit / Portfolio</span> <span class="tag-amber">1–2 hours to create brief</span></p>
+
+          <h4>Structure</h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Field</th><th>What to Fill In</th><th>Rules</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Project Title</strong></td><td>Descriptive, portfolio-worthy name</td><td>Something the learner would be proud to show</td></tr>
+                <tr><td><strong>Scenario</strong></td><td>1–2 paragraphs: who the client/user is, what they need, why it matters</td><td>Must be a realistic scenario from the SME's domain. Not "build X" but "a small business owner needs Y because Z."</td></tr>
+                <tr><td><strong>Requirements</strong></td><td>3–5 specific, testable requirements the deliverable must meet</td><td>Numbered. Each requirement maps to a specific learning objective from the module.</td></tr>
+                <tr><td><strong>Constraints</strong></td><td>What the learner cannot use or must work within (e.g., "no external libraries," "must be responsive," "under 500 words")</td><td>Constraints force creative problem-solving within boundaries (desirable difficulty).</td></tr>
+                <tr><td><strong>Deliverable</strong></td><td>Exactly what the learner submits (code file, document, design file, video, etc.)</td><td>Be specific about format. "Submit a Python file" not "submit your work."</td></tr>
+                <tr><td><strong>Rubric</strong></td><td>4–5 criteria with 3 levels (Developing / Proficient / Exemplary)</td><td>Criteria must align to requirements. One criterion per requirement minimum.</td></tr>
+                <tr><td><strong>Peer Review (optional)</strong></td><td>If enabled: how many peers review, what they evaluate, rubric they use</td><td>Peer review rubric should be simpler than the main rubric (3 criteria max).</td></tr>
+                <tr><td><strong>Estimated Time</strong></td><td>How long the project should take a proficient learner</td><td>State explicitly. Helps learners plan and manage expectations.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="collapsible-toggle" onclick="toggleCollapsible(this)">
+            <span>Example (filled in)</span><span class="arrow">▼</span>
+          </div>
+          <div class="collapsible-content">
+          <div class="template-example">
+            <p><strong>Project:</strong> Grade Calculator Tool</p>
+            <p><strong>Scenario:</strong> "Ms. Rodriguez teaches 5th grade and has 30 students. She's tired of calculating final grades by hand. She needs a Python program where she can enter each student's quiz scores and get their average, letter grade, and a flag for students who need extra help (below 70%)."</p>
+            <p><strong>Requirements:</strong><br>
+            1. Store at least 5 quiz scores per student using variables (covers: variable assignment)<br>
+            2. Calculate the numerical average (covers: arithmetic with variables)<br>
+            3. Convert to letter grade using conditionals: A≥90, B≥80, C≥70, D≥60, F&lt;60 (covers: if/elif/else)<br>
+            4. Print a warning message for averages below 70% (covers: conditional output)<br>
+            5. Code must include comments explaining each section (covers: documentation)</p>
+            <p><strong>Constraints:</strong> Use only variables, arithmetic, and conditionals (no loops, no lists, no functions yet).</p>
+            <p><strong>Deliverable:</strong> A single Python file (.py) that runs and produces correct output for the sample data provided.</p>
+            <p><strong>Rubric:</strong><br>
+            — Correct calculations (Developing: some errors / Proficient: all correct / Exemplary: all correct + handles edge cases)<br>
+            — Conditional logic (Developing: missing branches / Proficient: all branches work / Exemplary: efficient logic, no redundancy)<br>
+            — Code clarity (Developing: no comments / Proficient: comments on each section / Exemplary: clear variable names + comments)<br>
+            — Deliverable completeness (Developing: missing parts / Proficient: all requirements met / Exemplary: exceeds requirements)</p>
+            <p><strong>Estimated Time:</strong> 45–60 minutes for a proficient learner.</p>
+          </div>
+          </div>
+        </div>
+
+        <!-- T9: VR / Interactive Simulation Lab -->
+        <div class="template-section t9">
+          <h3>T9: VR / Interactive Simulation Lab</h3>
+          <p><span class="tag-purple">Embodied Cognition, Experiential Learning, Procedural Memory (Fitts &amp; Posner)</span> <span class="tag-green">Apply / Analyze</span> <small>(psychomotor: Guided Response through Complex Overt Response)</small> <span class="tag-teal">Three.js / Unity WebGL / Spline / Labster / PhET</span> <span class="tag-amber">15–35 minutes</span></p>
+
+          <h4>Structure</h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Step</th><th>Duration</th><th>What to Fill In</th><th>Production Rules</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Step 1: Briefing</strong></td><td>2–3 min</td><td>Scenario context, learning objectives, safety notes</td><td>Must establish real-world context; reference Ch 8.8 mirror neuron pathway</td></tr>
+                <tr><td><strong>Step 2: Demo / Exploration</strong></td><td>3–5 min</td><td>Free exploration or guided tour of the 3D/simulation environment</td><td>Learner sees expert performance before attempting; camera controls explained</td></tr>
+                <tr><td><strong>Step 3: Guided Practice</strong></td><td>5–10 min</td><td>Structured task with hints, real-time feedback, parameter adjustment</td><td>Guidance fading: full hints → partial → none; scaffold per cognitive load budget</td></tr>
+                <tr><td><strong>Step 4: Independent Task</strong></td><td>5–10 min</td><td>Open task with success criteria, no hints</td><td>Must include error detection and recovery; learner applies without scaffolding</td></tr>
+                <tr><td><strong>Step 5: Debrief</strong></td><td>3–5 min</td><td>Performance summary, comparison to expert, reflection prompts</td><td>Show metrics (time, accuracy, error count); connect to procedural memory encoding</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="collapsible-toggle" onclick="toggleCollapsible(this)">
+            <span>Example (filled in)</span><span class="arrow">▼</span>
+          </div>
+          <div class="collapsible-content">
+          <div class="template-example">
+            <p><strong>Module:</strong> Robotics — Forward Kinematics Lab</p>
+            <p><strong>Briefing:</strong> "You're a robotics technician at a manufacturing plant. The Fanuc M-20iA arm needs recalibration after a collision event. Your task: adjust the Denavit-Hartenberg parameters so the end-effector reaches all 8 weld points within tolerance. Safety note: the arm is in simulation mode — no physical risk — but treat every action as if it were real."</p>
+            <p><strong>Demo / Exploration:</strong> Explore the 3D factory environment. Rotate the camera around the robotic arm, conveyor belt, car body, and 8 highlighted weld points. Watch an expert path where the arm successfully calibrates and completes all welds. Camera controls: left-click drag to orbit, scroll to zoom, right-click drag to pan.</p>
+            <p><strong>Guided Practice:</strong> Adjust the d2 DH parameter using a slider. The simulation shows the arm's new position in real-time, and an error meter shows deviation from the target weld point. Hints appear: "Try decreasing d2 by 5mm increments." After each adjustment, the error value updates. Guidance fades after 3 successful sub-adjustments.</p>
+            <p><strong>Independent Task:</strong> Achieve &lt;0.5mm error on all 8 weld points without any guidance hints. The error meter is still visible, but no directional hints appear. If the learner makes 3 consecutive adjustments that increase error, a "Check your approach" warning appears (error detection).</p>
+            <p><strong>Debrief:</strong> Score breakdown: Time taken (vs. expert: 4 min 22 sec), Accuracy (% of weld points within tolerance), Error count (number of adjustments that increased error). Comparison overlay: learner's path vs. expert's path on the 3D model. Reflection prompts: "What parameter had the biggest impact on accuracy?" "How did your strategy change after the hints disappeared?"</p>
+          </div>
+          </div>
+        </div>
+
+        <!-- T10: Psychomotor Practice Session -->
+        <div class="template-section t10">
+          <h3>T10: Psychomotor Practice Session</h3>
+          <p><span class="tag-purple">Embodied Cognition, Procedural Memory (Fitts &amp; Posner 3-stage model)</span> <span class="tag-green">Apply</span> <small>(Psychomotor: Mechanism through Adaptation)</small> <span class="tag-teal">Video recording + rubric, or VR simulator</span> <span class="tag-amber">20–40 minutes</span></p>
+
+          <h4>Structure</h4>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead><tr><th>Step</th><th>Duration</th><th>What to Fill In</th><th>Production Rules</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Step 1: Video Demo</strong></td><td>3–5 min</td><td>Expert performance of the skill at normal speed + slow motion</td><td>Show visible hands/tools; goal-directed actions only (Ch 8.8 mirror neuron activation)</td></tr>
+                <tr><td><strong>Step 2: Decomposition</strong></td><td>5 min</td><td>Break skill into sub-steps with checkpoints</td><td>Map to Dave's taxonomy levels; max 4–5 sub-skills per session</td></tr>
+                <tr><td><strong>Step 3: Guided Repetition</strong></td><td>10–15 min</td><td>Practice each sub-step with feedback</td><td>Fitts &amp; Posner Cognitive stage: high WM load, frequent errors expected</td></tr>
+                <tr><td><strong>Step 4: Whole-Skill Integration</strong></td><td>5–10 min</td><td>Chain sub-steps into complete performance</td><td>Fitts &amp; Posner Associative stage: patterns emerging, errors decreasing</td></tr>
+                <tr><td><strong>Step 5: Self-Assessment</strong></td><td>5 min</td><td>Video review + rubric self-scoring + reflection</td><td>Learner compares own performance to expert; identifies gaps for next session</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="collapsible-toggle" onclick="toggleCollapsible(this)">
+            <span>Example (filled in)</span><span class="arrow">▼</span>
+          </div>
+          <div class="collapsible-content">
+          <div class="template-example">
+            <p><strong>Module:</strong> Surgical Skills — Interrupted Suturing</p>
+            <p><strong>Dave's Taxonomy Mapping:</strong></p>
+            <ul>
+              <li><strong>Imitation (Level 1):</strong> Learner watches expert perform interrupted suture on synthetic skin pad</li>
+              <li><strong>Manipulation (Level 2):</strong> Learner performs each sub-step individually with verbal cues from the video</li>
+              <li><strong>Precision (Level 3):</strong> Learner chains sub-steps together, aiming for correct technique</li>
+              <li><strong>Articulation (Level 4):</strong> Learner performs complete suture sequence smoothly, self-correcting errors</li>
+            </ul>
+            <p><strong>Video Demo:</strong> Expert surgeon performs 3 interrupted sutures on a synthetic skin pad. Camera shows close-up of hands at normal speed (90 sec), then slow-motion replay of needle loading, tissue bite, instrument tie, and knot squaring (2 min). Hands and instruments always visible.</p>
+            <p><strong>Decomposition:</strong> Skill broken into 4 sub-steps: (1) Needle loading — grasp needle at 2/3 distance from point, (2) Tissue bite — enter skin at 90°, drive through tissue at consistent depth, (3) Instrument tie — perform square knot using needle holder, (4) Knot securing — lay knot flat, apply appropriate tension. Each sub-step has a checkpoint: correct hand position, tissue entry angle, knot type, final tension.</p>
+            <p><strong>Guided Repetition:</strong> Learner practices each sub-step separately. After each attempt, they review their own video against the checkpoint rubric. Expected: high error rate at this stage (Fitts &amp; Posner Cognitive stage). Video comparison tool shows learner's attempt side-by-side with expert.</p>
+            <p><strong>Whole-Skill Integration:</strong> Learner performs complete interrupted suture from needle loading through knot securing without stopping. Expected: patterns emerging, smoother transitions, fewer errors (Fitts &amp; Posner Associative stage). Timer running but not pressured.</p>
+            <p><strong>Self-Assessment:</strong> Learner reviews their final performance video. Scores themselves on: (1) Needle grasp position, (2) Tissue entry angle, (3) Knot type (square vs. granny), (4) Knot tension, (5) Overall smoothness. Identifies top 2 areas for improvement in next session.</p>
+          </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 7.5 Tool Selection Decision Tree -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🌳</span>
+        <div>
+          <div class="card-title">7.5 Tool Selection Decision Tree</div>
+          <div class="card-subtitle">Follow this flowchart from content type + Bloom's level + cognitive load → recommended tool + template.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="flow-container" style="justify-content: center;">
+          <div class="flow-step flow-step-gradient">
+            <strong>Step 1:</strong><br>Identify Content Type<br>
+            <small>(Video / Interactive / Simulation / Quiz / etc.)</small>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step flow-step-gradient">
+            <strong>Step 2:</strong><br>Determine Bloom's Level<br>
+            <small>(Remember → Create)</small>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step flow-step-gradient">
+            <strong>Step 3:</strong><br>Classify Cognitive Load<br>
+            <small>(Low / Medium / High)</small>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <strong>Step 4:</strong><br>Select Tool from Library<br>
+            <small>(Section 7.1–7.3)</small>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <strong>Step 5:</strong><br>Apply Template<br>
+            <small>(Section 7.4)</small>
+          </div>
+        </div>
+
+        <h4>Quick Selection Examples</h4>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead><tr><th>Scenario</th><th>Content Type</th><th>Bloom's</th><th>Load</th><th>Tool</th><th>Template</th></tr></thead>
+            <tbody>
+              <tr><td>Teach new vocabulary</td><td>Flashcards</td><td>Remember</td><td>Low</td><td>Anki / Quizlet</td><td>T7: Spaced Review</td></tr>
+              <tr><td>Explain a concept</td><td>Video + visual</td><td>Understand</td><td>Medium</td><td>Articulate Rise / Vyond</td><td>T1: Video Lesson</td></tr>
+              <tr><td>Practice a procedure</td><td>Interactive exercise</td><td>Apply</td><td>Medium</td><td>CodeSandbox / Storyline</td><td>T3: Worked Example</td></tr>
+              <tr><td>Real-world decision-making</td><td>Branching scenario</td><td>Analyze</td><td>High</td><td>Articulate Storyline / Twine</td><td>T4: Scenario Lab</td></tr>
+              <tr><td>Build a portfolio project</td><td>Open-ended project</td><td>Create</td><td>High</td><td>Figma / Replit / GitHub</td><td>T8: Mini-Project Brief</td></tr>
+              <tr><td>Check mastery before advancing</td><td>Comprehensive quiz</td><td>Apply–Analyze</td><td>Medium</td><td>H5P / Storyline</td><td>T5: Mastery Gate</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- APPENDIX A: ILD Research Quick Reference                     -->
+  <!-- ============================================================ -->
+  <div class="section" id="section-A">
+    <div class="section-header">
+      <div class="section-number">A</div>
+      <div>
+        <h2 class="section-title">Appendix A: ILD Research Quick Reference</h2>
+        <p class="section-desc">Condensed lookup tables for quick reference during pipeline execution.</p>
+      </div>
+    </div>
+
+    <h3>A.1 Effect Size Reference Table</h3>
+    <div class="data-table-container">
+      <table class="data-table">
+        <thead><tr><th>Intervention</th><th>Effect Size (d)</th><th>Strength</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><td>Multimedia (words + pictures)</td><td>1.40</td><td>Very Large</td><td>Mayer, Ch 8</td></tr>
+          <tr><td>Temporal Contiguity</td><td>1.22</td><td>Very Large</td><td>Mayer, Ch 8</td></tr>
+          <tr><td>Spatial Contiguity</td><td>1.12</td><td>Very Large</td><td>Mayer, Ch 8</td></tr>
+          <tr><td>Coherence</td><td>0.86</td><td>Large</td><td>Mayer, Ch 8</td></tr>
+          <tr><td>Pre-Training</td><td>0.85</td><td>Large</td><td>Mayer, Ch 8</td></tr>
+          <tr><td>Self-efficacy (Social Learning)</td><td>0.92</td><td>Very Large</td><td>Bandura, Ch 2</td></tr>
+          <tr><td>Mastery Learning</td><td>1.0+</td><td>Very Large</td><td>Bloom, Ch 12</td></tr>
+          <tr><td>Autonomy-supportive environments</td><td>0.80</td><td>Large</td><td>SDT, Ch 5</td></tr>
+          <tr><td>Formative Assessment</td><td>0.40–0.70</td><td>Medium–Large</td><td>Black & Wiliam, Ch 6</td></tr>
+          <tr><td>Spaced Repetition</td><td>0.50–0.70</td><td>Medium–Large</td><td>Ebbinghaus, Ch 8</td></tr>
+          <tr><td>Retrieval Practice</td><td>0.65</td><td>Medium</td><td>Roediger, Ch 8</td></tr>
+          <tr><td>SRL Interventions</td><td>0.61</td><td>Medium</td><td>Zimmerman, Ch 2</td></tr>
+          <tr><td>Interleaving</td><td>0.42</td><td>Medium</td><td>Rohrer, Ch 8</td></tr>
+          <tr><td>Desirable Difficulties (combined)</td><td>0.50–0.70</td><td>Medium–Large</td><td>Bjork, Ch 8</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><small>Interpretation: d ≥ 0.40 = educationally significant (Hattie); 0.20 = small, 0.50 = medium, 0.80 = large (Cohen).</small></p>
+
+    <h3>A.2 Bloom's 4×6 Matrix (Quick Reference)</h3>
+    <div class="data-table-container">
+      <table class="data-table">
+        <thead><tr><th></th><th>Factual</th><th>Conceptual</th><th>Procedural</th><th>Metacognitive</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Remember</strong></td><td>List definitions</td><td>Recognize categories</td><td>Recall steps</td><td>Identify strategies</td></tr>
+          <tr><td><strong>Understand</strong></td><td>Describe facts</td><td>Explain concepts</td><td>Summarize procedures</td><td>Reflect on approach</td></tr>
+          <tr><td><strong>Apply</strong></td><td>Use facts in context</td><td>Apply concepts to examples</td><td>Execute procedures</td><td>Use strategies</td></tr>
+          <tr><td><strong>Analyze</strong></td><td>Compare facts</td><td>Differentiate concepts</td><td>Break down procedures</td><td>Evaluate strategies</td></tr>
+          <tr><td><strong>Evaluate</strong></td><td>Judge reliability</td><td>Assess conceptual models</td><td>Critique procedures</td><td>Self-assess approach</td></tr>
+          <tr><td><strong>Create</strong></td><td>Compile information</td><td>Design new models</td><td>Develop new procedures</td><td>Plan learning path</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>A.3 Mayer's 12 Principles (One-Line Reference)</h3>
+    <div class="data-table-container">
+      <table class="data-table">
+        <thead><tr><th>Category</th><th>Principle</th><th>d</th><th>One-Line Rule</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="5">Reduce Extraneous</td><td>Coherence</td><td>0.86</td><td>Remove anything that doesn't serve learning</td></tr>
+          <tr><td>Signaling</td><td>0.52</td><td>Highlight what matters</td></tr>
+          <tr><td>Redundancy</td><td>0.72</td><td>Don't narrate and display identical text</td></tr>
+          <tr><td>Spatial Contiguity</td><td>1.12</td><td>Keep words near their pictures</td></tr>
+          <tr><td>Temporal Contiguity</td><td>1.22</td><td>Present narration and visuals simultaneously</td></tr>
+          <tr><td rowspan="3">Manage Essential</td><td>Segmenting</td><td>0.79</td><td>Break complex content into learner-paced chunks</td></tr>
+          <tr><td>Pre-Training</td><td>0.85</td><td>Teach key terms before the main lesson</td></tr>
+          <tr><td>Modality</td><td>1.02</td><td>Explain graphics with narration, not text</td></tr>
+          <tr><td rowspan="4">Foster Generative</td><td>Multimedia</td><td>1.40</td><td>Words + pictures, not words alone</td></tr>
+          <tr><td>Personalization</td><td>0.52</td><td>Use conversational style</td></tr>
+          <tr><td>Voice</td><td>0.69</td><td>Use a friendly human voice</td></tr>
+          <tr><td>Embodiment</td><td>0.36</td><td>Use human-like gestures in agents</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>A.4 ARCS Strategy Quick Checklist</h3>
+    <div class="grid-2">
+      <div>
+        <h4>Attention</h4>
+        <ul>
+          <li>Begin with a surprising fact, question, or problem</li>
+          <li>Vary content format (video, text, interactive, visual)</li>
+          <li>Use concrete examples before abstractions</li>
+        </ul>
+        <h4>Relevance</h4>
+        <ul>
+          <li>Connect to learner's existing goals or experience</li>
+          <li>Show real-world application immediately</li>
+          <li>Use the learner's professional context</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Confidence</h4>
+        <ul>
+          <li>Start with achievable tasks, then increase difficulty</li>
+          <li>Provide clear success criteria</li>
+          <li>Offer practice with immediate feedback before assessment</li>
+        </ul>
+        <h4>Satisfaction</h4>
+        <ul>
+          <li>Natural consequences of mastery (not arbitrary rewards)</li>
+          <li>Display progress and achievements</li>
+          <li>Connect completion to real outcomes</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- APPENDIX B: Template Pack Summary                            -->
+  <!-- ============================================================ -->
+  <div class="section" id="section-B">
+    <div class="section-header">
+      <div class="section-number">B</div>
+      <div>
+        <h2 class="section-title">Appendix B: Complete Template Pack</h2>
+        <p class="section-desc">Summary of all templates referenced throughout the pipeline, with stage and section links.</p>
+      </div>
+    </div>
+    <div class="data-table-container">
+      <table class="data-table">
+        <thead><tr><th>Template</th><th>Stage</th><th>Section</th><th>Used By</th></tr></thead>
+        <tbody>
+          <tr><td>SME Input Template</td><td>Stage 1</td><td>1.1</td><td>SME</td></tr>
+          <tr><td>SME Onboarding Guide</td><td>Stage 1</td><td>1.2</td><td>SME</td></tr>
+          <tr><td>Quality Gate 0 Checklist</td><td>Stage 1</td><td>Gate 0</td><td>Pipeline Lead</td></tr>
+          <tr><td>AI Output Document</td><td>Stage 2</td><td>Output Spec</td><td>AI System</td></tr>
+          <tr><td>SME Review Checklist</td><td>Stage 3</td><td>3.1</td><td>SME</td></tr>
+          <tr><td>SME Feedback Template</td><td>Stage 3</td><td>3.2</td><td>SME</td></tr>
+          <tr><td>Quality Gate 1 Checklist</td><td>Stage 3</td><td>Gate 1</td><td>Pipeline Lead</td></tr>
+          <tr><td>Content Creator Brief</td><td>Stage 4</td><td>4.1</td><td>Content Creator</td></tr>
+          <tr><td>Mayer's Principles Checklist</td><td>Stage 4</td><td>4.2</td><td>Content Creator</td></tr>
+          <tr><td>Task Review Feedback (SME Loop)</td><td>Stage 4</td><td>4.3</td><td>SME + Content Creator</td></tr>
+          <tr><td>Quality Gate 2 Checklist</td><td>Stage 4</td><td>Gate 2</td><td>Pipeline Lead</td></tr>
+          <tr><td>ILD QC Rubric (9 Dimensions)</td><td>Stage 5</td><td>5.1</td><td>ILD Reviewer</td></tr>
+          <tr><td>Quality Gate 3 Checklist</td><td>Stage 5</td><td>Gate 3</td><td>ILD Reviewer</td></tr>
+          <tr><td>Final SME Review Checklist</td><td>Stage 6</td><td>6.1</td><td>SME</td></tr>
+          <tr><td>Quality Gate 4 Checklist</td><td>Stage 6</td><td>Gate 4</td><td>Pipeline Lead</td></tr>
+          <tr><td>10 Ready-to-Use Content Templates (T1–T10)</td><td>Stage 4</td><td>7.4</td><td>Content Creator</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- APPENDIX C: Quality Gate Summary Card                        -->
+  <!-- ============================================================ -->
+  <div class="section" id="section-C">
+    <div class="section-header">
+      <div class="section-number">C</div>
+      <div>
+        <h2 class="section-title">Appendix C: Quality Gate Summary Card</h2>
+        <p class="section-desc">Single-page reference — all 5 quality gates at a glance.</p>
+      </div>
+    </div>
+    <div class="data-table-container">
+      <table class="data-table">
+        <thead><tr><th>Gate</th><th>Location</th><th>Checked By</th><th>Key Criteria</th><th>Pass Rule</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Gate 0</strong></td><td>After Stage 1</td><td>Pipeline Lead</td><td>SME dump completeness (6 items)</td><td>ALL items checked</td></tr>
+          <tr><td><strong>Gate 1</strong></td><td>After Stage 3</td><td>SME</td><td>AI output accuracy + alignment (6 items)</td><td>ALL items passed</td></tr>
+          <tr><td><strong>Gate 2</strong></td><td>After Stage 4</td><td>Pipeline Lead</td><td>Content creation completion (6 items + SME task sign-off)</td><td>ALL items checked</td></tr>
+          <tr><td><strong>Gate 3</strong></td><td>After Stage 5</td><td>ILD Reviewer</td><td>9-dimension rubric ≥ 85%, zero critical failures</td><td>Score ≥ 85%</td></tr>
+          <tr><td><strong>Gate 4</strong></td><td>After Stage 6</td><td>SME</td><td>Final sign-off, all prior gates documented</td><td>Approved</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- APPENDIX D: Toolset Library Detailed Catalog                 -->
+  <!-- ============================================================ -->
+  <div class="section" id="section-D">
+    <div class="section-header">
+      <div class="section-number">D</div>
+      <div>
+        <h2 class="section-title">Appendix D: Toolset Library Detailed Catalog</h2>
+        <p class="section-desc">Full tool profiles with capabilities, learning curve, and use cases.</p>
+      </div>
+    </div>
+
+    <div class="data-table-container">
+      <table class="data-table">
+        <thead><tr><th>Tool</th><th>Type</th><th>Strengths</th><th>Learning Curve</th><th>Best For</th><th>Template</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Articulate Storyline 360</strong></td><td>Authoring</td><td>Branching scenarios, triggers, variables, screen recording, quiz engine</td><td>Medium–High</td><td>Complex interactions, scenario-based learning, mastery gates</td><td>T2, T4, T5</td></tr>
+          <tr><td><strong>Articulate Rise 360</strong></td><td>Authoring</td><td>Responsive, fast production, clean modern UI, built-in quizzes</td><td>Low–Medium</td><td>Video lessons, text-based modules, quick turnaround</td><td>T1, T2</td></tr>
+          <tr><td><strong>Vyond</strong></td><td>2D Animation</td><td>Character animation, templates, text-to-speech, whiteboard</td><td>Low</td><td>Explainer videos, concept visualization, scenario animations</td><td>T1, T3</td></tr>
+          <tr><td><strong>Camtasia</strong></td><td>Video Editing</td><td>Screen recording, annotations, quizzes in video, callouts</td><td>Low–Medium</td><td>Software tutorials, walkthroughs, video lessons</td><td>T1, T3</td></tr>
+          <tr><td><strong>Blender</strong></td><td>3D Modeling</td><td>Free, professional-grade 3D, animation, simulations</td><td>High</td><td>3D visualizations, scientific simulations, anatomy</td><td>T4 (3D)</td></tr>
+          <tr><td><strong>Unity</strong></td><td>3D Engine</td><td>Interactive 3D, VR/AR, physics simulations</td><td>High</td><td>Immersive simulations, virtual labs, serious games</td><td>T4 (3D)</td></tr>
+          <tr><td><strong>CodeSandbox</strong></td><td>Code IDE</td><td>Browser-based, instant preview, shareable, supports many frameworks</td><td>Low</td><td>Interactive coding exercises, web dev practice</td><td>T3, T8</td></tr>
+          <tr><td><strong>Replit</strong></td><td>Code IDE</td><td>Multi-language, collaborative, AI-assisted, deployment</td><td>Low</td><td>Coding exercises, project environments, Python/data science</td><td>T3, T8</td></tr>
+          <tr><td><strong>H5P</strong></td><td>Interactives</td><td>Free, 40+ content types, LMS integration, open source</td><td>Low</td><td>Quizzes, drag-drop, interactive video, flashcards</td><td>T2, T5, T7</td></tr>
+          <tr><td><strong>Miro</strong></td><td>Collaboration</td><td>Infinite canvas, templates, real-time collaboration</td><td>Low</td><td>Concept maps, brainstorming, process diagrams</td><td>T1 (visuals)</td></tr>
+          <tr><td><strong>Twine</strong></td><td>Interactive Fiction</td><td>Free, branching narrative, no code required</td><td>Low</td><td>Branching scenarios, decision trees, case studies</td><td>T4</td></tr>
+          <tr><td><strong>Anki</strong></td><td>Flashcards</td><td>Spaced repetition algorithm, highly customizable, free</td><td>Low–Medium</td><td>Vocabulary, definitions, factual recall, spaced review</td><td>T7</td></tr>
+          <tr><td><strong>Quizlet</strong></td><td>Flashcards</td><td>User-friendly, multiple study modes, gamified</td><td>Very Low</td><td>Quick retrieval practice, vocabulary, definitions</td><td>T7</td></tr>
+          <tr><td><strong>Canva</strong></td><td>Design</td><td>Templates for everything, easy to use, infographic maker</td><td>Very Low</td><td>Infographics, concept diagrams, visual summaries</td><td>T1 (visuals)</td></tr>
+          <tr><td><strong>Figma</strong></td><td>Design</td><td>Professional UI/UX design, prototyping, collaboration</td><td>Medium</td><td>Project briefs, design challenges, portfolio creation</td><td>T8</td></tr>
+          <tr><td><strong>Tableau</strong></td><td>Data Visualization</td><td>Professional analytics, interactive dashboards</td><td>Medium</td><td>Data analysis exercises, case studies, analytical tasks</td><td>T4, T8</td></tr>
+          <tr><td><strong>Descript</strong></td><td>Audio/Video</td><td>Text-based editing, transcription, screen recording</td><td>Low</td><td>Podcast lessons, video editing, audio content</td><td>T1</td></tr>
+          <tr><td><strong>Kahoot!</strong></td><td>Quiz/Gamified</td><td>Gamified quizzes, live games, reports</td><td>Very Low</td><td>Engagement checks, formative assessment, review</td><td>T2</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="chapter-footer">
+    <p>ILD Master Document — Pipeline Process Framework — Z.ai Research Division — March 2026</p>
+    <p>10 Platforms · 9 ID Models · 9 Learning Theories · 3 Taxonomies · 7 Cognitive Science Foundations · 6 Pipeline Stages · 5 Quality Gates</p>
+  </footer>
+
+  <div class="mini-toc" id="miniToc"></div>
+
+  <div id="chapterNav"></div>
+</div>
+<script src="../shared/nav.js"></script>
+</body>
+</html>
