@@ -14,6 +14,7 @@ import { StageShell, Callout } from "@/components/player/stage-shell";
 import { N8nScreenView } from "@/components/n8n/screen";
 import "@/components/n8n/n8n.css";
 import { useLocalJson, writeLocal } from "@/lib/local-store";
+import { planModule } from "@/lib/learner-plan";
 import type { Adaptation } from "@/lib/setup";
 import type { GuideStep, GuidedBlock, N8nScreen } from "@/data/types";
 import type { StageProps } from "./types";
@@ -31,7 +32,8 @@ export function GuidedStage({ block, adaptation, ...nav }: StageProps<GuidedBloc
   const firstOpen = block.steps.find((s) => !done.includes(s.id))?.id ?? null;
   const [openId, setOpenId] = React.useState<string | null>(firstOpen);
   const left = block.steps.filter((s) => !done.includes(s.id)).length;
-  const tipsOpen = adaptation.support === "extra";
+  const moduleSupport = adaptation.override ?? planModule(adaptation.plan, block.step_id.split(".")[0] ?? "")?.support ?? adaptation.support;
+  const tipsOpen = moduleSupport === "extra";
 
   const complete = (step: GuideStep) => {
     const next = done.includes(step.id) ? done : [...done, step.id];

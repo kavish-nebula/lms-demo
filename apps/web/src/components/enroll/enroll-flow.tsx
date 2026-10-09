@@ -13,10 +13,10 @@ import { CardSkeleton } from "@/components/kit/states";
 import { ProfileStep } from "@/components/enroll/profile-step";
 import { PrecheckStep } from "@/components/enroll/precheck-step";
 import { CustomizeStep, type Pace } from "@/components/enroll/customize-step";
-import { BuildStep } from "@/components/enroll/build-step";
+import { BuildStep, type BuildServer } from "@/components/enroll/build-step";
 import { useCourseUnits, usePlanState } from "@/components/plan/use-plan";
+import { useLearnerReady } from "@/lib/api";
 import { useEnrollment } from "@/lib/enrollment";
-import { useHydrated } from "@/lib/local-store";
 import { autoFill } from "@/lib/plan";
 import { applyComfort, useProfile } from "@/lib/profile";
 import { adaptationOf, type PrecheckResult, type SetupAnswers, type SupportOverride } from "@/lib/setup";
@@ -47,10 +47,11 @@ export function EnrollFlow({
 }) {
   const t = useTranslations("enroll");
   const router = useRouter();
-  const hydrated = useHydrated();
+  const learnerReady = useLearnerReady();
   const courseHref = `/learn/courses/${course.course_id}`;
-  const { profile, save: saveProfile } = useProfile();
-  const { enrollment, enrolled, save } = useEnrollment(course.course_id);
+  const { profile, ready: profileReady, save: saveProfile } = useProfile();
+  const { enrollment, enrolled, save, adaptation: saved } = useEnrollment(course.course_id);
+  const hydrated = learnerReady && profileReady;
   const { plan, setPlan } = usePlanState();
   const { byCourse } = useCourseUnits(React.useMemo(() => [course], [course]));
 
@@ -63,6 +64,8 @@ export function EnrollFlow({
   const [precheck, setPrecheck] = React.useState<PrecheckResult | null>(null);
   const [override, setOverride] = React.useState<SupportOverride>("auto");
   const [pace, setPace] = React.useState<Pace>({ sessionMinutes: 30, studyDays: [1, 3, 5], addToPlan: true });
+  const [saving, setSaving] = React.useState<{ state: "idle" | "saving" | "saved" } | { state: "error"; message: string }>({ state: "idle" });
+  const [planningSince, setPlanningSince] = React.useState(0);
 
   // start from what is saved, once storage has been read
   if (hydrated && phase === null) {
@@ -79,15 +82,34 @@ export function EnrollFlow({
     window.scrollTo({ top: 0 });
   }, [phase]);
 
-  function commit() {
-    save(answers, { precheck, supportOverride: override });
-    saveProfile({ ...(profile?.answers ?? {}), ...answers }, needs);
+  /** Saves the setup on the server (which plans the course), the profile, and this browser's study plan. */
+  async function commit() {
+    setSaving({ state: "saving" });
+    try {
+      await save(answers, { precheck, supportOverride: override, pace: pace.studyDays.length ? { sessionMinutes: pace.sessionMinutes, studyDays: pace.studyDays } : null });
+      await saveProfile({ ...(profile?.answers ?? {}), ...answers }, needs);
+    } catch (e) {
+      setSaving({ state: "error", message: e instanceof Error ? e.message : String(e) });
+      return false;
+    }
     applyComfort(needs.includes("none") ? [] : needs);
     const prefs = { ...plan, studyDays: pace.studyDays, sessionMinutes: pace.sessionMinutes };
     const remaining = (byCourse.get(course.course_id) ?? []).filter((u) => !u.done);
     const added = pace.addToPlan && pace.studyDays.length ? autoFill(remaining, prefs, today) : [];
     setPlan({ ...prefs, sessions: [...plan.sessions, ...added] });
+    setPlanningSince(Date.now());
+    setSaving({ state: "saved" });
+    return true;
   }
+
+  const server: BuildServer =
+    saving.state === "error"
+      ? { status: "error", message: saving.message }
+      : saving.state !== "saved"
+        ? { status: "saving" }
+        : enrollment?.pending
+          ? { status: "planning", since: planningSince }
+          : { status: "ready", source: enrollment?.plan?.source ?? "baseline", ai: !!enrollment?.ai, failed: enrollment?.lastError ?? null };
 
   const adaptation = adaptationOf(answers, { precheck, override });
   const editing = enrolled && phase !== "build";
@@ -103,7 +125,7 @@ export function EnrollFlow({
         setNeeds={setNeeds}
         continueLabel={returnTo === "customize" ? t("backToCustomize") : t("toQuickCheck")}
         onDone={() => {
-          saveProfile(answers, needs);
+          void saveProfile(answers, needs).catch(() => toast.error(t("profileSaveFailed")));
           setReusedProfile(false);
           setPhase(returnTo ?? "precheck");
           setReturnTo(null);
@@ -142,14 +164,15 @@ export function EnrollFlow({
           setReturnTo("customize");
           setPhase("profile");
         }}
-        onSubmit={() => {
+        onSubmit={async () => {
           if (enrolled) {
-            commit();
-            toast.success(t("toastSaved"));
-            router.push(courseHref);
+            if (await commit()) {
+              toast.success(t("toastSaved"));
+              router.push(courseHref);
+            } else toast.error(t("saveFailed"));
           } else {
-            commit();
             setPhase("build");
+            void commit();
           }
         }}
       />
@@ -159,9 +182,11 @@ export function EnrollFlow({
       <BuildStep
         course={course}
         name={name}
-        adaptation={adaptation}
+        adaptation={saving.state === "saved" && enrollment ? saved : adaptation}
         pace={pace}
         authoredModules={authoredModules}
+        server={server}
+        onRetry={() => void commit()}
         onGo={() => {
           toast.success(t("toastEnrolled", { course: course.title }));
           router.push(`${courseHref}?ready=1`);

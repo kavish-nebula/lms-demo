@@ -12,6 +12,7 @@ import { PipelineDiagram } from "@/components/kit/pipeline";
 import { StageShell, Callout } from "@/components/player/stage-shell";
 import { ChoiceList, Feedback } from "@/components/player/items";
 import { ROLE_HOOK } from "@/lib/world";
+import { planModule } from "@/lib/learner-plan";
 import type { Adaptation } from "@/lib/setup";
 import type { HookBlock, Objective } from "@/data/types";
 import type { StageProps } from "./types";
@@ -34,7 +35,8 @@ export function HookStage({
   const [finished, setFinished] = React.useState(nav.done);
   const timeline = block.reveal.timeline;
   const playing = frame >= 0 && !finished;
-  const roleText = adaptation.roleKey ? ROLE_HOOK[moduleIndex]?.[adaptation.roleKey as keyof (typeof ROLE_HOOK)[1]] : undefined;
+  const planScene = planModule(adaptation.plan, block.step_id.split(".")[0] ?? "")?.hookScene;
+  const roleText = planScene || (adaptation.roleKey ? ROLE_HOOK[moduleIndex]?.[adaptation.roleKey as keyof (typeof ROLE_HOOK)[1]] : undefined);
 
   // play the run on its own clock; reduced motion jumps straight to the end
   function start() {
@@ -103,7 +105,7 @@ export function HookStage({
       </Surface>
 
       {roleText ? (
-        <Callout label={t("roleCard", { role: adaptation.roleLabel ?? "" })} icon={<UserRound />}>
+        <Callout label={adaptation.roleLabel ? t("roleCard", { role: adaptation.roleLabel }) : t("forYouCard")} icon={<UserRound />}>
           <p>{roleText}</p>
         </Callout>
       ) : null}

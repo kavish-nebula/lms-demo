@@ -11,8 +11,8 @@ import { Chip } from "@/components/kit/chip";
 import { CardSkeleton } from "@/components/kit/states";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useEnrollments } from "@/lib/enrollment";
-import { useHydrated, writeLocal } from "@/lib/local-store";
+import { saveEnrollment, useEnrollments } from "@/lib/enrollment";
+import { useLearnerReady } from "@/lib/api";
 import { useProfile } from "@/lib/profile";
 import { COMFORT_QUESTION, QUESTIONS, changeFor, comfortChange, type SetupAnswers } from "@/lib/setup";
 import type { Course } from "@/data/types";
@@ -25,16 +25,18 @@ import type { Course } from "@/data/types";
 export function ProfileEditor({ name, courses }: { name: string; courses: Course[] }) {
   const t = useTranslations("profile");
   const format = useFormatter();
-  const hydrated = useHydrated();
-  const { profile, save } = useProfile();
+  const learnerReady = useLearnerReady();
+  const { profile, ready: profileReady, save } = useProfile();
+  const hydrated = learnerReady && profileReady;
   const enrollments = useEnrollments();
   const answers: SetupAnswers = profile?.answers ?? {};
   const needs = profile?.needs ?? [];
 
   if (!hydrated) return <CardSkeleton lines={6} />;
 
-  const setAnswer = (id: string, v: string | null) => save({ ...answers, [id]: v }, needs);
-  const setNeeds = (next: string[]) => save(answers, next);
+  const persist = (a: typeof answers, n: string[]) => void save(a, n).catch(() => toast.error(t("saveFailed")));
+  const setAnswer = (id: string, v: string | null) => persist({ ...answers, [id]: v }, needs);
+  const setNeeds = (next: string[]) => persist(answers, next);
   const enrolled = courses.filter((c) => enrollments[c.course_id]);
 
   return (
@@ -87,7 +89,7 @@ export function ProfileEditor({ name, courses }: { name: string; courses: Course
                   placeholder={q.options.find((o) => o.free)?.free}
                   maxLength={40}
                   defaultValue={answers[freeKey] ?? ""}
-                  onBlur={(e) => save({ ...answers, [freeKey]: e.target.value }, needs)}
+                  onBlur={(e) => persist({ ...answers, [freeKey]: e.target.value }, needs)}
                   className="h-9 max-w-xs"
                 />
               ) : null}
@@ -165,10 +167,12 @@ export function ProfileEditor({ name, courses }: { name: string; courses: Course
                         size="sm"
                         variant="ghost"
                         className="w-fit text-brand-ink"
-                        onClick={() => {
-                          writeLocal(`lms-enrollment:${c.course_id}`, JSON.stringify({ ...e, answers: { ...e.answers, ...profile.answers } }));
-                          toast.success(t("applied", { course: c.title }));
-                        }}
+                        onClick={() =>
+                          saveEnrollment(c.course_id, e, { ...e.answers, ...profile.answers }).then(
+                            () => toast.success(t("applied", { course: c.title })),
+                            () => toast.error(t("applyFailed")),
+                          )
+                        }
                       >
                         {t("applyToCourse")}
                       </Button>

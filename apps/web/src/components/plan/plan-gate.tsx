@@ -8,12 +8,12 @@ import { CardSkeleton, EmptyState } from "@/components/kit/states";
 import { Button } from "@/components/ui/button";
 import { PlanBoard, type PlanBoardProps } from "@/components/plan/plan-board";
 import { useEnrollments } from "@/lib/enrollment";
-import { useHydrated } from "@/lib/local-store";
+import { useLearnerReady } from "@/lib/api";
 
 /** Plans only cover enrolled courses. Before enrolment, point to the catalog. */
 export function PlanGate({ courses, ...rest }: PlanBoardProps) {
   const t = useTranslations("plan");
-  const hydrated = useHydrated();
+  const hydrated = useLearnerReady();
   const enrollments = useEnrollments();
   const enrolled = React.useMemo(() => courses.filter((c) => enrollments[c.course_id]), [courses, enrollments]);
 

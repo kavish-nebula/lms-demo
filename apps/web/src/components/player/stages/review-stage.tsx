@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { StageShell, Callout } from "@/components/player/stage-shell";
 import { ChoiceList, Feedback } from "@/components/player/items";
 import type { ReviewBlock, ReviewVariant } from "@/data/types";
+import { useSignal } from "@/lib/signals";
 import type { StageProps } from "./types";
 
 type Rating = "got" | "not_yet";
@@ -22,6 +23,8 @@ type Rating = "got" | "not_yet";
  */
 export function ReviewStage({ block, ...nav }: StageProps<ReviewBlock>) {
   const t = useTranslations("player");
+  const signal = useSignal();
+  const moduleId = block.step_id.split(".")[0] ?? null;
   const [ratings, setRatings] = React.useState<Record<string, Rating>>({});
   const [answered, setAnswered] = React.useState<Record<string, boolean>>({});
   const left = block.variants.filter((v) => !answered[v.id]).length;
@@ -48,8 +51,14 @@ export function ReviewStage({ block, ...nav }: StageProps<ReviewBlock>) {
           key={v.id}
           variant={v}
           rating={ratings[v.id]}
-          onRate={(r) => setRatings((s) => ({ ...s, [v.id]: r }))}
-          onAnswered={(yes) => setAnswered((s) => ({ ...s, [v.id]: yes }))}
+          onRate={(r) => {
+            setRatings((s) => ({ ...s, [v.id]: r }));
+            signal({ kind: "recall_answer", moduleId, payload: { variantId: v.id, rating: r } });
+          }}
+          onAnswered={(yes, correct) => {
+            setAnswered((s) => ({ ...s, [v.id]: yes }));
+            if (yes) signal({ kind: "recall_answer", moduleId, payload: { variantId: v.id, correct } });
+          }}
         />
       ))}
     </StageShell>
@@ -65,7 +74,7 @@ function ReviewCard({
   variant: ReviewVariant;
   rating?: Rating;
   onRate: (r: Rating) => void;
-  onAnswered: (answered: boolean) => void;
+  onAnswered: (answered: boolean, correct?: boolean) => void;
 }) {
   const t = useTranslations("player");
   const [value, setValue] = React.useState<string[]>([]);
@@ -107,7 +116,7 @@ function ReviewCard({
           disabled={!value.length}
           onClick={() => {
             setChecked(true);
-            onAnswered(true);
+            onAnswered(true, correct);
           }}
         >
           {t("checkAnswer")}

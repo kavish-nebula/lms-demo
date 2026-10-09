@@ -28,7 +28,7 @@ export function PrecheckStep({ items, courseTitle, onDone }: { items: PrecheckIt
     setResponses(next);
     setTimeout(() => {
       if (i + 1 < items.length) setI(i + 1);
-      else onDone({ at: at(), lessons: scorePrecheck(items, next) });
+      else onDone({ at: at(), lessons: scorePrecheck(items, next), responses: next });
     }, 220);
   }
 

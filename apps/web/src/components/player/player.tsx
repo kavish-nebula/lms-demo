@@ -22,6 +22,8 @@ import { AdaptedStrip } from "@/components/player/adapted-strip";
 import { getBlock } from "@/data/client";
 import { useEnrollment } from "@/lib/enrollment";
 import { orderStages } from "@/lib/topics";
+import { planTopicOrder } from "@/lib/learner-plan";
+import { SignalProvider } from "@/lib/signals";
 import type { ModuleContent, Topic } from "@/data/types";
 import type { StageId } from "@/lib/stages";
 
@@ -46,17 +48,18 @@ export type PlayerProps = {
 export function Player({ module, moduleIndex, stage, courseHref, initialDone, topics, after }: PlayerProps) {
   const t = useTranslations("player");
   const router = useRouter();
-  const { done, complete } = useModuleProgress(module.module_id, initialDone);
+  const { done, complete } = useModuleProgress(module.course_id, module.module_id, initialDone);
   const { enrolled, adaptation } = useEnrollment(module.course_id);
   const [railOpen, setRailOpen] = React.useState(false);
   const moduleHref = `${courseHref}/${module.module_id}`;
   const setupHref = `${courseHref}/enroll`;
-  // every topic of the module, in the learner's order ("see a full example first"
-  // puts the watch-it-run topic before the explanation); only authored ones play
+  // every topic of the module, in the order the learner's plan sets (without a
+  // plan, "see a full example first" puts the watch-it-run topic before the
+  // explanation); only authored ones play
   const order = React.useMemo(() => {
     const all = topics.length ? topics.map((x) => x.stage) : module.stages_included;
-    return orderStages(all, adaptation.order[0] === "example");
-  }, [topics, module.stages_included, adaptation.order]);
+    return planTopicOrder(adaptation.plan, module.module_id, all) ?? orderStages(all, adaptation.order[0] === "example");
+  }, [topics, module.stages_included, module.module_id, adaptation.plan, adaptation.order]);
   const playable = order.filter((s) => module.stages_included.includes(s));
   const titleOf = (s: StageId) => topics.find((x) => x.stage === s)?.title ?? module.title;
   const pos = order.indexOf(stage);
@@ -186,8 +189,10 @@ export function Player({ module, moduleIndex, stage, courseHref, initialDone, to
           {rail}
         </aside>
         <main id="stage-main" tabIndex={-1} className="min-w-0 flex-1 pb-24 outline-none">
-          <AdaptedStrip stage={stage} adaptation={adaptation} enrolled={enrolled} setupHref={setupHref} />
-          <TopicContext.Provider value={header}>{body}</TopicContext.Provider>
+          <AdaptedStrip stage={stage} moduleId={module.module_id} adaptation={adaptation} enrolled={enrolled} setupHref={setupHref} />
+          <SignalProvider courseId={module.course_id} enabled={enrolled}>
+            <TopicContext.Provider value={header}>{body}</TopicContext.Provider>
+          </SignalProvider>
         </main>
       </div>
 

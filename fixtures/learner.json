@@ -2,8 +2,8 @@
   "$comment": "Learner fixtures. Enrolment, setup answers and progress are client-side (localStorage) until the API exists, so the learner starts with nothing enrolled.",
   "user": {
     "user_id": "u-1001",
-    "name": "Jack Okafor",
-    "email": "jack@example.com",
+    "name": "Kavish",
+    "email": "kavish@example.com",
     "avatar": null,
     "locale": "en",
     "roles": [{ "role": "learner", "scope_type": "self", "scope_id": "u-1001" }],

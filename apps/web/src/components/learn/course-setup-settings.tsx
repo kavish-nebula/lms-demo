@@ -7,14 +7,14 @@ import { Settings2 } from "lucide-react";
 import { Surface } from "@/components/kit/surface";
 import { Button } from "@/components/ui/button";
 import { useEnrollments } from "@/lib/enrollment";
-import { useHydrated } from "@/lib/local-store";
+import { useLearnerReady } from "@/lib/api";
 import { QUESTIONS, answerLabel } from "@/lib/setup";
 import type { Course } from "@/data/types";
 
 /** Settings: the setup answers per enrolled course, each with a link back into the wizard. */
 export function CourseSetupSettings({ courses }: { courses: Course[] }) {
   const t = useTranslations("settings");
-  const hydrated = useHydrated();
+  const hydrated = useLearnerReady();
   const enrollments = useEnrollments();
   const enrolled = courses.filter((c) => enrollments[c.course_id]);
 

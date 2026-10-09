@@ -288,11 +288,6 @@ function DayItemRow({
             {item.label} · {minutesLabel(item.minutes)}
           </span>
         </span>
-        {item.dueToday ? (
-          <Button asChild size="xs" variant="outline">
-            <Link href="/learn/reviews">{t("open")}</Link>
-          </Button>
-        ) : null}
       </>
     );
   }

@@ -25,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useLocalString, writeLocal } from "@/lib/local-store";
+import { useSignal } from "@/lib/signals";
 import { VideoSlideView } from "@/components/player/video/video-slide";
 import type { ConceptVideo, VideoQuiz } from "@/data/types";
 
@@ -59,6 +60,9 @@ export function VideoLesson({
   nextLabel?: string;
 }) {
   const t = useTranslations("video");
+  const signal = useSignal();
+  const report = (phase: "mid" | "end") => (question: number, correct: boolean, attempt: number) =>
+    signal({ kind: "video_check", moduleId: video.module, lesson: video.lesson, payload: { videoId: video.id, questionId: `${phase}-${question + 1}`, correct, attempt } });
   const slides = video.slides;
   const last = slides.length - 1;
   const quizAfter = video.quizAfter ?? -1;
@@ -296,6 +300,7 @@ export function VideoLesson({
               key="mid"
               questions={video.midQuiz}
               doneLabel={t("continueVideo")}
+              onAnswer={report("mid")}
               onDone={() => {
                 setMidPassed(true);
                 setPhase("play");
@@ -310,6 +315,7 @@ export function VideoLesson({
               key="end"
               questions={video.endQuiz}
               doneLabel={t("finish")}
+              onAnswer={report("end")}
               onDone={() => {
                 setEndPassed(true);
                 setPhase("done");
@@ -520,10 +526,22 @@ function CtrlButton({
  * moves on; a wrong one gets a hint, not the answer, and the learner decides
  * whether to try again or carry on.
  */
-function QuizOverlay({ questions, onDone, doneLabel }: { questions: VideoQuiz[]; onDone: () => void; doneLabel: string }) {
+function QuizOverlay({
+  questions,
+  onDone,
+  doneLabel,
+  onAnswer,
+}: {
+  questions: VideoQuiz[];
+  onDone: () => void;
+  doneLabel: string;
+  /** every attempt, for the learner's plan */
+  onAnswer?: (question: number, correct: boolean, attempt: number) => void;
+}) {
   const t = useTranslations("video");
   const [qi, setQi] = React.useState(0);
   const [choice, setChoice] = React.useState<number | null>(null);
+  const [attempts, setAttempts] = React.useState(0);
   const q = questions[qi]!;
   const right = choice === q.correct;
   const lastQ = qi === questions.length - 1;
@@ -532,6 +550,7 @@ function QuizOverlay({ questions, onDone, doneLabel }: { questions: VideoQuiz[];
     else {
       setQi(qi + 1);
       setChoice(null);
+      setAttempts(0);
     }
   };
 
@@ -560,7 +579,11 @@ function QuizOverlay({ questions, onDone, doneLabel }: { questions: VideoQuiz[];
               key={o}
               type="button"
               disabled={right}
-              onClick={() => setChoice(i)}
+              onClick={() => {
+                setChoice(i);
+                setAttempts(attempts + 1);
+                onAnswer?.(qi, i === q.correct, attempts + 1);
+              }}
               className={cn(
                 "rounded-lg border px-3 py-2.5 text-left text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/60",
                 choice === i

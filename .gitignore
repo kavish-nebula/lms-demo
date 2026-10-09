@@ -10,3 +10,6 @@ Thumbs.db
 !.env.example
 .tools/
 *.tsbuildinfo
+
+# local learner database (PGlite)
+.data/

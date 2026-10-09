@@ -6,6 +6,9 @@ const monorepoRoot = path.join(__dirname, "..", "..");
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: monorepoRoot,
+  // PGlite (the built-in local Postgres) ships WASM; load it from node_modules
+  // at runtime rather than through the bundler.
+  serverExternalPackages: ["@electric-sql/pglite"],
   turbopack: {
     root: monorepoRoot,
     resolveAlias: {

@@ -36,6 +36,8 @@ import { blankWorkflow, persistReport, persistWorkflow, readDraft, resetDraft } 
 import { createNode, NODES, PALETTE_GROUPS } from "@/lib/sandbox/nodes";
 import { edgeCount, simulate } from "@/lib/sandbox/run";
 import { useFinale } from "@/lib/finale";
+import { useEnrollment } from "@/lib/enrollment";
+import { queueSignal } from "@/lib/signals";
 import { useHydrated } from "@/lib/local-store";
 import type { CapstoneBlock } from "@/data/types";
 import type { Execution, Handle, NodeType, SNode, Workflow, World } from "@/lib/sandbox/types";
@@ -70,6 +72,7 @@ function Editor({ courseId, block, briefHref, initial, initialReport, initialChe
   const t = useTranslations("sandbox");
   const flow = useReactFlow();
   const { markDone, state: finale } = useFinale(courseId);
+  const { enrolled } = useEnrollment(courseId);
   const [name, setName] = React.useState(initial.name);
   const [nodes, setNodes] = React.useState<CanvasNode[]>(() => initial.nodes.map((n) => toCanvas(n)));
   const [edges, setEdges] = React.useState<Edge[]>(() => initial.edges.map(toEdge));
@@ -200,6 +203,11 @@ function Editor({ courseId, block, briefHref, initial, initialReport, initialChe
   const check = () => {
     const r = gradeCapstone(workflow);
     persistReport(courseId, workflow, r);
+    if (enrolled)
+      queueSignal(courseId, {
+        kind: "capstone_check",
+        payload: { passed: r.passed, total: r.total, accepted: r.accepted, failing: r.results.filter((x) => !x.passed).map((x) => x.id) },
+      });
     setReport(r);
     setChecks((c) => c + 1);
     setTab("check");

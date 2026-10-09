@@ -18,7 +18,8 @@ import { WrapUpStage } from "@/components/finale/wrap-up-stage";
 import { useCourseProgress } from "@/lib/course-progress";
 import { useEnrollment } from "@/lib/enrollment";
 import { useFinale } from "@/lib/finale";
-import { useHydrated } from "@/lib/local-store";
+import { useLearnerReady } from "@/lib/api";
+import { queueSignal } from "@/lib/signals";
 import type { Course, FinaleContent, FinaleStepId } from "@/data/types";
 
 /**
@@ -41,10 +42,10 @@ export function FinalePlayer({
   const t = useTranslations("finale");
   const tp = useTranslations("player");
   const router = useRouter();
-  const hydrated = useHydrated();
+  const hydrated = useLearnerReady();
   const progress = useCourseProgress(course);
   const { state, markDone, recordFinal } = useFinale(course.course_id);
-  const { adaptation } = useEnrollment(course.course_id);
+  const { adaptation, enrolled } = useEnrollment(course.course_id);
   const [railOpen, setRailOpen] = React.useState(false);
   const courseHref = `/learn/courses/${course.course_id}`;
 
@@ -108,6 +109,7 @@ export function FinalePlayer({
         preview={preview}
         roleKey={adaptation.roleKey}
         roleLabel={adaptation.roleLabel}
+        planBrief={adaptation.plan?.capstoneBrief ?? null}
         done={current.done}
         onComplete={() => {
           if (!current.done) markDone("capstone", { capstoneAt: new Date().toISOString() });
@@ -123,7 +125,14 @@ export function FinalePlayer({
         checkId="final"
         remediationHref={remediationHref}
         preview={preview}
-        onGraded={(r) => recordFinal(r.score, r.total, r.passed)}
+        onGraded={(r) => {
+          recordFinal(r.score, r.total, r.passed);
+          if (enrolled)
+            queueSignal(course.course_id, {
+              kind: "final_check",
+              payload: { score: r.score, total: r.total, passed: r.passed, missedLessons: r.failedObjectives.map((o) => o.replace(/^obj-/, "")) },
+            });
+        }}
         onPrev={prev ? () => go(prev.step.id) : undefined}
         onComplete={() => next && go(next.step.id)}
         done={current.done}

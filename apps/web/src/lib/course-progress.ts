@@ -3,7 +3,8 @@
 import * as React from "react";
 import { useLocalPrefix } from "@/lib/local-store";
 import { EMPTY_FINALE, FINALE_PREFIX, type FinaleState } from "@/lib/finale";
-import { useEnrollments } from "@/lib/enrollment";
+import { useLearnerData } from "@/lib/api";
+import { planTopicOrder, type LearnerPlan } from "@/lib/learner-plan";
 import { adaptationOf } from "@/lib/setup";
 import { orderStages, topicOf } from "@/lib/topics";
 import type { Course, CourseModule, FinaleStep, ModuleState } from "@/data/types";
@@ -53,21 +54,24 @@ export type CourseProgress = {
  * Live course state from what the player has stored. Prototype: nothing is
  * locked. Every module and every finale step (capstone, final check,
  * wrap-up) can be opened at any time; modules are still listed first.
- * `exampleFirst` follows the learner's setup, so "next" matches the player.
+ * Topic order follows the learner's plan (or, without one, `exampleFirst`
+ * from their setup), so "next" matches the player.
  */
 export function deriveProgress(
   course: Course,
   stored: Record<string, StageId[]>,
   finaleState: FinaleState = EMPTY_FINALE,
   exampleFirst = false,
+  plan: LearnerPlan | null = null,
 ): CourseProgress {
   const base = `/learn/courses/${course.course_id}`;
+  const orderOf = (m: CourseModule) => planTopicOrder(plan, m.module_id, m.stages) ?? orderStages(m.stages, exampleFirst);
   const modules: ModuleProgress[] = course.modules.map((m, i) => {
     const done = (stored[m.module_id] ?? []).filter((s) => m.stages.includes(s));
     const complete = m.stages.every((s) => done.includes(s));
     const liveState: ModuleState = complete ? "done" : done.length ? "in_progress" : "available";
     // the next topic that has content (Modules 2-5 have their concept videos so far)
-    const playable = orderStages(m.stages, exampleFirst).filter((s) => !m.authored || m.authored.includes(s));
+    const playable = orderOf(m).filter((s) => !m.authored || m.authored.includes(s));
     const next = playable.find((s) => !done.includes(s));
     return { ...m, index: i + 1, done, next, liveState };
   });
@@ -87,7 +91,7 @@ export function deriveProgress(
   const current = modules.find((m) => m.liveState === "in_progress") ?? modules.find((m) => m.liveState === "available");
   if (current?.next) {
     const at = topicOf(current, current.next);
-    const order = orderStages(current.stages, exampleFirst);
+    const order = orderOf(current);
     resume = {
       kind: "module",
       href: `${base}/${current.module_id}/${current.next}`,
@@ -131,44 +135,36 @@ export function deriveProgress(
   };
 }
 
+/** Per course: topics done (server for enrolled learners, this browser for previews), finale state, plan, setup. */
 function useStored() {
-  const raw = useLocalPrefix<StageId[]>(PREFIX);
+  const { enrollments } = useLearnerData();
+  const local = useLocalPrefix<StageId[]>(PREFIX);
   const finales = useLocalPrefix<FinaleState>(FINALE_PREFIX);
   return React.useMemo(() => {
-    const stored: Record<string, StageId[]> = {};
-    for (const [k, v] of Object.entries(raw)) stored[k.slice(PREFIX.length)] = v;
+    const preview: Record<string, StageId[]> = {};
+    for (const [k, v] of Object.entries(local)) preview[k.slice(PREFIX.length)] = v;
     const finale: Record<string, FinaleState> = {};
     for (const [k, v] of Object.entries(finales)) finale[k.slice(FINALE_PREFIX.length)] = v;
-    return { stored, finale };
-  }, [raw, finales]);
-}
-
-function useExampleFirst() {
-  const enrollments = useEnrollments();
-  return React.useMemo(() => {
-    const out: Record<string, boolean> = {};
-    for (const [id, e] of Object.entries(enrollments)) out[id] = adaptationOf(e.answers).order[0] === "example";
-    return out;
-  }, [enrollments]);
+    return (course: Course) => {
+      const e = enrollments[course.course_id];
+      return deriveProgress(
+        course,
+        e ? (e.progress as Record<string, StageId[]>) : preview,
+        finale[course.course_id],
+        e ? adaptationOf(e.answers).order[0] === "example" : false,
+        e?.plan?.plan ?? null,
+      );
+    };
+  }, [enrollments, local, finales]);
 }
 
 export function useCourseProgress(course: Course): CourseProgress {
-  const { stored, finale } = useStored();
-  const exampleFirst = useExampleFirst();
-  const id = course.course_id;
-  return React.useMemo(
-    () => deriveProgress(course, stored, finale[id], exampleFirst[id]),
-    [course, stored, finale, exampleFirst, id],
-  );
+  const derive = useStored();
+  return React.useMemo(() => derive(course), [derive, course]);
 }
 
 /** Progress for several courses at once (dashboard), keyed by course id. */
 export function useCoursesProgress(courses: Course[]): Record<string, CourseProgress> {
-  const { stored, finale } = useStored();
-  const exampleFirst = useExampleFirst();
-  return React.useMemo(() => {
-    const out: Record<string, CourseProgress> = {};
-    for (const c of courses) out[c.course_id] = deriveProgress(c, stored, finale[c.course_id], exampleFirst[c.course_id]);
-    return out;
-  }, [courses, stored, finale, exampleFirst]);
+  const derive = useStored();
+  return React.useMemo(() => Object.fromEntries(courses.map((c) => [c.course_id, derive(c)])), [courses, derive]);
 }

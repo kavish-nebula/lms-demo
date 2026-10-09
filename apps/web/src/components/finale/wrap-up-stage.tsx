@@ -5,7 +5,7 @@ import Link from "next/link";
 import { cn } from "cn";
 import { useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
-import { Award, Boxes, CalendarRange, Clock3, GraduationCap, Hammer, LayoutDashboard, PartyPopper, RotateCcw, ShieldCheck } from "lucide-react";
+import { Award, Boxes, CalendarRange, Clock3, GraduationCap, Hammer, LayoutDashboard, PartyPopper, ShieldCheck } from "lucide-react";
 import { Surface } from "@/components/kit/surface";
 import { StatTile } from "@/components/kit/stat-tile";
 import { Button } from "@/components/ui/button";
@@ -172,9 +172,8 @@ export function WrapUpStage({
 
       <Surface pad="md" className="flex flex-col gap-3">
         <h2 className="font-semibold">{t("whatsNext")}</h2>
-        <ul className="grid gap-2 sm:grid-cols-3">
+        <ul className="grid gap-2 sm:grid-cols-2">
           {[
-            { href: "/learn/reviews", icon: <RotateCcw />, title: t("nextReviews"), body: t("nextReviewsBody") },
             { href: "/learn/plan", icon: <CalendarRange />, title: t("nextPlan"), body: t("nextPlanBody") },
             { href: `/learn/courses/${course.course_id}#modules`, icon: <Boxes />, title: t("nextRevisit"), body: t("nextRevisitBody") },
           ].map((x) => (

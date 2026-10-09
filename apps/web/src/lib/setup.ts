@@ -7,6 +7,7 @@
  * support lesson by lesson.
  */
 import { DOMAINS, ROLES, customDomain, customRole, type Domain } from "@/lib/world";
+import type { LearnerPlan, PlanSource } from "@/lib/learner-plan";
 
 export type QuestionId = "domain" | "role" | "goal" | "experience" | "firstStep" | "style";
 
@@ -135,7 +136,14 @@ export function comfortLabel(needs: string[] | undefined): string | null {
 export type Support = "extra" | "standard" | "light";
 
 /** Result of the ungraded pre-check: right answers per lesson (0-2). */
-export type PrecheckResult = { at: string; skipped?: boolean; isNew?: boolean; lessons: Record<string, number> };
+export type PrecheckResult = {
+  at: string;
+  skipped?: boolean;
+  isNew?: boolean;
+  lessons: Record<string, number>;
+  /** the raw answers (null = "I don't know yet"), sent to the server, which scores them and keeps them for planning */
+  responses?: Record<string, string | null>;
+};
 
 /** "auto" follows the pre-check (or the experience answer); the others apply everywhere. */
 export type SupportOverride = "auto" | Support;
@@ -241,9 +249,12 @@ export type Adaptation = {
   support: Support;
   /** support per lesson from the pre-check ("1.1" -> "light") */
   lessonSupport: Record<string, Support>;
-  supportSource: "override" | "precheck" | "experience";
+  supportSource: "override" | "precheck" | "experience" | "plan";
   override: Support | null;
   answered: number;
+  /** the server plan this adaptation follows (written by the AI planner, or the rule-based baseline) */
+  plan: LearnerPlan | null;
+  planSource: PlanSource | null;
 };
 
 export function adaptationOf(
@@ -276,6 +287,37 @@ export function adaptationOf(
     supportSource,
     override,
     answered: QUESTIONS.filter((q) => !!s[q.id]).length,
+    plan: null,
+    planSource: null,
+  };
+}
+
+/**
+ * The adaptation a learner's server plan describes: help per lesson from the
+ * plan (an override still wins), the rest from their answers as before.
+ * Without a plan it is the rule-based adaptation.
+ */
+export function adaptationFromPlan(
+  a: SetupAnswers | null | undefined,
+  opts: { precheck?: PrecheckResult | null; override?: SupportOverride },
+  plan: LearnerPlan | null | undefined,
+  source: PlanSource | null | undefined,
+): Adaptation {
+  const base = adaptationOf(a, opts);
+  if (!plan) return base;
+  const lessonSupport: Record<string, Support> = {};
+  for (const m of plan.modules) for (const l of m.lessons) lessonSupport[l.lessonId] = l.support;
+  const levels = Object.values(lessonSupport);
+  const score = levels.reduce<number>((n, l) => n + (l === "extra" ? 0 : l === "standard" ? 1 : 2), 0) / (levels.length || 1);
+  const support: Support = base.override ?? (score < 0.67 ? "extra" : score > 1.5 ? "light" : "standard");
+  return {
+    ...base,
+    lessonSupport,
+    support,
+    supportSource: base.override ? "override" : "plan",
+    analogyOpen: base.style === "steps" || (support === "extra" && base.style !== "short"),
+    plan,
+    planSource: source ?? null,
   };
 }
 

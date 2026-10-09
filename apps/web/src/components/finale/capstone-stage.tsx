@@ -28,6 +28,7 @@ export function CapstoneStage({
   preview,
   roleKey,
   roleLabel,
+  planBrief,
   done,
   onComplete,
 }: {
@@ -36,13 +37,15 @@ export function CapstoneStage({
   preview: boolean;
   roleKey: string | null;
   roleLabel: string | null;
+  /** the learner's plan frames the capstone for their role */
+  planBrief: string | null;
   done: boolean;
   onComplete: () => void;
 }) {
   const draft = useCapstoneDraft(courseId);
   const sandboxHref = `/learn/courses/${courseId}/finale/capstone/sandbox`;
   if (done || draft?.report?.accepted) return <Accepted block={block} draft={draft} sandboxHref={sandboxHref} onComplete={onComplete} />;
-  return <Brief block={block} draft={draft} preview={preview} roleKey={roleKey} roleLabel={roleLabel} sandboxHref={sandboxHref} />;
+  return <Brief block={block} draft={draft} preview={preview} roleKey={roleKey} roleLabel={roleLabel} planBrief={planBrief} sandboxHref={sandboxHref} />;
 }
 
 function Brief({
@@ -51,6 +54,7 @@ function Brief({
   preview,
   roleKey,
   roleLabel,
+  planBrief,
   sandboxHref,
 }: {
   block: CapstoneBlock;
@@ -58,12 +62,13 @@ function Brief({
   preview: boolean;
   roleKey: string | null;
   roleLabel: string | null;
+  planBrief: string | null;
   sandboxHref: string;
 }) {
   const t = useTranslations("finale");
   const format = useFormatter();
   const now = useNow({ updateInterval: 60_000 });
-  const brief = roleKey ? ROLE_BRIEF[roleKey as keyof typeof ROLE_BRIEF] : undefined;
+  const brief = planBrief || (roleKey ? ROLE_BRIEF[roleKey as keyof typeof ROLE_BRIEF] : undefined);
   const report = draft?.report;
   const started = !!draft?.workflow.nodes.length;
 
@@ -143,7 +148,7 @@ function Brief({
       </div>
 
       {brief ? (
-        <Callout tone="hook" label={t("forYou", { role: roleLabel ?? "" })} icon={<UserRound />}>
+        <Callout tone="hook" label={roleLabel ? t("forYou", { role: roleLabel }) : t("forYouPlain")} icon={<UserRound />}>
           {brief}
         </Callout>
       ) : null}
