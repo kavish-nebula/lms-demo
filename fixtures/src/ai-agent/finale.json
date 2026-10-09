@@ -2,41 +2,42 @@
   "$comment": "Mini project, final assessment (12 questions, 2 per module; correct is 0-based) and reflection.",
   "capstone": {
     "kicker": "Mini project",
-    "title": "Ship Scout: your first complete agent",
-    "project_name": "Scout v1, Orbit's support agent",
-    "scene": "Black Friday is ten days away. Leo forwards you sixty real tickets from last year and asks one question: can Scout handle the order, return and exchange questions, so his team can focus on the hard ones? Your job is to ship Scout version 1, end to end, on your own.",
+    "title": "Build Scout's prompt engine",
+    "project_name": "Scout's prompt engine, in Python",
+    "scene": "Black Friday is ten days away and Orbit's inbox is filling up. Before Scout answers anyone, every email goes through one Python file: the prompt engine. It asks the model for a structured answer, checks it, and decides what Scout does: reply, ask for the order number, or hand the email to Leo's team. You'll build it right here in the browser, try it on four sample emails, then run it against ten hidden ones.",
     "requirements": [
-      "Scout answers order, return and exchange questions using at least three tools, for example get_order, track_parcel and search_policy.",
-      "It keeps the conversation across turns and never asks again for an order number it has already been given.",
-      "Every policy answer comes from Orbit's policy text, and Scout says so when the policy doesn't cover a question.",
-      "Tool errors go back to the model marked as errors, and Scout tells the customer honestly or hands off to a person.",
-      "A step limit and a spend limit stop every request, and refunds over $200 wait for a person's approval.",
-      "At least ten test cases run with one command and print a pass rate of 80% or more.",
-      "A short README explains Scout's scope, its tools, its guardrails and what you would improve next."
+      "Every email comes back as the five fields Scout needs (intent, order number, email, reply, action), with an intent from the list.",
+      "Scout recognises what each email is about: an order, a return, an exchange, a policy question, or something else.",
+      "It picks out the order number, or the customer's email when there isn't one, and never mixes the two up.",
+      "Policy answers come from Orbit's policy, and when the policy doesn't cover a question Scout says so instead of guessing.",
+      "Each email is routed the right way: answered, a request for the order number, or handed to the team (refunds over $200, anything off-topic, and any email that tries to change Scout's rules).",
+      "Run twice, the same email gets the same decision.",
+      "Replies sound like Scout, Orbit's support agent, never like a generic AI."
     ],
     "edge_cases": [
       "A customer gives an email address instead of an order number",
-      "The tracking API times out",
-      "A customer asks to return boots delivered 62 days ago",
-      "A message tries to make Scout ignore its rules",
-      "Someone asks about something Scout doesn't cover, like a product review"
+      "No order number and no email at all",
+      "Boots delivered 62 days ago, sent for a return",
+      "A $310 refund",
+      "A question the policy doesn't cover, like a student discount",
+      "An email that tries to switch Scout into \"admin mode\""
     ],
-    "closing": "Use everything from the guided practice in Modules 3 to 6. When every requirement holds and your test report shows 80% or more, mark the project as done.",
+    "closing": "Run tries the four sample emails and shows every step: the messages you send, the model's raw reply, what you parsed, and Scout's decision. Run tests plays ten hidden emails twice. You pass at 80%, and the email that tries to change Scout's rules must be handed off.",
     "reactions": [
       {
         "who": "Leo — support lead",
         "av": "L",
-        "text": "ran last year's 60 tickets through it. 51 handled, 9 handed to us with a summary. that's black friday saved"
+        "text": "ran last year's tickets through it. every one came back as clean JSON, and the $310 refund landed with us. that's black friday sorted"
       },
       {
         "who": "Maya — founder",
         "av": "M",
-        "text": "and the $310 refund waited for one of us to approve it. good. ship it."
+        "text": "and it didn't fall for the \"admin mode\" email. good. ship it."
       },
       {
         "who": "Priya — developer",
         "av": "P",
-        "text": "your README is better than mine. annoying."
+        "text": "your parse_reply is more defensive than mine. stealing it."
       }
     ]
   },

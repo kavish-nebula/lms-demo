@@ -10,6 +10,8 @@
  *   fixtures/intro-ai-agent.json         the course preview video
  *   fixtures/precheck-ai-agent.json      the prior-knowledge check
  *   fixtures/finale-ai-agent.json        mini project, final assessment, reflection
+ *   fixtures/project-ai-agent.json       the mini project workspace (files, sample tickets)
+ *   fixtures/project-ai-agent-tests.json the mini project hidden tickets (server only)
  *   fixtures/mock-gate-keys.json         answer keys (mock grading only)
  *
  * Usage:
@@ -1026,13 +1028,76 @@ if (ONLY && !moduleIdx.length) {
 }
 const built = moduleIdx.map((i) => buildModule(spine, i));
 
+/**
+ * The mini project's workspace (project/): the files the learner sees, the
+ * hidden harness and practice model, the sample tickets with what Scout should
+ * do, and the hidden tickets. Hidden expectations go to a server-only file.
+ * Check the project's difficulty with fixtures/scripts/check-project.mjs.
+ */
+function buildProject() {
+  const dir = path.join(SRC, "project");
+  const where = "project/";
+  const files = [
+    { path: "prompt_engine.py", editable: true },
+    { path: "docs/policy.md", editable: false },
+    { path: "orbit/__init__.py", hidden: true },
+    { path: "orbit/model.py", hidden: true },
+    { path: "run.py", hidden: true },
+  ].map((f) => {
+    const file = path.join(dir, f.path);
+    if (!fs.existsSync(file)) {
+      errors.push(`${where}${f.path}: missing`);
+      return null;
+    }
+    return { ...f, content: fs.readFileSync(file, "utf8").replace(/\r\n/g, "\n") };
+  });
+  if (!fs.existsSync(path.join(dir, "solution", "prompt_engine.py"))) errors.push(`${where}solution/prompt_engine.py: missing (the reference solution)`);
+  const tickets = readJson(path.join(dir, "tickets.json"), `${where}tickets.json`);
+  const ACTIONS = ["reply", "ask_for_order", "handoff"];
+  const INTENTS = ["order_status", "return", "exchange", "policy_question", "other"];
+  for (const [list, min] of [["samples", 2], ["hidden", 6]]) {
+    const ts = tickets[list];
+    if (!Array.isArray(ts) || ts.length < min) {
+      errors.push(`${where}tickets.json ${list}: needs at least ${min} tickets`);
+      continue;
+    }
+    for (const t of ts) {
+      const w = `${where}tickets.json ${list} ${t.id}`;
+      for (const k of ["id", "from", "subject", "body"]) if (typeof t[k] !== "string" || !t[k]) errors.push(`${w}: ${k} must be text`);
+      const e = t.expect ?? {};
+      if (![e.intent].flat().every((i) => INTENTS.includes(i))) errors.push(`${w}: expect.intent must be one of ${INTENTS.join(", ")}`);
+      if (!ACTIONS.includes(e.action)) errors.push(`${w}: expect.action must be one of ${ACTIONS.join(", ")}`);
+      if (!("order_id" in e) || !("email" in e)) errors.push(`${w}: expect needs order_id and email (null when there is none)`);
+    }
+  }
+  const ids = [...(tickets.samples ?? []), ...(tickets.hidden ?? [])].map((t) => t.id);
+  if (new Set(ids).size !== ids.length) errors.push(`${where}tickets.json: ticket ids must be unique`);
+  return {
+    client: {
+      $comment: "Generated from fixtures/src/ai-agent/project. The mini project workspace: files (the learner edits prompt_engine.py; hidden ones are the harness and practice model) and the sample tickets with what Scout should do. Hidden tickets live in project-ai-agent-tests.json, server only.",
+      course_id: spine.course_id,
+      entry: "prompt_engine.py",
+      files: files.filter(Boolean),
+      samples: tickets.samples ?? [],
+    },
+    server: {
+      $comment: "Generated. SERVER ONLY: the hidden tickets and what Scout should do with each. The browser receives the tickets without 'expect' when the learner runs the tests.",
+      course_id: spine.course_id,
+      runs: 2,
+      tickets: tickets.hidden ?? [],
+    },
+  };
+}
+
 let intro = null;
 let precheck = null;
 let finale = null;
+let project = null;
 if (!ONLY) {
   intro = buildVideo(readJson(path.join(SRC, "intro.json"), "intro.json"), "ai-agent-intro", "intro", "intro.json", { quizzes: false });
   precheck = buildPrecheck(spine);
   finale = buildFinale(spine);
+  project = buildProject();
 }
 
 for (const w of warnings) console.warn(`warning  ${w}`);
@@ -1076,6 +1141,8 @@ write("videos-ai-agent.json", { $comment: "Generated. Narration audio: apps/web/
 write("intro-ai-agent.json", { $comment: "Generated. The course preview video shown while enrolling.", course_id: spine.course_id, video: intro });
 write("precheck-ai-agent.json", precheck.file);
 write("finale-ai-agent.json", finale.file);
+write("project-ai-agent.json", project.client);
+write("project-ai-agent-tests.json", project.server);
 write("mock-gate-keys.json", {
   $comment: "MOCK ONLY. Generated. Stands in for server-side scoring; never ship keys to the client in production. Keys per check: final (final-assessment answers), final_explain (why each answer is right), precheck (prior-knowledge answers), gate-mN and gate-mN_explain (each module's closing check).",
   final: finale.keys,
@@ -1085,4 +1152,4 @@ write("mock-gate-keys.json", {
     built.flatMap((b, i) => (b.check ? [[`gate-${spine.modules[i].module_id}`, b.check.keys], [`gate-${spine.modules[i].module_id}_explain`, b.check.explain]] : [])),
   ),
 });
-console.log("Wrote courses.json, module-ai-agent-m1..m6.json, videos-ai-agent.json, intro-ai-agent.json, precheck-ai-agent.json, finale-ai-agent.json, mock-gate-keys.json");
+console.log("Wrote courses.json, module-ai-agent-m1..m6.json, videos-ai-agent.json, intro-ai-agent.json, precheck-ai-agent.json, finale-ai-agent.json, project-ai-agent.json, project-ai-agent-tests.json, mock-gate-keys.json");

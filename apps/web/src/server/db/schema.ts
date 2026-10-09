@@ -1,6 +1,7 @@
 import { integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import type { LearnerPlan, PlanChangeT, PlanSource, PlanStatus, PlanVersion } from "@/lib/learner-plan";
 import type { PrecheckResult, SetupAnswers, SupportOverride } from "@/lib/setup";
+import type { ProjectReport } from "@/lib/project-grade";
 
 /**
  * Learner data. Profile answers drive the course plan; plans are append-only
@@ -97,3 +98,16 @@ export const stepProgress = pgTable(
   },
   (t) => [primaryKey({ columns: [t.enrollmentId, t.moduleId, t.stage] })],
 );
+
+/** The mini project's report: the score from the hidden tickets, kept with the work it graded. */
+export type ProjectReportRow = ProjectReport & { at: string };
+
+/** A learner's mini project: their files as they last left them, and the last test report. */
+export const projectWork = pgTable("project_work", {
+  enrollmentId: uuid("enrollment_id")
+    .primaryKey()
+    .references(() => enrollments.id, { onDelete: "cascade" }),
+  files: jsonb("files").$type<Record<string, string>>().notNull(),
+  report: jsonb("report").$type<ProjectReportRow>(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

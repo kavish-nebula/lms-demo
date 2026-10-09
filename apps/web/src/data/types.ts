@@ -3,6 +3,7 @@
  * (ARCHITECTURE.pdf section 6) and data model (section 5) closely enough
  * that swapping fixtures for API calls is a change to src/data only.
  */
+import type { ProjectTicket, TicketExpect } from "@/lib/project-grade";
 import type { StageId } from "@/lib/stages";
 
 export type Bloom = "remember" | "understand" | "apply" | "analyze" | "evaluate" | "create";
@@ -456,4 +457,17 @@ export type Learner = {
   daily_progress: { day: string; minutes: number }[];
   credentials: Credential[];
   history: HistoryEntry[];
+};
+
+/* ---------------------------------------------------------------- mini project workspace */
+
+/** A file in the mini project: the learner edits `editable` ones; `hidden` ones (harness, practice model) never show. */
+export type ProjectFile = { path: string; content: string; editable?: boolean; hidden?: boolean };
+
+/** The mini project's workspace (fixtures/project-*.json): its files, the file to open first, and sample tickets with what Scout should do. */
+export type ProjectContent = {
+  course_id: string;
+  entry: string;
+  files: ProjectFile[];
+  samples: (ProjectTicket & { expect: TicketExpect })[];
 };

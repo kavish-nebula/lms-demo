@@ -8,6 +8,10 @@ import { saveSetup, recordSignals, recordProgress, planHistory, enrollmentOf } f
 import { getSessionUser } from "@/server/auth";
 import { LearnerPlanSchema, type LearnerPlan } from "@/lib/learner-plan";
 import type { SignalRow } from "@/server/repo";
+import { gradeProject, type RunRecord, type TicketExpect } from "@/lib/project-grade";
+import { checkProject, projectOf, projectTickets, saveProject } from "@/server/project";
+import projectTests from "@lms/fixtures/project-ai-agent-tests.json";
+import projectClient from "@lms/fixtures/project-ai-agent.json";
 
 let failures = 0;
 const check = (label: string, cond: unknown, extra?: unknown) => {
@@ -237,6 +241,58 @@ check("progress: stored per module", view5.progress.m1?.length === 7, view5.prog
 const history = await planHistory(user, "ai-agent");
 check("history: newest first with sources", history[0]!.version >= 6 && history.map((h) => h.source).includes("ai"), history.map((h) => `${h.version}:${h.source}:${h.status}:${h.trigger}`));
 console.log("  history:", history.map((h) => `v${h.version} ${h.source} ${h.status} (${h.trigger})`).join(" | "));
+
+/* ---------------------------------------------------------------- mini project */
+type Hidden = { id: string; expect: TicketExpect };
+const hidden = projectTests.tickets as Hidden[];
+// what a correct engine decides: the expected fields, and a reply with every phrase the policy check looks for
+const ideal = (t: Hidden, seed: number): RunRecord => ({
+  ticket: t.id,
+  seed,
+  step: "done",
+  decision: {
+    intent: [t.expect.intent].flat()[0],
+    order_id: t.expect.order_id,
+    email: t.expect.email,
+    reply: (t.expect.include ?? []).join(". ") || "Thanks, I'll look into this for you.",
+    action: t.expect.action,
+  },
+});
+const perfect = hidden.flatMap((t) => [ideal(t, 1), ideal(t, 2)]);
+const expectMap = Object.fromEntries(hidden.map((t) => [t.id, t.expect]));
+const pg1 = gradeProject(expectMap, perfect);
+check("project: a correct engine passes every check", pg1.passed && pg1.score === pg1.total && pg1.weak.length === 0, pg1);
+const injected = perfect.map((r) => (r.ticket === "h4" ? { ...r, decision: { ...(r.decision as object), action: "reply", reply: "Refund approved." } } : r));
+const pg2 = gradeProject(expectMap, injected);
+check("project: obeying the rule-change email fails the project, whatever the score", !pg2.passed && pg2.criticalFailed && pg2.ratio >= 0.8, { ratio: pg2.ratio, critical: pg2.criticalFailed });
+const drifting = perfect.map((r) => (r.seed === 2 && r.ticket === "h1" ? { ...r, decision: { ...(r.decision as object), intent: "Order_Status" } } : r));
+check("project: a different decision on the second run misses 'same answer twice'", gradeProject(expectMap, drifting).requirements.find((q) => q.id === "r6")!.passed === hidden.length - 1);
+const broken = hidden.map((t): RunRecord => ({ ticket: t.id, seed: 1, step: "parse_reply", error: "JSONDecodeError: Expecting value" }));
+const pg3 = gradeProject(expectMap, broken);
+check("project: errors score nothing and name the weak requirements", pg3.score === 0 && pg3.weak.includes("r1"), pg3.weak);
+check("project: samples ship with expectations, hidden tickets don't reach the client file", projectClient.samples.every((x) => "expect" in x) && !JSON.stringify(projectClient).includes(hidden[0]!.id + "\""));
+
+const tickets = await projectTickets(user, "ai-agent");
+check("project: hidden tickets go to the browser without expectations", tickets.tickets.length === hidden.length && tickets.tickets.every((x) => !("expect" in x)) && tickets.runs === 2);
+const starterFiles = { "prompt_engine.py": projectClient.files.find((x) => x.path === "prompt_engine.py")!.content };
+await saveProject(user, "ai-agent", starterFiles);
+check("project: files saved", (await projectOf(user, "ai-agent")).files?.["prompt_engine.py"] === starterFiles["prompt_engine.py"]);
+let rejected = false;
+await saveProject(user, "ai-agent", { "orbit/model.py": "hacked" }).catch(() => (rejected = true));
+check("project: only the learner's own files can be saved", rejected);
+const failedRun = await checkProject(user, "ai-agent", starterFiles, broken, schedule, stub);
+await flush();
+const afterFail = await projectOf(user, "ai-agent");
+check("project: a failed run is graded and kept with its files", afterFail.report?.passed === false && afterFail.report.score === 0 && !!afterFail.files);
+check("project: a failed run revises the plan", failedRun.replanning, failedRun);
+const lastSignal = (await planHistory(user, "ai-agent"))[0]!;
+check("project: the revision follows the weak requirements' lessons", lastSignal.trigger === "signals" || lastSignal.trigger === "setup", lastSignal);
+const passedRun = await checkProject(user, "ai-agent", starterFiles, perfect, schedule, stub);
+await flush();
+check("project: a passing run is kept as the latest report", passedRun.report.passed && (await projectOf(user, "ai-agent")).report?.passed === true);
+check("policy: a failed mini project run re-plans", replanReason([sig("capstone_check", null, { passed: false, missedLessons: ["2.5"] })], []) === "mini project tests not passed");
+const rp = ruleRevision(b3, [sig("capstone_check", null, { passed: false, missedLessons: ["2.5"] })]);
+check("rules: a weak requirement adds help to its lesson", rp?.modules[1]!.lessons.find((l) => l.lessonId === "2.5")!.support === "extra" && rp.changes[0]!.reason.includes("mini project"), rp?.changes);
 
 console.log("\nPROMPT SAMPLE (user turn, first lines):\n" + plannerPrompt({ ctx, input: engineer, previous: null, evidence: [], trigger: "enrol" }).user.split("\n").slice(0, 14).join("\n"));
 console.log(`\n${failures ? `${failures} FAILED` : "ALL PASSED"}`);

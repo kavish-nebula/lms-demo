@@ -32,12 +32,15 @@ export function FinalePlayer({
   finale,
   step,
   authoredModules,
+  hasProject = false,
 }: {
   course: Course;
   finale: FinaleContent;
   step: FinaleStepId;
   /** modules with lesson content, so "revisit" links can open the lesson itself */
   authoredModules: string[];
+  /** the mini project is built in the browser, in its workspace */
+  hasProject?: boolean;
 }) {
   const t = useTranslations("finale");
   const tp = useTranslations("player");
@@ -109,6 +112,7 @@ export function FinalePlayer({
         roleKey={adaptation.roleKey}
         roleLabel={adaptation.roleLabel}
         planBrief={adaptation.plan?.capstoneBrief ?? null}
+        workspace={hasProject ? { href: `/learn/courses/${course.course_id}/finale/capstone/workspace`, courseId: course.course_id, enrolled } : null}
         done={current.done}
         onComplete={() => {
           if (!current.done) markDone("capstone", { capstoneAt: new Date().toISOString() });

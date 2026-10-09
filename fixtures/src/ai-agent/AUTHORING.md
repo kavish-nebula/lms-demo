@@ -483,3 +483,24 @@ Three short questions that return after 3, 10 and 30 days, each a little harder 
   ]
 }
 ```
+
+---
+
+## 6. The mini project: `project/`
+
+The course finale's mini project, "Build Scout's prompt engine", is built and tested in the browser (`/learn/courses/ai-agent/finale/capstone/workspace`). The brief (title, scene, requirements, edge cases, reactions) is `finale.json` `capstone` as before; the workspace is `project/`:
+
+| File | What it is |
+|---|---|
+| `prompt_engine.py` | The starter the learner edits. Three functions: `ask_model(ticket)`, `parse_reply(text)`, `decide(result, ticket)`. Keep it short and working, but failing. |
+| `docs/policy.md` | Orbit's policy, word for word from section 1. Shown read-only; `orbit.POLICY` reads it. |
+| `orbit/model.py` | The practice model, hidden from the learner. `client.messages.create(model=MODEL, max_tokens=..., system=..., messages=..., output_config=...)` with the real API's shape and errors (no `temperature`, no `system` role in `messages`). Deterministic: it reads emails well and follows only what the prompt clearly says; each gap produces one realistic mistake (see its docstring). An output schema makes its reply valid JSON with only the schema's fields and enum values. |
+| `run.py` | The harness the workspace runs (hidden). Do not change its output shape without changing `apps/web/src/components/project`. |
+| `tickets.json` | `samples` (shown, with what Scout should do) and `hidden` (the tests; their `expect` stays on the server). Use the shared data from section 1: customers, order numbers, products. |
+| `solution/prompt_engine.py` | The reference solution. Never shipped. |
+
+Rules:
+
+- The seven `requirements` in `finale.json` are graded as r1 to r7 in that order (`apps/web/src/lib/project-grade.ts`): fields, intent, order number or email, policy, routing, same answer twice, voice. Reword them freely; keep the order and the meaning.
+- Every `hidden` ticket's `expect` gives `intent` (or a list), `order_id`, `email`, `action` (`reply`, `ask_for_order` or `handoff`), and optionally `include`/`exclude` phrases for the reply and `critical: true` (failing it fails the project).
+- After any change, run `node fixtures/scripts/check-project.mjs` (needs Python 3.10+): the starter must fail and the reference solution must score 100%, on the samples too. Then `node fixtures/scripts/build-ai-agent.mjs` writes `fixtures/project-ai-agent.json` (the browser's copy, no hidden answers) and `fixtures/project-ai-agent-tests.json` (server only).
