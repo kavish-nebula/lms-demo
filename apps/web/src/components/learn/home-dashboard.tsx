@@ -11,7 +11,7 @@ import { SectionHeader } from "@/components/kit/page-header";
 import { Surface } from "@/components/kit/surface";
 import { Chip } from "@/components/kit/chip";
 import { NebulaMark } from "@/components/kit/logo";
-import { CardSkeleton } from "@/components/kit/states";
+import { CardSkeleton, EmptyState } from "@/components/kit/states";
 import { UpNextTicker } from "@/components/plan/up-next-ticker";
 import { ResumeCard } from "@/components/learn/resume-card";
 import { ProgramCard } from "@/components/course/program-card";
@@ -47,15 +47,16 @@ export function HomeDashboard({ learner, courses, today }: { learner: Learner; c
   return enrolled.length ? (
     <EnrolledHome learner={learner} courses={enrolled} progress={progress} today={today} />
   ) : (
-    <WelcomeHome course={courses[0]!} />
+    <WelcomeHome course={courses[0]} />
   );
 }
 
 /* ---------------------------------------------------------------- not enrolled */
 
-function WelcomeHome({ course }: { course: Course }) {
+function WelcomeHome({ course }: { course: Course | undefined }) {
   const t = useTranslations("home");
   const tc = useTranslations("course");
+  if (!course) return <EmptyState icon={<GraduationCap />} title={t("noCoursesTitle")} description={t("noCoursesBody")} />;
   const steps = [
     { icon: <ListChecks />, title: t("welcomeStep1"), body: t("welcomeStep1Body", { count: QUESTIONS.length }) },
     { icon: <Wand2 />, title: t("welcomeStep2"), body: t("welcomeStep2Body") },

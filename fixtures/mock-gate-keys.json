@@ -1,45 +1,141 @@
 {
-  "$comment": "MOCK ONLY. Stands in for server-side scoring; never ship keys to the client in production.",
+  "$comment": "MOCK ONLY. Generated. Stands in for server-side scoring; never ship keys to the client in production. Keys per check: final (final-assessment answers), final_explain (why each answer is right), precheck (prior-knowledge answers), gate-mN and gate-mN_explain (each module's closing check).",
   "final": {
     "f1": "b",
-    "f2": "a",
-    "f3": "c",
+    "f2": "c",
+    "f3": "a",
     "f4": "d",
-    "f5": "b",
-    "f6": "c",
-    "f7": "a",
-    "f8": "d",
-    "f9": "b",
-    "f10": "b",
-    "f11": "c",
-    "f12": "d"
+    "f5": "c",
+    "f6": "a",
+    "f7": "d",
+    "f8": "b",
+    "f9": "a",
+    "f10": "c",
+    "f11": "d",
+    "f12": "b"
   },
   "final_explain": {
-    "f1": "The trigger starts the execution; the items travel inside it, and every node handles them one by one.",
-    "f2": "The trigger and the middle of the pipeline are already proven by the green runs. The only unknown is what the other system answered — and that is in the last node’s response.",
-    "f3": "Set reshapes, Filter decides. Confusing the two is how data gets “cleaned” by silently dropping it.",
-    "f4": "300 − 36 − 41 = 223. Move the duplicate guard downstream and the 41 repeats are alerted before anything checks them: 300 − 36 = 264.",
-    "f5": "Success describes the node, not the outcome. The outcome is in the response it got back.",
-    "f6": "The guard compares values exactly. Until case and spacing are made uniform, one address is two different strings.",
-    "f7": "Expressions are per item and on the fly — which is why one misspelled field name fails on every item.",
-    "f8": "Normalise before you compare or default. Otherwise “FREE ” and “free” live side by side as two plans.",
-    "f9": "A guard placed after the action runs, shows green, and protects nothing.",
-    "f10": "Nothing errored: the expression simply found no such field. Quiet failures like this are why field names are tidied once, upstream.",
-    "f11": "A trustworthy pipeline can say how many rows each guard stopped and why — not just that it ran.",
-    "f12": "Two ordering faults at once: nothing protects the write, and the guards compare values that have not been cleaned yet."
+    "f1": "The steps never change, so a fixed workflow is cheaper, faster and more predictable. Agents earn their cost when the steps depend on the situation.",
+    "f2": "Without tools the model can only talk. Tools are what let an agent look things up and act.",
+    "f3": "Models fill gaps with plausible text. Giving the real facts and clear rules in the system prompt removes the gap.",
+    "f4": "A JSON schema in the request makes the reply match the shape your code expects, every time.",
+    "f5": "The model chooses tools from their descriptions. A clear description of when to use each tool is the first fix.",
+    "f6": "A 429 is usually temporary, so a short retry often works. If it doesn't, the model needs the error to answer honestly.",
+    "f7": "Trimming keeps requests small and cheap; pinned facts make sure what matters is never trimmed away.",
+    "f8": "With retrieval, answers are only as current as the documents searched. Remove or replace the old file.",
+    "f9": "Failures usually cluster. The trace shows the exact step that went wrong, and one fix often clears many cases.",
+    "f10": "Look at what fails, not just the number. A small number of unsafe failures matters more than a high score.",
+    "f11": "Instructions inside customer text are data, not commands. Policy and the approval guardrail still apply.",
+    "f12": "Every step re-sends the conversation, so smaller requests and cheaper models for simple steps cut cost directly."
   },
   "precheck": {
-    "p1": "a",
-    "p2": "c",
-    "p3": "b",
+    "p1": "c",
+    "p2": "a",
+    "p3": "a",
     "p4": "a",
     "p5": "c",
-    "p6": "b",
+    "p6": "c",
     "p7": "a",
-    "p8": "c",
-    "p9": "b",
-    "p10": "a",
-    "p11": "c",
-    "p12": "b"
+    "p8": "a",
+    "p9": "a",
+    "p10": "c",
+    "p11": "a",
+    "p12": "a"
+  },
+  "gate-m1": {
+    "q1": "b",
+    "q2": "a",
+    "q3": "d",
+    "q4": "c",
+    "q5": "b",
+    "q6": "a"
+  },
+  "gate-m1_explain": {
+    "q1": "Autonomy is a dial: give Scout the least power that does the job. A wrong address is hard to undo once the parcel leaves, so a person approves each change at first. A Friday review only finds mistakes after the parcels have gone.",
+    "q2": "Only one step needs judgement: reading the customer's words. The rest never changes, so a workflow can run it and call a model just for the tag. A full agent adds cost and surprises to steps nobody needs to decide, and keyword rules miss messy wording.",
+    "q3": "A good first agent job repeats, needs lookups and forgives mistakes. Both repeat, but the returns address is the same for everyone, so a help page answers it for free. Return status needs a lookup for each customer, and a wrong answer is easy to correct.",
+    "q4": "For tools you define, the model only sends a request naming the tool and its input; your code runs it. With just get_order defined, there's nothing to ask for that deletes data. A prompt guides the model but runs no code, and the model does decide its own steps.",
+    "q5": "Assume a leaked key is already copied: scanners search public code for keys, and Git keeps the old commit. Only deleting the key in the console stops others spending your credit. A new commit, a private repo or .gitignore all leave the old key working.",
+    "q6": "The text has fixed steps, so a workflow sends it fast and cheaply every time. Questions vary and need lookups in the log, so the steps depend on the request: agent work, and it can start read-only. One agent for both adds cost and risk to a job with nothing to decide."
+  },
+  "gate-m2": {
+    "q1": "c",
+    "q2": "b",
+    "q3": "a",
+    "q4": "d",
+    "q5": "c",
+    "q6": "b"
+  },
+  "gate-m2_explain": {
+    "q1": "The model learned only in training and keeps nothing between requests, so last week's chat is gone. If the policy isn't in the context window, it doesn't exist for the model. A one-line reminder is rules without facts, which is how the 90-day promise happened.",
+    "q2": "Both happen on every ticket. 300 input words is about 400 tokens at $4 per million; 200 output words is about 270 tokens at $20 per million, over three times the saving. The reply is written on every request too, so the resent prompt doesn't outweigh it.",
+    "q3": "With four changes at once she can't tell which one helped and which one broke the old email. One change per run, on the same emails, shows what each edit really does. Tuning on a single email risks breaking the other nine.",
+    "q4": "Shouting makes models stiff and over-cautious, and \"never mention refunds\" clashes with a policy full of them. A calm rule with a reason keeps Scout on policy and still helpful. Deleting the rule removes the guard that stops invented promises.",
+    "q5": "An enum limits a field to a fixed list, so the model can only pick one of your five labels. additionalProperties false blocks extra fields, not odd values inside a field. Asking in the prompt usually works, but it is a request, not a guarantee.",
+    "q6": "A valid shape is not a true answer, and a sentence in a prompt can't protect money: the model may copy the amount the customer asked for. Code that checks the value and routes odd cases to a person owns the decision. Louder rules or a bigger model still leave it to the model."
+  },
+  "gate-m3": {
+    "q1": "d",
+    "q2": "c",
+    "q3": "b",
+    "q4": "a",
+    "q5": "d",
+    "q6": "c"
+  },
+  "gate-m3_explain": {
+    "q1": "Scout can only write text, so \"I've refunded your $60\" was just words. A real action happens only when Scout asks for a tool like request_refund and your code runs it. A firmer rule or a bigger model still only produces text.",
+    "q2": "Scout asked for track_parcel, so the definition reached the model. The error comes from run_tool: the name has no entry in FUNCTIONS, so there is nothing to call. The definition tells the model a tool exists; the mapping makes it real.",
+    "q3": "Models predict digits much like words, so a sum can be a little off while sounding sure. Checking twice in its head repeats the same weakness. Handing 58 - 6.95 to calculate gives exactly 51.05, every time.",
+    "q4": "A thin track_parcel function gives Scout one clear job and only the power it needs, while the key, timeout and trimming stay in your code. A general tool hands the model every endpoint, and a key the model can see can be repeated or leaked.",
+    "q5": "A 404 fails the same way every time, so retrying only keeps Tom waiting. An empty result would let Scout guess, as it did for Elena. Reported as is_error, the failure lets Scout ask Tom to check the number, with no hand-off needed yet.",
+    "q6": "An empty list reads as \"no slots\", so the assistant was certain and wrong, and a prompt rule can't fix that. A short retry handles a blip; is_error tells the truth after that. Usual slots are a guess that can double-book, and endless retries keep customers waiting."
+  },
+  "gate-m4": {
+    "q1": "a",
+    "q2": "d",
+    "q3": "c",
+    "q4": "b",
+    "q5": "a",
+    "q6": "d"
+  },
+  "gate-m4_explain": {
+    "q1": "Her size is useful next time and low risk. Stock changes daily and already lives in Sam's stock sheet, so check it fresh. A full transcript is slow, costly and more to protect, and details kept just in case are only risk.",
+    "q2": "A big window is what fits, not what's free. Every call resends the whole chat, so turn 45 reads far more tokens than turn 5: slower and pricier. Recent turns, a short note and pinned facts keep requests small; a fresh chat would make Elena repeat herself.",
+    "q3": "Cutting every 50 words splits the steps in half, so even the best match is incomplete. Splitting at headings keeps each passage whole. Embeddings still find broken pieces, extra chunks add noise, and pasting 40 pages into every call is slow and buries the key line.",
+    "q4": "Steps that move money follow Orbit's rules. A $310 refund waits for a teammate's approval, and refunds arrive within 5 business days of the return arriving, so step 4 promises what Scout can't. Four short steps is a normal plan, and the lookup order is fine.",
+    "q5": "ReAct decides each step from what it just observed. get_order shows no tracking number yet, so the next think skips track_parcel and tells Ravi his order is still being prepared. A plan written up front has the script's blind spot, and a step limit never picks steps.",
+    "q6": "Each part of the request needs a step. Two are grounded in retrieved text and the third isn't covered, so the honest reply says so and offers the owner. Guessing invents a promise, skipping it leaves her asking again, and handing off everything wastes good answers."
+  },
+  "gate-m5": {
+    "q1": "b",
+    "q2": "a",
+    "q3": "d",
+    "q4": "c",
+    "q5": "b",
+    "q6": "a"
+  },
+  "gate-m5_explain": {
+    "q1": "Writing down what Scout won't do, and who handles it, is part of the design. A hand-off gets the customer to someone who can act. A new action tool weeks before launch adds untested risk, and confirming a change Scout can't make is a promise.",
+    "q2": "The build loop is build, run, check, keep: ask a real question that needs the new piece and read the trace. The old order question never calls request_refund, and testing two new tools together gives every error two suspects.",
+    "q3": "Four of Scout's tools only read, so a repeated search wastes a step but harms no one. request_refund changes something, so a repeat could move money twice. Tools that act need more care, which is why their rules live inside the tool.",
+    "q4": "Read from the top. Step 1 is fine. Step 2 is the first bad step: wrong arguments, the order ID in the tracking field. The guessed window is a second bug, an ignored error, but it follows from step 2. Fix the input first, then re-run.",
+    "q5": "Same total, worse agent: refund failures break policy and move money, clumsy wording doesn't. Look at which cases moved, not just the number, then fix or undo the change and re-run. Chasing a lucky run only hides what broke.",
+    "q6": "A made-up nut-free claim is an unsafe failure, so the score can't decide this. With no allergen data the agent can never answer well: scope those questions to a person, test the hand-off and re-run. Ship when what still fails is safe, not perfect."
+  },
+  "gate-m6": {
+    "q1": "c",
+    "q2": "b",
+    "q3": "a",
+    "q4": "d",
+    "q5": "c",
+    "q6": "b"
+  },
+  "gate-m6_explain": {
+    "q1": "A prompt rule is followed most of the time, not every time. The approval guard only holds refunds over $200, so $190 slips past it, and a flag only logs. A check in your own code runs whatever the model decides.",
+    "q2": "Each change can hurt quality in its own way. One at a time, with the tests re-run, shows which saving is safe and which one broke answers. A small model suits simple steps like sorting a ticket, not the answer the customer reads.",
+    "q3": "The model has no memory, so the server holds each chat by session id. A dictionary in memory is lost on every restart, and a deploy always restarts the server, with or without --reload. A database keeps sessions across restarts.",
+    "q4": "Scout isn't crowded: it picks the right tools and fails only where an outside API times out. A tracking agent would hit the same timeouts, plus extra routing calls and a longer trace. Split only when tests show one agent struggling.",
+    "q5": "Her problem is checking quality, not finding text or adding tools. Evaluations at scale grow the test set and use a model as a grader for answers with no single right wording. Embeddings help Scout search by meaning, not grade replies.",
+    "q6": "Calling the model from the browser puts the key in the page, so anyone can copy it and run up a bill. Limits in the page can't stop them, because they use the key directly. Revoke it, keep the new key on a server, and alert on spend."
   }
 }

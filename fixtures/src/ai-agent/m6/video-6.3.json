@@ -1,0 +1,254 @@
+{
+  "lesson": "6.3",
+  "title": "Deploying the agent (web app or API)",
+  "notes": [
+    "Deploying means wrapping Scout in an API endpoint, such as POST /chat, so a website or app can send a message and get a reply.",
+    "The API key stays on the server, in an environment variable; never in a browser, an app or your code.",
+    "Each chat sends a session id, so the server can keep that customer's conversation separate from everyone else's."
+  ],
+  "quizAfter": 3,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "rocket",
+      "kicker": "Module 6 · Lesson 3",
+      "title": "Deploying the agent (web app or API)",
+      "sub": "From a script on your laptop to an endpoint any app can call",
+      "sentences": [
+        "Right now Scout lives in your terminal, and only you can talk to it.",
+        "In this lesson you will see how to put Scout behind a web API, so Orbit's website, app or help desk can all use it.",
+        "You will also learn where the API key must live, and how the server keeps each customer's chat apart."
+      ]
+    },
+    {
+      "kind": "cards",
+      "title": "What changes when Scout goes live",
+      "cards": [
+        {
+          "icon": "users",
+          "title": "Many customers at once",
+          "flow": ["Each chat has a session id", "The server keeps each history", "Chats never mix"],
+          "cue": 1
+        },
+        {
+          "icon": "server",
+          "title": "Always on",
+          "flow": ["Runs on a server, not a laptop", "Restarted if it crashes", "Same agent code as today"],
+          "cue": 2
+        },
+        {
+          "icon": "shield",
+          "title": "Guarded and logged",
+          "flow": ["Limits on every request", "Key kept on the server", "One log line per request"],
+          "cue": 3
+        }
+      ],
+      "sentences": [
+        "Today Scout is a script: only you can use it, and it stops when you close the terminal.",
+        "Live, it serves many customers at once, so every chat needs its own id and its own history.",
+        "It runs all day on a server, and the host restarts it if it ever crashes.",
+        "And every request passes through your guardrails and leaves a log line behind.",
+        "The good news is that the agent code barely changes: you wrap it, you do not rewrite it."
+      ]
+    },
+    {
+      "kind": "define",
+      "title": "What an API endpoint is",
+      "term": "API endpoint",
+      "definition": "A web address your program listens on. Other programs send it a request and get a structured reply back.",
+      "parts": [
+        { "text": "An address: POST /chat", "cue": 1 },
+        { "text": "JSON in: session id and message", "cue": 2 },
+        { "text": "JSON out: reply, steps and cost", "cue": 3 }
+      ],
+      "analogy": {
+        "label": "Think of it as",
+        "text": "A service window: you hand in a slip with your question, and a slip comes back with the answer."
+      },
+      "sentences": [
+        "The usual way to share an agent is an API endpoint.",
+        "An endpoint is a web address your program listens on; Scout's is called chat, and it takes POST requests, which carry data in.",
+        "Each request carries a little JSON with two fields: a session id and the customer's message.",
+        "The response is JSON too: Scout's reply, plus the number of steps and the cost, which are handy for monitoring.",
+        "Picture a service window: you hand in a slip with a question, and a slip comes back with the answer.",
+        "Whoever stands at the window can be a website, a phone app or another program."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "One message, end to end",
+      "run": true,
+      "nodes": [
+        { "kind": "user", "icon": "globe", "label": "Browser", "sub": "Orbit's chat widget", "cue": 1 },
+        { "kind": "logic", "icon": "server", "label": "Your API", "sub": "POST /chat, holds the key", "cue": 2 },
+        { "kind": "llm", "icon": "bot", "label": "Scout", "sub": "the tool loop, with limits", "cue": 3 },
+        { "kind": "tool", "icon": "wrench", "label": "Tools", "sub": "orders, tracking, policy", "cue": 4 }
+      ],
+      "note": { "text": "The browser never sees the API key, the tools or the system prompt. It only sees the reply.", "cue": 5 },
+      "sentences": [
+        "Follow one message from start to finish.",
+        "A customer types into the chat widget on Orbit's website, and the browser sends the message to your API.",
+        "Your API, running on a server, finds that customer's session and hands the message to Scout.",
+        "Scout runs its loop, with the step and spend limits from your guards file.",
+        "It calls tools such as get order and track parcel on the server, and the reply travels back the same way.",
+        "Notice what the browser never sees: the API key, the tools or the system prompt."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Where the API key lives",
+      "left": {
+        "label": "Never here",
+        "tone": "bad",
+        "cue": 1,
+        "points": ["In the website's JavaScript", "Inside a phone app", "In code pushed to Git", "In a chat message or email"]
+      },
+      "right": {
+        "label": "Only here",
+        "tone": "ok",
+        "cue": 3,
+        "points": ["The server's environment", "The host's secret settings", "Read by anthropic.Anthropic()", "Replaced at once if it leaks"]
+      },
+      "sentences": [
+        "Now the most important rule of deploying: where the API key lives.",
+        "Anything you send to a browser or put in an app can be read by anyone who opens the developer tools or unpacks the app.",
+        "A leaked key lets a stranger run up a bill on Orbit's account, with none of your limits in the way.",
+        "So the key lives only on the server, as an environment variable, set in the host's secret settings.",
+        "The SDK reads it from there, exactly as it has since Module 1, so your code never contains it.",
+        "And if a key ever leaks, revoke it in the console straight away and create a new one."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "The endpoint in a few lines",
+      "lead": "FastAPI turns a Python function into a web endpoint. Here is the heart of server.py.",
+      "rows": [
+        { "code": "@app.post(\"/chat\")", "out": "run this function for POST /chat", "cue": 1 },
+        { "code": "convo = sessions.setdefault(req.session_id, Conversation())", "out": "find or start this customer's chat", "cue": 2 },
+        { "code": "result = run_turn(convo, req.message)", "out": "Scout's loop, guardrails included", "cue": 3 },
+        { "code": "return {\"reply\": result[\"reply\"], ...}", "out": "JSON back to the caller", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "terminal",
+        "label": "Run it",
+        "text": "uvicorn server:app --reload serves it at http://127.0.0.1:8000, with a test page at /docs.",
+        "cue": 5
+      },
+      "sentences": [
+        "Here is the heart of the server, using FastAPI, a popular Python web framework.",
+        "One line tells FastAPI to call our function for every POST request to chat.",
+        "The server keeps a dictionary of conversations, one per session id, and finds or starts this customer's chat.",
+        "Then it calls the same run turn function you can try in the terminal, guardrails included.",
+        "Finally it returns the reply as JSON, together with the step count and the cost.",
+        "To run it, you start uvicorn, a small web server for Python, and it listens on your own machine on port eight thousand."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "Sessions keep chats apart",
+      "columns": ["Session id", "Customer", "What the server holds"],
+      "rows": [
+        { "cells": ["ana-7f3c", "Ana", "Asked where her tent is"], "cue": 2 },
+        { "cells": ["owen-91ab", "Owen", "Refund pending approval"], "cue": 3 },
+        { "cells": ["grace-02de", "Grace", "Flagged message, handed off"], "cue": 3 }
+      ],
+      "note": { "text": "A dictionary in memory is fine to start. It is lost on restart, so production keeps sessions in a database.", "cue": 4 },
+      "sentences": [
+        "Remember that the model has no memory of its own; your code sends the history every time.",
+        "So the server must know which history belongs to which customer, and that is what the session id is for.",
+        "The chat widget makes up a random id when a chat starts and sends it with every message.",
+        "The server keeps each id's conversation separately, so Owen's chat never shows him anything about Ana's order.",
+        "A Python dictionary works on one server, but it is lost on every restart, so real deployments keep sessions in a database."
+      ]
+    },
+    {
+      "kind": "hub",
+      "title": "Where to host it",
+      "center": { "icon": "cloud", "label": "Scout's API", "sub": "server.py plus your project" },
+      "spokes": [
+        { "icon": "server", "label": "Virtual server", "sub": "a rented machine runs uvicorn", "cue": 1 },
+        { "icon": "boxes", "label": "Container service", "sub": "build an image, they run it", "cue": 2 },
+        { "icon": "rocket", "label": "App platform", "sub": "push your code, they host it", "cue": 3 },
+        { "icon": "key", "label": "Secret settings", "sub": "ANTHROPIC_API_KEY lives here", "cue": 4 },
+        { "icon": "lock", "label": "HTTPS and checks", "sub": "encrypt traffic, limit callers", "cue": 5 }
+      ],
+      "note": { "text": "Same start command everywhere: uvicorn server:app --host 0.0.0.0 --port 8000", "cue": 6 },
+      "sentences": [
+        "Where should the server run? Almost anywhere that runs Python.",
+        "You can rent a small virtual server and run uvicorn on it yourself.",
+        "You can package the project as a container, a sealed box with Python and your code inside, and hand it to a container service.",
+        "Or you can use an app platform that takes your code and runs it for you.",
+        "Whichever you choose, the API key goes into that host's secret settings, never into a file.",
+        "Put HTTPS in front so traffic is encrypted, check who is calling, and add a rate limit so one caller cannot flood Scout.",
+        "The start command is the same everywhere: uvicorn, pointed at your server file, without the reload option."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "Recap: deploying Scout",
+      "points": [
+        { "text": "Deploying means wrapping Scout in an API endpoint, like POST /chat.", "cue": 1 },
+        { "text": "The API key lives only in the server's environment.", "cue": 2 },
+        { "text": "A session id keeps each customer's conversation apart.", "cue": 3 },
+        { "text": "FastAPI and uvicorn run it; any server or container service can host it.", "cue": 4 },
+        { "text": "Before going public: HTTPS, a check on callers and a rate limit.", "cue": 5 }
+      ],
+      "sentences": [
+        "Let us sum up.",
+        "Deploying means wrapping Scout in an API endpoint that other programs can call.",
+        "The API key lives only in the server's environment, never in a browser or an app.",
+        "A session id tells the server which conversation each message belongs to.",
+        "FastAPI and uvicorn run it, and any virtual server, container service or app platform can host it.",
+        "Before going public, add HTTPS, a check on who is calling and a rate limit."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "What does Scout's POST /chat endpoint receive in each request?",
+      "options": [
+        "The customer's API key and their message",
+        "A session id and the customer's message",
+        "The full system prompt and the tool list"
+      ],
+      "correct": 1,
+      "explain": "The caller only sends a session id and the message. The key, the system prompt and the tools all stay on the server.",
+      "hint": "Think about what the browser is allowed to know."
+    },
+    {
+      "q": "In the flow from browser to API to Scout to tools, where does the Anthropic API key live?",
+      "options": [
+        "In the chat widget, so the browser can call the model",
+        "On the server that runs your API",
+        "Inside the session id the widget sends"
+      ],
+      "correct": 1,
+      "explain": "Only the server talks to the model, so only the server needs the key. It reads it from its environment, never from the browser.",
+      "hint": "Which part of the flow actually calls the model?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "A teammate wants to call the model straight from the website's JavaScript to skip the server. What is the problem?",
+      "options": [
+        "Browsers cannot send JSON to an API",
+        "The API key would be readable by anyone who opens the developer tools",
+        "The model answers more slowly when it is called from a browser"
+      ],
+      "correct": 1,
+      "explain": "Everything sent to a browser can be read. A key in the page lets anyone run up a bill on Orbit's account, with none of your limits in the way.",
+      "hint": "What can a curious visitor see in their own browser?"
+    },
+    {
+      "q": "Owen and Ana chat with Scout at the same time. What keeps Owen's chat apart from Ana's?",
+      "options": [
+        "Each chat has its own session id and its own history on the server",
+        "The model remembers which customer is which",
+        "uvicorn starts a separate copy of Scout for each customer"
+      ],
+      "correct": 0,
+      "explain": "The model has no memory of its own. The server stores one conversation per session id and sends only that history with each request.",
+      "hint": "Where does the conversation history actually live?"
+    }
+  ]
+}

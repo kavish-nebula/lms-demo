@@ -1,0 +1,218 @@
+{
+  "lesson": "4.5",
+  "title": "The agent loop: think, act, observe (ReAct)",
+  "notes": [
+    "ReAct, short for reason and act, is the agent loop: think, act, observe, and repeat until the job is done.",
+    "Your code runs the loop and the tools; the model decides each step, and a trace shows why.",
+    "Every loop needs a step limit in code, and an honest hand-off with a summary when it is reached."
+  ],
+  "quizAfter": 4,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "repeat",
+      "kicker": "Module 4 · Lesson 5",
+      "title": "The agent loop: think, act, observe (ReAct)",
+      "sub": "The loop at the heart of every agent, and the limit that keeps it safe",
+      "sentences": [
+        "This is the last lesson of the module, and it ties everything together.",
+        "Memory, retrieval and planning all run inside one loop.",
+        "You will learn how the loop works, how to read it, and why it always needs a limit."
+      ]
+    },
+    {
+      "kind": "define",
+      "title": "Reason and act",
+      "term": "ReAct",
+      "definition": "Reason and act: the agent thinks about the next step, takes one action, observes the result, and repeats.",
+      "parts": [
+        { "text": "Think: decide the next step", "cue": 1 },
+        { "text": "Act: call a tool", "cue": 2 },
+        { "text": "Observe: read the result", "cue": 3 }
+      ],
+      "analogy": {
+        "label": "Think of it as",
+        "text": "A cook tasting as they go: season, taste, adjust, taste again, and stop when it's right."
+      },
+      "sentences": [
+        "The pattern is called react, short for reason and act.",
+        "First the agent thinks: given what it knows, what's the next step?",
+        "Then it acts, usually by calling one tool.",
+        "Then it observes: it reads the tool's result and adds it to what it knows.",
+        "Think of a cook tasting as they go. Season, taste, adjust, and stop when it's right."
+      ]
+    },
+    {
+      "kind": "cycle",
+      "title": "The loop",
+      "center": { "label": "Scout", "sub": "until done, or the limit" },
+      "steps": [
+        { "icon": "brain", "label": "Think", "sub": "what's the next step?", "cue": 1 },
+        { "icon": "wrench", "label": "Act", "sub": "call one tool", "cue": 2 },
+        { "icon": "eye", "label": "Observe", "sub": "read the result", "cue": 3 },
+        { "icon": "check", "label": "Done?", "sub": "reply, or go round again", "cue": 4 }
+      ],
+      "note": { "text": "Your code runs the loop. The model decides each step.", "cue": 5 },
+      "sentences": [
+        "Drawn as a loop, it looks like this.",
+        "Think: Scout looks at the conversation and the results so far, and decides what to do next.",
+        "Act: it asks for a tool, and your code runs it.",
+        "Observe: the result goes back into the messages, so Scout can read it.",
+        "Then a check: is the job done? If yes, Scout replies. If not, it goes round again.",
+        "Notice who does what. Your code runs the loop, and the model decides each step."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "Reading a ReAct trace",
+      "messages": [
+        { "role": "user", "label": "Ana", "text": "Swap my tent for the 3-person one and tell me when it arrives. ORB-10482.", "cue": 0 },
+        { "role": "agent", "label": "Think", "text": "Plan: check her order, then the 3-person tent's stock.", "cue": 1 },
+        { "role": "tool", "label": "Act, observe", "text": "get_order(ORB-10482) → Trailhead 2P tent, green, shipped", "cue": 2 },
+        { "role": "tool", "label": "Act, observe", "text": "check_stock(TENT-3P-GRN) → 0 in stock", "cue": 3 },
+        { "role": "agent", "label": "Think", "text": "No swap possible today. Offer: keep the 2P, or return it within 30 days.", "cue": 4 },
+        { "role": "agent", "label": "Reply", "text": "Sorry, Ana, the 3-person tent is sold out. Your 2-person tent is on its way: you can keep it, or return it within 30 days of delivery.", "cue": 5 }
+      ],
+      "sentences": [
+        "Here's Ana's request again, this time as a trace of the loop.",
+        "Scout thinks first: check the order, then the stock.",
+        "It acts with the get order tool, and observes that her two-person tent has shipped.",
+        "It acts again with check stock, and observes a zero.",
+        "It thinks again with the new fact: the swap can't happen today, so it changes course.",
+        "Finally it replies with options, and the loop ends.",
+        "Reading a trace like this, step by step, is how you will debug agents in Module 5."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "The loop in your code",
+      "lead": "You wrote this loop in Module 3. Each part maps to think, act or observe.",
+      "rows": [
+        { "code": "for step in range(MAX_STEPS):", "out": "the loop, with a hard limit", "cue": 1 },
+        { "code": "response = client.messages.create(...)", "out": "think: the model picks its next move", "cue": 2 },
+        { "code": "output = run_tool(block.name, block.input)", "out": "act: your code runs the tool", "cue": 3 },
+        { "code": "messages.append({\"role\": \"user\", \"content\": results})", "out": "observe: results go back to the model", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "check",
+        "label": "Done",
+        "text": "When stop_reason isn't tool_use, the model has answered and the loop breaks.",
+        "cue": 5
+      },
+      "sentences": [
+        "Good news: you already wrote this loop in Module 3.",
+        "The for loop allows a fixed number of steps, and no more.",
+        "Each call to messages create is a think: the model reads everything and picks its next move.",
+        "When it asks for a tool, your run tool function is the act.",
+        "Appending the results to the messages is the observe step.",
+        "And when the stop reason is anything other than tool use, the model has answered, and the loop ends."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "Why the loop needs a limit",
+      "columns": ["What goes wrong", "Without a limit", "With MAX_STEPS = 6"],
+      "rows": [
+        { "cells": ["Tracking keeps timing out", "Retries all night", "Stops after 6 steps"], "cue": 1 },
+        { "cells": ["Item out of stock", "Re-plans in circles", "Hands off with a summary"], "cue": 2 },
+        { "cells": ["Model misreads a result", "Same call, over and over", "Caught and handed off"], "cue": 3 },
+        { "cells": ["Cost per message", "No ceiling", "A known maximum"], "cue": 4 }
+      ],
+      "note": { "text": "Six steps covers almost every Orbit request. If Scout needs more, a person should look.", "cue": 5 },
+      "sentences": [
+        "Every loop needs a way out that doesn't depend on the model.",
+        "If the tracking service keeps timing out, a loop with no limit can retry all night.",
+        "If an item is out of stock, an agent can re-plan in circles, trying the same idea again and again.",
+        "And if the model misreads a result, it may repeat the same call over and over.",
+        "A step limit puts a hard ceiling on the time and the cost of every message.",
+        "Six steps covers almost every Orbit request. If Scout needs more, a person should take a look."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "When the limit is hit",
+      "run": true,
+      "nodes": [
+        { "kind": "logic", "icon": "repeat", "label": "Step 6 of 6", "sub": "job still not done", "cue": 1 },
+        { "kind": "guard", "icon": "shield", "label": "Stop the loop", "sub": "no more tool calls", "cue": 2 },
+        { "kind": "action", "icon": "file", "label": "Write a summary", "sub": "asked, tried, failed", "cue": 3 },
+        { "kind": "output", "icon": "headset", "label": "Hand off", "sub": "a person takes over", "cue": 4 }
+      ],
+      "note": { "text": "Tell the customer the truth: a teammate is on it. Never a guess dressed up as an answer.", "cue": 5 },
+      "sentences": [
+        "So what should happen when the limit is reached?",
+        "The loop has used its last step, and the job still isn't done.",
+        "Your code stops it. No more tool calls, whatever the model asks for.",
+        "It writes a short summary: what the customer asked, what was tried, and what failed.",
+        "Then it hands the case to a person, who starts from that summary instead of from scratch.",
+        "And the customer hears the truth: a teammate is picking this up. Never a guess dressed up as an answer."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "ReAct: think, act, observe, and repeat until the job is done.", "cue": 1 },
+        { "text": "Your code runs the loop; the model decides each step.", "cue": 2 },
+        { "text": "A trace shows exactly why the agent did what it did.", "cue": 3 },
+        { "text": "Always a step limit, with an honest hand-off when it's hit.", "cue": 4 }
+      ],
+      "sentences": [
+        "Let's recap the module's last idea.",
+        "React, short for reason and act, means think, act, observe, and repeat until the job is done.",
+        "Your code runs the loop, and the model decides each step inside it.",
+        "A trace of those steps shows you exactly why the agent did what it did.",
+        "Every loop gets a step limit, with an honest hand-off when it's reached.",
+        "Now watch Scout do all of this, then build it yourself."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "In the ReAct loop, what happens in the observe step?",
+      "options": [
+        "The model reads the tool's result and updates what it knows",
+        "Your code shows the customer each tool call",
+        "The model checks its reply for typos"
+      ],
+      "correct": 0,
+      "explain": "Observe means the tool result goes back into the messages, so the model's next think starts from the new facts.",
+      "hint": "Observe comes right after act. What does an act produce?"
+    },
+    {
+      "q": "In your Python loop, which line is the act step?",
+      "options": [
+        "for step in range(MAX_STEPS):",
+        "output = run_tool(block.name, block.input)",
+        "if response.stop_reason != \"tool_use\": break"
+      ],
+      "correct": 1,
+      "explain": "The model only asks for a tool. Your code acts: run_tool is the line that actually runs it.",
+      "hint": "Which line actually does something in the world?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "Why should the step limit live in your code, not only in the prompt?",
+      "options": [
+        "The prompt has no room for numbers",
+        "Code enforces it even when the model keeps asking for tools",
+        "The model can't count past five"
+      ],
+      "correct": 1,
+      "explain": "A prompt is a request that a stuck model may not follow. A for loop with a limit always stops.",
+      "hint": "Which one still works when the model is confused?"
+    },
+    {
+      "q": "Scout reaches step 6 of 6 without finishing. What should happen?",
+      "options": [
+        "Raise the limit and keep going",
+        "Stop, summarise what was tried, and hand off to a person",
+        "Reply with the most likely answer"
+      ],
+      "correct": 1,
+      "explain": "The limit did its job. A summary and an honest hand-off beat both an endless loop and a guess.",
+      "hint": "What would Leo's team need to pick the case up?"
+    }
+  ]
+}

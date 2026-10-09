@@ -1,0 +1,247 @@
+{
+  "$comment": "Generated. Ungraded check of prior knowledge before Module 1; each item's lesson is its module number, so support is set module by module.",
+  "course_id": "ai-agent",
+  "version": "1.0.0",
+  "items": [
+    {
+      "id": "p1",
+      "lesson": "1",
+      "module": "m1",
+      "stem": "What makes an AI agent different from a chatbot?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It always runs on a bigger language model"
+        },
+        {
+          "id": "b",
+          "text": "It replies faster than a chatbot"
+        },
+        {
+          "id": "c",
+          "text": "It can decide on steps and use tools to act toward a goal"
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "lesson": "1",
+      "module": "m1",
+      "stem": "Which job is best handled by a fixed workflow rather than an agent?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Emailing the same stock report every Monday at 8 AM"
+        },
+        {
+          "id": "b",
+          "text": "Looking into a customer's problem across several systems"
+        },
+        {
+          "id": "c",
+          "text": "Answering open questions about orders, returns and exchanges"
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "lesson": "2",
+      "module": "m2",
+      "stem": "A language model writes its answer by…",
+      "options": [
+        {
+          "id": "a",
+          "text": "Predicting the next piece of text, one token at a time"
+        },
+        {
+          "id": "b",
+          "text": "Looking each answer up in a database of facts"
+        },
+        {
+          "id": "c",
+          "text": "Running the code you send it"
+        }
+      ]
+    },
+    {
+      "id": "p4",
+      "lesson": "2",
+      "module": "m2",
+      "stem": "What is a system prompt for?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Setting the model's role, rules and the facts it should use"
+        },
+        {
+          "id": "b",
+          "text": "Storing the user's password"
+        },
+        {
+          "id": "c",
+          "text": "Choosing which computer runs the model"
+        }
+      ]
+    },
+    {
+      "id": "p5",
+      "lesson": "3",
+      "module": "m3",
+      "stem": "When an agent \"calls a tool\", who actually runs the tool?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The customer runs it in their browser"
+        },
+        {
+          "id": "b",
+          "text": "The language model runs it inside itself"
+        },
+        {
+          "id": "c",
+          "text": "Your code runs it and sends the result back to the model"
+        }
+      ]
+    },
+    {
+      "id": "p6",
+      "lesson": "3",
+      "module": "m3",
+      "stem": "A tool call fails with a timeout. What should your code send back to the model?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Nothing, so the model doesn't get confused"
+        },
+        {
+          "id": "b",
+          "text": "An empty result"
+        },
+        {
+          "id": "c",
+          "text": "A clear error message, marked as an error"
+        }
+      ]
+    },
+    {
+      "id": "p7",
+      "lesson": "4",
+      "module": "m4",
+      "stem": "Between two API calls, what does the model remember about your conversation?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Only what you send again in the messages"
+        },
+        {
+          "id": "b",
+          "text": "Always the last three messages"
+        },
+        {
+          "id": "c",
+          "text": "Everything from earlier calls, automatically"
+        }
+      ]
+    },
+    {
+      "id": "p8",
+      "lesson": "4",
+      "module": "m4",
+      "stem": "What does retrieval-augmented generation (RAG) add to an agent?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Relevant text from your own documents, put into the prompt"
+        },
+        {
+          "id": "b",
+          "text": "A way to train a new model from scratch"
+        },
+        {
+          "id": "c",
+          "text": "A faster model"
+        }
+      ]
+    },
+    {
+      "id": "p9",
+      "lesson": "5",
+      "module": "m5",
+      "stem": "You're building your first agent. What's the best way to start?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Get the smallest loop working, then add one tool at a time"
+        },
+        {
+          "id": "b",
+          "text": "Give it every tool you might ever need on day one"
+        },
+        {
+          "id": "c",
+          "text": "Write the whole system before running anything"
+        }
+      ]
+    },
+    {
+      "id": "p10",
+      "lesson": "5",
+      "module": "m5",
+      "stem": "How do you know whether an agent is good enough to launch?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The model provider says the model is accurate"
+        },
+        {
+          "id": "b",
+          "text": "It answered your three favourite questions well"
+        },
+        {
+          "id": "c",
+          "text": "You run it on a set of test cases and look at what fails"
+        }
+      ]
+    },
+    {
+      "id": "p11",
+      "lesson": "6",
+      "module": "m6",
+      "stem": "Which guardrail stops an agent from looping all weekend on a failing tool?",
+      "options": [
+        {
+          "id": "a",
+          "text": "A step limit and a spend limit on every request"
+        },
+        {
+          "id": "b",
+          "text": "A larger context window"
+        },
+        {
+          "id": "c",
+          "text": "A friendlier system prompt"
+        }
+      ]
+    },
+    {
+      "id": "p12",
+      "lesson": "6",
+      "module": "m6",
+      "stem": "Where should your API key live when you put an agent online?",
+      "options": [
+        {
+          "id": "a",
+          "text": "On the server, in an environment variable"
+        },
+        {
+          "id": "b",
+          "text": "In the system prompt"
+        },
+        {
+          "id": "c",
+          "text": "In the web page's JavaScript"
+        }
+      ]
+    }
+  ]
+}

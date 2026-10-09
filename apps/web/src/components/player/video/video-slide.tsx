@@ -6,34 +6,77 @@ import { motion } from "motion/react";
 import {
   AlertTriangle,
   ArrowRight,
+  Award,
+  BarChart3,
   BellOff,
+  BookOpen,
+  Bot,
   Boxes,
   Braces,
+  Brain,
+  Calculator,
   CalendarDays,
   Check,
   CheckCircle2,
+  CircleHelp,
   ClipboardList,
   Clock3,
+  Cloud,
   Copy,
+  Cpu,
   Database,
+  DollarSign,
   Download,
   Eye,
   Factory,
+  FileJson,
   FileText,
   Filter,
+  FlaskConical,
+  Folder,
+  Gauge,
+  GitBranch,
+  Globe,
+  Hand,
   Headset,
+  History,
+  KeyRound,
+  Layers,
   Lightbulb,
+  Link,
+  ListChecks,
+  Lock,
   Mail,
+  Map as MapIcon,
+  MessageSquare,
+  Package,
   Pencil,
+  Play,
+  Plug,
+  Receipt,
+  Repeat,
+  Rocket,
   Scale,
   Search,
   Send,
+  Server,
+  Settings,
+  ShieldCheck,
   ShoppingCart,
+  Sparkles,
   Split,
   Table2,
+  Target,
+  Terminal,
+  ThumbsUp,
+  Timer,
+  Truck,
+  Bug,
   UserRound,
+  Users,
   Webhook,
   Workflow,
+  Wrench,
   X,
   XCircle,
   Zap,
@@ -41,7 +84,54 @@ import {
 } from "lucide-react";
 import type { VideoSlide } from "@/data/types";
 
+/** Icon names a slide can use (the course authoring guide lists them). */
 const ICONS: Record<string, LucideIcon> = {
+  bot: Bot,
+  brain: Brain,
+  wrench: Wrench,
+  message: MessageSquare,
+  sparkles: Sparkles,
+  globe: Globe,
+  calculator: Calculator,
+  key: KeyRound,
+  shield: ShieldCheck,
+  server: Server,
+  cloud: Cloud,
+  rocket: Rocket,
+  gauge: Gauge,
+  dollar: DollarSign,
+  layers: Layers,
+  target: Target,
+  repeat: Repeat,
+  "list-checks": ListChecks,
+  "git-branch": GitBranch,
+  users: Users,
+  terminal: Terminal,
+  plug: Plug,
+  bug: Bug,
+  book: BookOpen,
+  lock: Lock,
+  folder: Folder,
+  settings: Settings,
+  play: Play,
+  chart: BarChart3,
+  "thumbs-up": ThumbsUp,
+  help: CircleHelp,
+  timer: Timer,
+  package: Package,
+  truck: Truck,
+  receipt: Receipt,
+  check: Check,
+  json: FileJson,
+  cpu: Cpu,
+  history: History,
+  link: Link,
+  hand: Hand,
+  scale: Scale,
+  lightbulb: Lightbulb,
+  flask: FlaskConical,
+  award: Award,
+  map: MapIcon,
   workflow: Workflow,
   zap: Zap,
   boxes: Boxes,
@@ -304,7 +394,7 @@ function SlideBody({ s, shown }: { s: VideoSlide; shown: Shown }) {
               </div>
               {c.flow.map((f, k) => (
                 <div key={k} className="vl-card-row">
-                  <span className="vl-card-tag">{["Trigger", "Step", "Action"][k]}</span>
+                  <span className="vl-card-tag">{s.tags?.[k] ?? `Step ${k + 1}`}</span>
                   {f}
                 </div>
               ))}
@@ -374,5 +464,143 @@ function SlideBody({ s, shown }: { s: VideoSlide; shown: Shown }) {
           ))}
         </ul>
       );
+
+    case "hub": {
+      const pts = ring(s.spokes.length, 36, 40);
+      return (
+        <div className="vl-hubwrap">
+          <div className="vl-hub">
+            <svg className="vl-hub-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
+              {pts.map((p, i) => (
+                <line key={i} x1={50} y1={50} x2={p.x} y2={p.y} vectorEffect="non-scaling-stroke" style={{ opacity: shown(s.spokes[i]!.cue) ? 1 : 0 }} />
+              ))}
+            </svg>
+            <div className="vl-hub-center">
+              <span className="vl-node-ic">
+                <Icon name={s.center.icon} />
+              </span>
+              <b>{s.center.label}</b>
+              <span>{s.center.sub}</span>
+            </div>
+            {s.spokes.map((sp, i) => (
+              <div key={sp.label} className="vl-hub-pos" style={{ left: `${pts[i]!.x}%`, top: `${pts[i]!.y}%` }}>
+                <R on={shown(sp.cue)} y={8} className="vl-hub-spoke">
+                  <span className="vl-bullet-ic">
+                    <Icon name={sp.icon} />
+                  </span>
+                  <span className="vl-hub-txt">
+                    <b>{sp.label}</b>
+                    <span>{sp.sub}</span>
+                  </span>
+                </R>
+              </div>
+            ))}
+          </div>
+          {s.note ? (
+            <R on={shown(s.note.cue)} className="vl-note">
+              {s.note.text}
+            </R>
+          ) : null}
+        </div>
+      );
+    }
+
+    case "cycle": {
+      const n = s.steps.length;
+      const pts = ring(n, 38, 34);
+      // arrows sit halfway round the loop between two steps, pointing along it
+      const arrows = s.steps.map((_, i) => {
+        const a = ((-90 + (360 / n) * (i + 0.5)) * Math.PI) / 180;
+        const deg = (Math.atan2(0.34 * 34 * Math.cos(a), -0.38 * 88 * Math.sin(a)) * 180) / Math.PI;
+        return { x: 50 + 38 * Math.cos(a), y: 50 + 34 * Math.sin(a), deg };
+      });
+      const nextCue = (i: number) => s.steps[i + 1]?.cue ?? s.note?.cue;
+      return (
+        <div className="vl-cyclewrap">
+          <div className="vl-cycle">
+            <svg className="vl-cycle-ring" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
+              <ellipse cx={50} cy={50} rx={38} ry={34} vectorEffect="non-scaling-stroke" />
+            </svg>
+            <div className="vl-cycle-center">
+              <b>{s.center.label}</b>
+              <span>{s.center.sub}</span>
+            </div>
+            {arrows.map((a, i) => (
+              <span
+                key={i}
+                aria-hidden
+                className="vl-cycle-arrow"
+                style={{ left: `${a.x}%`, top: `${a.y}%`, transform: `rotate(${a.deg}deg)`, opacity: shown(s.steps[(i + 1) % n]!.cue) ? 1 : 0.15 }}
+              >
+                <ArrowRight />
+              </span>
+            ))}
+            {s.steps.map((st, i) => {
+              const now = shown(st.cue) && (nextCue(i) === undefined || !shown(nextCue(i)));
+              return (
+                <div key={st.label} className="vl-cycle-pos" style={{ left: `${pts[i]!.x}%`, top: `${pts[i]!.y}%` }}>
+                  <R on={shown(st.cue)} y={8} className={cn("vl-cycle-step", now && "now")}>
+                    <span className="vl-node-ic">
+                      <Icon name={st.icon} />
+                    </span>
+                    <b>{st.label}</b>
+                    <span>{st.sub}</span>
+                  </R>
+                </div>
+              );
+            })}
+          </div>
+          {s.note ? (
+            <R on={shown(s.note.cue)} className="vl-note">
+              {s.note.text}
+            </R>
+          ) : null}
+        </div>
+      );
+    }
+
+    case "chat":
+      return (
+        <div className={cn("vl-chatwrap", s.aside && "has-aside")}>
+          <div className="vl-chat">
+            {s.messages.map((m, i) => {
+              const RoleIcon = CHAT_ROLE[m.role].icon;
+              return (
+                <R key={i} on={shown(m.cue)} y={10} className={cn("vl-msg", m.role)}>
+                  <span className="vl-msg-who">
+                    <RoleIcon aria-hidden />
+                    {m.label ?? CHAT_ROLE[m.role].label}
+                  </span>
+                  <p>{m.text}</p>
+                </R>
+              );
+            })}
+          </div>
+          {s.aside ? (
+            <R on={shown(s.aside.cue)} className="vl-aside tall">
+              <Icon name={s.aside.icon} />
+              <div>
+                <b>{s.aside.label}</b>
+                <p>{s.aside.text}</p>
+              </div>
+            </R>
+          ) : null}
+        </div>
+      );
   }
+}
+
+const CHAT_ROLE = {
+  user: { icon: UserRound, label: "Customer" },
+  agent: { icon: Bot, label: "Agent" },
+  tool: { icon: Wrench, label: "Tool" },
+  system: { icon: Settings, label: "System" },
+} as const;
+
+/** `n` points round an ellipse (percent of the box), starting at the top and going clockwise. */
+function ring(n: number, rx: number, ry: number) {
+  return Array.from({ length: n }, (_, i) => {
+    const a = ((-90 + (360 / n) * i) * Math.PI) / 180;
+    return { x: 50 + rx * Math.cos(a), y: 50 + ry * Math.sin(a) };
+  });
 }

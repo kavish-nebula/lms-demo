@@ -1,0 +1,125 @@
+{
+  "$comment": "Ungraded prior-knowledge check, 2 questions per module. correct is the 0-based index of the right option.",
+  "items": [
+    {
+      "module": "m1",
+      "stem": "What makes an AI agent different from a chatbot?",
+      "options": [
+        "It can decide on steps and use tools to act toward a goal",
+        "It always runs on a bigger language model",
+        "It replies faster than a chatbot"
+      ],
+      "correct": 0
+    },
+    {
+      "module": "m1",
+      "stem": "Which job is best handled by a fixed workflow rather than an agent?",
+      "options": [
+        "Answering open questions about orders, returns and exchanges",
+        "Emailing the same stock report every Monday at 8 AM",
+        "Looking into a customer's problem across several systems"
+      ],
+      "correct": 1
+    },
+    {
+      "module": "m2",
+      "stem": "A language model writes its answer by…",
+      "options": [
+        "Looking each answer up in a database of facts",
+        "Predicting the next piece of text, one token at a time",
+        "Running the code you send it"
+      ],
+      "correct": 1
+    },
+    {
+      "module": "m2",
+      "stem": "What is a system prompt for?",
+      "options": [
+        "Setting the model's role, rules and the facts it should use",
+        "Storing the user's password",
+        "Choosing which computer runs the model"
+      ],
+      "correct": 0
+    },
+    {
+      "module": "m3",
+      "stem": "When an agent \"calls a tool\", who actually runs the tool?",
+      "options": [
+        "The language model runs it inside itself",
+        "Your code runs it and sends the result back to the model",
+        "The customer runs it in their browser"
+      ],
+      "correct": 1
+    },
+    {
+      "module": "m3",
+      "stem": "A tool call fails with a timeout. What should your code send back to the model?",
+      "options": [
+        "Nothing, so the model doesn't get confused",
+        "An empty result",
+        "A clear error message, marked as an error"
+      ],
+      "correct": 2
+    },
+    {
+      "module": "m4",
+      "stem": "Between two API calls, what does the model remember about your conversation?",
+      "options": [
+        "Everything from earlier calls, automatically",
+        "Only what you send again in the messages",
+        "Always the last three messages"
+      ],
+      "correct": 1
+    },
+    {
+      "module": "m4",
+      "stem": "What does retrieval-augmented generation (RAG) add to an agent?",
+      "options": [
+        "Relevant text from your own documents, put into the prompt",
+        "A faster model",
+        "A way to train a new model from scratch"
+      ],
+      "correct": 0
+    },
+    {
+      "module": "m5",
+      "stem": "You're building your first agent. What's the best way to start?",
+      "options": [
+        "Give it every tool you might ever need on day one",
+        "Get the smallest loop working, then add one tool at a time",
+        "Write the whole system before running anything"
+      ],
+      "correct": 1
+    },
+    {
+      "module": "m5",
+      "stem": "How do you know whether an agent is good enough to launch?",
+      "options": [
+        "It answered your three favourite questions well",
+        "You run it on a set of test cases and look at what fails",
+        "The model provider says the model is accurate"
+      ],
+      "correct": 1
+    },
+    {
+      "module": "m6",
+      "stem": "Which guardrail stops an agent from looping all weekend on a failing tool?",
+      "options": [
+        "A step limit and a spend limit on every request",
+        "A friendlier system prompt",
+        "A larger context window"
+      ],
+      "correct": 0
+    },
+    {
+      "module": "m6",
+      "stem": "Where should your API key live when you put an agent online?",
+      "options": [
+        "In the web page's JavaScript",
+        "In the system prompt",
+        "On the server, in an environment variable"
+      ],
+      "correct": 2
+    }
+  ]
+}

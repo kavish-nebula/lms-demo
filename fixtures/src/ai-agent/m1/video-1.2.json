@@ -1,0 +1,255 @@
+{
+  "lesson": "1.2",
+  "title": "Agents vs. chatbots vs. workflows",
+  "notes": [
+    "A chatbot replies with text, a workflow follows steps a person wrote in advance, and an agent decides its own steps as it goes.",
+    "If you can write the steps down ahead of time, a fixed workflow is usually cheaper, faster and easier to trust than an agent.",
+    "Use an agent when the steps depend on the request and need lookups and judgement; many jobs don't need one."
+  ],
+  "quizAfter": 3,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "split",
+      "kicker": "Module 1 · Lesson 2",
+      "title": "Agents vs. chatbots vs. workflows",
+      "sub": "Three ways to automate a job, and the one question that tells them apart",
+      "sentences": [
+        "Agent is a popular word right now, and it gets stuck on almost everything.",
+        "In this lesson you will meet three different kinds of system: chatbots, workflows and agents.",
+        "By the end, you will know the one question that tells them apart, and when each one is the right choice."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "Who decides the steps?",
+      "columns": ["System", "Who decides the steps", "Can it act?"],
+      "rows": [
+        { "cells": ["Chatbot", "No steps: it replies, then waits", "No, it only writes text"], "cue": 1 },
+        { "cells": ["Workflow", "A person, in advance", "Yes, the same steps every time"], "cue": 2 },
+        { "cells": ["Agent", "The model, while it runs", "Yes, it picks tools as it goes"], "cue": 3 }
+      ],
+      "note": {
+        "text": "The key question: who decides what happens next, a person in advance or the model in the moment?",
+        "cue": 5
+      },
+      "sentences": [
+        "Here are the three, side by side.",
+        "A chatbot reads a message and writes a reply, and that's all: no lookups and no actions.",
+        "A workflow does take actions, but a person wrote every step in advance, and it follows them in order.",
+        "An agent takes actions too, but the model chooses which steps to take while it runs.",
+        "So the question that separates them is simple.",
+        "Who decides what happens next: a person who wrote it down in advance, or the model in the moment?"
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "A chatbot on its own",
+      "messages": [
+        { "role": "user", "label": "Ana", "text": "Hi, where is my order ORB-10482? It's been four days.", "cue": 1 },
+        {
+          "role": "agent",
+          "label": "FAQ chatbot",
+          "text": "I'm sorry, I can't access order information. Standard shipping takes 3 to 5 business days.",
+          "cue": 2
+        },
+        { "role": "user", "label": "Ana", "text": "It's been FOUR days. Where is it?", "cue": 3 },
+        { "role": "agent", "label": "FAQ chatbot", "text": "I'm sorry, I can't access order information.", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "lightbulb",
+        "label": "Good at",
+        "text": "Explaining what it already knows: policies, product care, how-tos. Not facts it can't see.",
+        "cue": 5
+      },
+      "sentences": [
+        "First, the chatbot, which is what Orbit runs today.",
+        "Ana asks where her order is.",
+        "The bot answers politely, with the general shipping times from the FAQ page.",
+        "Ana asks again, more frustrated this time.",
+        "And she gets the same apology, because the bot has nothing new to look at.",
+        "Chatbots are good at explaining what they already know, like policies and product care, but they can't fetch facts they can't see.",
+        "Once you give a chatbot tools and let it choose when to use them, it is on its way to becoming an agent."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "A workflow: steps written in advance",
+      "run": true,
+      "nodes": [
+        { "kind": "trigger", "icon": "zap", "label": "Order shipped", "sub": "orders system says so", "cue": 1 },
+        { "kind": "data", "icon": "file", "label": "Fill template", "sub": "name, item, tracking", "cue": 2 },
+        { "kind": "action", "icon": "mail", "label": "Send email", "sub": "to the customer", "cue": 3 }
+      ],
+      "note": { "text": "Same three steps every time. Nothing to decide, so no model needed.", "cue": 4 },
+      "sentences": [
+        "Next, a workflow, and Orbit could use one tomorrow.",
+        "When Sam's warehouse marks an order as shipped, the orders system announces it.",
+        "A template fills in the customer's name, the item and the tracking number.",
+        "And the email goes out to the customer.",
+        "Same three steps, every time, in the same order, with nothing to decide, so no language model is needed.",
+        "It runs in a second and costs almost nothing, and customers with a tracking number are less likely to ask where their order is."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Workflow or agent?",
+      "left": {
+        "label": "Fixed workflow",
+        "tone": "ok",
+        "cue": 1,
+        "points": [
+          "Steps known in advance",
+          "Fast and nearly free to run",
+          "Same result every time",
+          "Easy to test and explain"
+        ]
+      },
+      "right": {
+        "label": "Agent",
+        "tone": "info",
+        "cue": 3,
+        "points": [
+          "Steps depend on the request",
+          "Needs lookups and judgement",
+          "Slower: each step is a model call",
+          "Can be wrong, so needs limits and tests"
+        ]
+      },
+      "sentences": [
+        "So when should you use which?",
+        "If you can write the steps down ahead of time, use a fixed workflow.",
+        "It is fast and nearly free, it does the same thing every time, and it is easy to test.",
+        "Reach for an agent when the steps depend on the request.",
+        "Ana wants tracking, Grace wants a return, Owen wants a different size, and you can't predict the mix.",
+        "But agents are slower, every step is a paid model call, and they can make mistakes.",
+        "So they need limits and testing, and that is a big part of this course."
+      ]
+    },
+    {
+      "kind": "cards",
+      "title": "Three Orbit jobs, three answers",
+      "tags": ["The job", "What it needs", "Best fit"],
+      "cards": [
+        {
+          "icon": "mail",
+          "title": "Shipping email",
+          "flow": ["Email when an order ships", "The same steps every time", "Workflow"],
+          "cue": 1
+        },
+        {
+          "icon": "help",
+          "title": "Boot care question",
+          "flow": ["How do I waterproof boots?", "An answer already written down", "Chatbot or help page"],
+          "cue": 2
+        },
+        {
+          "icon": "headset",
+          "title": "Owen's size swap",
+          "flow": ["Jacket too big, swap L for M?", "Order, stock and policy lookups", "Agent"],
+          "cue": 3
+        }
+      ],
+      "sentences": [
+        "Let's try the question on three real Orbit jobs.",
+        "An email every time an order ships: the steps never change, so it's a workflow.",
+        "A customer asks how to waterproof her boots: the answer is already written down, so a chatbot or a help page will do.",
+        "Owen wants to swap his jacket for a smaller size.",
+        "That needs his order, the stock level and the exchange policy.",
+        "What to check next depends on each answer, so it's a job for an agent.",
+        "One question sorted all three: who has to decide the steps?"
+      ]
+    },
+    {
+      "kind": "bullets",
+      "title": "Honest advice: start simple",
+      "lead": "Use the simplest thing that works. Add an agent only when it truly helps.",
+      "bullets": [
+        { "icon": "book", "text": "A clear FAQ page answers many repeat questions for free", "cue": 1 },
+        { "icon": "workflow", "text": "Known steps? Build a workflow: cheaper, faster, predictable", "cue": 2 },
+        { "icon": "bot", "text": "Use an agent only when the steps depend on the request", "cue": 3 },
+        { "icon": "layers", "text": "Mix them: a workflow can call a model for one step", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "dollar",
+        "label": "Cost check",
+        "text": "Every agent step is a paid model call. Ten steps on hundreds of tickets a day adds up.",
+        "cue": 5
+      },
+      "sentences": [
+        "Here is the honest advice experienced builders give.",
+        "Many repeat questions are answered perfectly well by a clear FAQ page, which costs nothing to run.",
+        "If the steps are known, build a workflow: it is cheaper, faster and more predictable.",
+        "Use an agent only when the steps really depend on the request.",
+        "And you can mix them: a workflow can call a model for a single step, like sorting an email into a category.",
+        "Keep cost in mind too, because every agent step is a paid model call, and Orbit gets hundreds of tickets a day."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "Chatbot: replies with text, can't look anything up", "cue": 1 },
+        { "text": "Workflow: steps a person wrote in advance, the same every time", "cue": 2 },
+        { "text": "Agent: the model decides the steps and uses tools", "cue": 3 },
+        { "text": "Known steps? A workflow is usually cheaper and safer", "cue": 4 }
+      ],
+      "sentences": [
+        "Here is what to keep.",
+        "A chatbot replies with text, but it can't look anything up or act.",
+        "A workflow acts, following steps a person wrote in advance.",
+        "An agent acts too, but the model decides the steps as it goes.",
+        "If you can write the steps down, a workflow is usually the better and cheaper choice, and many jobs never need an agent.",
+        "Next, we look at where agents are earning their keep in real companies today."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "What's the key difference between a workflow and an agent?",
+      "options": [
+        "Only agents can send emails or update records",
+        "In a workflow a person sets the steps in advance; in an agent the model decides them as it runs",
+        "Workflows can never use a language model"
+      ],
+      "correct": 1,
+      "explain": "Both can act. The difference is who decides the steps: a person ahead of time, or the model in the moment. A workflow can even call a model for one step.",
+      "hint": "Ask the lesson's one question: who decides what happens next?"
+    },
+    {
+      "q": "Why does Orbit's FAQ chatbot keep apologising to Ana?",
+      "options": [
+        "It has no way to look up her order",
+        "Its language model is too small",
+        "Ana didn't include her order number"
+      ],
+      "correct": 0,
+      "explain": "The chatbot understood her, and she gave her order number. It simply has no connection to the orders system, so all it can do is write text.",
+      "hint": "Ana gave everything that was needed. What was missing on the bot's side?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "Leo wants a message in the support channel whenever a product review has one star. What fits best?",
+      "options": [
+        "A fixed workflow: new review, check the stars, post the message",
+        "An agent that reads every review and decides what to do",
+        "A chatbot Leo can ask about reviews"
+      ],
+      "correct": 0,
+      "explain": "The trigger, the check and the action are all known in advance. A workflow does it instantly and cheaply, the same way every time.",
+      "hint": "Could you write every step down before the first review arrives?"
+    },
+    {
+      "q": "Which is a good reason NOT to use an agent?",
+      "options": [
+        "The answer depends on lookups that change with each request",
+        "The steps are the same every time and you can write them down",
+        "Customers phrase the same question in many different ways"
+      ],
+      "correct": 1,
+      "explain": "Fixed, known steps are a workflow's home ground: cheaper, faster and more predictable. The other two are reasons an agent might help.",
+      "hint": "Two of these make an agent more useful. One makes it unnecessary."
+    }
+  ]
+}

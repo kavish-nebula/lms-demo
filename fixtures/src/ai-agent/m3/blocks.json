@@ -1,0 +1,1112 @@
+{
+  "hook": {
+    "kicker": "Wednesday, 10:12 AM",
+    "title": "\"Delivered\" (it wasn't)",
+    "why": "Scout has been answering tracking questions for a week. Last night it told a customer her parcel had arrived. It hadn't, and this morning she wants to know why Orbit lied to her.",
+    "stat": "1 parcel still in transit · 1 reply saying \"delivered\" · 0 errors in the log",
+    "narration": "It is Wednesday morning, and Leo has just forwarded you an angry email. Elena ordered a climbing rope for a climbing trip this weekend. Last night she asked Scout whether it had arrived, and Scout told her it had been delivered. It hadn't: the carrier shows it still in transit. And Scout's log shows no errors at all. So before anything is explained: why did Scout say delivered?",
+    "messages": [
+      {
+        "who": "Leo — support lead",
+        "av": "L",
+        "at": "10:02 AM",
+        "text": "forwarding this one. elena petrova, order ORB-10560. she is not happy"
+      },
+      {
+        "who": "Leo — support lead",
+        "av": "L",
+        "at": "10:03 AM",
+        "text": "her email: \"Your chat assistant told me my rope was DELIVERED. I've checked the porch, the neighbours and the mailroom. It isn't here. I leave for a climb on Friday. Did someone lie to me, or is your bot just making things up?\""
+      },
+      {
+        "who": "Priya — developer",
+        "av": "P",
+        "at": "10:07 AM",
+        "text": "checked ParcelPath directly. PP-90417 is in transit, left the Denver hub this morning. so the carrier knows exactly where it is"
+      },
+      {
+        "who": "Leo — support lead",
+        "av": "L",
+        "at": "10:09 AM",
+        "text": "then where did \"delivered\" come from?? scout's log shows no errors anywhere"
+      }
+    ],
+    "prompt": "Before anything is explained: why did Scout tell Elena her rope was delivered?",
+    "hunches": [
+      {
+        "id": "a",
+        "label": "ParcelPath briefly sent Scout wrong data that said \"delivered\""
+      },
+      {
+        "id": "b",
+        "label": "The tracking call failed, the error was hidden, and Scout filled the gap"
+      },
+      {
+        "id": "c",
+        "label": "Scout looked up the wrong order and read another customer's status"
+      }
+    ],
+    "correct": "b",
+    "pipeline": {
+      "nodes": [
+        {
+          "id": "user",
+          "kind": "user",
+          "label": "Customer",
+          "sub": "Elena asks",
+          "x": 0,
+          "y": 60
+        },
+        {
+          "id": "scout",
+          "kind": "llm",
+          "label": "Scout",
+          "sub": "decides",
+          "x": 230,
+          "y": 60
+        },
+        {
+          "id": "order",
+          "kind": "tool",
+          "label": "get_order",
+          "sub": "order ORB-10560",
+          "x": 460,
+          "y": 60
+        },
+        {
+          "id": "track",
+          "kind": "tool",
+          "label": "track_parcel",
+          "sub": "tracking PP-90417",
+          "x": 690,
+          "y": 60
+        },
+        {
+          "id": "reply",
+          "kind": "output",
+          "label": "Reply",
+          "sub": "to Elena",
+          "x": 920,
+          "y": 60
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "source": "user",
+          "target": "scout"
+        },
+        {
+          "id": "e2",
+          "source": "scout",
+          "target": "order"
+        },
+        {
+          "id": "e3",
+          "source": "order",
+          "target": "track"
+        },
+        {
+          "id": "e4",
+          "source": "track",
+          "target": "reply"
+        }
+      ]
+    },
+    "reveal": {
+      "narration": "Here is what really happened. Elena asked about her order, and Scout called get order, which worked and returned her tracking number. Then Scout called track parcel, but ParcelPath was slow, and the call timed out. The code caught the timeout and quietly returned an empty string, with no error flag and nothing in the log. To Scout, that looked like a tool that worked and had nothing new to say. Her rope had shipped six days earlier on three to five day shipping, so Scout filled the gap with the likeliest story: delivered.",
+      "steps": [
+        {
+          "caption": "Elena asks Scout whether her rope from order ORB-10560 has arrived.",
+          "nodes": {
+            "user": "ok",
+            "scout": "running"
+          },
+          "edges": {
+            "e1": "ok"
+          }
+        },
+        {
+          "caption": "Scout calls get_order. It works: shipped six days ago with ParcelPath, standard shipping, tracking PP-90417.",
+          "nodes": {
+            "scout": "ok",
+            "order": "ok"
+          },
+          "edges": {
+            "e2": "ok"
+          }
+        },
+        {
+          "caption": "Scout calls track_parcel for the latest scan. ParcelPath is slow, and the call times out after 10 seconds.",
+          "nodes": {
+            "track": "running"
+          },
+          "edges": {
+            "e3": "running"
+          }
+        },
+        {
+          "caption": "The code catches the timeout and returns \"\": no is_error, nothing logged. The failure is now invisible to Scout.",
+          "nodes": {
+            "track": "error"
+          },
+          "edges": {
+            "e3": "error"
+          }
+        },
+        {
+          "caption": "To Scout, an empty result reads as \"worked, nothing new\". Six days in, on 3-to-5-day shipping, it guesses: delivered.",
+          "nodes": {
+            "reply": "running"
+          },
+          "edges": {
+            "e4": "running"
+          }
+        },
+        {
+          "caption": "The reply goes out: \"Good news, your rope has been delivered!\" It is still in transit, out of the Denver hub.",
+          "nodes": {
+            "reply": "error"
+          },
+          "edges": {
+            "e4": "error"
+          }
+        }
+      ]
+    },
+    "wrap_correct": "Right. The tracking call failed, but the code turned the timeout into an empty string. Scout couldn't tell \"the lookup failed\" from \"nothing to report\", so it filled the gap with the likeliest story.",
+    "wrap_wrong": "Not quite. ParcelPath's data was right, and get_order found the right order. The tracking call timed out, and the code returned an empty string instead of an error. Scout never knew the lookup had failed, so it guessed.",
+    "wrap_point": "Tools give Scout real facts, but only if every failure is reported back to it as an error, never hidden.",
+    "film": {
+      "shots": [
+        {
+          "type": "parcel-map",
+          "label": "ParcelPath · PP-90417",
+          "say": "Last night, Scout told Elena her climbing rope was delivered. She can't find it anywhere.",
+          "act": "Track the parcel yourself",
+          "then": "It was never delivered. It's still in transit, past the Denver hub.",
+          "from": "Orbit warehouse",
+          "to": "Elena's home",
+          "hub": "Denver hub",
+          "stop": 0.56,
+          "claim": "Good news, Elena! Your rope has been delivered.",
+          "truth": "Still in transit"
+        },
+        {
+          "type": "terminal",
+          "label": "Scout's log · last night",
+          "say": "So Priya opens Scout's log for that chat. Not a single error.",
+          "title": "scout.log",
+          "lines": [
+            {
+              "time": "21:14:02",
+              "text": "chat    Elena: has my rope arrived yet?",
+              "tone": "dim"
+            },
+            {
+              "time": "21:14:03",
+              "text": "tool    get_order(ORB-10560)            ok",
+              "tone": "ok"
+            },
+            {
+              "time": "21:14:13",
+              "text": "tool    track_parcel(PP-90417)          completed",
+              "tone": "ok"
+            },
+            {
+              "time": "21:14:15",
+              "text": "reply   \"Good news, your rope has been delivered!\"",
+              "tone": "ok"
+            },
+            {
+              "time": "21:14:15",
+              "text": "errors: none",
+              "tone": "ok"
+            }
+          ],
+          "badge": "0 errors"
+        },
+        {
+          "type": "phone",
+          "label": "Team chat · 10:09 AM",
+          "say": "The carrier knows where the parcel is. So where did Scout's answer come from?",
+          "time": "10:09",
+          "notes": [
+            {
+              "who": "Priya — developer",
+              "av": "P",
+              "at": "10:07 AM",
+              "text": "the carrier knows exactly where it is. PP-90417 left the Denver hub this morning"
+            },
+            {
+              "who": "Leo — support lead",
+              "av": "L",
+              "at": "10:09 AM",
+              "text": "then where did \"delivered\" come from??"
+            }
+          ]
+        },
+        {
+          "type": "numbers",
+          "label": "What it cost",
+          "say": "One parcel, one wrong answer, and nothing in the log."
+        }
+      ]
+    }
+  },
+  "worked": {
+    "examples": [
+      {
+        "lesson": "3.1",
+        "title": "One tool: get_order for Ana",
+        "intro": "Ana asks where her tent is. Watch Scout ask for one tool, your code run it, and the result come back.",
+        "narration": "Ana writes in: where is my tent, order ORB-10482? Scout reads her question alongside the tool definitions it was given, and sees that get_order fits. It doesn't answer yet. It stops with a tool request: get_order, with order_id ORB-10482. Your code's run_tool finds the get_order function, runs the lookup, and sends back a tool_result with the same id: Trailhead 2P tent, shipped, ParcelPath, tracking PP-88213. Scout reads that and writes the reply Ana sees, with every fact taken from the result.",
+        "predict": {
+          "stem": "Ana asks: \"Where is my tent? Order ORB-10482.\" What will Scout do first?",
+          "options": [
+            {
+              "text": "Reply with a tool request: get_order with order_id ORB-10482",
+              "correct": true
+            },
+            {
+              "text": "Tell Ana her tent has shipped and is on its way"
+            },
+            {
+              "text": "Connect to Orbit's order database and read the order itself"
+            }
+          ],
+          "rationale": "Scout has no order data of its own and can't reach the database. get_order's description says it looks up an order by ID, so Scout asks for it and waits for your code to run it."
+        },
+        "pipeline": {
+          "nodes": [
+            {
+              "id": "user",
+              "kind": "user",
+              "label": "Ana",
+              "sub": "where is my tent?",
+              "x": 0,
+              "y": 60
+            },
+            {
+              "id": "scout",
+              "kind": "llm",
+              "label": "Scout",
+              "sub": "reads tools, decides",
+              "x": 230,
+              "y": 60
+            },
+            {
+              "id": "code",
+              "kind": "logic",
+              "label": "Your code",
+              "sub": "run_tool()",
+              "x": 460,
+              "y": 0
+            },
+            {
+              "id": "order",
+              "kind": "tool",
+              "label": "get_order",
+              "sub": "order lookup",
+              "x": 690,
+              "y": 0
+            },
+            {
+              "id": "reply",
+              "kind": "output",
+              "label": "Reply",
+              "sub": "to Ana",
+              "x": 460,
+              "y": 120
+            }
+          ],
+          "edges": [
+            {
+              "id": "e1",
+              "source": "user",
+              "target": "scout"
+            },
+            {
+              "id": "e2",
+              "source": "scout",
+              "target": "code"
+            },
+            {
+              "id": "e3",
+              "source": "code",
+              "target": "order"
+            },
+            {
+              "id": "e4",
+              "source": "scout",
+              "target": "reply"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "caption": "Ana asks where her tent is and gives her order number, ORB-10482.",
+            "show": [
+              "user",
+              "scout"
+            ],
+            "nodes": {
+              "user": "ok",
+              "scout": "running"
+            },
+            "edges": {
+              "e1": "ok"
+            }
+          },
+          {
+            "caption": "Scout matches the question to get_order's description and stops with stop_reason \"tool_use\": get_order(order_id=\"ORB-10482\").",
+            "show": [
+              "code"
+            ],
+            "nodes": {
+              "code": "running"
+            },
+            "edges": {
+              "e2": "running"
+            }
+          },
+          {
+            "caption": "Your run_tool looks up \"get_order\" in its mapping and calls the Python function.",
+            "show": [
+              "order"
+            ],
+            "nodes": {
+              "order": "running"
+            },
+            "edges": {
+              "e2": "ok",
+              "e3": "running"
+            }
+          },
+          {
+            "caption": "The lookup returns: Trailhead 2P tent, shipped, ParcelPath, tracking PP-88213. Your code sends it back as a tool_result with the same tool_use_id.",
+            "nodes": {
+              "order": "ok",
+              "code": "ok"
+            },
+            "edges": {
+              "e3": "ok"
+            }
+          },
+          {
+            "caption": "Scout reads the result and writes its answer. stop_reason is now \"end_turn\", so the loop ends.",
+            "show": [
+              "reply"
+            ],
+            "nodes": {
+              "reply": "running"
+            },
+            "edges": {
+              "e4": "running"
+            }
+          },
+          {
+            "caption": "Ana gets: \"Your Trailhead tent has shipped with ParcelPath. Tracking number: PP-88213.\" Every fact came from the tool.",
+            "nodes": {
+              "scout": "ok",
+              "reply": "ok"
+            },
+            "edges": {
+              "e4": "ok"
+            }
+          }
+        ]
+      },
+      {
+        "lesson": "3.4",
+        "title": "Two tools in a row: get_order, then track_parcel",
+        "intro": "Ana asks when her tent will arrive. One lookup isn't enough, so watch Scout chain two tools.",
+        "narration": "This time Ana asks when her tent will arrive. Scout calls get_order first, because it needs her tracking number. The result says shipped, tracking PP-88213, but nothing about where the parcel is now. So Scout makes a second request: track_parcel with PP-88213, the output of the first call. Your code calls ParcelPath with the key from the environment and a ten-second timeout, and trims the long answer to three fields: in transit, last scan at the Denver hub, due Thursday. With both results in hand, Scout answers: your tent is on its way and due Thursday.",
+        "predict": {
+          "stem": "get_order has returned Ana's tracking number, PP-88213. What does Scout do next?",
+          "options": [
+            {
+              "text": "Call track_parcel with PP-88213",
+              "correct": true
+            },
+            {
+              "text": "Give Ana the tracking number and stop there"
+            },
+            {
+              "text": "Call get_order again to double-check the order"
+            }
+          ],
+          "rationale": "Ana asked when it will arrive, and get_order doesn't know that. The tracking number from the first result is exactly the input track_parcel needs, so Scout chains the two calls."
+        },
+        "pipeline": {
+          "nodes": [
+            {
+              "id": "user",
+              "kind": "user",
+              "label": "Ana",
+              "sub": "when will it arrive?",
+              "x": 0,
+              "y": 60
+            },
+            {
+              "id": "scout",
+              "kind": "llm",
+              "label": "Scout",
+              "sub": "plans the lookups",
+              "x": 230,
+              "y": 60
+            },
+            {
+              "id": "order",
+              "kind": "tool",
+              "label": "get_order",
+              "sub": "ORB-10482",
+              "x": 460,
+              "y": 0
+            },
+            {
+              "id": "track",
+              "kind": "tool",
+              "label": "track_parcel",
+              "sub": "PP-88213",
+              "x": 460,
+              "y": 120
+            },
+            {
+              "id": "api",
+              "kind": "api",
+              "label": "ParcelPath API",
+              "sub": "key from environment",
+              "x": 690,
+              "y": 120
+            },
+            {
+              "id": "reply",
+              "kind": "output",
+              "label": "Reply",
+              "sub": "due Thursday",
+              "x": 920,
+              "y": 60
+            }
+          ],
+          "edges": [
+            {
+              "id": "e1",
+              "source": "user",
+              "target": "scout"
+            },
+            {
+              "id": "e2",
+              "source": "scout",
+              "target": "order"
+            },
+            {
+              "id": "e3",
+              "source": "scout",
+              "target": "track"
+            },
+            {
+              "id": "e4",
+              "source": "track",
+              "target": "api"
+            },
+            {
+              "id": "e5",
+              "source": "scout",
+              "target": "reply"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "caption": "Ana asks when her tent will arrive.",
+            "show": [
+              "user",
+              "scout"
+            ],
+            "nodes": {
+              "user": "ok",
+              "scout": "running"
+            },
+            "edges": {
+              "e1": "ok"
+            }
+          },
+          {
+            "caption": "Scout needs the tracking number first, so it asks for get_order(order_id=\"ORB-10482\").",
+            "show": [
+              "order"
+            ],
+            "nodes": {
+              "order": "running"
+            },
+            "edges": {
+              "e2": "running"
+            }
+          },
+          {
+            "caption": "Result: shipped with ParcelPath, tracking PP-88213. Nothing yet about where the parcel is now.",
+            "nodes": {
+              "order": "ok"
+            },
+            "edges": {
+              "e2": "ok"
+            }
+          },
+          {
+            "caption": "Scout chains a second call, using the first result as its input: track_parcel(tracking_number=\"PP-88213\").",
+            "show": [
+              "track"
+            ],
+            "nodes": {
+              "track": "running"
+            },
+            "edges": {
+              "e3": "running"
+            }
+          },
+          {
+            "caption": "track_parcel calls ParcelPath with the key from the environment and a 10-second timeout. The key never enters the prompt.",
+            "show": [
+              "api"
+            ],
+            "nodes": {
+              "api": "running"
+            },
+            "edges": {
+              "e4": "running"
+            }
+          },
+          {
+            "caption": "ParcelPath sends back thousands of lines. track_parcel keeps three fields: in transit, last scan Denver hub, due Thursday.",
+            "nodes": {
+              "api": "ok",
+              "track": "ok"
+            },
+            "edges": {
+              "e3": "ok",
+              "e4": "ok"
+            }
+          },
+          {
+            "caption": "With both results, Scout replies: \"Your tent is on its way and due on Thursday. Tracking number: PP-88213.\"",
+            "show": [
+              "reply"
+            ],
+            "nodes": {
+              "scout": "ok",
+              "reply": "ok"
+            },
+            "edges": {
+              "e5": "ok"
+            }
+          }
+        ]
+      },
+      {
+        "lesson": "3.5",
+        "title": "A tool that fails, and an honest answer",
+        "intro": "Elena asks about her rope while ParcelPath is down. Watch the error reach Scout, and what Scout does with it.",
+        "narration": "Elena asks whether her rope has arrived. get_order works and returns tracking PP-90417. Scout calls track_parcel, and ParcelPath doesn't answer. This time the tool retries twice, waiting longer each time, then raises an error, and the tool loop sends it back as a tool_result with is_error set to true: ParcelPath timed out 3 times, status unknown. Scout now knows that it doesn't know. It tells Elena it can't reach the carrier right now, doesn't guess, and offers to pass her question to a person on the team.",
+        "predict": {
+          "stem": "track_parcel comes back with is_error true: \"ParcelPath timed out 3 times. Status unknown.\" What should Scout tell Elena?",
+          "options": [
+            {
+              "text": "That it can't check the carrier right now, and offer a person who can",
+              "correct": true
+            },
+            {
+              "text": "That her rope has probably been delivered, since it shipped six days ago"
+            },
+            {
+              "text": "Nothing yet: it should keep calling track_parcel until it works"
+            }
+          ],
+          "rationale": "The error tells Scout the status is unknown, so any delivery claim would be a guess. Honest uncertainty plus a hand-off keeps Elena's trust. Endless retries would hit the step limit and keep her waiting."
+        },
+        "pipeline": {
+          "nodes": [
+            {
+              "id": "user",
+              "kind": "user",
+              "label": "Elena",
+              "sub": "has my rope arrived?",
+              "x": 0,
+              "y": 60
+            },
+            {
+              "id": "scout",
+              "kind": "llm",
+              "label": "Scout",
+              "sub": "decides",
+              "x": 230,
+              "y": 60
+            },
+            {
+              "id": "order",
+              "kind": "tool",
+              "label": "get_order",
+              "sub": "ORB-10560",
+              "x": 460,
+              "y": 0
+            },
+            {
+              "id": "track",
+              "kind": "tool",
+              "label": "track_parcel",
+              "sub": "PP-90417",
+              "x": 460,
+              "y": 120
+            },
+            {
+              "id": "api",
+              "kind": "api",
+              "label": "ParcelPath API",
+              "sub": "not answering",
+              "x": 690,
+              "y": 120
+            },
+            {
+              "id": "reply",
+              "kind": "output",
+              "label": "Honest reply",
+              "sub": "plus hand-off offer",
+              "x": 920,
+              "y": 60
+            }
+          ],
+          "edges": [
+            {
+              "id": "e1",
+              "source": "user",
+              "target": "scout"
+            },
+            {
+              "id": "e2",
+              "source": "scout",
+              "target": "order"
+            },
+            {
+              "id": "e3",
+              "source": "scout",
+              "target": "track"
+            },
+            {
+              "id": "e4",
+              "source": "track",
+              "target": "api"
+            },
+            {
+              "id": "e5",
+              "source": "scout",
+              "target": "reply"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "caption": "Elena asks whether her rope from order ORB-10560 has arrived.",
+            "show": [
+              "user",
+              "scout"
+            ],
+            "nodes": {
+              "user": "ok",
+              "scout": "running"
+            },
+            "edges": {
+              "e1": "ok"
+            }
+          },
+          {
+            "caption": "get_order works: shipped with ParcelPath, tracking PP-90417.",
+            "show": [
+              "order"
+            ],
+            "nodes": {
+              "order": "ok"
+            },
+            "edges": {
+              "e2": "ok"
+            }
+          },
+          {
+            "caption": "Scout calls track_parcel. ParcelPath doesn't answer within 10 seconds.",
+            "show": [
+              "track",
+              "api"
+            ],
+            "nodes": {
+              "track": "running",
+              "api": "running"
+            },
+            "edges": {
+              "e3": "running",
+              "e4": "running"
+            }
+          },
+          {
+            "caption": "track_parcel retries twice, waiting 1 second, then 2. All three tries time out.",
+            "nodes": {
+              "api": "error"
+            },
+            "edges": {
+              "e4": "error"
+            }
+          },
+          {
+            "caption": "The tool raises an error, and the loop returns a tool_result with is_error: true and \"ParcelPath timed out 3 times. Status unknown.\"",
+            "nodes": {
+              "track": "error"
+            },
+            "edges": {
+              "e3": "error"
+            }
+          },
+          {
+            "caption": "Scout reads the error. The status is unknown, so it won't claim anything about where the rope is.",
+            "nodes": {
+              "scout": "ok"
+            }
+          },
+          {
+            "caption": "Reply: \"I can't reach our carrier's tracking right now, so I can't confirm where your rope is. Shall I pass this to our team?\"",
+            "show": [
+              "reply"
+            ],
+            "nodes": {
+              "reply": "ok"
+            },
+            "edges": {
+              "e5": "ok"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "guided": {
+    "title": "Give your agent a calculator and a file reader",
+    "situation": "Leo's team spends hours on two kinds of question: \"how much will I get back?\" and \"what does the policy say?\". Scout can talk about both, but it does sums in its head and has never read Orbit's policy file. Today you give it a calculator, a file reader, and the loop that lets it use them.",
+    "intro": "By the end you'll have tools.py with two safe tools and agent.py running the tool loop, with errors reported back to Scout instead of hidden.",
+    "before": {
+      "items": [
+        "Your **scout** folder from Modules 1 and 2, with the virtual environment active (`.venv\\Scripts\\activate` on Windows, `source .venv/bin/activate` on macOS and Linux)",
+        "The **anthropic** package installed and **ANTHROPIC_API_KEY** set in this terminal",
+        "**Python 3.11** or newer",
+        "About 30 minutes"
+      ],
+      "downloads": []
+    },
+    "steps": [
+      {
+        "title": "Add Orbit's policy file",
+        "body": "Scout's file reader will only open files in one folder, docs. Start by putting Orbit's policy there.",
+        "actions": [
+          "In your **scout** folder, create a folder for documents: run `mkdir docs`.",
+          "Inside **docs**, create a file called **policy.md**.",
+          "Paste the text below and save."
+        ],
+        "values": [
+          {
+            "label": "docs/policy.md",
+            "value": "# Orbit Outdoor policies\n## Returns\nYou can return any unused item within 30 days of delivery for a full refund. Items must be unused and in their original packaging.\n## Return shipping\nReturn shipping is free on orders over $75. Under $75, a $6.95 return label is taken off the refund.\n## Refunds\nRefunds go back to the original payment method within 5 business days of the return arriving. Refunds over $200 must be approved by a member of the support team.\n## Exchanges\nExchanging for a different size is free if the new size is in stock.\n## Shipping\nStandard shipping takes 3 to 5 business days. Express takes 1 to 2 business days.\n## Damaged items\nSend a photo within 7 days of delivery and we send a replacement or a full refund."
+          }
+        ],
+        "check": "From the **scout** folder, `python -c \"print(open('docs/policy.md').read()[:24])\"` prints `# Orbit Outdoor policies`.",
+        "tip": "On Windows, make sure the file is called policy.md and not policy.md.txt. Turn on **File name extensions** in File Explorer's **View** menu to check."
+      },
+      {
+        "title": "Build a safe calculator",
+        "body": "Models are unreliable at exact arithmetic, so Scout will hand every sum to Python. This calculator parses the text with ast and allows only numbers and arithmetic. There is no eval, so no other code can ever run.",
+        "actions": [
+          "Create **tools.py** in the **scout** folder.",
+          "Paste the code below and save.",
+          "Try a sum: `python -c \"from tools import calculate; print(calculate('240 * 0.85'))\"`.",
+          "Try something that isn't arithmetic: `python -c \"from tools import calculate; calculate('open(1)')\"`."
+        ],
+        "values": [
+          {
+            "label": "tools.py",
+            "value": "import ast\nimport operator\nfrom pathlib import Path\n\n# ---------- calculate: safe arithmetic, no eval ----------\n\n# The only operations calculate() will carry out.\nOPERATORS = {\n    ast.Add: operator.add,\n    ast.Sub: operator.sub,\n    ast.Mult: operator.mul,\n    ast.Div: operator.truediv,\n    ast.Pow: operator.pow,\n    ast.USub: operator.neg,\n}\n\n\ndef _evaluate(node):\n    \"\"\"Work out one part of the parsed expression. Refuse anything that is not arithmetic.\"\"\"\n    if isinstance(node, ast.Constant) and type(node.value) in (int, float):\n        return node.value\n    if isinstance(node, ast.BinOp) and type(node.op) in OPERATORS:\n        left, right = _evaluate(node.left), _evaluate(node.right)\n        if isinstance(node.op, ast.Pow) and abs(right) > 100:\n            raise ValueError(\"exponent too large\")\n        return OPERATORS[type(node.op)](left, right)\n    if isinstance(node, ast.UnaryOp) and type(node.op) in OPERATORS:\n        return OPERATORS[type(node.op)](_evaluate(node.operand))\n    raise ValueError(\"only numbers, + - * / ** and parentheses are allowed\")\n\n\ndef calculate(expression):\n    \"\"\"Work out an arithmetic expression such as '240 * 0.85' and return the answer as text.\"\"\"\n    tree = ast.parse(expression, mode=\"eval\")  # text -> tree; nothing is run\n    result = _evaluate(tree.body)\n    return str(round(result, 6))  # trims float noise like 0.30000000000000004\n"
+          }
+        ],
+        "check": "The first command prints `204.0`. The second ends with `ValueError: only numbers, + - * / ** and parentheses are allowed`: a function call was refused, not run.",
+        "tip": "`ModuleNotFoundError: No module named 'tools'` means you're not in the scout folder. `cd` into it and run the command again."
+      },
+      {
+        "title": "Add a file reader that stays inside docs",
+        "body": "read_file joins the name to the docs folder, resolves it to a full path, and refuses anything that ends up outside docs, such as ../tools.py.",
+        "actions": [
+          "Open **tools.py** and paste the code below at the bottom, after a blank line.",
+          "Save, then read the policy: `python -c \"from tools import read_file; print(read_file('policy.md')[:60])\"`.",
+          "Now try to escape the folder: `python -c \"from tools import read_file; read_file('../tools.py')\"`."
+        ],
+        "values": [
+          {
+            "label": "tools.py (add at the bottom)",
+            "value": "# ---------- read_file: only files inside docs ----------\n\nDOCS = Path(__file__).parent / \"docs\"\n\n\ndef read_file(name):\n    \"\"\"Return the text of a file in the docs folder. Refuse anything outside it.\"\"\"\n    path = (DOCS / name).resolve()  # a full path, with any ../ worked out\n    if not path.is_relative_to(DOCS.resolve()):\n        raise ValueError(f\"{name} is outside the docs folder\")\n    if not path.is_file():\n        raise FileNotFoundError(f\"no file called {name} in docs\")\n    return path.read_text(encoding=\"utf-8\")\n"
+          }
+        ],
+        "check": "The first command prints the start of the policy, beginning `# Orbit Outdoor policies`. The second ends with `ValueError: ../tools.py is outside the docs folder`.",
+        "tip": "`Path(__file__).parent` is the folder tools.py lives in, so read_file finds docs no matter which folder you start Python from."
+      },
+      {
+        "title": "Describe the tools and add a dispatcher",
+        "body": "The model never sees your Python. It sees TOOLS: a name, a description and an input schema for each tool. run_tool maps each name to its function, so a tool request becomes a real call.",
+        "actions": [
+          "Paste the code below at the bottom of **tools.py**, after a blank line, and save.",
+          "Run a tool the way the agent will: `python -c \"from tools import run_tool; print(run_tool('calculate', {'expression': '240 * 15 / 100'}))\"`."
+        ],
+        "values": [
+          {
+            "label": "tools.py (add at the bottom)",
+            "value": "# ---------- what the model sees, and which function runs ----------\n\nTOOLS = [\n    {\n        \"name\": \"calculate\",\n        \"description\": (\n            \"Work out an arithmetic expression exactly and return the answer. \"\n            \"Use it for every sum, discount, refund or percentage instead of working it out yourself. \"\n            \"Write the expression with numbers, + - * / ** and parentheses only, \"\n            \"e.g. 240 * 0.85 for 15 percent off 240.\"\n        ),\n        \"input_schema\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"expression\": {\"type\": \"string\", \"description\": \"Arithmetic only, e.g. 240 * 0.85\"},\n            },\n            \"required\": [\"expression\"],\n        },\n    },\n    {\n        \"name\": \"read_file\",\n        \"description\": (\n            \"Read a file from Orbit's docs folder and return its full text. \"\n            \"policy.md holds Orbit's rules on returns, return shipping, refunds, exchanges, \"\n            \"shipping times and damaged items. Use it before answering any policy question. \"\n            \"Pass only the file name, e.g. policy.md.\"\n        ),\n        \"input_schema\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"name\": {\"type\": \"string\", \"description\": \"File name inside docs, e.g. policy.md\"},\n            },\n            \"required\": [\"name\"],\n        },\n    },\n]\n\nFUNCTIONS = {\"calculate\": calculate, \"read_file\": read_file}\n\n\ndef run_tool(name, tool_input):\n    \"\"\"Run the Python function for one tool request and return its result as text.\"\"\"\n    if name not in FUNCTIONS:\n        raise ValueError(f\"unknown tool {name}\")\n    return FUNCTIONS[name](**tool_input)\n"
+          }
+        ],
+        "check": "It prints `36.0`. That is the exact path the agent will use: a tool name and an input dictionary in, text out.",
+        "tip": "The descriptions are prompts. If Scout later skips a tool or picks the wrong one, improve the description before you change any code."
+      },
+      {
+        "title": "Write the tool loop",
+        "body": "agent.py sends the question with TOOLS, runs every tool Scout asks for, and sends all the results back in one message. Failures go back with is_error, and MAX_STEPS = 6 stops a runaway loop.",
+        "actions": [
+          "Create **agent.py** in the **scout** folder.",
+          "Paste the code below and save.",
+          "Read the loop once. It is the loop from the lessons, plus two `print` lines so you can watch each tool call, and a polite fallback if the step limit runs out.",
+          "Check that it loads: `python -c \"import agent\"`."
+        ],
+        "values": [
+          {
+            "label": "agent.py",
+            "value": "import sys\n\nimport anthropic\n\nfrom tools import TOOLS, run_tool\n\nclient = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY\nMODEL = \"claude-opus-5-5\"\nMAX_STEPS = 6  # the most model calls one question may use\n\nSYSTEM = \"\"\"You are Scout, Orbit Outdoor's support assistant.\nUse the calculate tool for every sum, discount or refund amount. Never do arithmetic in your head.\nUse the read_file tool to check Orbit's policy in policy.md before answering any policy question.\nOnly state facts that come from a tool result or from the customer.\nIf a tool returns an error, do not guess. Say plainly what you could not check, and offer to pass the question to a person on the team.\nKeep replies short, friendly and plain.\"\"\"\n\n\ndef ask(question):\n    messages = [{\"role\": \"user\", \"content\": question}]\n    for step in range(MAX_STEPS):                       # always a step limit\n        response = client.messages.create(model=MODEL, max_tokens=16000,\n                                          system=SYSTEM, tools=TOOLS, messages=messages)\n        messages.append({\"role\": \"assistant\", \"content\": response.content})\n        if response.stop_reason != \"tool_use\":\n            break\n        results = []\n        for block in response.content:\n            if block.type == \"tool_use\":\n                print(f\"  [tool] {block.name}({block.input})\")\n                try:\n                    output = run_tool(block.name, block.input)\n                    results.append({\"type\": \"tool_result\", \"tool_use_id\": block.id, \"content\": output})\n                except Exception as err:\n                    print(f\"  [error] {err}\")\n                    results.append({\"type\": \"tool_result\", \"tool_use_id\": block.id,\n                                    \"content\": f\"Error: {err}\", \"is_error\": True})\n        messages.append({\"role\": \"user\", \"content\": results})   # all results in one message\n    if response.stop_reason == \"tool_use\":              # still asking for tools: the step limit ran out\n        return \"Sorry, I couldn't finish that one. I'll pass your question to a person on the team.\"\n    return next(b.text for b in response.content if b.type == \"text\")\n\n\nif __name__ == \"__main__\":\n    question = \" \".join(sys.argv[1:]) or input(\"Ask Scout: \")\n    print(ask(question))\n"
+          }
+        ],
+        "check": "The import prints nothing and shows no error. Your **scout** folder now holds **docs/policy.md**, **tools.py** and **agent.py**.",
+        "tip": "An IndentationError usually means the `try` and `except` lines aren't inside the `for block in response.content:` loop. Compare your indentation with the code above, line by line."
+      },
+      {
+        "title": "Ask Scout to do a sum",
+        "body": "Now watch the loop work. Scout should hand the arithmetic to calculate instead of doing it in its head.",
+        "actions": [
+          "Run `python agent.py \"What is 15 percent off a 240 dollar tent?\"`.",
+          "Watch for the `[tool]` lines that appear before the answer."
+        ],
+        "check": "You see at least one line like `[tool] calculate({'expression': '240 * 0.85'})`, then an answer of 204 dollars. Scout may work out the 36 dollar discount first, so two calculate calls are fine too.",
+        "tip": "No `[tool]` line means Scout did the sum in its head. Check that `tools=TOOLS` is in the create call and that SYSTEM tells Scout to use calculate for every sum."
+      },
+      {
+        "title": "Ask about the policy",
+        "body": "This time the answer lives in a file Scout has never seen, so it should reach for read_file.",
+        "actions": [
+          "Run `python agent.py \"What does our policy say about returns?\"`."
+        ],
+        "check": "You see `[tool] read_file({'name': 'policy.md'})`, then an answer that mentions 30 days from delivery, unused items in their original packaging, and free return shipping on orders over 75 dollars.",
+        "tip": "`[error] no file called policy.md in docs` means the file is in the wrong place or has a hidden .txt ending. It must be **scout/docs/policy.md**."
+      },
+      {
+        "title": "Break it on purpose",
+        "body": "Tools fail. Ask about a file that doesn't exist and watch the error travel back to Scout with is_error, instead of being hidden the way Elena's tracking error was.",
+        "actions": [
+          "Run `python agent.py \"What does warranty.md in our docs say about tents?\"`.",
+          "Read the `[error]` line, then Scout's answer."
+        ],
+        "check": "You see `[tool] read_file({'name': 'warranty.md'})` and `[error] no file called warranty.md in docs`. Scout says it couldn't find a warranty file and doesn't invent warranty terms. It may also open policy.md to look, which is fine: there is no warranty section there either.",
+        "tip": "If Scout describes a warranty anyway, check that your except block sets `\"is_error\": True` and that SYSTEM tells Scout not to guess when a tool fails."
+      }
+    ],
+    "finish": {
+      "title": "Scout can calculate, read, and admit what it doesn't know",
+      "body": "You built two safe tools, described them for the model, and ran the full tool loop with a step limit. When a tool failed, the error reached Scout with is_error, and it answered honestly instead of guessing. In Module 4 you'll give Scout memory and a search_policy tool that finds the right part of the policy.",
+      "checklist": [
+        "**tools.py** has calculate (ast, no eval) and read_file (docs only)",
+        "TOOLS describes both tools, and run_tool maps each name to its function",
+        "**agent.py** runs the tool loop with MAX_STEPS = 6",
+        "Tool failures go back as a tool_result with is_error true",
+        "Scout answered a sum, a policy question and a missing file correctly"
+      ]
+    }
+  },
+  "lab": {
+    "title": "Which tool, and what if it fails?",
+    "intro": "Three situations from Scout's first week with tools. In each one, decide what should change, or what Scout should do.",
+    "scenarios": [
+      {
+        "lesson": "3.2",
+        "title": "Scout searches instead of looking up",
+        "situation": "Priya added a search_help tool that searches Orbit's help pages. Since then, when customers give an order number, Scout often searches the help pages instead of calling get_order, and replies with general shipping advice. Ravi, whose order is still processing, was told it should arrive in 3 to 5 days. Leo pasted the two tool descriptions and a trace.",
+        "context": {
+          "label": "Tool descriptions and Scout's trace",
+          "lines": [
+            "get_order:   \"Gets data.\"",
+            "search_help: \"Search Orbit's help pages for answers to",
+            "              customer questions about orders, shipping",
+            "              and returns.\"",
+            "user> Where's my order ORB-10533? It's been 4 days.",
+            "> search_help(query=\"order not arrived after 4 days\")",
+            "< Standard shipping takes 3 to 5 business days...",
+            "scout> Orders usually arrive in 3 to 5 business days."
+          ]
+        },
+        "stem": "What is the best fix?",
+        "options": [
+          {
+            "text": "Rewrite get_order's description: look up one Orbit order by its ID, like ORB-10482, and use it whenever a customer gives an order number",
+            "correct": true,
+            "why": "The model chooses tools by their descriptions. \"Gets data\" says nothing, while search_help sounds like it covers orders. A clear what-and-when description makes get_order the obvious choice."
+          },
+          {
+            "text": "Delete search_help, so get_order is the only tool left",
+            "why": "That stops this mistake but throws away a useful tool. The real problem is that get_order's description gives the model no reason to pick it."
+          },
+          {
+            "text": "Add a system prompt rule: call get_order first for every message, no matter what",
+            "why": "Calling get_order on every message wastes calls and fails when there's no order number. Fix the description so the model knows when get_order fits."
+          }
+        ],
+        "hints": [
+          "Read the two descriptions as if you were the model. Which one sounds like it handles order questions?",
+          "The model never sees your Python, only the descriptions."
+        ],
+        "debrief": "When an agent picks the wrong tool, read the tool descriptions first: they are prompts. Say what each tool does, when to use it and what the input looks like, and make overlapping tools clearly different. Then rerun the same question to confirm the fix."
+      },
+      {
+        "lesson": "3.5",
+        "title": "The tracking API is down for 20 minutes",
+        "situation": "At 2:00 PM on Tuesday, ParcelPath's API starts timing out on every call. It comes back at 2:20, but for twenty minutes every tracking question hits the outage. track_parcel already retries twice with backoff, then raises an error that the loop returns with is_error. At 2:07, Ana asks where her tent is.",
+        "context": {
+          "label": "Scout's trace, 2:07 PM",
+          "lines": [
+            "user> Where's my tent? Order ORB-10482",
+            "> get_order(order_id=\"ORB-10482\")",
+            "< shipped · ParcelPath · tracking PP-88213",
+            "> track_parcel(tracking_number=\"PP-88213\")",
+            "  attempt 1: timeout after 10s",
+            "  attempt 2: timeout after 10s (waited 1s)",
+            "  attempt 3: timeout after 10s (waited 2s)",
+            "< is_error: ParcelPath timed out 3 times. Status unknown."
+          ]
+        },
+        "stem": "What should Scout tell Ana?",
+        "options": [
+          {
+            "text": "It shipped with ParcelPath (tracking PP-88213), but live tracking is down right now; she can check later, or Scout can pass her question to the team",
+            "correct": true,
+            "why": "It shares what Scout does know from get_order, is honest about what it doesn't, and gives Ana a way forward. Nothing is guessed."
+          },
+          {
+            "text": "Her tent is in transit and should arrive within 3 to 5 business days",
+            "why": "It sounds helpful, but the live status is unknown. This is Elena's mistake again: a guess presented as a fact."
+          },
+          {
+            "text": "Nothing yet: keep retrying track_parcel until ParcelPath comes back",
+            "why": "Ana would wait up to twenty minutes while the loop burns through its step limit and your money. Retries are for brief blips, not outages."
+          }
+        ],
+        "hints": [
+          "Separate what Scout knows from get_order from what it doesn't know.",
+          "Retries help with a blip of a few seconds. Is a twenty-minute outage a blip?"
+        ],
+        "debrief": "Retry briefly inside the tool, then report the error with is_error and let the model handle it honestly. Scout should share the facts it has, say plainly what it couldn't check, and offer a next step. In production, also alert the team when the same tool fails many times in a row."
+      },
+      {
+        "lesson": "3.4",
+        "title": "4,000 lines for one parcel",
+        "situation": "Priya's first version of track_parcel returns ParcelPath's whole response as text. For most parcels that's about 4,000 lines of JSON: every scan event, depot codes, route IDs and driver notes. Scout's replies have become slow and expensive, and yesterday one reply quoted a driver's note about a customer's gate code.",
+        "context": {
+          "label": "track_parcel result (first lines of 4,012)",
+          "lines": [
+            "{\"tracking_number\": \"PP-88213\",",
+            " \"status\": \"in_transit\",",
+            " \"estimated_delivery\": \"Thursday\",",
+            " \"last_scan\": {\"location\": \"Denver hub\", \"time\": \"06:12\"},",
+            " \"route_id\": \"RT-DEN-4471-B\",",
+            " \"driver_notes\": \"gate code 4471, dog in yard, leave at side door\",",
+            " \"events\": [",
+            "   {\"code\": \"ARR\", \"depot\": \"SLC-02\", \"barcode\": \"00492130...\"},",
+            "   ... 4,000 more lines ..."
+          ]
+        },
+        "stem": "What should track_parcel return to Scout?",
+        "options": [
+          {
+            "text": "Only the status, the estimated delivery and the last scan, as a short JSON string",
+            "correct": true,
+            "why": "Those fields answer the tracking questions customers actually ask. Fewer tokens means faster, cheaper replies, and private fields like driver notes never reach the model or the customer."
+          },
+          {
+            "text": "The full response, so Scout always has every detail it might need",
+            "why": "That's what is happening now: slow, costly replies and private notes leaking into answers. More context isn't better when most of it is noise."
+          },
+          {
+            "text": "The full response, plus a system prompt rule telling Scout never to mention driver notes",
+            "why": "The rule may work most of the time, but you still pay for 4,000 lines on every call, and the private data still sits in the model's context. Remove it in code instead."
+          }
+        ],
+        "hints": [
+          "List the questions customers actually ask about tracking. Which fields answer them?",
+          "Which is safer: asking the model not to repeat something, or never giving it to the model at all?"
+        ],
+        "debrief": "Treat a tool's output like a prompt you are writing: include what the model needs and nothing else. Trimming in code is cheaper and safer than asking the model to ignore things, and it keeps private fields away from customers. If Scout later needs one more field, add that one field."
+      }
+    ]
+  },
+  "review": {
+    "variants": [
+      {
+        "after_days": 3,
+        "title": "Health check · Scout's first tool",
+        "stem": "Grace asks Scout whether her boots, order ORB-10517, can still be returned. Scout's response comes back with stop_reason \"tool_use\" and a request for get_order. What happens next?",
+        "options": [
+          {
+            "text": "Your code runs get_order with ORB-10517 and sends the result back as a tool_result",
+            "correct": true
+          },
+          {
+            "text": "The model connects to Orbit's order system and reads the order itself"
+          },
+          {
+            "text": "Your code shows the response to Grace, because the model has finished"
+          }
+        ],
+        "rationale": "The model can only ask. Your code runs the tool and sends back a tool_result with the matching tool_use_id; then the model carries on. (Grace's boots were delivered 62 days ago, so Scout should explain they're outside the 30-day window.)"
+      },
+      {
+        "after_days": 10,
+        "title": "Tool design · check_stock",
+        "stem": "Sam wants Scout to answer \"is this in stock?\" with a new check_stock tool. Which description will help Scout use it correctly?",
+        "options": [
+          {
+            "text": "\"Check how many of one product Orbit has in stock, by SKU like BOOT-RDG-39. Use it before promising an exchange or a size. Returns a whole number.\"",
+            "correct": true
+          },
+          {
+            "text": "\"Stock tool.\""
+          },
+          {
+            "text": "\"Returns data from Sam's stock sheet.\""
+          }
+        ],
+        "rationale": "A good description is a prompt: what the tool does, when to use it, what the input looks like, and what comes back. The other two leave the model guessing when and how to call it."
+      },
+      {
+        "after_days": 30,
+        "title": "Busy hour · ParcelPath",
+        "stem": "At 8 PM on Black Friday, track_parcel starts getting 429 responses with Retry-After: 3. Customers are waiting in the chat. What should your code do?",
+        "options": [
+          {
+            "text": "Wait the 3 seconds and retry a couple of times, cache recent lookups, and if it still fails, return is_error so Scout can explain",
+            "correct": true
+          },
+          {
+            "text": "Retry immediately in a tight loop until a call gets through"
+          },
+          {
+            "text": "Return an empty string so Scout can carry on without tracking"
+          }
+        ],
+        "rationale": "A 429 is temporary: respect Retry-After, back off, and cache so the same parcel isn't fetched again and again. Hammering the API makes the limit worse, and an empty string recreates Elena's bug: Scout guesses."
+      }
+    ]
+  }
+}

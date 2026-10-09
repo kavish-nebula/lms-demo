@@ -43,7 +43,8 @@ async function build(courseId: string): Promise<CourseContext> {
 
   lines.push(`COURSE ${course.course_id}: "${course.title}"`);
   lines.push(course.tagline);
-  lines.push(`Level: ${course.level}. About ${course.estimated_hours} hours. Story: Nebula, a coffee subscription company; Ana is the founder.`);
+  lines.push(`Level: ${course.level}. About ${course.estimated_hours} hours.`);
+  if (course.goal) lines.push(`Goal: ${course.goal}`);
   lines.push("");
 
   for (const [i, m] of course.modules.entries()) {
@@ -59,7 +60,7 @@ async function build(courseId: string): Promise<CourseContext> {
       lessons: m.lessons.map((l) => ({ id: l.id, title: l.title })),
       hasHook: !!hook,
     });
-    lines.push(`MODULE ${m.module_id} (module ${i + 1}): "${m.title}", about ${m.minutes} min`);
+    lines.push(`MODULE ${m.module_id} (module ${i + 1}): "${m.title}"${m.minutes ? `, about ${m.minutes} min` : ""}`);
     lines.push(`  Problem: ${m.pain}`);
     lines.push(`  Topics in outline order (stage id: title [written | coming soon]):`);
     for (const s of m.stages) {
@@ -68,14 +69,14 @@ async function build(courseId: string): Promise<CourseContext> {
     }
     lines.push(`  Lessons:`);
     for (const l of m.lessons) lines.push(`    - ${l.id} "${l.title}": ${(l.notes ?? []).join(" ")}`);
-    if (hook) lines.push(`  Opening scenario (hook): ${hook.why}`);
+    if (hook) lines.push(`  Opening scenario (hook): ${hook.title}. ${hook.why}${hook.stat ? ` ${hook.stat}` : ""}`);
     if (m.outcomes?.length) lines.push(`  Outcomes: ${m.outcomes.join("; ")}`);
     lines.push("");
   }
 
   if (precheck?.items.length) {
-    lines.push("QUICK CHECK (ungraded, taken before the course; 2 questions per lesson):");
-    for (const it of precheck.items) lines.push(`  - ${it.id} tests lesson ${it.lesson}: ${it.stem}`);
+    lines.push("QUICK CHECK (ungraded, taken before the course; 2 questions per lesson, or per module where a bare number names the module):");
+    for (const it of precheck.items) lines.push(`  - ${it.id} tests ${it.lesson.includes(".") ? "lesson" : "module"} ${it.lesson}: ${it.stem}`);
     lines.push("");
   }
 

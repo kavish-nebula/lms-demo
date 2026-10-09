@@ -1,5 +1,5 @@
 import "server-only";
-import { getPrecheck } from "@/data";
+import { getCourse, getPrecheck } from "@/data";
 import { scorePrecheck } from "@/data/mock-grader";
 import type { EnrollmentView, PlanSource, PlanVersion } from "@/lib/learner-plan";
 import type { PrecheckResult, SetupAnswers, SupportOverride } from "@/lib/setup";
@@ -152,7 +152,8 @@ async function maybeReplan(user: SessionUser, e: repo.EnrollmentRow, fresh: repo
   const current = (await repo.plansFor(e.id)).find((p) => p.status === "ready");
   const revised = current?.plan ? ruleRevision(current.plan, unused) : null;
   if (!revised) return false;
-  await repo.insertPlan(e.id, { status: "ready", source: "baseline", trigger: "signals", plan: revised, changes: revised.changes, completedAt: new Date() });
+  // the revision adjusts the current plan, so it keeps that plan's source: an AI-written plan stays personalised
+  await repo.insertPlan(e.id, { status: "ready", source: current!.source, trigger: "signals", plan: revised, changes: revised.changes, completedAt: new Date() });
   return true;
 }
 
@@ -161,7 +162,8 @@ async function startAi(user: SessionUser, e: repo.EnrollmentRow, trigger: PlanVe
   if (!api && !aiConfigured()) return false;
   const plans = await repo.plansFor(e.id);
   if (plans.some((p) => p.status === "generating" && Date.now() - p.createdAt.getTime() < STALE_MS)) return false;
-  const lastAi = plans.find((p) => p.source === "ai");
+  // the last AI call (rule revisions of an AI plan share its source but record no model)
+  const lastAi = plans.find((p) => p.source === "ai" && p.model);
   if (cooldown && lastAi && Date.now() - lastAi.createdAt.getTime() < AI_COOLDOWN_MS) return false;
 
   const row = await repo.insertPlan(e.id, { status: "generating", source: "ai" satisfies PlanSource, trigger, model: plannerModel() });
@@ -189,7 +191,7 @@ async function runAi(user: SessionUser, enrollmentId: string, courseId: string, 
       },
       api,
     );
-    const { plan, issues } = validatePlan(result.plan, ctx, baselinePlan(input, ctx));
+    const { plan, issues } = validatePlan(result.plan, ctx, baselinePlan(input, ctx), { override: input.supportOverride, floor: evidence.length === 0 });
     await repo.updatePlan(row.id, {
       status: "ready",
       plan,
@@ -211,8 +213,11 @@ async function runAi(user: SessionUser, enrollmentId: string, courseId: string, 
   }
 }
 
+/** Every enrollment in a course that still exists (a removed course's rows stay stored, unlisted). */
 export async function enrollmentsOf(user: SessionUser) {
-  return Promise.all((await repo.listEnrollments(user.id)).map(viewOf));
+  const rows = await repo.listEnrollments(user.id);
+  const live = await Promise.all(rows.map(async (e) => ((await getCourse(e.courseId)) ? e : null)));
+  return Promise.all(live.filter((e): e is NonNullable<typeof e> => !!e).map(viewOf));
 }
 
 export async function enrollmentOf(user: SessionUser, courseId: string) {

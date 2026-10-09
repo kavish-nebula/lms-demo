@@ -1,0 +1,275 @@
+{
+  "lesson": "4.3",
+  "title": "Retrieval-Augmented Generation (RAG) basics",
+  "notes": [
+    "RAG means retrieve the relevant chunks, add them to the prompt, and generate the answer from them.",
+    "Keyword scoring is a simple start; embeddings in a vector store such as Chroma or pgvector match meaning, not just words.",
+    "Answer only from retrieved text, say so when it doesn't cover the question, and keep your sources current."
+  ],
+  "quizAfter": 4,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "search",
+      "kicker": "Module 4 · Lesson 3",
+      "title": "Retrieval-Augmented Generation (RAG) basics",
+      "sub": "Answer from Orbit's own documents instead of the model's best guess",
+      "sentences": [
+        "Remember the early Scout that promised a ninety day refund Orbit never offered?",
+        "The model filled a gap with something that sounded right.",
+        "In this lesson you will learn RAG, the standard way to make an agent answer from your own documents."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Why not paste every document in?",
+      "left": {
+        "label": "Paste every document",
+        "tone": "bad",
+        "cue": 1,
+        "points": [
+          "Fine for one short file",
+          "Slow and costly as documents grow",
+          "The key line gets buried",
+          "Can outgrow the context window"
+        ]
+      },
+      "right": {
+        "label": "Retrieve what's relevant",
+        "tone": "ok",
+        "cue": 4,
+        "points": [
+          "Only the best 2 or 3 chunks",
+          "Small, cheap requests",
+          "The model sees the right text",
+          "Scales to thousands of pages"
+        ]
+      },
+      "sentences": [
+        "Why not simply paste every document into the system prompt?",
+        "For one short file, like Orbit's six-section policy, that honestly works.",
+        "But Orbit's documents keep growing: size guides, care instructions, shipping rules, and more.",
+        "Pasting all of it into every call is slow and costly, and the one line that matters gets buried.",
+        "The better way is to find the few passages that answer this question, and send only those.",
+        "That approach scales from six sections to six thousand pages."
+      ]
+    },
+    {
+      "kind": "define",
+      "title": "So what is RAG?",
+      "term": "RAG",
+      "definition": "Retrieval-augmented generation: find the passages that answer a question, add them to the prompt, and let the model answer from them.",
+      "parts": [
+        { "text": "Retrieve: find relevant text", "cue": 1 },
+        { "text": "Augment: add it to the prompt", "cue": 2 },
+        { "text": "Generate: answer from it", "cue": 3 }
+      ],
+      "analogy": {
+        "label": "Think of it as",
+        "text": "An open-book exam. The student still writes the answer, but from the right page of the book, not from memory."
+      },
+      "sentences": [
+        "This pattern has a name: RAG, short for retrieval-augmented generation.",
+        "Retrieve means finding the passages in your documents that relate to the question.",
+        "Augment means adding those passages to the prompt, right next to the question.",
+        "Generate means the model writes its answer from that text.",
+        "It's an open-book exam. The student still writes the answer, but from the right page, not from memory."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "RAG, step by step",
+      "run": true,
+      "nodes": [
+        { "kind": "data", "icon": "file", "label": "Documents", "sub": "Orbit's policy file", "cue": 1 },
+        { "kind": "logic", "icon": "split", "label": "Split into chunks", "sub": "one per section", "cue": 2 },
+        { "kind": "tool", "icon": "search", "label": "Find best chunks", "sub": "score against the question", "cue": 3 },
+        { "kind": "llm", "icon": "brain", "label": "Model", "sub": "question plus top chunks", "cue": 4 },
+        { "kind": "output", "icon": "check", "label": "Grounded answer", "sub": "or: not covered", "cue": 5 }
+      ],
+      "note": { "text": "Split once, ahead of time. Search and answer on every question.", "cue": 6 },
+      "sentences": [
+        "Let's walk through it with Orbit's policy file.",
+        "You start with your documents.",
+        "Ahead of time, you split them into chunks, small passages that make sense on their own, like one section of the policy.",
+        "When a question arrives, you score every chunk against it and keep the best two or three.",
+        "Those chunks go into the prompt, together with the question.",
+        "The model answers from them, or says plainly that they don't cover the question.",
+        "Splitting happens once. Searching and answering happen for every question."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "Owen's question, answered from two chunks",
+      "messages": [
+        { "role": "user", "label": "Owen", "text": "My new jacket is too big. Can I send it back, and is return shipping free? It was $310.", "cue": 1 },
+        { "role": "tool", "label": "search_policy", "text": "Top 2 of 6 sections: Return shipping (3 shared words), Returns (2)", "cue": 2 },
+        { "role": "system", "label": "Added to the prompt", "text": "Return shipping is free on orders over $75... You can return any unused item within 30 days of delivery...", "cue": 3 },
+        { "role": "agent", "label": "Scout", "text": "Yes! Unused items can come back within 30 days of delivery, in the original packaging. Your order was over $75, so return shipping is free.", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "shield",
+        "label": "Grounded",
+        "text": "Every claim in the reply traces back to a line of Orbit's policy.",
+        "cue": 5
+      },
+      "sentences": [
+        "Here's RAG in a real Orbit chat.",
+        "Owen's new jacket is too big, and he wants to know if he can send it back for free.",
+        "Scout searches the policy, and the two best-matching sections come back: return shipping, and returns.",
+        "Those two chunks are added to the prompt.",
+        "Scout answers from them: unused items within thirty days, and free return shipping on orders over seventy-five dollars.",
+        "Every claim in that answer traces back to a line of Orbit's policy."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Two ways to find the best chunks",
+      "left": {
+        "label": "Keyword scoring",
+        "tone": "info",
+        "cue": 1,
+        "points": [
+          "Count words shared with the question",
+          "A few lines of Python, no extra service",
+          "Misses synonyms: send back versus return"
+        ]
+      },
+      "right": {
+        "label": "Embeddings",
+        "tone": "ok",
+        "cue": 4,
+        "points": [
+          "Text turned into numbers that capture meaning",
+          "Finds similar meaning in different words",
+          "Kept in a vector store: Chroma, pgvector"
+        ]
+      },
+      "sentences": [
+        "How do you score the chunks? There are two common ways.",
+        "The simple way is keyword scoring: count the words each chunk shares with the question.",
+        "It needs no extra service and fits in a few lines of Python. It's what you will build today.",
+        "Its weakness is synonyms. Send it back and return mean the same thing, but share no words.",
+        "The real-project way is embeddings: a model turns each chunk into a list of numbers that captures its meaning.",
+        "Chunks with similar meaning get similar numbers, so a question finds them even in different words.",
+        "Those numbers live in a vector store, such as Chroma or pgvector, which searches millions of chunks quickly."
+      ]
+    },
+    {
+      "kind": "bullets",
+      "title": "Rules that make RAG trustworthy",
+      "lead": "Retrieval finds the text. The prompt decides how the model uses it.",
+      "bullets": [
+        { "icon": "book", "text": "Answer only from the retrieved text", "cue": 1 },
+        { "icon": "help", "text": "Not covered? Say so, and offer a person", "cue": 2 },
+        { "icon": "calendar", "text": "Keep sources current: remove old versions, date every file", "cue": 3 },
+        { "icon": "eye", "text": "Show which section the answer came from", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "alert",
+        "label": "Garbage in, garbage out",
+        "text": "Retrieval can't fix a wrong document. If last year's policy is in the folder, it can be retrieved.",
+        "cue": 5
+      },
+      "sentences": [
+        "Finding the right text is half the job. The prompt does the other half.",
+        "Tell the model to answer only from the retrieved text, not from what shops usually do.",
+        "If the chunks don't cover the question, it should say so plainly and offer to pass it to a person.",
+        "Keep your sources clean: remove old versions, and put a date on every file.",
+        "And show which section an answer came from, so Leo's team can check it in seconds.",
+        "Retrieval can't fix a wrong document. If last year's policy is still in the folder, it can be retrieved."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "search_policy in a few lines",
+      "lead": "Split policy.md at its headings, score each section by shared words, return the best two.",
+      "rows": [
+        { "code": "for heading, text in load_sections():", "out": "one chunk per policy section", "cue": 1 },
+        { "code": "score = len(query_words & _words(heading + \" \" + text))", "out": "count the shared words", "cue": 2 },
+        { "code": "scored.sort(key=lambda s: s[0], reverse=True)", "out": "highest score first", "cue": 3 },
+        { "code": "best = [s for s in scored[:top] if s[0] > 0]", "out": "top two, skipping zero scores", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "lightbulb",
+        "label": "In real projects",
+        "text": "Swap the scoring for embeddings and a vector store. The tool's name and inputs stay the same.",
+        "cue": 5
+      },
+      "sentences": [
+        "Here's the heart of the search tool you will write in the guided practice.",
+        "It splits the policy file at each heading, so every section becomes a chunk.",
+        "For each chunk, it counts the words shared with the query.",
+        "It sorts the chunks, highest score first.",
+        "And it returns the top two, skipping any chunk that shares no words at all.",
+        "Later you can swap the scoring for embeddings, and Scout won't notice the difference."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "RAG: retrieve relevant text, add it to the prompt, answer from it.", "cue": 1 },
+        { "text": "Split documents into chunks once; search them on every question.", "cue": 2 },
+        { "text": "Keyword scoring is simple; embeddings and a vector store catch meaning.", "cue": 3 },
+        { "text": "Answer only from the chunks, and say so when they don't cover it.", "cue": 4 }
+      ],
+      "sentences": [
+        "Let's recap.",
+        "RAG means retrieve the relevant text, add it to the prompt, and generate the answer from it.",
+        "You split documents into chunks once, and search them for every question.",
+        "Keyword scoring is a fine start. Embeddings in a vector store catch meaning in real projects.",
+        "The model answers only from what was retrieved, and says so when that doesn't cover the question.",
+        "Next: what Scout should do when one request needs several steps."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "In RAG, what goes into the prompt along with the customer's question?",
+      "options": [
+        "Every document in the folder",
+        "The few chunks that best match the question",
+        "A list of the customer's past chats"
+      ],
+      "correct": 1,
+      "explain": "Retrieval picks the best-matching chunks, and only those are added. That keeps the request small and focused.",
+      "hint": "The R in RAG stands for retrieve. What gets retrieved?"
+    },
+    {
+      "q": "A customer asks about gift wrapping. The retrieved chunks are about shipping times. What should Scout do?",
+      "options": [
+        "Answer from what shops usually do",
+        "Say the policy doesn't cover it and offer a person",
+        "Adapt the closest chunk into an answer"
+      ],
+      "correct": 1,
+      "explain": "The model should answer only from retrieved text. When that text doesn't cover the question, saying so is the honest answer.",
+      "hint": "Does any retrieved line actually mention gift wrapping?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "A customer asks if she can send her boots back. Keyword scoring misses the Returns section. What would catch it?",
+      "options": [
+        "Embeddings, which match meaning rather than exact words",
+        "Returning only the single best chunk",
+        "A longer system prompt"
+      ],
+      "correct": 0,
+      "explain": "Send back and return share no words, so keyword scoring misses the match. Embeddings place similar meanings close together.",
+      "hint": "The problem is two different words for the same idea."
+    },
+    {
+      "q": "Why split documents into chunks instead of retrieving whole files?",
+      "options": [
+        "Models can't read whole files",
+        "Chunks let you send only the passages that matter",
+        "The API only accepts text in chunks"
+      ],
+      "correct": 1,
+      "explain": "Small chunks keep requests short and put the right lines in front of the model, instead of burying them in a long file.",
+      "hint": "Think back to why pasting every document was a problem."
+    }
+  ]
+}

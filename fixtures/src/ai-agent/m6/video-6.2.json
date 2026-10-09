@@ -1,0 +1,254 @@
+{
+  "lesson": "6.2",
+  "title": "Cost, latency and monitoring",
+  "notes": [
+    "Cost is tokens times price, and every step re-sends the whole conversation, so each step costs more than the last.",
+    "Cut cost with shorter prompts, trimmed history, smaller models for simple steps, step limits and prompt caching; cut waiting with fewer steps and streaming.",
+    "Log tokens, cost, latency, tool errors and hand-offs for every request, and set alerts before a bill surprises you."
+  ],
+  "quizAfter": 3,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "gauge",
+      "kicker": "Module 6 · Lesson 2",
+      "title": "Cost, latency and monitoring",
+      "sub": "What one answer costs, why loops get expensive, and how to watch it all",
+      "sentences": [
+        "Every answer Scout gives costs money and takes time.",
+        "In this lesson you will price one real answer, see why long loops get expensive so fast, and learn to cut both cost and waiting time.",
+        "Then you will decide what to measure on every request, so a bill never surprises you again."
+      ]
+    },
+    {
+      "kind": "define",
+      "title": "How a model call is priced",
+      "term": "Token cost",
+      "definition": "What one model call costs: input tokens times the input price, plus output tokens times the output price.",
+      "parts": [
+        { "text": "Input: everything you send", "cue": 1 },
+        { "text": "Output: everything it writes", "cue": 2 },
+        { "text": "Opus 5.5: $4 in, $20 out per million", "cue": 3 }
+      ],
+      "analogy": {
+        "label": "Think of it as",
+        "text": "A taxi that, at every new stop, charges you again for the whole route from home."
+      },
+      "sentences": [
+        "Start with how a model call is priced, in tokens, where a token is roughly three quarters of a word.",
+        "Input tokens are everything you send: the system prompt, the tool list and the whole conversation so far.",
+        "Output tokens are everything the model writes back, including its thinking and its tool calls.",
+        "Claude Opus 5.5 costs four dollars per million input tokens and twenty dollars per million output tokens.",
+        "Picture a taxi that, at every new stop, charges you again for the whole route from home.",
+        "That is exactly how an agent loop is billed, as the next two slides show."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "One answer, priced step by step",
+      "columns": ["Step", "Input tokens", "Output tokens", "Cost"],
+      "rows": [
+        { "cells": ["1 · get_order", "3,000", "100", "$0.014"], "cue": 1 },
+        { "cells": ["2 · track_parcel", "3,500", "100", "$0.016"], "cue": 2 },
+        { "cells": ["3 · write the answer", "4,000", "250", "$0.021"], "cue": 3 },
+        { "cells": ["Total", "10,500", "450", "$0.051"], "cue": 4 }
+      ],
+      "note": { "text": "Cost = input × $4 + output × $20, per million tokens. About 5 cents an answer, or $20 a day at 400 tickets.", "cue": 5 },
+      "sentences": [
+        "Let us price one real answer: Ana asks where her tent is, and Scout takes three steps.",
+        "Step one sends three thousand tokens and gets back a short call to get order: about one and a half cents.",
+        "Step two sends the whole conversation again, now with the order details, and calls track parcel.",
+        "Step three sends everything once more and writes the answer, which costs about two cents.",
+        "In total, ten and a half thousand input tokens and four hundred and fifty output tokens: about five cents.",
+        "At four hundred tickets a day, that is about twenty dollars a day, far less than the hours Leo's team gets back."
+      ]
+    },
+    {
+      "kind": "example",
+      "title": "Why a loop gets expensive fast",
+      "scenario": "A tool keeps failing and Scout keeps retrying. Each attempt adds about 500 tokens to the conversation.",
+      "steps": [
+        { "time": "Step 1", "icon": "play", "text": "Sends 3,000 tokens. Input costs about 1 cent.", "cue": 1 },
+        { "time": "Step 10", "icon": "repeat", "text": "Sends 7,500 tokens. About 3 cents for this step alone.", "cue": 2 },
+        { "time": "Step 100", "icon": "repeat", "text": "Sends 52,500 tokens. About 21 cents for one step.", "cue": 3 },
+        { "time": "Step 1,000", "icon": "alert", "text": "Sends about 500,000 tokens. About $2 for one step.", "cue": 4 }
+      ],
+      "result": { "text": "Each step costs more than the last, so the total grows far faster than the step count.", "cue": 5 },
+      "sentences": [
+        "Now the dangerous part: the model remembers nothing between calls, so every step re-sends the whole conversation.",
+        "Imagine a tool that keeps failing, where each failed attempt adds about five hundred tokens to the history.",
+        "By step ten, a single step sends seven and a half thousand tokens, about three cents.",
+        "By step one hundred, one step on its own costs about twenty one cents.",
+        "By step one thousand, one step sends half a million tokens and costs about two dollars.",
+        "Every step costs more than the one before, so the total grows much faster than the number of steps.",
+        "That is how a weekend loop on a broken tool turned into an eighteen hundred dollar bill."
+      ]
+    },
+    {
+      "kind": "hub",
+      "title": "Five ways to cut the cost",
+      "center": { "icon": "dollar", "label": "Cost per answer", "sub": "tokens times price" },
+      "spokes": [
+        { "icon": "pencil", "label": "Shorter prompts", "sub": "cut what the model never uses", "cue": 1 },
+        { "icon": "history", "label": "Trim history", "sub": "recent turns plus key facts", "cue": 2 },
+        { "icon": "cpu", "label": "Smaller models", "sub": "Haiku 5.5: 40 times cheaper", "cue": 3 },
+        { "icon": "timer", "label": "Step limits", "sub": "a hard stop on every loop", "cue": 4 },
+        { "icon": "copy", "label": "Prompt caching", "sub": "reuse the unchanged start", "cue": 5 }
+      ],
+      "note": { "text": "Change one thing at a time, then re-run your Module 5 tests to check quality held.", "cue": 6 },
+      "sentences": [
+        "So how do you bring the cost per answer down?",
+        "First, shorter prompts: cut instructions and examples the model never actually uses.",
+        "Second, trim the history: keep the recent turns and the key facts, as you did in Module 4.",
+        "Third, use a smaller model for simple steps; Claude Haiku 5.5 costs forty times less than Opus 5.5 and is fine for sorting a ticket.",
+        "Fourth, put a step limit on every loop, so one request can never run away.",
+        "Fifth, prompt caching lets the provider reuse the unchanged start of your prompt, such as the system prompt and tool list, at a much lower price.",
+        "Change one thing at a time, and re-run your Module 5 tests to make sure quality held."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "Where the waiting time goes",
+      "run": true,
+      "nodes": [
+        { "kind": "user", "icon": "message", "label": "Question arrives", "sub": "the clock starts", "cue": 1 },
+        { "kind": "llm", "icon": "brain", "label": "Step 1: decide", "sub": "about 3 seconds", "cue": 1 },
+        { "kind": "tool", "icon": "truck", "label": "track_parcel", "sub": "about 1 second, or a timeout", "cue": 2 },
+        { "kind": "llm", "icon": "brain", "label": "Step 2: answer", "sub": "about 4 seconds", "cue": 3 },
+        { "kind": "output", "icon": "send", "label": "Reply streams", "sub": "first words appear early", "cue": 4 }
+      ],
+      "note": { "text": "Latency adds up across steps. Fewer steps, smaller models and streaming make Scout feel fast.", "cue": 5 },
+      "sentences": [
+        "Latency is the time the customer waits, and in an agent it adds up across the steps.",
+        "Each model call takes a few seconds, because the model reads everything, thinks, and writes its answer token by token.",
+        "Each tool call adds its own time, and a slow carrier API can add many more seconds.",
+        "Two model calls and one tool already make an eight second wait, and three or four calls make it longer.",
+        "Streaming helps: the reply appears word by word as it is written, so the customer sees progress instead of a blank screen.",
+        "Fewer steps, smaller models for quick steps, and streaming are your three main tools against waiting."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "Streaming a reply with the SDK",
+      "lead": "Swap messages.create for messages.stream, and send each piece of text as soon as it arrives.",
+      "rows": [
+        { "code": "with client.messages.stream(model=MODEL, ...) as stream:", "out": "same arguments as create", "cue": 1 },
+        { "code": "    for text in stream.text_stream:", "out": "each new piece of text, as it is written", "cue": 2 },
+        { "code": "        send_to_customer(text)", "out": "words appear on the customer's screen", "cue": 3 },
+        { "code": "    final = stream.get_final_message()", "out": "the full message, with usage for the log", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "zap",
+        "label": "In an agent",
+        "text": "Stream every model call and pass only the text to the customer. Tool calls happen quietly in between.",
+        "cue": 5
+      },
+      "sentences": [
+        "Here is what streaming looks like with the SDK.",
+        "Instead of messages create, you call messages stream, with exactly the same arguments.",
+        "Then you loop over the text stream, which hands you each new piece of text as soon as it is written.",
+        "Each piece goes straight to the customer's screen, so they watch the answer appear.",
+        "At the end you still get the full message, with the usage numbers your cost log needs.",
+        "In an agent, stream every call and pass only the text on; the tool calls happen quietly in between."
+      ]
+    },
+    {
+      "kind": "cards",
+      "title": "What to watch, and when to shout",
+      "cards": [
+        {
+          "icon": "list-checks",
+          "title": "Log every request",
+          "flow": ["Tokens and cost", "Latency in seconds", "Tools, errors, hand-offs"],
+          "cue": 1
+        },
+        {
+          "icon": "chart",
+          "title": "Watch the trends",
+          "flow": ["Spend per day", "The slowest replies", "Hand-off and error rates"],
+          "cue": 3
+        },
+        {
+          "icon": "alert",
+          "title": "Alert before it hurts",
+          "flow": ["Spend over $50 a day", "Tool errors over 10%", "Replies over 15 seconds"],
+          "cue": 5
+        }
+      ],
+      "sentences": [
+        "Finally, monitoring, because you cannot fix what you cannot see.",
+        "For every request, log one line with the tokens, the cost, the latency, the tools used, any tool errors and whether Scout handed off.",
+        "Your Module 5 trace shows one conversation in detail; these log lines show the whole day at a glance.",
+        "From the logs, watch the trends: spend per day, the slowest replies, and how often Scout hands off or hits errors.",
+        "A sudden jump in hand-offs or tool errors usually means a tool or an API key has broken.",
+        "Then set alerts that message a person, for example when spend passes fifty dollars in a day or tool errors pass ten percent.",
+        "Also set a monthly spend limit in your provider account, as a last safety net.",
+        "Alerts like these would have caught the eighteen hundred dollar weekend within hours, not on Monday."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "Recap: cost, latency and monitoring",
+      "points": [
+        { "text": "Cost is tokens times price: Opus 5.5 is $4 in, $20 out per million.", "cue": 1 },
+        { "text": "Each step re-sends the conversation, so long loops get expensive fast.", "cue": 2 },
+        { "text": "Cut cost: shorter prompts, trimmed history, smaller models, limits, caching.", "cue": 3 },
+        { "text": "Latency adds up across steps; stream the reply so it feels fast.", "cue": 4 },
+        { "text": "Log every request and alert on spend, errors and slow replies.", "cue": 5 }
+      ],
+      "sentences": [
+        "Here is what to take away.",
+        "Cost is tokens times price, and for Opus 5.5 that is four dollars per million in and twenty per million out.",
+        "Every step re-sends the whole conversation, so a long loop gets expensive very fast.",
+        "Shorter prompts, trimmed history, smaller models for simple steps, step limits and caching all cut the bill.",
+        "Latency adds up across steps, and streaming the reply makes the wait feel short.",
+        "And log every request, then set alerts on spend, errors and slow replies.",
+        "Next, you will put Scout on a server where customers can reach it."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "A step sends 4,000 input tokens and gets 250 output tokens on Opus 5.5 ($4 in, $20 out per million). What does it cost?",
+      "options": ["About $0.021", "About $0.005", "About $0.210"],
+      "correct": 0,
+      "explain": "Input: 4,000 × $4 ÷ 1,000,000 = $0.016. Output: 250 × $20 ÷ 1,000,000 = $0.005. Together about 2.1 cents.",
+      "hint": "Work out the input cost and the output cost separately, then add them."
+    },
+    {
+      "q": "Why does step 100 of a looping agent cost far more than step 1?",
+      "options": [
+        "The provider charges more after many calls in a row",
+        "Every step re-sends the whole conversation, which keeps growing",
+        "Output tokens get more expensive as a chat goes on"
+      ],
+      "correct": 1,
+      "explain": "The model remembers nothing between calls, so each step sends the full history again. More history means more input tokens on every single step.",
+      "hint": "What does each step have to send to the model?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "Scout's replies take 12 seconds at lunchtime. Which change helps most without hurting the answers?",
+      "options": [
+        "Stream the reply and use a smaller model for simple steps",
+        "Raise max_tokens so the model has more room to answer",
+        "Add a second model call that double-checks every reply"
+      ],
+      "correct": 0,
+      "explain": "Streaming shows words straight away, and a small model is quicker for simple steps such as sorting the question. More room or an extra check only adds time.",
+      "hint": "Which option removes waiting, rather than adding more work?"
+    },
+    {
+      "q": "Overnight, Scout's hand-offs jump from 5% to 40% of requests. What is the most likely cause?",
+      "options": [
+        "Customers suddenly started asking much harder questions",
+        "A tool or an API key has broken, so Scout keeps handing off",
+        "The model provider changed its prices overnight"
+      ],
+      "correct": 1,
+      "explain": "A sudden jump overnight points to something that broke, not a slow change in customers. Check the tool errors in the logs first.",
+      "hint": "Slow changes usually come from customers; sudden ones usually come from something breaking."
+    }
+  ]
+}

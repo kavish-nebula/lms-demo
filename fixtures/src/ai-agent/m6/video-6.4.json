@@ -1,0 +1,230 @@
+{
+  "lesson": "6.4",
+  "title": "Intro to multi-agent systems and frameworks",
+  "notes": [
+    "When one agent has too many tools or jobs, split the work into specialist agents with a coordinator that routes each request.",
+    "More agents mean more model calls, more cost and more places to break, so start with one and split only when tests show it struggling.",
+    "Frameworks and SDKs such as Anthropic's tool runner, LangGraph, CrewAI or a managed agent platform give you the loop, tools and memory ready-made."
+  ],
+  "quizAfter": 3,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "users",
+      "kicker": "Module 6 · Lesson 4",
+      "title": "Intro to multi-agent systems and frameworks",
+      "sub": "When one agent is not enough, and what frameworks do for you",
+      "sentences": [
+        "Scout is one agent with six tools, and that is the right size for Orbit today.",
+        "But Maya already has plans: wholesale orders for outdoor shops, and help for Sam with stock.",
+        "In this lesson you will learn when to split work across several agents, what that costs, and what frameworks can do for you."
+      ]
+    },
+    {
+      "kind": "example",
+      "title": "When one agent gets crowded",
+      "scenario": "Maya wants Scout to handle wholesale orders too: about ten new tools, trade prices and a second set of rules.",
+      "steps": [
+        { "time": "Today", "icon": "wrench", "text": "6 tools, one policy. Scout picks the right tool almost every time.", "cue": 1 },
+        { "time": "Week 2", "icon": "layers", "text": "16 tools, two price lists and two sets of rules in one prompt.", "cue": 2 },
+        { "time": "Week 3", "icon": "bug", "text": "Scout quotes a trade price to a retail customer.", "cue": 3 },
+        { "time": "Week 4", "icon": "dollar", "text": "Every request pays for 16 tool definitions, even the simple ones.", "cue": 4 }
+      ],
+      "result": { "text": "Too many tools and jobs in one prompt: more mix-ups, more tokens, harder to test.", "cue": 5 },
+      "sentences": [
+        "Picture what happens if Scout simply keeps growing.",
+        "Today Scout has six tools, all about retail support, and it picks the right one almost every time.",
+        "Now add wholesale: ten more tools, a trade price list and a second set of rules, all in the same prompt.",
+        "The model now has more ways to go wrong, such as quoting a trade price to a retail customer.",
+        "And every request pays for sixteen tool definitions, even a simple question about where an order is.",
+        "When one agent juggles too many tools and jobs, mistakes go up, cost goes up and testing gets harder."
+      ]
+    },
+    {
+      "kind": "hub",
+      "title": "Specialists with a coordinator",
+      "center": { "icon": "split", "label": "Coordinator", "sub": "sends each request onward" },
+      "spokes": [
+        { "icon": "headset", "label": "Scout (retail)", "sub": "orders, returns, tracking", "cue": 1 },
+        { "icon": "factory", "label": "Wholesale agent", "sub": "bulk orders, trade prices", "cue": 2 },
+        { "icon": "package", "label": "Stock agent", "sub": "reorders from Sam's sheet", "cue": 3 }
+      ],
+      "note": { "text": "Each specialist has a short prompt and only the tools its job needs.", "cue": 5 },
+      "sentences": [
+        "The usual answer is to split the work between specialists, with a coordinator in front.",
+        "Scout stays the retail specialist, with its six tools and the retail policy.",
+        "A wholesale agent gets its own prompt, its own tools and its own price list.",
+        "Later, a stock agent could help Sam plan reorders from the warehouse sheet.",
+        "The coordinator reads each request and passes it to the right specialist; it can be as simple as the ticket classifier you built in Module 2.",
+        "Each specialist stays small, so it is easier to prompt, cheaper to run and easier to test on its own."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "One request through the team",
+      "run": true,
+      "nodes": [
+        { "kind": "user", "icon": "shop", "label": "Shop owner", "sub": "wants 40 green tents", "cue": 1 },
+        { "kind": "logic", "icon": "split", "label": "Coordinator", "sub": "intent: wholesale", "cue": 2 },
+        { "kind": "llm", "icon": "factory", "label": "Wholesale agent", "sub": "plans the quote", "cue": 3 },
+        { "kind": "tool", "icon": "package", "label": "check_stock", "sub": "TENT-2P-GRN: 4 in stock", "cue": 3 },
+        { "kind": "output", "icon": "send", "label": "Honest reply", "sub": "4 now, Maya confirms the rest", "cue": 4 }
+      ],
+      "note": { "text": "Agents pass short summaries to each other, not whole conversations. Less to read, less to pay for.", "cue": 5 },
+      "sentences": [
+        "Here is one request moving through the team.",
+        "A shop owner asks for forty green two person tents for their store.",
+        "The coordinator classifies it as wholesale and passes a short summary to the wholesale agent.",
+        "The wholesale agent checks stock and finds only four of those tents in the warehouse.",
+        "It replies honestly with what is available and hands the rest of the order to Maya to confirm.",
+        "Notice that agents pass short summaries to each other rather than whole conversations, which keeps every call small."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "One agent or several?",
+      "left": {
+        "label": "One agent",
+        "tone": "info",
+        "cue": 1,
+        "points": ["One prompt and one loop to test", "Fewest model calls per answer", "Mixes up jobs as tools pile up", "The right place to start"]
+      },
+      "right": {
+        "label": "Several agents",
+        "tone": "info",
+        "cue": 3,
+        "points": ["Small, focused prompts", "Extra calls to route and hand over", "More places to break and to trace", "Worth it when one agent clearly struggles"]
+      },
+      "sentences": [
+        "Splitting is not free, so weigh it honestly.",
+        "One agent means one prompt and one loop to test, and the fewest model calls per answer.",
+        "Its weakness is crowding: as tools and jobs pile up, it starts to mix them up.",
+        "Several agents get small, focused prompts, but every request now pays for extra calls to route it and hand it over.",
+        "There are also more places to break, and one customer's trace now spans several agents, so debugging takes longer.",
+        "The rule of thumb: start with one agent, measure it, and split only when your tests show it struggling."
+      ]
+    },
+    {
+      "kind": "cards",
+      "title": "Frameworks give you the loop",
+      "cards": [
+        {
+          "icon": "code",
+          "title": "Anthropic tool runner",
+          "flow": ["Part of the Python SDK", "Runs the tool loop for you", "You write the tool functions"],
+          "cue": 2
+        },
+        {
+          "icon": "workflow",
+          "title": "LangGraph and CrewAI",
+          "flow": ["Open-source frameworks", "Graphs or teams of agents", "Work with many providers"],
+          "cue": 3
+        },
+        {
+          "icon": "cloud",
+          "title": "Managed agent platforms",
+          "flow": ["The provider runs the loop", "Hosted tools and memory", "Least code, least control"],
+          "cue": 4
+        }
+      ],
+      "sentences": [
+        "You built Scout's loop by hand, and that was on purpose.",
+        "Frameworks and SDKs give you the loop, the tool plumbing and often memory, ready-made.",
+        "Anthropic's Python SDK has a tool runner: you write the tool functions, and it runs the loop for you.",
+        "Open-source frameworks such as LangGraph and CrewAI go further, wiring several agents into graphs or teams, and they work with many model providers.",
+        "Managed agent platforms go furthest, running the loop, the tools and the memory on the provider's own servers.",
+        "Each step up means less code to write, and less control over what happens inside."
+      ]
+    },
+    {
+      "kind": "bullets",
+      "title": "Why you built it by hand first",
+      "lead": "Every framework does the same few jobs you have now written yourself.",
+      "bullets": [
+        { "icon": "repeat", "text": "The tool loop: call the model, run tools, send results back", "cue": 1 },
+        { "icon": "history", "text": "Memory: what to keep, what to trim", "cue": 2 },
+        { "icon": "shield", "text": "Guardrails: step limits, spend limits and approvals", "cue": 3 },
+        { "icon": "bug", "text": "Debugging: reading a trace one step at a time", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "lightbulb",
+        "label": "When a framework surprises you",
+        "text": "You know what it must be doing inside, so you know where to look.",
+        "cue": 5
+      },
+      "sentences": [
+        "So why build the loop yourself first?",
+        "Because every framework does the same few jobs you have now written by hand, starting with the tool loop.",
+        "It manages memory, deciding what to keep in the conversation and what to trim.",
+        "It needs the same guardrails, so you still check that a step limit and a spend limit are really set.",
+        "And when something goes wrong, you read its trace one step at a time, just as you did in Module 5.",
+        "Because you understand what happens inside, a framework becomes a time saver instead of a mystery."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "Recap: multi-agent systems and frameworks",
+      "points": [
+        { "text": "Split into specialists when one agent has too many tools or jobs.", "cue": 1 },
+        { "text": "A coordinator routes each request; agents pass short summaries.", "cue": 2 },
+        { "text": "More agents mean more calls, cost and debugging. Start with one.", "cue": 3 },
+        { "text": "Frameworks supply the loop, tools and memory; you know what they do.", "cue": 4 }
+      ],
+      "sentences": [
+        "Let us recap.",
+        "When one agent has too many tools or jobs, split it into specialists, each with a short prompt and its own tools.",
+        "A coordinator routes each request, and agents pass short summaries rather than whole conversations.",
+        "More agents mean more calls, more cost and more to debug, so start with one and split only when tests show you must.",
+        "Frameworks and managed platforms give you the loop, tools and memory ready-made, and now you know what they do inside."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "Which sign suggests Scout should be split into specialist agents?",
+      "options": [
+        "Scout takes three steps to answer a tracking question",
+        "After ten wholesale tools were added, Scout mixes up retail and trade prices",
+        "Scout's daily cost doubled because ticket volume doubled"
+      ],
+      "correct": 1,
+      "explain": "Mixing up two jobs after the prompt and tool list grew is the classic sign of a crowded agent. Three steps is normal, and cost that tracks volume is expected.",
+      "hint": "Look for the option where one agent is doing two different jobs badly."
+    },
+    {
+      "q": "What does the coordinator do in a multi-agent setup?",
+      "options": [
+        "Runs every tool itself, then asks the specialists to check",
+        "Reads each request and passes it to the right specialist",
+        "Stores the full conversation history for all the agents"
+      ],
+      "correct": 1,
+      "explain": "The coordinator routes. It can be as simple as a classifier that reads the intent and passes a short summary to the right specialist.",
+      "hint": "Think of a receptionist, not a manager who does everyone's work."
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "What is the main cost of moving from one agent to several?",
+      "options": [
+        "Extra model calls, and more places to break and debug",
+        "The agents can no longer use tools",
+        "Each agent needs its own separate API key"
+      ],
+      "correct": 0,
+      "explain": "Routing and hand-overs add model calls, and a problem can now hide in any agent or between them. That is why you split only when one agent clearly struggles.",
+      "hint": "What happens to the number of model calls, and to the trace, when work is passed between agents?"
+    },
+    {
+      "q": "Why did this course have you write the tool loop by hand before using a framework?",
+      "options": [
+        "Frameworks are too slow for real agents",
+        "So you understand what a framework does inside, and can debug it",
+        "Because frameworks cannot use custom tools"
+      ],
+      "correct": 1,
+      "explain": "Frameworks run the same loop, memory and guardrails you built. Knowing them from the inside means a framework saves you time instead of hiding problems.",
+      "hint": "Think about the moment a framework does something you did not expect."
+    }
+  ]
+}

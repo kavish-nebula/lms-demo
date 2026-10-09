@@ -51,7 +51,7 @@ export const SignalsBody = z.object({
     .array(
       z.object({
         id: z.string().min(6).max(120),
-        kind: z.enum(["video_check", "recall_answer", "final_check", "capstone_check"]),
+        kind: z.enum(["video_check", "recall_answer", "scenario_answer", "module_check", "final_check", "capstone_check"]),
         moduleId: z.string().max(20).nullable().default(null),
         lesson: z.string().max(20).nullable().default(null),
         payload: z.record(z.string(), z.unknown()),

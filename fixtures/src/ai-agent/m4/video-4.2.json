@@ -1,0 +1,214 @@
+{
+  "lesson": "4.2",
+  "title": "Managing conversation context",
+  "notes": [
+    "The context window is large, but every token you send costs money and time, and every call resends the chat.",
+    "Keep long chats lean: trim old turns, summarise what you trim, and pin key facts like the order number.",
+    "Trim at whole customer turns, so a tool call is never separated from its result."
+  ],
+  "quizAfter": 4,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "layers",
+      "kicker": "Module 4 · Lesson 2",
+      "title": "Managing conversation context",
+      "sub": "Keep long chats fast and affordable without losing what matters",
+      "sentences": [
+        "In the last lesson, short-term memory meant sending the conversation again with every call.",
+        "That works beautifully for ten messages.",
+        "In this lesson you will see what happens at forty, and three simple ways to keep a long chat fast, cheap and on track."
+      ]
+    },
+    {
+      "kind": "define",
+      "title": "The context window",
+      "term": "Context window",
+      "definition": "The most a model can read and write in one call, counted in tokens: system prompt, tools, messages and reply.",
+      "parts": [
+        { "text": "Counted in tokens", "cue": 1 },
+        { "text": "Everything in the request", "cue": 2 },
+        { "text": "1 million tokens on Opus 5.5", "cue": 3 }
+      ],
+      "analogy": {
+        "label": "Think of it as",
+        "text": "A desk. A huge desk holds plenty of paper, but every sheet on it still has to be read before you answer."
+      },
+      "sentences": [
+        "First, a term you will hear a lot: the context window.",
+        "It's the most text a model can handle in one call, counted in tokens. A token is roughly three quarters of a word.",
+        "It covers everything: the system prompt, the tool definitions, the messages, and the reply itself.",
+        "Claude Opus 5.5 has a context window of one million tokens, enough for several long novels.",
+        "Think of it as a desk. A huge desk holds plenty, but every sheet on it still has to be read before you answer."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "A long chat gets heavier every turn",
+      "columns": ["Turn", "Tokens sent", "Input cost of that call"],
+      "rows": [
+        { "cells": ["1", "500", "0.2 cents"], "cue": 1 },
+        { "cells": ["10", "5,000", "2 cents"], "cue": 2 },
+        { "cells": ["40", "20,000", "8 cents"], "cue": 3 },
+        { "cells": ["All 40 calls", "410,000", "about $1.64"], "tone": "bad", "cue": 4 }
+      ],
+      "note": { "text": "Opus 5.5 input costs $4 per million tokens. More input also means a slower reply.", "cue": 5 },
+      "sentences": [
+        "Big isn't free, though, because every call sends the whole conversation again.",
+        "Say each turn adds about five hundred tokens. The first call sends five hundred.",
+        "By turn ten, each call sends five thousand tokens.",
+        "By turn forty, it's twenty thousand tokens per call, for a single customer.",
+        "Add up all forty calls and you have sent over four hundred thousand tokens, about one dollar sixty, just for input.",
+        "And more input means a slower reply, because the model has to read it all before it writes a word."
+      ]
+    },
+    {
+      "kind": "cards",
+      "title": "Three ways to keep context lean",
+      "tags": ["How", "Keeps", "Watch out"],
+      "cards": [
+        { "icon": "filter", "title": "Trim", "flow": ["Send the last N turns", "The recent back and forth", "Older details fall out"], "cue": 1 },
+        { "icon": "file", "title": "Summarise", "flow": ["Condense the older turns", "The gist in a few lines", "Can drop a detail"], "cue": 3 },
+        { "icon": "target", "title": "Pin key facts", "flow": ["Copy facts to a small dict", "Order number, name, item", "Keep the list short"], "cue": 5 }
+      ],
+      "sentences": [
+        "There are three simple techniques, and good agents combine them.",
+        "Trim: send only the last few turns, say the last ten.",
+        "It's simple and cheap, but anything older falls out, which is exactly what happened to Ravi.",
+        "Summarise: when the chat gets long, ask the model to condense the older turns into a short note.",
+        "You keep the gist, but a summary can quietly drop a detail.",
+        "Pin key facts: copy the details that must never be lost, like the order number, into a small list.",
+        "Pinned facts go into the system prompt on every call, however old they are."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "What Scout sends on message twenty-two",
+      "run": true,
+      "nodes": [
+        { "kind": "data", "icon": "target", "label": "Pinned facts", "sub": "order ORB-10533, name Ravi", "cue": 1 },
+        { "kind": "memory", "icon": "file", "label": "Summary", "sub": "older turns in three lines", "cue": 2 },
+        { "kind": "memory", "icon": "history", "label": "Last 10 messages", "sub": "word for word", "cue": 3 },
+        { "kind": "llm", "icon": "brain", "label": "Scout", "sub": "sees what matters", "cue": 4 }
+      ],
+      "note": { "text": "A small request, and the order number can't fall out.", "cue": 5 },
+      "sentences": [
+        "Here's what a well-built request looks like on Ravi's twenty-second message.",
+        "First, in the system prompt, the pinned facts: his order number and his name.",
+        "Next, a short summary of the older turns, written by the model a while back.",
+        "Then the last ten messages, word for word, so the recent back and forth is exact.",
+        "Scout gets everything it needs, and nothing it doesn't.",
+        "The request stays small, and the order number can never fall out."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "Trim at whole turns",
+      "lead": "Cut only where a customer turn begins, so a tool call is never split from its result.",
+      "rows": [
+        { "code": "typed = isinstance(m[\"content\"], str)", "out": "a message the customer typed", "cue": 1 },
+        { "code": "messages = messages[starts[-10]:]", "out": "keep the last ten turns", "cue": 2 },
+        { "code": "system = convo.system_prompt(SYSTEM)", "out": "pinned facts added on every call", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "alert",
+        "label": "The trap",
+        "text": "Cut by message count and you may keep a tool result but drop its tool call. The API rejects that.",
+        "cue": 3
+      },
+      "sentences": [
+        "Trimming sounds easy: keep the last ten messages. There's one trap.",
+        "First, find where each customer turn begins: a message the customer actually typed, not a list of tool results.",
+        "Then keep everything from the tenth-last turn onward.",
+        "If you cut by message count instead, you can keep a tool result but drop the tool call it answers, and the API rejects the request.",
+        "Finally, add the pinned facts to the system prompt, so they ride along with every call."
+      ]
+    },
+    {
+      "kind": "example",
+      "title": "Summarising in practice",
+      "scenario": "Ravi's chat passes 30 turns. The oldest 20 are condensed into a short note.",
+      "steps": [
+        { "time": "Turn 30", "icon": "history", "text": "The chat passes the limit; the oldest 20 turns are set aside", "cue": 1 },
+        { "time": "One call", "icon": "sparkles", "text": "A small model writes: Ravi, ORB-10533, asked about mat size and returns", "cue": 2 },
+        { "time": "Turn 31", "icon": "file", "text": "The note replaces 20 turns; facts and the last 10 messages stay", "cue": 3 },
+        { "time": "After", "icon": "check", "text": "Scout keeps the gist at a fraction of the tokens", "cue": 4 }
+      ],
+      "result": { "text": "One cheap summary call saves tokens on every call that follows.", "cue": 5 },
+      "sentences": [
+        "Here's summarising in practice.",
+        "Ravi's chat passes thirty turns, so the code sets aside the oldest twenty.",
+        "It makes one extra call, often to a small, cheap model like Haiku, asking for the gist in a few lines.",
+        "That note replaces the twenty turns, while the pinned facts and the recent messages stay as they are.",
+        "From then on, Scout carries the early chat at a fraction of the tokens.",
+        "One cheap summary call pays for itself on every call that follows."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "The context window is large, but every token costs money and time.", "cue": 1 },
+        { "text": "Every call resends the chat, so long chats get slower and pricier.", "cue": 2 },
+        { "text": "Trim old turns, summarise them, and pin key facts.", "cue": 3 },
+        { "text": "Trim at whole turns so tool calls keep their results.", "cue": 4 }
+      ],
+      "sentences": [
+        "Let's recap.",
+        "The context window is huge, but it isn't free: every token costs money and time.",
+        "Because every call resends the conversation, a long chat gets heavier with each turn.",
+        "Trim old turns, summarise what you trim, and pin the facts that must never be lost.",
+        "When you trim, cut at whole customer turns, so a tool call never loses its result.",
+        "Next, Scout learns to look things up in Orbit's own documents."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "Why does call forty of a chat cost more than call four?",
+      "options": [
+        "Long conversations are billed at a higher rate",
+        "Each call resends the whole conversation as input",
+        "Long chats are switched to a bigger model"
+      ],
+      "correct": 1,
+      "explain": "The API keeps nothing between calls, so every call carries the full history. More history means more input tokens, and more cost.",
+      "hint": "What does each call have to include for the model to know the chat so far?"
+    },
+    {
+      "q": "Which technique keeps Ravi's order number in view however long the chat gets?",
+      "options": [
+        "Trimming to the last ten messages",
+        "Pinning it as a fact in the system prompt",
+        "Moving to a model with a bigger context window"
+      ],
+      "correct": 1,
+      "explain": "Pinned facts are added to the system prompt on every call, so trimming old messages can't remove them.",
+      "hint": "Which technique adds something to every call, however old it is?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "Priya trims Scout's history to the last 8 messages by count, and the API sometimes rejects the request. Why?",
+      "options": [
+        "Eight messages is below the API's minimum",
+        "The cut can keep a tool result but drop the tool call it answers",
+        "Trimmed chats must be summarised first"
+      ],
+      "correct": 1,
+      "explain": "A tool result must follow the assistant message that asked for it. Cutting at whole customer turns keeps each pair together.",
+      "hint": "Think about what a tool result needs right before it."
+    },
+    {
+      "q": "What is the main risk of summarising old turns?",
+      "options": [
+        "The summary can quietly drop a detail that mattered",
+        "Summaries make every later call slower",
+        "The model can't read a summary in the prompt"
+      ],
+      "correct": 0,
+      "explain": "A summary keeps the gist, not every detail. That is why key facts like the order number are pinned separately.",
+      "hint": "What does a summary give up in exchange for being short?"
+    }
+  ]
+}

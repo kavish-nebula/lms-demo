@@ -28,14 +28,17 @@ export function baselinePlan(input: PlannerInput, ctx: CourseContext): LearnerPl
   const a = adaptationOf(input.answers, { precheck: input.precheck, override: input.supportOverride });
   const exampleFirst = a.order[0] === "example";
   const roleKey = roleKeyOf(input.answers);
-  const lessonTitle = new Map(ctx.modules.flatMap((m) => m.lessons.map((l) => [l.id, l.title] as const)));
+  // quick-check scores are keyed by lesson ("2.3") or, for a check that asks about a whole module, by its number ("2")
+  const titleOf = new Map([...ctx.modules.map((m) => [String(m.index), m.title] as const), ...ctx.modules.flatMap((m) => m.lessons.map((l) => [l.id, l.title] as const))]);
+  const scoreFor = (lesson: string) => pre?.lessons[lesson] ?? pre?.lessons[lesson.split(".")[0] ?? ""];
   const pre = input.precheck && !input.precheck.skipped ? input.precheck : null;
 
   const why = (lesson: string, s: Support) => {
     if (a.override) return `You set ${s === "light" ? "a lighter touch" : s === "extra" ? "extra help" : "standard help"} for every lesson.`;
     if (pre?.isNew) return "You said you're completely new, so every lesson starts with more help.";
-    if (pre && lesson in pre.lessons) return `From your quick check: ${pre.lessons[lesson]} of 2 right on this lesson.`;
-    return a.supportSource === "experience" ? "Based on how often you build automations today." : "Standard help.";
+    const score = scoreFor(lesson);
+    if (score !== undefined) return `From your quick check: ${score} of 2 right on ${lesson in pre!.lessons ? "this lesson" : "this module"}.`;
+    return a.supportSource === "experience" ? "Based on your experience with this topic." : "Standard help.";
   };
 
   const modules: PlanModuleT[] = ctx.modules.map((m) => {
@@ -63,8 +66,8 @@ export function baselinePlan(input: PlannerInput, ctx: CourseContext): LearnerPl
     };
   });
 
-  const strengths = pre ? Object.entries(pre.lessons).filter(([, n]) => n >= 2).map(([l]) => lessonTitle.get(l) ?? l).slice(0, 3) : [];
-  const gaps = pre ? Object.entries(pre.lessons).filter(([, n]) => n <= 0).map(([l]) => lessonTitle.get(l) ?? l).slice(0, 3) : [];
+  const strengths = pre ? Object.entries(pre.lessons).filter(([, n]) => n >= 2).map(([l]) => titleOf.get(l) ?? l).slice(0, 3) : [];
+  const gaps = pre ? Object.entries(pre.lessons).filter(([, n]) => n <= 0).map(([l]) => titleOf.get(l) ?? l).slice(0, 3) : [];
   const level = pre?.isNew || input.answers.experience === "never" ? "new" : input.answers.experience === "regularly" ? "confident" : "some";
   const minutes = input.pace?.sessionMinutes ?? 30;
   const perWeek = input.pace?.studyDays.length || 3;
@@ -72,7 +75,7 @@ export function baselinePlan(input: PlannerInput, ctx: CourseContext): LearnerPl
 
   return {
     summary: `${who ? `Set up for ${who}. ` : ""}${exampleFirst ? "Examples come before explanations. " : ""}${
-      a.supportSource === "precheck" ? "Help is set lesson by lesson from your quick check." : a.supportSource === "override" ? "Help follows the level you chose." : "Help follows your experience answer."
+      a.supportSource === "precheck" ? "Help is set from your quick check." : a.supportSource === "override" ? "Help follows the level you chose." : "Help follows your experience answer."
     }`,
     learner: { level, strengths, gaps },
     pacing: { minutesPerSession: minutes, sessionsPerWeek: perWeek, note: `${perWeek} sessions of ${minutes} minutes a week.` },

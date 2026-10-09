@@ -1,0 +1,79 @@
+{
+  "title": "Module check: build, debug and measure Scout",
+  "summary": "Scoping Scout, building it piece by piece, its tools, reading traces, and judging a pass rate before you ship.",
+  "items": [
+    {
+      "lesson": "5.1",
+      "stem": "A few customers a week ask Scout to change the delivery address on an order that is still processing. Scout has no tool for that, and launch is three weeks away. What should Scout's scope say?",
+      "options": [
+        "In scope: add an update_address tool now, since it is an order question like the rest",
+        "Out of scope for launch: Scout hands these chats to a person with a short summary",
+        "Leave it out of the scope document, and let Scout work out what to do when it comes up",
+        "In scope: Scout confirms the new address, and Leo's team updates the order afterward"
+      ],
+      "correct": 1,
+      "explain": "Writing down what Scout won't do, and who handles it, is part of the design. A hand-off gets the customer to someone who can act. A new action tool weeks before launch adds untested risk, and confirming a change Scout can't make is a promise."
+    },
+    {
+      "lesson": "5.2",
+      "stem": "You have just written and registered request_refund, Scout's fifth tool. Everything before it works. Before you start on hand_off, what does the build loop say to do?",
+      "options": [
+        "Start on hand_off now, then test request_refund and hand_off together once both are written",
+        "Re-run the where-is-my-order question, since that one has passed after every piece so far",
+        "Read the request_refund code line by line, and move on to hand_off if it looks right",
+        "Ask for Owen's $310 refund, and check the trace for request_refund, its input and the reply"
+      ],
+      "correct": 3,
+      "explain": "The build loop is build, run, check, keep: ask a real question that needs the new piece and read the trace. The old order question never calls request_refund, and testing two new tools together gives every error two suspects."
+    },
+    {
+      "lesson": "5.3",
+      "stem": "Two traces from today: in one, Scout calls search_policy twice with the same query. In the other, it calls request_refund twice for Owen's order. Which needs your attention first?",
+      "options": [
+        "The refund trace: request_refund acts, so a repeat could start a second refund for one jacket",
+        "The policy trace: a repeated search means the policy chunks are wrong, so the reply will be too",
+        "Neither: both tools give the same answer the second time, so a repeat only costs one more step",
+        "Both equally: any repeated call is a loop, and the step limit treats every tool the same way"
+      ],
+      "correct": 0,
+      "explain": "Four of Scout's tools only read, so a repeated search wastes a step but harms no one. request_refund changes something, so a repeat could move money twice. Tools that act need more care, which is why their rules live inside the tool."
+    },
+    {
+      "lesson": "5.4",
+      "stem": "Elena asks where her rope is. Trace: [1] get_order ORB-10560 -> in transit, tracking PP-90417. [2] track_parcel ORB-10560 -> Error: Unknown tracking number. Scout replies it should arrive in 3 to 5 business days. What do you fix first?",
+      "options": [
+        "The reply: Scout ignored the error, so add a prompt rule that it must never guess a date",
+        "Step 2: the order ID went where the tracking number belonged, so sharpen track_parcel's description",
+        "Step 1: wrong tool, since a where-is-my-parcel question should go straight to track_parcel",
+        "Nothing yet: PP-90417 always times out in the fake data, so this case is meant to fail"
+      ],
+      "correct": 1,
+      "explain": "Read from the top. Step 1 is fine. Step 2 is the first bad step: wrong arguments, the order ID in the tracking field. The guessed window is a second bug, an ignored error, but it follows from step 2. Fix the input first, then re-run."
+    },
+    {
+      "lesson": "5.5",
+      "stem": "Priya tries a friendlier system prompt and the score stays at 53 of 60, so Leo wants to keep it. Case by case, two refunds over $200 that passed now fail, and two clumsy-wording fails now pass. What do you advise?",
+      "options": [
+        "Keep it: the total didn't move, so the new prompt is neither better nor worse than the old one",
+        "Run it a few more times and keep the prompt if any run scores higher, since scores wobble",
+        "Keep it, and add more wording cases so the next run shows the improvement in the total",
+        "Don't keep it as is: it traded two harmless failures for two unsafe refund failures"
+      ],
+      "correct": 3,
+      "explain": "Same total, worse agent: refund failures break policy and move money, clumsy wording doesn't. Look at which cases moved, not just the number, then fix or undo the change and re-run. Chasing a lucky run only hides what broke."
+    },
+    {
+      "lesson": "5.5",
+      "transfer": true,
+      "stem": "A small bakery tests its cake-order agent: 37 of 40 cases pass. All 3 failures are customers asking if a cake is nut-free. The bakery's data has no allergen details, yet the agent said yes each time. What should the owner do?",
+      "options": [
+        "Launch: 37 of 40 is over 90 percent, and allergy questions are a small share of messages",
+        "Launch, and add a line to every reply asking customers to check allergens with the bakery",
+        "Hold launch: make allergy questions a hand-off to the baker, add cases for it, and re-run",
+        "Hold launch until all 40 cases pass, since a food business can't accept any failed answer"
+      ],
+      "correct": 2,
+      "explain": "A made-up nut-free claim is an unsafe failure, so the score can't decide this. With no allergen data the agent can never answer well: scope those questions to a person, test the hand-off and re-run. Ship when what still fails is safe, not perfect."
+    }
+  ]
+}

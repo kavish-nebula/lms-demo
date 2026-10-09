@@ -76,15 +76,18 @@ export async function gradeGate(
     objective_id,
     ...(per.get(objective_id) ?? { correct: 0, total: 0 }),
   }));
+  // to revisit: any area with no right answer (a module check passes on the overall score alone,
+  // but a lesson missed entirely is still worth pointing back to)
   const failedObjectives = perObjective
-    .filter((o) => o.total > 0 && o.correct < block.min_correct_per_objective)
+    .filter((o) => o.total > 0 && o.correct < Math.max(1, block.min_correct_per_objective))
     .map((o) => o.objective_id);
+  const eachArea = perObjective.every((o) => o.total === 0 || o.correct >= block.min_correct_per_objective);
 
   return {
     score,
     total,
     ratio,
-    passed: ratio >= block.pass_threshold && failedObjectives.length === 0,
+    passed: ratio >= block.pass_threshold && eachArea,
     perObjective,
     failedObjectives,
     review,

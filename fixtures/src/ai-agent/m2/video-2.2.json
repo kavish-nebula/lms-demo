@@ -1,0 +1,199 @@
+{
+  "lesson": "2.2",
+  "title": "Choosing a model and API setup",
+  "notes": [
+    "Weigh each step on quality, speed and cost; output tokens cost five times as much as input tokens.",
+    "Start with the most capable model, measure, then move simple high-volume steps to a cheaper model once tests show quality holds.",
+    "A request names the model, a max_tokens ceiling, the system prompt and the messages; the reply's text sits in a list of content blocks."
+  ],
+  "quizAfter": 3,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "scale",
+      "kicker": "Module 2 · Lesson 2",
+      "title": "Choosing a model and API setup",
+      "sub": "Weigh quality, speed and price, then look inside a request and its response",
+      "sentences": [
+        "In Module 1 you made your first model call, using a model name you simply copied.",
+        "In this lesson you will learn to choose that model on purpose.",
+        "Then we will open up a request and a response, so nothing in that call is a mystery."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "One family, three sizes",
+      "columns": ["Model", "Quality", "Speed", "Price per 1M tokens (in / out)"],
+      "rows": [
+        { "cells": ["Claude Opus 5.5", "Highest: planning, tools, hard cases", "Slowest of the three", "$4 / $20"], "cue": 1 },
+        { "cells": ["Claude Sonnet 5.5", "Strong all-rounder", "Faster", "$2 / $10"], "cue": 3 },
+        { "cells": ["Claude Haiku 5.5", "Good at simple, clear tasks", "Fastest", "$0.10 / $0.50"], "cue": 4 }
+      ],
+      "note": { "text": "Input is what you send; output is what the model writes. Output costs 5 times as much.", "cue": 5 },
+      "sentences": [
+        "Most providers offer a family of models, from large and careful to small and quick.",
+        "Claude Opus is the most capable, the best choice for planning, using tools and hard cases.",
+        "It costs four dollars per million input tokens, and twenty dollars per million output tokens.",
+        "Sonnet is a strong all-rounder, a little faster, at half that price.",
+        "Haiku is the fastest and by far the cheapest, ten cents in and fifty cents out, and it is good at simple, clear tasks.",
+        "Input tokens are what you send, and output tokens are what the model writes back.",
+        "Output costs five times as much as input, so long replies cost more than long prompts."
+      ]
+    },
+    {
+      "kind": "cards",
+      "title": "Three questions for every step",
+      "tags": ["Ask", "Matters most when", "How to judge"],
+      "cards": [
+        { "icon": "award", "title": "Quality", "flow": ["Can it do this step well?", "Planning, tools, tricky policy", "Test it on real tickets"], "cue": 1 },
+        { "icon": "timer", "title": "Speed", "flow": ["How long can someone wait?", "A customer is in live chat", "Time a few real requests"], "cue": 3 },
+        { "icon": "dollar", "title": "Cost", "flow": ["Price × tokens × calls", "Thousands of calls a day", "Multiply it out per day"], "cue": 5 }
+      ],
+      "sentences": [
+        "Choosing a model means weighing three things, separately for each step your agent takes.",
+        "First, quality: can this model do this step well, every time?",
+        "That matters most for planning, choosing tools and reading tricky policy, and you judge it by testing on real tickets.",
+        "Second, speed: how long can someone wait for the answer?",
+        "A customer in live chat notices a slow reply, while an overnight report does not care.",
+        "Third, cost: the price per token, times the tokens per call, times the calls per day.",
+        "One ticket costs a fraction of a cent, but thousands a day add up."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "Rule of thumb: start capable, then measure",
+      "run": true,
+      "nodes": [
+        { "kind": "llm", "icon": "rocket", "label": "Start capable", "sub": "build with Opus", "cue": 1 },
+        { "kind": "guard", "icon": "chart", "label": "Measure", "sub": "quality, speed, cost", "cue": 2 },
+        { "kind": "logic", "icon": "filter", "label": "Spot simple steps", "sub": "high volume, low difficulty", "cue": 3 },
+        { "kind": "action", "icon": "dollar", "label": "Move them down", "sub": "e.g. Haiku for tagging", "cue": 4 }
+      ],
+      "note": { "text": "Switch a step only when your tests show the cheaper model still gets it right.", "cue": 6 },
+      "sentences": [
+        "So which model should Scout use? Here is a rule of thumb that works well.",
+        "Start with the most capable model while you build, so when something fails, you know it is your design and not the model's limits.",
+        "Then measure: run real tickets through it, and record quality, speed and cost.",
+        "Look for steps that are simple and happen a lot, like tagging every incoming email by intent.",
+        "Move those steps to a cheaper model such as Haiku, and keep the hard steps on the capable one.",
+        "For a short email, tagging costs roughly four tenths of a cent on Opus, and about one hundredth of a cent on Haiku.",
+        "But switch only when your tests show the cheaper model still gets it right.",
+        "A cheap wrong answer is not a saving."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "What you send",
+      "lead": "One call to client.messages.create carries four things: the model, a length limit, the rules and the conversation.",
+      "rows": [
+        { "code": "model=\"claude-opus-5-5\",", "out": "which model answers", "cue": 1 },
+        { "code": "max_tokens=16000,", "out": "a ceiling on the reply, not a target", "cue": 2 },
+        { "code": "system=\"You are Scout, Orbit Outdoor's ...\",", "out": "standing instructions for every turn", "cue": 3 },
+        { "code": "messages=[{\"role\": \"user\", \"content\": question}],", "out": "the conversation, oldest message first", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "key",
+        "label": "Key stays outside",
+        "text": "anthropic.Anthropic() reads ANTHROPIC_API_KEY from your environment. Never write the key in code.",
+        "cue": 6
+      },
+      "sentences": [
+        "Now let us open up a request, using the same call you made in Module 1.",
+        "You call the messages create method, and first you name the model that should answer.",
+        "Max tokens is a ceiling on how long the reply may be, and the model usually stops well before it.",
+        "The system prompt holds standing instructions, like Scout's role and rules, which you will write later in this module.",
+        "Messages is the conversation itself: a list of turns, each with a role, user or assistant, and its content.",
+        "Other providers, such as OpenAI, Google or an open model, use the same ideas with slightly different field names.",
+        "And the client reads your API key from the environment variable you set in Module 1, so the key never appears in your code."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "What comes back",
+      "lead": "The reply is an object, not a string. Its text sits inside a list of content blocks.",
+      "rows": [
+        { "code": "response.content", "out": "a list of blocks: maybe thinking, then text", "cue": 1 },
+        { "code": "next(b.text for b in response.content if b.type == \"text\")", "out": "the text block, whatever comes first", "cue": 2 },
+        { "code": "response.stop_reason", "out": "why it stopped: end_turn or max_tokens", "cue": 4 },
+        { "code": "response.usage.output_tokens", "out": "tokens written; input_tokens sits beside it", "cue": 5 }
+      ],
+      "aside": {
+        "icon": "alert",
+        "label": "Cut off?",
+        "text": "A stop_reason of max_tokens means the reply hit your ceiling mid-sentence. Raise the limit or ask for less.",
+        "cue": 6
+      },
+      "sentences": [
+        "Now the response.",
+        "Its content is not a plain string but a list of blocks, because the model may think before it answers.",
+        "So we take the first block whose type is text, with one short line of Python.",
+        "You will use that line in almost every program in this course.",
+        "The stop reason tells you why the model stopped: it finished its turn, or it ran into your max tokens ceiling.",
+        "Usage counts the input and output tokens, which you multiply by the price to know what the call cost.",
+        "If the stop reason is max tokens, the reply was cut off, so raise the limit or ask for a shorter answer."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "Weigh each step on quality, speed and cost", "cue": 1 },
+        { "text": "Output tokens cost five times as much as input tokens", "cue": 2 },
+        { "text": "Start capable, measure, then move simple high-volume steps down", "cue": 3 },
+        { "text": "Send model, max_tokens, system, messages; read the text block back", "cue": 4 }
+      ],
+      "sentences": [
+        "Let us pull it together.",
+        "Weigh every step of your agent on quality, speed and cost.",
+        "Remember that output tokens cost five times as much as input tokens.",
+        "Start with the capable model, measure, and only then move simple, high-volume steps to a cheaper one.",
+        "A request names the model, a max tokens ceiling, the system prompt and the messages, and the reply's text sits in a list of blocks.",
+        "Next, the most useful skill in this module: writing prompts the model gets right."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "On Claude Opus 5.5, which costs more: a million input tokens or a million output tokens?",
+      "options": ["Input tokens", "Output tokens, five times as much", "They cost the same"],
+      "correct": 1,
+      "explain": "Opus costs $4 per million input tokens and $20 per million output tokens, so output is five times the price.",
+      "hint": "Each row of the price table has two numbers. Which one is bigger?"
+    },
+    {
+      "q": "You are building Scout's first version. Which model should you start with?",
+      "options": [
+        "The cheapest one, to keep costs down from day one",
+        "The most capable one, then move simple steps to a cheaper model once you can measure",
+        "A different model for each customer, to compare them"
+      ],
+      "correct": 1,
+      "explain": "Starting capable shows you what good looks like. Then tests tell you which simple steps a cheaper model can take over.",
+      "hint": "You can't judge a cheaper model until you know what a good answer looks like."
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "Some of Scout's replies stop mid-sentence. What should you check first?",
+      "options": [
+        "Whether the API key is set",
+        "Whether stop_reason is max_tokens",
+        "Whether the model name is spelled correctly"
+      ],
+      "correct": 1,
+      "explain": "A stop_reason of max_tokens means the reply hit your ceiling and was cut off. Raise the limit or ask for a shorter reply.",
+      "hint": "The response itself tells you why the model stopped."
+    },
+    {
+      "q": "Why take the text with next(b.text for b in response.content if b.type == \"text\") instead of response.content[0].text?",
+      "options": [
+        "The first block may be the model's thinking, not the text",
+        "response.content is a single string, not a list",
+        "It makes the request cheaper"
+      ],
+      "correct": 0,
+      "explain": "The content is a list of blocks and the model may think before answering, so you pick the block whose type is text.",
+      "hint": "What kind of block can arrive before the answer?"
+    }
+  ]
+}

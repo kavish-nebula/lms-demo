@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { FIXTURE_TODAY, getAuthoredModuleIds, getCourse, getLearner, getPrecheck } from "@/data";
+import { FIXTURE_TODAY, getAuthoredModuleIds, getCourse, getCourseIntro, getLearner, getPrecheck } from "@/data";
 import { EnrollFlow, type EnrollPhase } from "@/components/enroll/enroll-flow";
 
 type Params = { courseId: string };
 type Search = { step?: string };
 
-const STEPS: EnrollPhase[] = ["profile", "precheck", "customize"];
+const STEPS: EnrollPhase[] = ["profile", "intro", "precheck", "customize"];
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { courseId } = await params;
@@ -21,16 +21,18 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
  */
 export default async function EnrollPage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<Search> }) {
   const [{ courseId }, { step }] = await Promise.all([params, searchParams]);
-  const [course, precheck, learner, authored] = await Promise.all([
+  const [course, precheck, learner, authored, intro] = await Promise.all([
     getCourse(courseId),
     getPrecheck(courseId),
     getLearner(),
     getAuthoredModuleIds(courseId),
+    getCourseIntro(courseId),
   ]);
   if (!course) notFound();
   return (
     <EnrollFlow
       course={course}
+      introVideo={intro}
       precheckItems={precheck?.items ?? []}
       name={learner.user.name.split(" ")[0] ?? learner.user.name}
       today={FIXTURE_TODAY}

@@ -8,6 +8,7 @@ import { Chip } from "@/components/kit/chip";
 import { TopicChip } from "@/components/kit/stage";
 import { useTopic } from "@/components/player/topic-context";
 import { Button } from "@/components/ui/button";
+import { DEMO_OPEN } from "@/lib/demo";
 import type { StageId } from "@/lib/stages";
 import type { Bloom } from "@/data/types";
 
@@ -58,6 +59,8 @@ export function StageShell({
   const tb = useTranslations("bloom");
   const tc = useTranslations("common");
   const topic = useTopic();
+  // the demo never holds a learner back: moving on is always allowed
+  const open = canComplete || DEMO_OPEN;
 
   return (
     <article data-stage={stage} className={cn("mx-auto flex w-full max-w-3xl flex-col gap-6", className)}>
@@ -93,13 +96,13 @@ export function StageShell({
             <span />
           )}
           <div className="flex items-center gap-3">
-            {!canComplete && completeHint ? (
+            {!open && completeHint ? (
               <span className="text-sm text-ink-muted" aria-live="polite">
                 {completeHint}
               </span>
             ) : null}
             {onComplete ? (
-              <Button size="lg" variant="brand" disabled={!canComplete} onClick={onComplete}>
+              <Button size="lg" variant="brand" disabled={!open} onClick={onComplete}>
                 {completeLabel ?? t("completeContinue")}
                 <ArrowRight data-icon="inline-end" />
               </Button>
@@ -129,6 +132,7 @@ export function Callout({
     accent: "border-brand-line bg-brand-soft [&_[data-label]]:text-brand-ink",
     worked: "border-stage-worked-line bg-stage-worked-soft [&_[data-label]]:text-stage-worked",
     guided: "border-stage-guided-line bg-stage-guided-soft [&_[data-label]]:text-stage-guided",
+    lab: "border-stage-lab-line bg-stage-lab-soft [&_[data-label]]:text-stage-lab",
     hook: "border-stage-hook-line bg-stage-hook-soft [&_[data-label]]:text-stage-hook",
     reflection: "border-stage-reflection-line bg-stage-reflection-soft [&_[data-label]]:text-stage-reflection",
     review: "border-stage-review-line bg-stage-review-soft [&_[data-label]]:text-stage-review",

@@ -1,0 +1,236 @@
+{
+  "lesson": "4.4",
+  "title": "Planning and task decomposition",
+  "notes": [
+    "Task decomposition splits one request into small steps, each a tool call or a reply.",
+    "Plan first: a short list of steps written before acting keeps a multi-step request on track.",
+    "When a step fails, re-plan with what you learned instead of pushing on or giving up."
+  ],
+  "quizAfter": 4,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "list-checks",
+      "kicker": "Module 4 · Lesson 4",
+      "title": "Planning and task decomposition",
+      "sub": "Turn a big request into small steps, and change the plan when a step fails",
+      "sentences": [
+        "So far, most of Scout's jobs have needed one tool call, or two.",
+        "Real customers ask for more than that in a single message.",
+        "In this lesson, Scout learns to break a request into steps, plan before acting, and change the plan when reality disagrees."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "One message, several jobs",
+      "messages": [
+        { "role": "user", "label": "Ana", "text": "Can you swap my tent for the 3-person one, and tell me when it arrives? Order ORB-10482.", "cue": 1 },
+        { "role": "system", "label": "Job 1", "text": "Find her order: which tent is it, and has it shipped?", "cue": 2 },
+        { "role": "system", "label": "Job 2", "text": "Is the 3-person tent in stock?", "cue": 3 },
+        { "role": "system", "label": "Job 3", "text": "Arrange the swap and work out an arrival date.", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "split",
+        "label": "Task decomposition",
+        "text": "Breaking one request into small steps, each one a tool call or a reply.",
+        "cue": 5
+      },
+      "sentences": [
+        "Here's a message from Ana, who ordered Orbit's two-person tent.",
+        "She asks Scout to swap it for the three-person one, and to tell her when it will arrive.",
+        "That's one sentence, but it hides several jobs. First, find her order and check which tent she has.",
+        "Second, check whether the three-person tent is in stock.",
+        "Third, arrange the swap and work out when it would arrive.",
+        "Splitting a request into small steps like this is called task decomposition."
+      ]
+    },
+    {
+      "kind": "define",
+      "title": "What a plan is",
+      "term": "Plan",
+      "definition": "A short, ordered list of steps the agent writes before acting, each step one tool call or one reply.",
+      "parts": [
+        { "text": "Written before acting", "cue": 1 },
+        { "text": "Small, checkable steps", "cue": 2 },
+        { "text": "Changes when results do", "cue": 3 }
+      ],
+      "analogy": {
+        "label": "Think of it as",
+        "text": "A map app. It plans the route before you set off, and finds a new one when a road is closed."
+      },
+      "sentences": [
+        "The result of decomposition is a plan.",
+        "A plan is a short, ordered list of steps that the agent writes before it does anything.",
+        "Each step is small enough to check: one tool call, or one reply.",
+        "And a plan isn't a contract. It changes when a result says it should.",
+        "Think of a map app. It plans the route before you set off, and finds a new one when a road is closed."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "Plan first, then act",
+      "run": true,
+      "nodes": [
+        { "kind": "user", "icon": "message", "label": "Request", "sub": "swap tent, give arrival", "cue": 1 },
+        { "kind": "logic", "icon": "list-checks", "label": "Plan", "sub": "three steps, written first", "cue": 2 },
+        { "kind": "tool", "icon": "search", "label": "get_order", "sub": "which tent, what status", "cue": 3 },
+        { "kind": "tool", "icon": "package", "label": "check_stock", "sub": "is the 3-person in stock?", "cue": 4 },
+        { "kind": "output", "icon": "send", "label": "Reply", "sub": "swap and arrival date", "cue": 5 }
+      ],
+      "note": { "text": "Plan first, and Scout skips fewer steps. You also get a trace you can read.", "cue": 6 },
+      "sentences": [
+        "First, the happy path, where every step works.",
+        "The request comes in.",
+        "Before calling anything, Scout writes a short plan of three steps.",
+        "Step one: the get order tool confirms which tent Ana ordered.",
+        "Step two: the check stock tool looks up the three-person tent.",
+        "Step three: Scout replies with the swap and an arrival date.",
+        "Planning first means fewer skipped steps, and a trace you can read afterwards."
+      ]
+    },
+    {
+      "kind": "example",
+      "title": "When a step fails, re-plan",
+      "scenario": "Same request, real stock: check_stock says TENT-3P-GRN has 0 left.",
+      "steps": [
+        { "time": "Step 1", "icon": "check", "text": "get_order: Trailhead 2P tent, green, $240, shipped", "cue": 1 },
+        { "time": "Step 2", "icon": "x-circle", "text": "check_stock TENT-3P-GRN: 0 in stock", "cue": 2 },
+        { "time": "Re-plan", "icon": "repeat", "text": "Swap impossible today. New plan: explain, then offer options", "cue": 3 },
+        { "time": "Reply", "icon": "message", "text": "Keep the 2-person tent, or return it within 30 days of delivery", "cue": 4 }
+      ],
+      "result": { "text": "Ana gets the truth and real choices, not a promise Scout can't keep.", "cue": 5 },
+      "sentences": [
+        "Now the real run. Sam's stock sheet says the three-person tent is sold out.",
+        "Step one works: Ana's two-person tent is already on its way.",
+        "Step two comes back with zero. There's no three-person tent to swap in.",
+        "Step three no longer makes sense, so Scout re-plans with what it now knows.",
+        "It explains the problem and offers real options: keep the tent that's coming, or return it within thirty days of delivery.",
+        "That beats both bad extremes: promising a swap that can't happen, or simply giving up."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Decide as you go, or plan first?",
+      "left": {
+        "label": "Decide step by step",
+        "tone": "info",
+        "cue": 1,
+        "points": [
+          "Pick one step at a time",
+          "Quick for simple questions",
+          "Can wander on long requests"
+        ]
+      },
+      "right": {
+        "label": "Plan, then act",
+        "tone": "ok",
+        "cue": 3,
+        "points": [
+          "Write the steps up front",
+          "Best for multi-step requests",
+          "Re-plan when a step fails",
+          "Easy to review in a trace"
+        ]
+      },
+      "sentences": [
+        "Does every request need a plan? No.",
+        "For a simple question, like where's my parcel, Scout can decide one step at a time.",
+        "That's quick, but on a long request an agent can wander, or forget part of what was asked.",
+        "For multi-step requests, a brief plan up front keeps it on track.",
+        "One line in the system prompt does it: for requests with several parts, write a short plan before using tools.",
+        "And the plan doubles as a record you can read when something goes wrong."
+      ]
+    },
+    {
+      "kind": "bullets",
+      "title": "What makes a good plan",
+      "lead": "Short plans beat clever ones.",
+      "bullets": [
+        { "icon": "list-checks", "text": "Three to five steps, each a tool call or a reply", "cue": 1 },
+        { "icon": "target", "text": "A clear check for every step: did it work?", "cue": 2 },
+        { "icon": "git-branch", "text": "A fallback for when a step fails", "cue": 3 },
+        { "icon": "hand", "text": "Steps that move money or promise dates follow Orbit's rules", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "alert",
+        "label": "Don't over-plan",
+        "text": "A twenty-step plan for a parcel question wastes tokens and time.",
+        "cue": 5
+      },
+      "sentences": [
+        "A few habits make plans work.",
+        "Keep them short: three to five steps, each one a tool call or a reply.",
+        "Give every step a clear check, so Scout knows whether it worked.",
+        "Think about failure up front: what if the item is out of stock, or tracking times out?",
+        "And take care with steps that move money or promise dates. A refund over two hundred dollars, for example, needs a person to approve it.",
+        "Don't over-plan, though. A twenty-step plan for a parcel question just wastes tokens."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "Decompose: split one request into small steps.", "cue": 1 },
+        { "text": "Plan first: a short list of steps before any tool call.", "cue": 2 },
+        { "text": "Re-plan when a step fails, using what you just learned.", "cue": 3 },
+        { "text": "Keep plans short; take care with money and promises.", "cue": 4 }
+      ],
+      "sentences": [
+        "Let's recap.",
+        "Decomposition splits one request into small steps, each a tool call or a reply.",
+        "A plan lists those steps before Scout acts, which keeps it on track.",
+        "When a step fails, Scout re-plans with what it learned, instead of pushing on or giving up.",
+        "Keep plans short, and take extra care with steps that move money or promise dates.",
+        "Next, we put thinking and acting together in the agent loop."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "What is task decomposition?",
+      "options": [
+        "Splitting one request into small steps an agent can carry out",
+        "Removing tools the agent doesn't need",
+        "Shortening the system prompt to save tokens"
+      ],
+      "correct": 0,
+      "explain": "Decomposition turns one big request into small steps, each one a tool call or a reply.",
+      "hint": "Think of Ana's single sentence that hid three jobs."
+    },
+    {
+      "q": "check_stock says the 3-person tent has 0 in stock. What should Scout do next?",
+      "options": [
+        "Promise the swap anyway; stock usually comes back",
+        "Re-plan: explain, and offer Ana real options",
+        "Reply that it can't help, and end the chat"
+      ],
+      "correct": 1,
+      "explain": "A failed step changes the facts, so the plan changes too. Ana gets the truth and choices she can act on.",
+      "hint": "A plan is a guide, not a contract."
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "Which request benefits most from a written plan?",
+      "options": [
+        "Where is my parcel?",
+        "Return my mat, swap my jacket for a medium, and tell me what I'll get back",
+        "Do you sell climbing rope?"
+      ],
+      "correct": 1,
+      "explain": "Several jobs in one message are where agents skip steps. A short plan keeps every part in view.",
+      "hint": "Count the jobs hidden in each request."
+    },
+    {
+      "q": "Why take extra care with plan steps that move money?",
+      "options": [
+        "They follow Orbit's rules, such as approval for refunds over $200",
+        "They are always slower than other steps",
+        "The model isn't allowed to plan them"
+      ],
+      "correct": 0,
+      "explain": "Money and promises are where mistakes cost most, so they follow fixed rules, like a person approving any refund over $200.",
+      "hint": "What does Orbit's refund policy say about large amounts?"
+    }
+  ]
+}

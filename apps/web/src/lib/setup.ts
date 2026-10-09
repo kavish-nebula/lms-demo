@@ -204,7 +204,7 @@ const CHANGE: Record<QuestionId, (a: SetupAnswers) => string | null> = {
   experience: (a) =>
     ({
       never:
-        "Every lesson starts with extra support: the analogy and “why” notes are open, and practice has no decoy nodes. The quick check can change this lesson by lesson.",
+        "Every lesson starts with extra support: the analogy and “why” notes are open, and the “Stuck?” tips in guided practice start open. The quick check can change this module by module.",
       little: "Lessons start on standard support. The quick check adjusts it lesson by lesson.",
       sometimes: "Lessons start on standard support. The quick check can lighten the lessons you already know.",
       regularly:
@@ -321,9 +321,18 @@ export function adaptationFromPlan(
   };
 }
 
+/**
+ * What the pre-check set for one lesson: its own result, or its module's when
+ * the check asked about the module as a whole (a check item tagged "3" covers
+ * every lesson "3.x").
+ */
+export function precheckSupportFor(a: Adaptation, lesson: string): Support | undefined {
+  return a.lessonSupport[lesson] ?? a.lessonSupport[lesson.split(".")[0] ?? ""];
+}
+
 /** Support for one lesson: an override wins, then the pre-check, then the overall level. */
 export function supportFor(a: Adaptation, lesson: string): Support {
-  return a.override ?? a.lessonSupport[lesson] ?? a.support;
+  return a.override ?? precheckSupportFor(a, lesson) ?? a.support;
 }
 
 /** Whether the alternative explanation opens by itself in this lesson. */

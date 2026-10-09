@@ -1,0 +1,218 @@
+{
+  "lesson": "6.5",
+  "title": "Course recap and next learning path",
+  "notes": [
+    "Scout now reads a question, plans, calls tools, remembers, follows policy, hands off when it should and runs behind an API with limits.",
+    "Good next steps are evaluations at scale, retrieval with embeddings, more tools through MCP, and multi-agent systems.",
+    "Next in the course: the mini project, where you ship Scout end to end, then the final assessment and a short reflection."
+  ],
+  "quizAfter": 3,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "award",
+      "kicker": "Module 6 · Lesson 5",
+      "title": "Course recap and next learning path",
+      "sub": "Everything you built, and where to go from here",
+      "sentences": [
+        "Six modules ago, Orbit's chatbot apologised four hundred times in one day, because it could not look anything up.",
+        "In this last lesson, you look back at what you built, piece by piece, and then look ahead at what to learn next.",
+        "After this lesson come the mini project and the final assessment."
+      ]
+    },
+    {
+      "kind": "cycle",
+      "title": "The loop at the heart of Scout",
+      "center": { "label": "Scout", "sub": "an agent, not just a chatbot" },
+      "steps": [
+        { "icon": "message", "label": "Read", "sub": "the question plus memory", "cue": 1 },
+        { "icon": "brain", "label": "Plan", "sub": "decide the next step", "cue": 2 },
+        { "icon": "wrench", "label": "Act", "sub": "call a tool", "cue": 3 },
+        { "icon": "eye", "label": "Observe", "sub": "read the result or error", "cue": 4 },
+        { "icon": "send", "label": "Answer or hand off", "sub": "within policy and limits", "cue": 5 }
+      ],
+      "note": { "text": "This is the ReAct loop from Module 4. Every agent framework runs some version of it.", "cue": 6 },
+      "sentences": [
+        "Everything you built turns around one loop.",
+        "Scout reads the customer's question, together with what it remembers from the conversation.",
+        "It plans: it works out what it needs to know, and which tool could tell it.",
+        "It acts by calling a tool, such as get order or track parcel.",
+        "It observes the result, including any error, and decides whether it knows enough yet.",
+        "Finally it answers within the policy and its limits, or hands over to a person.",
+        "That is the react loop from Module 4, and every agent framework runs some version of it."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "Six modules, one agent",
+      "columns": ["Module", "You built", "Scout could then"],
+      "rows": [
+        { "cells": ["1 and 2", "First call, system prompt, JSON", "Talk, and follow Orbit's rules"], "cue": 1 },
+        { "cells": ["3", "Tools and the tool loop", "Look things up instead of guessing"], "cue": 2 },
+        { "cells": ["4", "Memory, retrieval, planning", "Remember and ground its answers"], "cue": 3 },
+        { "cells": ["5", "Full project, tests, evaluation", "Prove it works with a pass rate"], "cue": 4 },
+        { "cells": ["6", "Guards, an API and logs", "Serve real customers safely"], "cue": 5 }
+      ],
+      "note": { "text": "From a chatbot that apologised to an agent that acts, within limits.", "cue": 6 },
+      "sentences": [
+        "Here is the whole journey in one table.",
+        "In Modules 1 and 2 you made your first model call, wrote Scout's system prompt and got clean JSON back.",
+        "In Module 3 Scout got tools and the loop that runs them, so it could look things up instead of guessing.",
+        "In Module 4 it learned to remember, to search Orbit's policy and to plan.",
+        "In Module 5 you assembled the full project and measured it against a test set.",
+        "And in Module 6 you added guardrails, an API and logs, so it can serve real customers safely.",
+        "That is the path from a chatbot that apologised to an agent that acts, within limits."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "Scout today, end to end",
+      "messages": [
+        { "role": "user", "label": "Owen", "text": "Hi, the storm jacket from order ORB-10588 is too big. Can I send it back for a refund?", "cue": 1 },
+        { "role": "tool", "label": "get_order", "text": "ORB-10588 · Storm shell jacket, size L · $310 · delivered 5 days ago", "cue": 2 },
+        { "role": "tool", "label": "check_stock", "text": "JKT-STORM-M: 3 in stock", "cue": 2 },
+        { "role": "system", "label": "Guard", "text": "request_refund for $310: over $200, saved for approval. No money has moved.", "cue": 3 },
+        {
+          "role": "agent",
+          "label": "Scout",
+          "text": "You're within 30 days and return shipping is free. Your $310 refund is waiting for a team member to approve. Or I can swap it for a size M, which is in stock.",
+          "cue": 4
+        }
+      ],
+      "aside": { "icon": "check", "label": "All in one reply", "text": "Tools, policy, a guardrail and an honest answer.", "cue": 5 },
+      "sentences": [
+        "Here is Scout today, handling a request it could not have touched in Module 1.",
+        "Owen's storm jacket is too big, and he asks to send it back for a refund.",
+        "Scout looks up his order, sees it arrived five days ago, and checks whether a size medium is in stock.",
+        "It asks for a three hundred and ten dollar refund, and your guard holds it, because it is over two hundred dollars.",
+        "Scout tells Owen the truth: the refund is waiting for approval, and a free exchange is also possible.",
+        "Tools, policy, a guardrail and an honest answer, all in one short reply."
+      ]
+    },
+    {
+      "kind": "hub",
+      "title": "What to learn next",
+      "center": { "icon": "map", "label": "Your next steps", "sub": "beyond your first agent" },
+      "spokes": [
+        { "icon": "flask", "label": "Evaluations at scale", "sub": "hundreds of cases, model graders", "cue": 1 },
+        { "icon": "database", "label": "Embedding search", "sub": "find policy text by meaning", "cue": 2 },
+        { "icon": "plug", "label": "Tools via MCP", "sub": "plug in ready-made tool servers", "cue": 3 },
+        { "icon": "users", "label": "Multi-agent systems", "sub": "coordinators and specialists", "cue": 4 }
+      ],
+      "note": { "text": "The ideas carry over to any provider: OpenAI, Google or open models.", "cue": 5 },
+      "sentences": [
+        "Where next? Here are four directions that build directly on Scout.",
+        "Evaluations at scale: grow your ten test cases into hundreds, and use a model as a grader for answers that have no single right wording.",
+        "Retrieval with embeddings: instead of matching words, search Orbit's documents by meaning, with a vector store such as Chroma or pgvector.",
+        "More tools through MCP, the Model Context Protocol, an open standard for plugging an agent into ready-made tool servers, such as a help desk or a calendar.",
+        "And multi-agent systems, for the day one agent is no longer enough.",
+        "Everything you learned carries over to other providers, such as OpenAI, Google or open models; only the SDK calls change.",
+        "Pick the direction that solves your next real problem, not the most exciting one."
+      ]
+    },
+    {
+      "kind": "bullets",
+      "title": "Habits to keep",
+      "lead": "The habits matter more than any one tool or framework.",
+      "bullets": [
+        { "icon": "target", "text": "Scope the agent to one job, and draw it before you code", "cue": 1 },
+        { "icon": "list-checks", "text": "Write test cases early, and re-run them after every change", "cue": 2 },
+        { "icon": "shield", "text": "Limits, approvals and logs on anything that runs unattended", "cue": 3 },
+        { "icon": "headset", "text": "Keep a person in the loop for what matters", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "lightbulb",
+        "label": "And remember",
+        "text": "Some jobs don't need an agent. A fixed workflow is simpler and cheaper when the steps never change.",
+        "cue": 5
+      },
+      "sentences": [
+        "Before the tools, a few habits that will serve you on every agent you build.",
+        "Scope the agent to one clear job, and draw its parts before you write any code.",
+        "Write test cases early, and re-run them after every change to the prompt, the tools or the model.",
+        "Never leave an agent running unattended without step limits, spend limits, approvals and logs.",
+        "Keep a person in the loop for decisions that matter, and make it easy for customers to reach one.",
+        "And remember Module 1: some jobs do not need an agent at all, and a fixed workflow is simpler and cheaper."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "What comes next in the course",
+      "nodes": [
+        { "kind": "action", "icon": "rocket", "label": "Mini project", "sub": "ship Scout end to end", "cue": 1 },
+        { "kind": "logic", "icon": "award", "label": "Final assessment", "sub": "12 questions, 80% to finish", "cue": 2 },
+        { "kind": "output", "icon": "pencil", "label": "Reflection", "sub": "look back, get your credential", "cue": 3 }
+      ],
+      "note": { "text": "You have written most of the code already. The project is about putting it together and explaining your choices.", "cue": 4 },
+      "sentences": [
+        "Here is what comes next in the course.",
+        "First, the mini project: you ship Scout end to end, with tools, memory, guardrails and a test report of at least ten cases.",
+        "Then the final assessment: twelve questions across all six modules, with eighty percent to finish, and retakes are allowed.",
+        "Last, a short reflection, where you look back on what you built and collect your credential.",
+        "You have already written most of the code, so the project is about putting it together and explaining your choices."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "Recap: the course, and what comes next",
+      "points": [
+        { "text": "Scout reads, plans, acts, observes, then answers or hands off.", "cue": 1 },
+        { "text": "You built it in layers: prompts, tools, memory, tests, guardrails, an API.", "cue": 2 },
+        { "text": "Next: evaluations at scale, embeddings, MCP tools, multi-agent systems.", "cue": 3 },
+        { "text": "Keep the habits: scope, test, limit, log, and keep a person in the loop.", "cue": 4 }
+      ],
+      "sentences": [
+        "One last recap.",
+        "Scout reads, plans, acts and observes, then answers or hands off, inside limits you set.",
+        "You built it in layers: prompts, tools, memory, tests, guardrails and an API.",
+        "Next, you can grow into evaluations at scale, retrieval with embeddings, more tools through MCP and multi-agent systems.",
+        "Whatever you build, keep the habits: scope it, test it, limit it, log it, and keep a person in the loop.",
+        "Well done. Now go and ship Scout."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "In Scout's loop, what happens right after it calls a tool?",
+      "options": [
+        "It answers the customer straight away, whatever the tool said",
+        "It observes the result, including any error, and decides what to do next",
+        "It starts a fresh conversation with the customer"
+      ],
+      "correct": 1,
+      "explain": "Read, plan, act, observe: after acting, Scout reads the result or the error and decides whether to call another tool, answer or hand off.",
+      "hint": "Think of the four words in the loop, in order."
+    },
+    {
+      "q": "Owen asks for a $310 refund. Which part of Scout stops the money moving straight away?",
+      "options": [
+        "The system prompt on its own",
+        "The approval guard in your code",
+        "The search_policy tool"
+      ],
+      "correct": 1,
+      "explain": "needs_approval() checks every refund call before it runs and holds anything over $200 for a person. The prompt asks for it; the code guarantees it.",
+      "hint": "Which of these still works if the model gets confused?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "Scout's word-matching search misses policy answers when customers use different words. Which next topic fixes that?",
+      "options": ["Multi-agent systems", "Retrieval with embeddings", "Streaming replies"],
+      "correct": 1,
+      "explain": "Embeddings let you search by meaning, so \"send it back\" can find the returns section even though the words differ.",
+      "hint": "Which topic is about finding text by meaning rather than by matching words?"
+    },
+    {
+      "q": "Orbit's help desk tool offers an MCP server. What does MCP give Scout?",
+      "options": [
+        "A cheaper model for simple steps",
+        "A standard way to plug in ready-made tools",
+        "A way to run without an API key"
+      ],
+      "correct": 1,
+      "explain": "MCP, the Model Context Protocol, is an open standard for connecting agents to tool servers, so Scout could use the help desk's tools without you writing each one.",
+      "hint": "MCP is about tools, not models or keys."
+    }
+  ]
+}

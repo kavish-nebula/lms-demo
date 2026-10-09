@@ -105,7 +105,6 @@ export function FinalePlayer({
     body = (
       <CapstoneStage
         block={finale.capstone}
-        courseId={course.course_id}
         preview={preview}
         roleKey={adaptation.roleKey}
         roleLabel={adaptation.roleLabel}
@@ -130,7 +129,13 @@ export function FinalePlayer({
           if (enrolled)
             queueSignal(course.course_id, {
               kind: "final_check",
-              payload: { score: r.score, total: r.total, passed: r.passed, missedLessons: r.failedObjectives.map((o) => o.replace(/^obj-/, "")) },
+              // each missed area names its lesson, or its module number when the check covers a whole module
+              payload: {
+                score: r.score,
+                total: r.total,
+                passed: r.passed,
+                missedLessons: r.failedObjectives.map((id) => finale.objectives.find((o) => o.id === id)?.lesson ?? id.replace(/^obj-/, "")),
+              },
             });
         }}
         onPrev={prev ? () => go(prev.step.id) : undefined}

@@ -1,0 +1,229 @@
+{
+  "lesson": "5.3",
+  "title": "Adding tools and memory to the project",
+  "notes": [
+    "Scout has six tools: four that look things up and two that act, with the rules for acting built into the tool.",
+    "Fake data in data/orders.json lets you test every hard case, from a late return to a carrier timeout, without real systems.",
+    "Memory keeps the recent turns plus pinned facts, like the order ID and email, that are never trimmed."
+  ],
+  "quizAfter": 3,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "wrench",
+      "kicker": "Module 5 · Lesson 3",
+      "title": "Adding tools and memory to the project",
+      "sub": "Six tools, fake data you control, and memory that never loses the order number",
+      "sentences": [
+        "Scout's loop runs. Now we give it everything its job needs.",
+        "That means six tools, data to test them with, and a memory that keeps what matters.",
+        "You'll also see how one sentence in a tool description can make or break a run."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "Four tools that look things up",
+      "columns": ["Tool", "Input", "Gives back"],
+      "rows": [
+        { "cells": ["get_order", "order_id or email", "Items, total, status, tracking"], "cue": 1 },
+        { "cells": ["track_parcel", "tracking_number", "Where it is, when it arrives"], "cue": 2 },
+        { "cells": ["check_stock", "sku, like JKT-STORM-M", "Units in stock"], "cue": 3 },
+        { "cells": ["search_policy", "query", "The 2 best policy sections"], "cue": 4 }
+      ],
+      "note": { "text": "These only read. Calling one twice wastes a step but does no harm.", "cue": 5 },
+      "sentences": [
+        "Four of Scout's six tools look things up.",
+        "Get order finds an order by its number, or by the email address the customer ordered with.",
+        "Track parcel asks the carrier, ParcelPath, where a parcel is and when it should arrive.",
+        "Check stock tells Scout how many of a product are left, using the product's stock code.",
+        "Search policy finds the two sections of Orbit's policy that best match a question, just as you built it in Module 4.",
+        "These four only read, so calling one twice wastes a step but does no harm."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "Two tools that act",
+      "messages": [
+        { "role": "user", "label": "Owen", "text": "I've posted the jacket back. Please refund the $310.", "cue": 1 },
+        { "role": "tool", "label": "request_refund", "text": "ORB-10588, $310 → status: pending_approval. Over $200 needs a person.", "cue": 2 },
+        { "role": "agent", "label": "Scout", "text": "Thanks, Owen. Your $310 refund is started. As it's over $200, a member of our support team will review it.", "cue": 3 },
+        { "role": "user", "label": "Owen", "text": "Can I just talk to a person about it?", "cue": 4 },
+        { "role": "tool", "label": "hand_off", "text": "Owen Hart, ORB-10588: $310 refund pending approval, wants to talk to a person. → ticket HO-1001", "cue": 4 },
+        { "role": "agent", "label": "Scout", "text": "Of course. I've passed your chat to the team with a summary, ticket HO-1001.", "cue": 5 }
+      ],
+      "aside": { "icon": "shield", "label": "Rules inside the tool", "text": "request_refund never approves over $200 by itself, however the model asks.", "cue": 6 },
+      "sentences": [
+        "The other two tools change something, so they need more care.",
+        "Owen has posted his jacket back and asks for his money.",
+        "Scout calls request refund, and because it's over two hundred dollars, the tool answers pending approval.",
+        "Scout passes that on honestly: the refund is started, and a person will review it.",
+        "When Owen asks for a person, Scout calls the sixth tool, hand off, with a short summary.",
+        "The team gets a ticket with the whole story, and Owen doesn't have to repeat himself.",
+        "Notice that the approval rule lives inside the tool, so even a confused model can't skip it."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "Fake data you control",
+      "lead": "Real systems come later. A small file and two dictionaries let you make every case happen on demand.",
+      "rows": [
+        { "code": "data/orders.json", "out": "the five sample orders, with emails", "cue": 1 },
+        { "code": "\"delivered_days_ago\": 62", "out": "Grace: outside the 30-day window", "cue": 2 },
+        { "code": "SLOW = {\"PP-90417\"}", "out": "this parcel always times out", "cue": 3 },
+        { "code": "STOCK = {\"JKT-STORM-M\": 3, ...}", "out": "stock levels you choose", "cue": 4 }
+      ],
+      "aside": { "icon": "flask", "label": "Why fake first", "text": "A late return, a timeout, a big refund: you can test each one today, the same way every time.", "cue": 5 },
+      "sentences": [
+        "Scout doesn't need Orbit's real systems to be built and tested.",
+        "A small JSON file in the data folder holds the five sample orders, each with the customer's email.",
+        "Grace's boots were delivered 62 days ago, so she's a ready-made late return.",
+        "One tracking number always times out, so you can test what Scout does when the carrier fails.",
+        "And a stock dictionary lets you decide what is in stock and what isn't.",
+        "With fake data, every hard case happens on demand, the same way every time."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "One description, two outcomes",
+      "left": {
+        "label": "Before: ID only",
+        "tone": "bad",
+        "cue": 1,
+        "points": [
+          "Takes order_id only",
+          "Customer gives an email",
+          "Scout puts the email in order_id",
+          "Error, then a guess"
+        ]
+      },
+      "right": {
+        "label": "After: ID or email",
+        "tone": "ok",
+        "cue": 4,
+        "points": [
+          "Takes order_id or email",
+          "Description says when to use each",
+          "Scout passes the email as email",
+          "Order found, real answer"
+        ]
+      },
+      "sentences": [
+        "A tool description is an instruction the model reads every time it decides what to do.",
+        "Scout's first get order tool only took an order number.",
+        "But many customers write in with nothing but their email address.",
+        "With nowhere else to put it, Scout passed the email as an order number, got an error, and guessed.",
+        "The fixed tool takes an order number or an email, and its description says when to use each.",
+        "Now Scout passes the email in the right field and gets the real order.",
+        "You'll meet this exact bug again later in this module."
+      ]
+    },
+    {
+      "kind": "define",
+      "title": "Memory: pinned facts",
+      "term": "Pinned facts",
+      "definition": "Key details kept apart from the chat history, so trimming old messages never loses them.",
+      "parts": [
+        { "text": "The order ID", "cue": 1 },
+        { "text": "The customer's email", "cue": 2 },
+        { "text": "The customer's name", "cue": 3 }
+      ],
+      "analogy": { "label": "Think of it as", "text": "A sticky note on your monitor: the chat scrolls away, but the note stays in view." },
+      "sentences": [
+        "Scout's memory works the way you built it in Module 4, with pinned facts at its heart.",
+        "When a customer mentions an order number, Scout pins it.",
+        "Now it pins their email address too.",
+        "And once get order finds the order, Scout pins the customer's name.",
+        "Think of a sticky note on your monitor.",
+        "The chat scrolls away, but the note stays in view."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "Memory on every turn",
+      "run": true,
+      "nodes": [
+        { "kind": "user", "icon": "message", "label": "New message", "sub": "the customer writes", "cue": 1 },
+        { "kind": "memory", "icon": "key", "label": "Pin facts", "sub": "order ID, email, name", "cue": 2 },
+        { "kind": "memory", "icon": "history", "label": "Recent turns", "sub": "last 10 customer turns", "cue": 3 },
+        { "kind": "llm", "icon": "brain", "label": "Scout", "sub": "system prompt plus facts", "cue": 4 },
+        { "kind": "output", "icon": "send", "label": "Reply", "sub": "saved as the next turn", "cue": 5 }
+      ],
+      "note": { "text": "Trim the chat, never the facts.", "cue": 6 },
+      "sentences": [
+        "Here is what happens to memory on every turn.",
+        "A new message arrives from the customer.",
+        "Any order number or email in it is pinned as a fact.",
+        "The last ten customer turns are kept, and older ones are trimmed.",
+        "Scout sees the system prompt, the pinned facts and those recent turns.",
+        "Its final reply is saved as a turn, while the tool calls behind it stay inside that run.",
+        "The rule is simple: trim the chat, never the facts."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "Recap",
+      "points": [
+        { "text": "Four tools look things up; two act, with rules inside the tool.", "cue": 1 },
+        { "text": "Fake data lets you test every hard case on demand.", "cue": 2 },
+        { "text": "A tool's description decides how the model uses it.", "cue": 3 },
+        { "text": "Pinned facts survive trimming: order ID, email, name.", "cue": 4 }
+      ],
+      "sentences": [
+        "Let's recap.",
+        "Scout has six tools: four that look things up, and two that act, with their rules inside the tool.",
+        "Fake data lets you make every hard case happen, whenever you want.",
+        "A tool's description is an instruction, and one sentence in it can fix a whole family of failures.",
+        "And pinned facts keep the order number, email and name safe while old turns are trimmed.",
+        "Next: what to do when Scout gets something wrong."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "Which of Scout's tools needs a safety rule built into the tool itself, not just a line in the prompt?",
+      "options": [
+        "search_policy",
+        "request_refund",
+        "check_stock"
+      ],
+      "correct": 1,
+      "explain": "request_refund moves money. With the over-200-dollar approval rule inside the tool, a confused model still can't approve a big refund on its own.",
+      "hint": "Which tool changes something instead of only reading?"
+    },
+    {
+      "q": "Why does tools.py make one tracking number always time out?",
+      "options": [
+        "So you can test what Scout does when the carrier fails",
+        "Because ParcelPath charges for every call",
+        "To slow Scout down so it thinks harder"
+      ],
+      "correct": 0,
+      "explain": "Fake data lets you make hard cases happen on demand. A guaranteed timeout tests Scout's error handling on every run, the same way each time.",
+      "hint": "Which case would be hardest to catch with a real carrier?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "Many customers give an email instead of an order number. What change helps Scout most?",
+      "options": [
+        "Tell customers to find their order number first",
+        "Let get_order take an email, and say so in its description",
+        "Remove get_order and let the model answer from what it knows"
+      ],
+      "correct": 1,
+      "explain": "The model learns what a tool accepts from its schema and description. Give it a field for the email and say when to use it, and the error and the guess both go away.",
+      "hint": "Where does the model learn what a tool accepts?"
+    },
+    {
+      "q": "Thirty messages in, Scout's memory has trimmed the early turns. How does it still know the order number from message two?",
+      "options": [
+        "It was pinned as a fact, and facts are never trimmed",
+        "The model remembers the whole chat on its own",
+        "It reads the order number back from the trace"
+      ],
+      "correct": 0,
+      "explain": "Trimming drops old turns, but pinned facts are added to every call. That is exactly what they are for.",
+      "hint": "Think of the sticky note on the monitor."
+    }
+  ]
+}

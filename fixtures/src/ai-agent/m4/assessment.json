@@ -1,0 +1,79 @@
+{
+  "title": "Module check: memory, retrieval and the agent loop",
+  "summary": "Six real situations on what to remember, keeping long chats lean, answering from documents, planning and the ReAct loop.",
+  "items": [
+    {
+      "lesson": "4.1",
+      "stem": "Grace's chat with Scout is ending. Along the way she said Ridge boots fit her best in size 39. Priya's new long-term memory saves a few details for each customer. What should it save for Grace?",
+      "options": [
+        "Her whole chat, word for word, so Scout can reread everything on her next visit",
+        "That Ridge boots fit her best in size 39, so her next visit can start from there",
+        "That size 39 had 2 pairs in stock today, so Scout can skip the stock check next time",
+        "Her home address and birthday, in case a future chat with Scout ever needs them"
+      ],
+      "correct": 1,
+      "explain": "Her size is useful next time and low risk. Stock changes daily and already lives in Sam's stock sheet, so check it fresh. A full transcript is slow, costly and more to protect, and details kept just in case are only risk."
+    },
+    {
+      "lesson": "4.2",
+      "stem": "Elena's chat with Scout has reached 45 turns, and each reply now takes noticeably longer. Priya says Claude Opus 5.5 has a 1 million token window, so nothing needs to change. What is the best response?",
+      "options": [
+        "Agree: the chat is far below the window, so speed and cost stay the same as turn one",
+        "Move the chat to a model with an even larger window, so it never gets close to the limit",
+        "Start a fresh chat every ten turns, so each request stays small and every reply is fast",
+        "Keep recent turns word for word, condense older ones into a short note, and pin key facts"
+      ],
+      "correct": 3,
+      "explain": "A big window is what fits, not what's free. Every call resends the whole chat, so turn 45 reads far more tokens than turn 5: slower and pricier. Recent turns, a short note and pinned facts keep requests small; a fresh chat would make Elena repeat herself."
+    },
+    {
+      "lesson": "4.3",
+      "stem": "Orbit adds a 40-page care guide to docs. Priya splits it every 50 words to keep chunks small, and now Scout's washing advice for the storm jacket stops halfway through the steps. What is the best fix?",
+      "options": [
+        "Split at the guide's headings, so each chunk is a passage that makes sense on its own",
+        "Return the top 10 chunks instead of 2, so the missing halves come back along with them",
+        "Paste the whole care guide into the system prompt, so no instruction is ever cut off",
+        "Switch from keyword scoring to embeddings, so the right chunk gets a higher score"
+      ],
+      "correct": 0,
+      "explain": "Cutting every 50 words splits the steps in half, so even the best match is incomplete. Splitting at headings keeps each passage whole. Embeddings still find broken pieces, extra chunks add noise, and pasting 40 pages into every call is slow and buries the key line."
+    },
+    {
+      "lesson": "4.4",
+      "stem": "Owen wants to return his $310 jacket. Scout's plan: 1. get_order to check delivery. 2. search_policy for returns. 3. Refund $310 to his card. 4. Tell Owen the money is on its way. What should change?",
+      "options": [
+        "Swap steps 1 and 2, so Scout reads the return policy before it looks up Owen's order",
+        "Drop step 2, since the return rules are simple enough for Scout to answer from memory",
+        "Steps 3 and 4: a refund over $200 needs a person to approve it, so Scout can't promise it",
+        "Cut it to two steps, since a four-step plan is too much for a single return question"
+      ],
+      "correct": 2,
+      "explain": "Steps that move money follow Orbit's rules. A $310 refund waits for a teammate's approval, and refunds arrive within 5 business days of the return arriving, so step 4 promises what Scout can't. Four short steps is a normal plan, and the lookup order is fine."
+    },
+    {
+      "lesson": "4.5",
+      "stem": "To save money, Priya tries a fixed script: always get_order, then track_parcel, then reply. On Ravi's order, still processing with no tracking number, it breaks. Why does Scout's ReAct loop cope?",
+      "options": [
+        "Its step limit stops the failed tracking call before the error can ever reach Ravi",
+        "It reads each result before choosing its next step, so it skips tracking with no number",
+        "It writes its whole plan before any tool call, so the calls always come in the right order",
+        "It keeps retrying track_parcel until ParcelPath has a tracking number for the order"
+      ],
+      "correct": 1,
+      "explain": "ReAct decides each step from what it just observed. get_order shows no tracking number yet, so the next think skips track_parcel and tells Ravi his order is still being prepared. A plan written up front has the script's blind spot, and a step limit never picks steps."
+    },
+    {
+      "lesson": "4.3",
+      "transfer": true,
+      "stem": "A family-run guesthouse's assistant answers from its house guide. A guest asks the check-in time, whether parking is free, and if she can bring her dog. Search returns check-in and parking, nothing on pets. What should it do?",
+      "options": [
+        "Answer all three, saying small dogs are usually welcome, as they are at most guesthouses",
+        "Answer check-in and parking from the guide, and leave the dog out so nothing is guessed",
+        "Pass the whole request to the owner, since one of its three parts isn't in the guide",
+        "Answer check-in and parking from the guide, say pets aren't covered, and offer the owner"
+      ],
+      "correct": 3,
+      "explain": "Each part of the request needs a step. Two are grounded in retrieved text and the third isn't covered, so the honest reply says so and offers the owner. Guessing invents a promise, skipping it leaves her asking again, and handing off everything wastes good answers."
+    }
+  ]
+}

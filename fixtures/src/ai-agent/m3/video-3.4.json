@@ -1,0 +1,236 @@
+{
+  "lesson": "3.4",
+  "title": "Connecting external APIs",
+  "notes": [
+    "Wrap an external API in a thin function with a clear name, like track_parcel, and define it as a tool.",
+    "API keys live in your code's environment, never in the prompt, and every call gets a timeout.",
+    "Slow down when the API answers 429, and return only the fields the model needs, not the whole response."
+  ],
+  "quizAfter": 4,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "plug",
+      "kicker": "Module 3 · Lesson 4",
+      "title": "Connecting external APIs",
+      "sub": "Wrapping ParcelPath's tracking API as a tool Scout can call safely",
+      "sentences": [
+        "Most tools that matter in real work talk to someone else's system.",
+        "For Scout, the big one is ParcelPath, the carrier that delivers Orbit's parcels.",
+        "In this lesson you will wrap its tracking API as a tool, and learn the four habits that keep that safe."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "Why Scout needs two tools in a row",
+      "run": true,
+      "nodes": [
+        { "kind": "user", "icon": "user", "label": "Ana", "sub": "when will my tent arrive?", "cue": 1 },
+        { "kind": "tool", "icon": "receipt", "label": "get_order", "sub": "finds tracking PP-88213", "cue": 2 },
+        { "kind": "tool", "icon": "truck", "label": "track_parcel", "sub": "asks ParcelPath where it is", "cue": 3 },
+        { "kind": "output", "icon": "send", "label": "Reply", "sub": "in transit, due Thursday", "cue": 4 }
+      ],
+      "note": { "text": "The output of one tool became the input of the next, and the model made that connection itself.", "cue": 5 },
+      "sentences": [
+        "Here is why Scout needs the carrier's API.",
+        "Ana asks when her tent will arrive.",
+        "Scout calls get order, which returns her tracking number, but not where the parcel is right now.",
+        "So Scout calls a second tool, track parcel, with that tracking number, and that tool calls ParcelPath.",
+        "Now Scout can tell Ana her tent is in transit and due on Thursday.",
+        "Notice that the output of one tool became the input of the next, and the model made that connection itself."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "Wrapping ParcelPath as track_parcel",
+      "lead": "A thin Python function around the API. httpx, the web client used here, comes with the anthropic package.",
+      "rows": [
+        { "code": "r = httpx.get(url, headers=HEADERS, timeout=10)", "out": "Ten seconds at most, never forever", "cue": 1 },
+        { "code": "r.raise_for_status()", "out": "A 404 or 500 raises an error, not data", "cue": 2 },
+        { "code": "d = r.json()", "out": "ParcelPath's full answer, often huge", "cue": 3 },
+        { "code": "return json.dumps({\"status\": d[\"status\"], \"eta\": d[\"eta\"]})", "out": "Only what Scout needs, as text", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "key",
+        "label": "Where the key lives",
+        "text": "HEADERS is built from os.environ[\"PARCELPATH_KEY\"]. The key never appears in the prompt.",
+        "cue": 5
+      },
+      "sentences": [
+        "Wrapping an API means writing a thin Python function around it, which takes exactly what the tool definition promises: a tracking number.",
+        "It calls ParcelPath with a timeout of ten seconds, so a slow server cannot freeze Scout.",
+        "It checks the status code, so a not found or a server error raises an error instead of passing as data.",
+        "Then it reads ParcelPath's full answer, which can run to thousands of lines.",
+        "And it returns only the fields the model needs, turned into text, because tool results are text.",
+        "The API key comes from an environment variable, read inside your code, and it never goes near the prompt."
+      ]
+    },
+    {
+      "kind": "hub",
+      "title": "Four habits for every API tool",
+      "center": { "icon": "plug", "label": "track_parcel", "sub": "an API tool done right" },
+      "spokes": [
+        { "icon": "key", "label": "Keys in env", "sub": "never in the prompt or code", "cue": 1 },
+        { "icon": "timer", "label": "Timeouts", "sub": "on every single call", "cue": 2 },
+        { "icon": "gauge", "label": "Rate limits", "sub": "429 means slow down", "cue": 3 },
+        { "icon": "filter", "label": "Trim results", "sub": "only fields the model needs", "cue": 4 }
+      ],
+      "note": { "text": "Each habit prevents a real failure: a leaked key, a frozen agent, a blocked account, a flooded context.", "cue": 5 },
+      "sentences": [
+        "Every API tool you build needs the same four habits.",
+        "Keys stay in your environment, read by your code, and never pasted into code files or prompts.",
+        "Every call has a timeout, because one day the other side will hang.",
+        "Rate limits are respected: when the API answers four twenty-nine, too many requests, you slow down.",
+        "And results are trimmed to the fields the model needs.",
+        "Each habit prevents a real failure: a leaked key, a frozen agent, a blocked account, or a flooded context."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Where does the API key go?",
+      "left": {
+        "label": "In the prompt",
+        "tone": "bad",
+        "cue": 1,
+        "points": [
+          "The model can see it, so it can repeat it",
+          "It lands in logs and saved traces",
+          "A clever customer might coax it out",
+          "Anyone with the transcript has your key"
+        ]
+      },
+      "right": {
+        "label": "In the environment",
+        "tone": "ok",
+        "cue": 4,
+        "points": [
+          "PARCELPATH_KEY set in the terminal",
+          "track_parcel reads it with os.environ",
+          "The model only ever sees the result",
+          "Change the key without touching code"
+        ]
+      },
+      "sentences": [
+        "One mistake deserves its own slide: putting an API key where the model can see it.",
+        "If the key is in the prompt, the model can repeat it, in a reply or in a log.",
+        "Traces and transcripts get shared, and the key travels with them.",
+        "And a customer who asks cleverly enough might talk Scout into printing it.",
+        "Instead, set the key as an environment variable, just like your Anthropic key in Module 1.",
+        "Your track parcel function reads it, and the model only ever sees the tracking result."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "When ParcelPath says slow down",
+      "messages": [
+        { "role": "agent", "label": "Scout asks", "text": "track_parcel(tracking_number=\"PP-88213\")", "cue": 1 },
+        { "role": "tool", "label": "ParcelPath", "text": "429 Too Many Requests · Retry-After: 2", "cue": 2 },
+        { "role": "system", "label": "Your code", "text": "Waits 2 seconds, then tries once more", "cue": 3 },
+        { "role": "tool", "label": "ParcelPath", "text": "200 OK · in transit · last scan Denver hub · due Thursday", "cue": 4 },
+        { "role": "agent", "label": "Scout", "text": "Your tent is on its way and should arrive on Thursday.", "cue": 5 }
+      ],
+      "aside": {
+        "icon": "history",
+        "label": "Busy hours",
+        "text": "Cache recent lookups for a few minutes, so the same parcel isn't fetched twenty times.",
+        "cue": 6
+      },
+      "sentences": [
+        "Busy hours bring a different problem: rate limits.",
+        "Scout asks to track Ana's parcel during the lunchtime rush.",
+        "ParcelPath answers with status four twenty-nine, too many requests, and says to retry after two seconds.",
+        "Your code, not the model, waits the two seconds and tries once more.",
+        "This time the call succeeds.",
+        "Scout gets a clean result and answers Ana, without ever knowing there was a hiccup.",
+        "When many customers ask at once, also cache recent lookups, so the same parcel is not fetched twenty times a minute."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "Return only what the model needs",
+      "columns": ["ParcelPath sends", "Scout needs it?"],
+      "rows": [
+        { "cells": ["status: in_transit", "Yes"], "cue": 1 },
+        { "cells": ["estimated_delivery: Thursday", "Yes"], "cue": 1 },
+        { "cells": ["last_scan: Denver hub, 06:12", "Yes, for where is it now"], "cue": 2 },
+        { "cells": ["Dozens of scan events, depot codes, barcodes", "No"], "tone": "bad", "cue": 3 },
+        { "cells": ["Route IDs and driver notes", "No, and some are private"], "tone": "bad", "cue": 4 }
+      ],
+      "note": { "text": "About 4,000 lines in, three fields out: fewer tokens, lower cost, fewer mistakes.", "cue": 5 },
+      "sentences": [
+        "The last habit is trimming the result.",
+        "ParcelPath's full answer is huge, but Scout mostly needs two things: the status and the expected delivery day.",
+        "The last scan helps too, for customers who ask where exactly the parcel is.",
+        "Scout does not need dozens of scan events, depot codes and barcodes.",
+        "And some fields, like a driver's notes, should never reach a customer at all.",
+        "Trimming takes the result from thousands of lines to three fields, which means fewer tokens, lower cost and fewer mistakes."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "Wrap each API in a thin function and define it as a tool", "cue": 1 },
+        { "text": "Keys live in the environment, never in the prompt", "cue": 2 },
+        { "text": "Give every call a timeout, and slow down on a 429", "cue": 3 },
+        { "text": "Return only the fields the model needs", "cue": 4 }
+      ],
+      "sentences": [
+        "Let us pull it together.",
+        "Wrap each API in a thin function with a clear name, and define it as a tool.",
+        "Keep keys in the environment, where your code can read them and the model cannot.",
+        "Give every call a timeout, and slow down when the API answers four twenty-nine.",
+        "Return only the fields the model needs.",
+        "Next: what to do when a tool fails anyway, because sooner or later, it will."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "Where should Scout's ParcelPath API key live?",
+      "options": [
+        "In the system prompt, so Scout can use it when it needs to",
+        "In an environment variable that your track_parcel code reads",
+        "In track_parcel's tool description"
+      ],
+      "correct": 1,
+      "explain": "The model never needs the key. Your code reads it from the environment and calls ParcelPath; the model only sees the result.",
+      "hint": "Who actually calls ParcelPath: the model, or your code?"
+    },
+    {
+      "q": "Why does every ParcelPath call get a timeout?",
+      "options": [
+        "So a slow or hung server can't freeze Scout",
+        "To make ParcelPath answer faster",
+        "Because the model will refuse to call tools without one"
+      ],
+      "correct": 0,
+      "explain": "Without a timeout, a call can wait forever while the customer waits too. A timeout turns a hang into an error your code can handle.",
+      "hint": "What happens to a waiting customer if ParcelPath never answers?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "During a busy hour, ParcelPath answers 429. What does that mean?",
+      "options": [
+        "The tracking number doesn't exist",
+        "Too many requests: wait, then try again",
+        "Your API key is wrong"
+      ],
+      "correct": 1,
+      "explain": "429 is a rate limit. Wait as long as the API asks, retry, and cache recent lookups so you send fewer requests.",
+      "hint": "Think busy hour, not bad input."
+    },
+    {
+      "q": "ParcelPath returns about 4,000 lines of JSON for one parcel. What should track_parcel give Scout?",
+      "options": [
+        "All of it, so Scout has every detail",
+        "The status, the expected delivery and the last scan",
+        "Nothing; Scout can call ParcelPath itself"
+      ],
+      "correct": 1,
+      "explain": "Those fields answer the questions customers ask. Fewer tokens means faster, cheaper, more accurate replies, and private fields stay out.",
+      "hint": "Which fields would answer: where is it, and when will it arrive?"
+    }
+  ]
+}

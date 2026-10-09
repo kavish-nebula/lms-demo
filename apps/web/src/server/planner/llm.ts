@@ -125,11 +125,11 @@ export const httpTransport: PlannerTransport = async (req) => {
 const INSTRUCTIONS = `You are the course planner for Nebula KnowLab, an online learning platform. You write one learner's plan for one course: the order they take each module's topics in, how much help each lesson gives, how much attention each module deserves, their pacing, and short personalised text. The learner reads everything you write, addressed to them as "you". Write plainly and warmly, and be specific; no marketing tone.
 
 What you decide:
-- topicOrder for each module: include every topic id of the module, written or coming soon. The opening scenario (hook) stays first and the recall topic (review) stays last; you may reorder the topics in between, for example putting the worked example (worked) before the explanation (explainer) for someone who learns best from examples.
-- support for each lesson and module: light, standard or extra. Base it on evidence: the quick check per lesson (as a starting point, 0 of 2 right suggests extra, 2 of 2 suggests light), their stated experience, and their answers inside lessons once those arrive. Each "why" is one sentence citing the evidence.
+- topicOrder for each module: include every topic id of the module, written or coming soon. The opening scenario (hook) stays first; the module check (gate) and then the recall topic (review) stay last. You may reorder the topics in between, for example putting the worked example (worked) before the explanation (explainer) for someone who learns best from examples.
+- support for each lesson and module: light, standard or extra. Base it on evidence: the quick check (as a starting point, 0 of 2 right suggests extra, 2 of 2 suggests light; a score for a module covers every lesson in it), their stated experience, and their answers inside lessons once those arrive. Each "why" is one sentence citing the evidence.
 - emphasis for each module: skim, standard or deep, from their goal, role and gaps.
-- hookScene: only for modules that have an opening scenario. Retell its stakes in two or three sentences from the learner's role and field. Keep the scenario's facts (Nebula, Ana, what went wrong); reframe them, do not invent new events. Null for modules without one.
-- inYourWorld for every lesson: apply that lesson's key idea to the learner's own field and role with a concrete, realistic example (a trigger, the data, a guard, an action they would recognise). Never contradict the lesson. With no field given, use a general workplace example.
+- hookScene: only for modules that have an opening scenario. Retell its stakes in two or three sentences from the learner's role and field. Keep the scenario's facts (the company, the people, what went wrong) as the course outline gives them; reframe them, do not invent new events or numbers. Null for modules without one.
+- inYourWorld for every lesson: apply that lesson's key idea to the learner's own field and role with a concrete, realistic example from their work that they would recognise. Never contradict the lesson. With no field given, use a general workplace example.
 - capstoneBrief: how to approach the capstone project given their role.
 - pacing: sessions per week and minutes per session that fit their stated pace and goal.
 - summary: two or three sentences on how the course is tuned for them and why.
@@ -185,7 +185,7 @@ function learnerText(req: PlannerRequest): string {
   if (!p || p.skipped) lines.push("Quick check: skipped");
   else if (p.isNew) lines.push("Quick check: they said they are completely new to this");
   else {
-    lines.push(`Quick check (right answers per lesson, out of 2): ${Object.entries(p.lessons).map(([l, n]) => `${l}: ${n}`).join(", ")}`);
+    lines.push(`Quick check (right answers out of 2, per lesson, or per module where a bare number names the module): ${Object.entries(p.lessons).map(([l, n]) => `${l.includes(".") ? "lesson" : "module"} ${l}: ${n}`).join(", ")}`);
     const dunno = Object.entries(p.responses ?? {}).filter(([, v]) => v === null).map(([k]) => k);
     if (dunno.length) lines.push(`Answered "I don't know yet" on: ${dunno.join(", ")}`);
   }
@@ -210,10 +210,14 @@ function describe(e: SignalNote): string {
       return `finished topic ${p.stage} (${where})`;
     case "module_complete":
       return `finished every written topic in ${e.moduleId}`;
+    case "scenario_answer":
+      return `scenario decision (${where}, ${p.scenarioId}): ${p.correct ? "right" : "wrong"} on the first try`;
+    case "module_check":
+      return `module check for ${e.moduleId}: ${p.score}/${p.total}, ${p.passed ? "passed" : "not passed"}${Array.isArray(p.missedLessons) && p.missedLessons.length ? `; weak on lessons ${p.missedLessons.join(", ")}` : ""}`;
     case "recall_answer":
       return `recall question (${where}, ${p.variantId}): ${p.correct === undefined ? "" : p.correct ? "right" : "wrong"}${p.rating ? `self-rated "${p.rating === "got" ? "got it" : "not yet"}"` : ""}`;
     case "final_check":
-      return `final check: ${p.score}/${p.total}, ${p.passed ? "passed" : "not passed"}${Array.isArray(p.missedLessons) && p.missedLessons.length ? `; missed lessons ${p.missedLessons.join(", ")}` : ""}`;
+      return `final check: ${p.score}/${p.total}, ${p.passed ? "passed" : "not passed"}${Array.isArray(p.missedLessons) && p.missedLessons.length ? `; weak on ${p.missedLessons.map((k: string) => (k.includes(".") ? `lesson ${k}` : `module ${k}`)).join(", ")}` : ""}`;
     case "capstone_check":
       return `capstone check: ${p.passed}/${p.total} requirements met${Array.isArray(p.failing) && p.failing.length ? `; failing: ${p.failing.join(", ")}` : ""}`;
     default:

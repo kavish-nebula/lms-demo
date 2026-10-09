@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ChevronLeft, FileQuestion } from "lucide-react";
-import { getCourse, getModule, SAMPLE_MODULE_HREF } from "@/data";
+import { getCourse, getModule } from "@/data";
 import { Player } from "@/components/player/player";
 import { EmptyState } from "@/components/kit/states";
 import { Button } from "@/components/ui/button";
@@ -18,9 +18,13 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return { title: m ? `${m.title} · ${course!.title}` : "Module" };
 }
 
-/** S4 Player route: /learn/courses/[courseId]/[moduleId]/[stage] */
-export default async function PlayerPage({ params }: { params: Promise<Params> }) {
-  const { courseId, moduleId, stage } = await params;
+/**
+ * S4 Player route: /learn/courses/[courseId]/[moduleId]/[stage]. The concept
+ * topic is split into one part per lesson video: `?v=m1-2` opens that video
+ * (without it, the first).
+ */
+export default async function PlayerPage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<{ v?: string }> }) {
+  const [{ courseId, moduleId, stage }, { v }] = await Promise.all([params, searchParams]);
   if (!isModuleStage(stage)) notFound();
   const course = await getCourse(courseId);
   const outline = course?.modules.find((m) => m.module_id === moduleId);
@@ -45,7 +49,7 @@ export default async function PlayerPage({ params }: { params: Promise<Params> }
           description={t("notAuthoredBody")}
           action={
             <Button asChild variant="brand">
-              <Link href={SAMPLE_MODULE_HREF}>{t("openSample")}</Link>
+              <Link href={courseHref}>{t("backToCourse")}</Link>
             </Button>
           }
         />
@@ -78,6 +82,7 @@ export default async function PlayerPage({ params }: { params: Promise<Params> }
       courseHref={courseHref}
       initialDone={[]}
       topics={outline.topics}
+      video={stage === "explainer" ? v : undefined}
       after={after}
     />
   );
