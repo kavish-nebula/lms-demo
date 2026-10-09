@@ -9,13 +9,13 @@ export const metadata: Metadata = { title: "Component kit" };
 const DEMO_CREDENTIAL: Credential = {
   credential_id: "kit-demo",
   kind: "module",
-  title: "Your first working workflow",
-  course_title: "Automate Real Work with n8n",
+  title: "Module 1 complete",
+  course_title: "Sample course",
   issued_at: "2026-10-01",
   verify_url: "/verify/kit-demo",
 };
 
 export default async function KitPage() {
   const courses = await getCourses();
-  return <KitShowcase course={courses[0]!} credential={DEMO_CREDENTIAL} />;
+  return <KitShowcase course={courses[0]} credential={DEMO_CREDENTIAL} />;
 }

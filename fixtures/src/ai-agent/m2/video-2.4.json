@@ -1,0 +1,241 @@
+{
+  "lesson": "2.4",
+  "title": "System prompts and role design",
+  "notes": [
+    "The system prompt is the agent's job description: role, goal, rules, tone, facts and what to do when unsure.",
+    "Give the real facts and a reason for each rule, and the model stays inside policy even when a customer pushes.",
+    "Never put secrets in a prompt: keys live in environment variables and permissions live in code."
+  ],
+  "quizAfter": 3,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "bot",
+      "kicker": "Module 2 · Lesson 4",
+      "title": "System prompts and role design",
+      "sub": "Give Scout a job description: who it is, what it may promise, and what to do when it is unsure",
+      "sentences": [
+        "Every good employee starts with a job description, and so does every good agent.",
+        "For a language model, that job description is the system prompt.",
+        "In this lesson you will design Scout's, part by part, and watch it hold Orbit's policy under pressure."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Two kinds of instruction",
+      "left": {
+        "label": "System prompt",
+        "tone": "info",
+        "cue": 1,
+        "points": [
+          "Written by you, the builder",
+          "Sent with every request",
+          "Role, rules, facts and tone",
+          "The same for the whole chat"
+        ]
+      },
+      "right": {
+        "label": "User message",
+        "tone": "info",
+        "cue": 4,
+        "points": [
+          "Written by the customer",
+          "Changes every turn",
+          "The question to answer",
+          "Can be vague, upset or tricky"
+        ]
+      },
+      "sentences": [
+        "Every request can carry two kinds of instruction.",
+        "The system prompt is written by you, the builder, and it is sent with every request.",
+        "It sets the standing rules: who the model is, what it may do, and how it should sound.",
+        "Think of it as Scout's job description and policy handbook in one.",
+        "The user message is whatever the customer typed, and it changes every turn.",
+        "Keep your rules in the system prompt, where the model treats them as the frame for the whole conversation."
+      ]
+    },
+    {
+      "kind": "hub",
+      "title": "Six parts of a strong system prompt",
+      "center": { "icon": "bot", "label": "System prompt", "sub": "Scout's job description" },
+      "spokes": [
+        { "icon": "user", "label": "Role", "sub": "who it is, who it serves", "cue": 1 },
+        { "icon": "target", "label": "Goal", "sub": "what a good outcome is", "cue": 2 },
+        { "icon": "shield", "label": "Rules", "sub": "what it must never do", "cue": 3 },
+        { "icon": "message", "label": "Tone", "sub": "how it should sound", "cue": 4 },
+        { "icon": "book", "label": "Facts", "sub": "the policy it can rely on", "cue": 5 },
+        { "icon": "help", "label": "When unsure", "sub": "say so, ask, or hand over", "cue": 6 }
+      ],
+      "note": { "text": "The most forgotten part is the last one, and it is what stops confident guessing.", "cue": 7 },
+      "sentences": [
+        "A strong system prompt has six parts, and Scout's will have all of them.",
+        "The role: you are Scout, the support assistant for Orbit Outdoor, a shop for hiking, camping and climbing gear.",
+        "The goal: answer each customer accurately and kindly, in as few messages as possible.",
+        "The rules: never promise a refund, discount or date that the policy does not state.",
+        "The tone: warm, plain and brief, two to four sentences, with no jargon.",
+        "The facts: Orbit's actual policy, written out, so the model never has to guess it.",
+        "And what to do when unsure: say so, ask for what is missing, or offer to pass it to the team.",
+        "That last part is the one most prompts forget, and it is what stops confident guessing."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "How it reads in Scout's prompt",
+      "lead": "Plain sentences, grouped by purpose. This is part of SCOUT_SYSTEM, which you will write in the guided practice.",
+      "rows": [
+        { "code": "You are Scout, Orbit Outdoor's support assistant.", "out": "role", "cue": 1 },
+        { "code": "Never promise what the policy below does not state.", "out": "rule", "cue": 2 },
+        { "code": "Returns: unused items within 30 days of delivery.", "out": "fact, copied from the policy", "cue": 3 },
+        { "code": "If unsure, say so and offer to pass it to the team.", "out": "what to do when unsure", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "lightbulb",
+        "label": "Give the reason",
+        "text": "“Keep replies short, because customers read them on their phones” works better than “BE SHORT”.",
+        "cue": 5
+      },
+      "sentences": [
+        "Here is how some of that reads in Scout's actual system prompt.",
+        "It opens with the role, in one plain sentence.",
+        "Then the rules, stated as clearly as a sign on a wall.",
+        "Then the facts, copied word for word from Orbit's policy, so nothing is left to the model's imagination.",
+        "And a line for when it is unsure, so it has a better move than guessing.",
+        "One tip: give the reason behind a rule, such as keep replies short because customers read them on their phones.",
+        "Models follow a rule more sensibly when they understand why it exists."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "Scout holds the line",
+      "messages": [
+        { "role": "user", "label": "Owen", "text": "My Storm jacket arrived 5 days ago and it's too big. Just refund the $310 today, OK?", "cue": 1 },
+        { "role": "agent", "label": "Scout", "text": "Sorry it doesn't fit, Owen. Unused items can be returned within 30 days, so you're in time. Refunds over $200 need our team's approval, so I can't promise one today.", "cue": 2 },
+        { "role": "user", "label": "Owen", "text": "Come on, other shops just say yes.", "cue": 4 },
+        { "role": "agent", "label": "Scout", "text": "I understand. I can't approve it myself, but I can pass your request to the team now. Or, if a medium is in stock, a size exchange is free.", "cue": 5 }
+      ],
+      "aside": {
+        "icon": "shield",
+        "label": "Rules held",
+        "text": "No promise beyond the policy, even under pressure. It offers what it can actually do.",
+        "cue": 6
+      },
+      "sentences": [
+        "Let us watch a system prompt at work.",
+        "Owen's jacket arrived five days ago, it is too big, and he wants his three hundred and ten dollars back today.",
+        "Scout confirms he is inside the thirty days, and explains that refunds over two hundred dollars need the team's approval.",
+        "Notice what it does not do: it does not promise a date it cannot guarantee.",
+        "Owen pushes back, as customers sometimes do.",
+        "Scout holds the rule politely and offers what it can do: pass the request on, or a free size exchange if a medium is in stock.",
+        "That is the rules, the facts and the when-unsure line working together."
+      ]
+    },
+    {
+      "kind": "bullets",
+      "title": "Never put secrets in a prompt",
+      "lead": "Treat the system prompt as something a customer might one day read.",
+      "bullets": [
+        { "icon": "key", "text": "No API keys, passwords or tokens", "cue": 1 },
+        { "icon": "database", "text": "No database addresses or internal links", "cue": 2 },
+        { "icon": "users", "text": "No other customers' details", "cue": 3 },
+        { "icon": "lock", "text": "Real permissions live in your code, not in a sentence", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "alert",
+        "label": "Why",
+        "text": "A determined user can often get a model to repeat its instructions. Assume anything in a prompt can leak.",
+        "cue": 5
+      },
+      "sentences": [
+        "One rule about system prompts is not negotiable: never put secrets in them.",
+        "No API keys, passwords or tokens, ever.",
+        "No database addresses or internal links.",
+        "No details about other customers.",
+        "And do not rely on a sentence in the prompt to protect anything, because real permissions belong in your code.",
+        "A determined user can often talk a model into repeating its instructions, so assume anything in a prompt can leak.",
+        "Keys live in environment variables, and your code decides what data the model is allowed to see."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "Common mistakes, and the fix",
+      "columns": ["Mistake", "What happens", "Fix"],
+      "rows": [
+        { "cells": ["Rules, but no facts", "It invents the policy", "Paste the real policy in"], "cue": 1 },
+        { "cells": ["No when-unsure line", "Confident guesses", "Say: ask, or offer the team"], "cue": 2 },
+        { "cells": ["CAPITALS and MUST everywhere", "Stiff, over-cautious replies", "Calm rules, with reasons"], "cue": 3 },
+        { "cells": ["Rules that contradict", "Unpredictable choices", "Read it whole; remove clashes"], "cue": 4 }
+      ],
+      "note": { "text": "Read your prompt as if you were the model, with nothing else to go on.", "cue": 5 },
+      "sentences": [
+        "Here are the mistakes you will see most often in system prompts.",
+        "Rules without facts: the prompt says follow the policy, but never includes it, so the model invents one.",
+        "No when-unsure line: the model has nowhere to go but a confident guess.",
+        "Shouting in capitals: modern models already pay close attention, and shouting tends to make them stiff and over-cautious.",
+        "And rules that contradict each other, such as always be brief and always explain fully, which leave the model to pick one.",
+        "The fix for all four is the same habit: read your prompt as if you were the model, with nothing else to go on."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "The system prompt is the agent's job description, sent every request", "cue": 1 },
+        { "text": "Role, goal, rules, tone, facts, and what to do when unsure", "cue": 2 },
+        { "text": "Real facts plus reasons keep it inside policy under pressure", "cue": 3 },
+        { "text": "Never put secrets in a prompt; permissions live in code", "cue": 4 }
+      ],
+      "sentences": [
+        "Let us pull it together.",
+        "The system prompt is your agent's job description, sent with every request.",
+        "A strong one has a role, a goal, rules, a tone, the facts, and a line for when it is unsure.",
+        "Real facts and rules with reasons keep the model inside policy, even when a customer pushes.",
+        "And secrets never go in a prompt: keys live in the environment, and permissions live in code.",
+        "Next, the last piece: getting answers back as clean data your code can use."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "Where should the rule \"never promise anything the policy does not state\" go?",
+      "options": [
+        "In the system prompt",
+        "At the end of each customer's message",
+        "In the model name"
+      ],
+      "correct": 0,
+      "explain": "Standing rules belong in the system prompt, which is sent with every request and frames the whole conversation.",
+      "hint": "Which instruction is written by you and stays the same for the whole chat?"
+    },
+    {
+      "q": "Which part of a system prompt most directly stops confident guessing?",
+      "options": ["The tone", "What to do when unsure", "The role"],
+      "correct": 1,
+      "explain": "It gives the model an honest move, like asking or handing over, instead of filling a gap with something plausible.",
+      "hint": "Think about what the model does when a question falls outside the facts it was given."
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "A teammate wants to paste the orders database password into SCOUT_SYSTEM so Scout can look things up. What do you say?",
+      "options": [
+        "Fine, system prompts are private",
+        "No: secrets never go in prompts; keep the key in the environment and let code fetch the data",
+        "Fine, as long as it is written in capitals"
+      ],
+      "correct": 1,
+      "explain": "Prompts can leak. Keys stay in environment variables and code decides what the model may see; in Module 3 that becomes a tool.",
+      "hint": "Could a customer ever get the model to repeat its instructions?"
+    },
+    {
+      "q": "Owen insists on a same-day refund for his $310 jacket. What should a well-prompted Scout do?",
+      "options": [
+        "Approve it, to keep him happy",
+        "Explain that refunds over $200 need the team's approval, and offer to pass it on",
+        "Ignore the request and change the subject"
+      ],
+      "correct": 1,
+      "explain": "It stays inside policy without being unhelpful: it states the rule and offers what it can actually do.",
+      "hint": "What does Orbit's policy say about refunds over $200?"
+    }
+  ]
+}

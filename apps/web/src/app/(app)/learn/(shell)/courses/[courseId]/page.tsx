@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Award, ChevronRight, Clock, Signal, Star } from "lucide-react";
-import { getCourse } from "@/data";
+import { getCourse, getModule } from "@/data";
+import { moduleOutline } from "@/lib/module-outline";
 import { NebulaMark } from "@/components/kit/logo";
 import { Surface } from "@/components/kit/surface";
 import { EnrollCta, EnrollNote } from "@/components/course/enroll-cta";
@@ -33,6 +34,15 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
   if (!course) notFound();
   const t = await getTranslations("course");
   const tc = await getTranslations("catalog");
+  // each module laid out under its side headings, part by part, for the outline below
+  const outlines = Object.fromEntries(
+    await Promise.all(
+      course.modules.map(async (m) => {
+        const mod = await getModule(courseId, m.module_id);
+        return [m.module_id, mod ? moduleOutline(mod, m.topics, m.stages) : []] as const;
+      }),
+    ),
+  );
 
   const sections = [
     { id: "about", label: t("navAbout") },
@@ -97,7 +107,7 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
         <AboutSection course={course} />
         <MethodSection course={course} />
         <OutcomesSection course={course} />
-        <ModulesSection course={course} />
+        <ModulesSection course={course} outlines={outlines} />
         <ReviewsSection course={course} />
       </div>
     </div>

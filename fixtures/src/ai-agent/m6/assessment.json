@@ -1,0 +1,79 @@
+{
+  "title": "Module check: safe, affordable and live",
+  "summary": "Six real situations: guardrails in code, cutting cost safely, deploying behind an API, splitting agents and choosing what's next.",
+  "items": [
+    {
+      "lesson": "6.1",
+      "stem": "In testing, Scout called request_refund for $190 on an order that cost $165. Its system prompt already says never to refund more than the order total. What is the most reliable fix?",
+      "options": [
+        "Repeat the rule at the top of the system prompt in capital letters, so the model can't miss it",
+        "Nothing new: the approval guard already holds risky refunds until a person checks them",
+        "Add a check in code that blocks any refund above the order total, and log each block",
+        "Add \"refund\" to the input check's phrase list, so these chats are flagged for review"
+      ],
+      "correct": 2,
+      "explain": "A prompt rule is followed most of the time, not every time. The approval guard only holds refunds over $200, so $190 slips past it, and a flag only logs. A check in your own code runs whatever the model decides."
+    },
+    {
+      "lesson": "6.2",
+      "stem": "To cut Scout's bill, Priya moves every step to Haiku 5.5, halves the system prompt and trims history to two turns, all in one release. Next day more answers are wrong, and nobody can tell which change did it. What is the better way to cut cost?",
+      "options": [
+        "Make one change at a time and re-run the Module 5 tests after each, keeping what holds quality",
+        "Keep Opus 5.5 on every step, since only the largest model answers support questions well",
+        "Move only the final answer step to Haiku 5.5, since that step writes the most tokens",
+        "Keep all three changes and watch daily spend, since cost was the problem she set out to fix"
+      ],
+      "correct": 0,
+      "explain": "Each change can hurt quality in its own way. One at a time, with the tests re-run, shows which saving is safe and which one broke answers. A small model suits simple steps like sorting a ticket, not the answer the customer reads."
+    },
+    {
+      "lesson": "6.3",
+      "stem": "Each time Priya deploys a new version of Scout's API, customers who were mid-chat get asked for their order number again. Chats that start after the deploy work fine. What is the cause, and the fix?",
+      "options": [
+        "Long chats overflow the context window; trim history harder so the order number fits",
+        "uvicorn still runs with --reload; drop it so the server stops restarting on deploy",
+        "The widget sends only the newest message; make it send the full chat history instead",
+        "Sessions live in a Python dictionary that empties on restart; keep them in a database"
+      ],
+      "correct": 3,
+      "explain": "The model has no memory, so the server holds each chat by session id. A dictionary in memory is lost on every restart, and a deploy always restarts the server, with or without --reload. A database keeps sessions across restarts."
+    },
+    {
+      "lesson": "6.4",
+      "stem": "Leo suggests splitting Scout into three agents: tracking, returns and policy. Scout has 6 tools and passes 57 of 60 tests, and all 3 failures are ParcelPath timeouts. What do you advise?",
+      "options": [
+        "Split it: three focused prompts will be more accurate than one agent with six tools",
+        "Keep one agent and fix the timeout handling; splitting adds calls and cost, not fixes",
+        "Split off just a tracking agent, since that is where every failing test comes from",
+        "Split it, and pass the full conversation between agents so no detail gets lost"
+      ],
+      "correct": 1,
+      "explain": "Scout isn't crowded: it picks the right tools and fails only where an outside API times out. A tracking agent would hit the same timeouts, plus extra routing calls and a longer trace. Split only when tests show one agent struggling."
+    },
+    {
+      "lesson": "6.5",
+      "stem": "Scout has been live a month. Priya tweaks its prompt weekly, then rereads 10 test answers by hand, and good replies worded differently from her expected text keep failing her checks. Which next step fits this problem best?",
+      "options": [
+        "Multi-agent systems, so a second agent can double-check every reply before it goes out",
+        "Retrieval with embeddings, so Scout finds the right policy text by meaning, not words",
+        "Evaluations at scale: hundreds of cases, with a model grading answers that vary in wording",
+        "Tools through MCP, so Scout can plug into the help desk and pull in past tickets"
+      ],
+      "correct": 2,
+      "explain": "Her problem is checking quality, not finding text or adding tools. Evaluations at scale grow the test set and use a model as a grader for answers with no single right wording. Embeddings help Scout search by meaning, not grade replies."
+    },
+    {
+      "lesson": "6.3",
+      "stem": "Juniper Bakery, a two-person shop, launched an ordering agent whose web page calls the model API straight from the browser. They took 40 orders overnight, yet the provider shows thousands of calls and a $900 bill. What should they do first?",
+      "options": [
+        "Revoke the key, move model calls to a server that holds a new key, and set a spend alert",
+        "Add a step limit and a spend limit to the agent code in the page, and keep the same key",
+        "Add an input check for injected instructions, since someone must have tricked the agent",
+        "Switch to Haiku 5.5 so each call costs far less, and watch the bill for another week"
+      ],
+      "correct": 0,
+      "explain": "Calling the model from the browser puts the key in the page, so anyone can copy it and run up a bill. Limits in the page can't stop them, because they use the key directly. Revoke it, keep the new key on a server, and alert on spend.",
+      "transfer": true
+    }
+  ]
+}

@@ -1,0 +1,232 @@
+{
+  "lesson": "5.1",
+  "title": "Project scoping and architecture design",
+  "notes": [
+    "Scope an agent to one job done well, and write down what it will not do and who handles that instead.",
+    "Decide how you will measure success before you build: a pass rate target, zero policy breaks and zero invented facts.",
+    "Draw the architecture first: the customer, the agent loop, tools, data, memory, a trace and a path to a person."
+  ],
+  "quizAfter": 4,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "map",
+      "kicker": "Module 5 · Lesson 1",
+      "title": "Project scoping and architecture design",
+      "sub": "Decide Scout's one job, its limits and its shape before you write code",
+      "sentences": [
+        "You've built every part of an agent: a model, tools, memory and a loop.",
+        "In this module you put them together into one working project, Scout, Orbit's support agent.",
+        "Before writing any code, you make two decisions that save days later.",
+        "What exactly is Scout's job, and what does it look like on paper?"
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Two ways to start a project",
+      "left": {
+        "label": "Scout does everything",
+        "tone": "bad",
+        "cue": 1,
+        "points": [
+          "Orders, marketing, stock, product advice",
+          "Twenty tools to choose between",
+          "No clear way to tell if it works",
+          "Still unfinished at Black Friday"
+        ]
+      },
+      "right": {
+        "label": "One job, done well",
+        "tone": "ok",
+        "cue": 4,
+        "points": [
+          "Order, return and exchange questions",
+          "Six tools, each with one purpose",
+          "A test set that says if it works",
+          "Live before Black Friday"
+        ]
+      },
+      "sentences": [
+        "When Maya first heard about Scout, she had a long wish list.",
+        "Answer order questions, write marketing emails, update the stock sheet, recommend tents, and more.",
+        "Every extra job means more tools, and more tools mean more chances to pick the wrong one.",
+        "Worse, with ten jobs there is no single way to say whether Scout works.",
+        "So we scope it to one job: answering order, return and exchange questions.",
+        "That job is narrow enough to test, and it covers most of Leo's tickets.",
+        "It's the difference between shipping in three weeks and never shipping at all."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "Inside the job, and outside it",
+      "columns": ["Request", "Scout's part", "Who finishes it"],
+      "rows": [
+        { "cells": ["Where is my order?", "Looks it up and tracks it", "Scout"], "cue": 1 },
+        { "cells": ["Return or exchange", "Checks order, policy and stock", "Scout"], "cue": 2 },
+        { "cells": ["Refund over $200", "Starts the refund", "A person approves"], "cue": 3 },
+        { "cells": ["Product advice", "Hands the chat over", "A person on the team"], "cue": 4 },
+        { "cells": ["Marketing emails", "Nothing: not its job", "The marketing team"], "tone": "bad", "cue": 5 }
+      ],
+      "note": { "text": "Writing down what Scout will not do is part of the design.", "cue": 6 },
+      "sentences": [
+        "Scoping means being exact, so let's sort some real requests from Leo's queue.",
+        "Questions like where is my order are Scout's core job: it looks the order up and tracks the parcel.",
+        "Returns and exchanges are in too, because Scout can check the order, the policy and the stock.",
+        "Refunds over two hundred dollars are half in: Scout starts them, and a person approves them.",
+        "Product advice needs real gear expertise, so Scout hands that chat to a person.",
+        "Marketing emails are not Scout's job at all, so it never tries.",
+        "Writing down what Scout will not do matters just as much as what it will do."
+      ]
+    },
+    {
+      "kind": "cards",
+      "title": "How we'll know Scout works",
+      "tags": ["What", "How we check", "Target"],
+      "cards": [
+        { "icon": "target", "title": "Right answers", "flow": ["Right tool, right facts", "60 real test questions", "90 percent or more"], "cue": 1 },
+        { "icon": "shield", "title": "Policy kept", "flow": ["Refund and return rules", "A check on every reply", "Zero breaks"], "cue": 2 },
+        { "icon": "eye", "title": "Nothing invented", "flow": ["No guessed status or date", "Reply compared with data", "Zero guesses"], "cue": 3 }
+      ],
+      "sentences": [
+        "Next, decide how you will know Scout works, before you build it.",
+        "First, right answers: on a set of real test questions, Scout should pass 90 percent or more.",
+        "Second, policy kept: no refund over two hundred dollars without a person, and no promise the policy doesn't make.",
+        "Third, nothing invented: when a tool fails or data is missing, Scout says so instead of guessing.",
+        "The last two targets are zero, because one broken promise costs more than ten clumsy replies."
+      ]
+    },
+    {
+      "kind": "hub",
+      "title": "Scout's architecture on one page",
+      "center": { "icon": "bot", "label": "Scout", "sub": "the agent loop" },
+      "spokes": [
+        { "icon": "user", "label": "Customer", "sub": "asks in the chat window", "cue": 1 },
+        { "icon": "wrench", "label": "Six tools", "sub": "look things up, take action", "cue": 2 },
+        { "icon": "database", "label": "Data", "sub": "orders, stock, policy", "cue": 3 },
+        { "icon": "history", "label": "Memory", "sub": "recent turns, pinned facts", "cue": 4 },
+        { "icon": "headset", "label": "Hand-off", "sub": "a person takes over", "cue": 5 },
+        { "icon": "list-checks", "label": "Trace", "sub": "a log of every step", "cue": 6 }
+      ],
+      "note": { "text": "Draw this before you code. Every box becomes a file or a function.", "cue": 7 },
+      "sentences": [
+        "Now draw the shape of the whole system on one page.",
+        "In the middle sits Scout's loop, and a customer talks to it.",
+        "Scout reaches the outside world only through its six tools.",
+        "The tools read Orbit's data: the orders, the stock levels and the policy file.",
+        "Memory keeps the recent conversation, plus pinned facts like the order number.",
+        "A hand-off path passes the chat to a person when Scout should stop.",
+        "And a trace records every step, so you can see what happened when something goes wrong.",
+        "Each box on this page becomes a file or a function in your project."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "One question, through the architecture",
+      "run": true,
+      "nodes": [
+        { "kind": "user", "icon": "message", "label": "Customer", "sub": "Where is my tent?", "cue": 1 },
+        { "kind": "llm", "icon": "brain", "label": "Scout loop", "sub": "decides the next step", "cue": 2 },
+        { "kind": "tool", "icon": "wrench", "label": "get_order", "sub": "then track_parcel", "cue": 3 },
+        { "kind": "data", "icon": "database", "label": "Orbit data", "sub": "orders file, ParcelPath", "cue": 4 },
+        { "kind": "output", "icon": "send", "label": "Reply", "sub": "shipped, arriving Thursday", "cue": 5 }
+      ],
+      "note": { "text": "Every result goes back to the loop. Scout replies only once it has the facts.", "cue": 6 },
+      "sentences": [
+        "Let's follow one real question through that drawing.",
+        "Ana asks where her tent is, and gives her order number.",
+        "Scout's loop decides it needs facts, so it asks for a tool.",
+        "First the get order tool, then the track parcel tool, using the tracking number it just found.",
+        "Those tools read Orbit's order file and the carrier's tracking service.",
+        "With the facts in hand, Scout replies: shipped, and arriving Thursday.",
+        "If any tool fails, the loop sees the error, and Scout says so instead of guessing."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "Scout at the edge of its job",
+      "messages": [
+        { "role": "user", "label": "Owen", "text": "My Storm jacket is too big. Can I swap it for a medium?", "cue": 1 },
+        { "role": "agent", "label": "Scout", "text": "Good news, Owen: the medium is in stock, and exchanging for a different size is free.", "cue": 2 },
+        { "role": "user", "label": "Owen", "text": "Great. Also, which rope should I buy for ice climbing?", "cue": 3 },
+        { "role": "tool", "label": "hand_off", "text": "Owen, ORB-10588: exchange L for M is possible. Wants rope advice for ice climbing.", "cue": 4 },
+        { "role": "agent", "label": "Scout", "text": "That's one for our gear experts. I've passed it to the team with a summary, so you won't have to repeat yourself.", "cue": 5 }
+      ],
+      "aside": { "icon": "headset", "label": "Hand-off, not a guess", "text": "Outside its job, Scout passes the chat on with a summary instead of inventing advice.", "cue": 6 },
+      "sentences": [
+        "Here is the scope working in a real chat.",
+        "Owen asks to swap his jacket for a smaller size.",
+        "That's inside the job, so Scout checks the stock and answers.",
+        "Then Owen asks which rope to buy for ice climbing.",
+        "Gear advice is outside Scout's job, so it calls the hand off tool with a short summary.",
+        "Scout tells Owen a person will pick it up, and he won't have to explain it again.",
+        "A clean hand-off is part of the design, not a failure."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "Recap",
+      "points": [
+        { "text": "Scope to one job: order, return and exchange questions.", "cue": 1 },
+        { "text": "Write down what Scout will not do, and who handles it instead.", "cue": 2 },
+        { "text": "Set measures first: a pass rate, zero policy breaks, zero guesses.", "cue": 3 },
+        { "text": "Draw the architecture: loop, tools, data, memory, hand-off, trace.", "cue": 4 }
+      ],
+      "sentences": [
+        "Let's recap.",
+        "Scout has one job, order, return and exchange questions, done well.",
+        "You wrote down what it will not do, and who handles those requests instead.",
+        "You set measures before building: a pass rate target, and zero policy breaks or invented facts.",
+        "And you drew the architecture, so every box already has a place in the code.",
+        "Next, you build it, one small piece at a time."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "Maya asks for Scout to also update Sam's stock sheet. What does good scoping say?",
+      "options": [
+        "Add it now: one more tool is cheap",
+        "Keep it out for now: it's a different job with its own risks and tests",
+        "Add it quietly through the system prompt so the tests don't change"
+      ],
+      "correct": 1,
+      "explain": "Every extra job adds tools to choose between and new ways to fail. Scout ships sooner and safer doing one job well; the stock sheet can be its own project.",
+      "hint": "Think about what each new job adds to the test set."
+    },
+    {
+      "q": "Which of these is a success measure you can actually check?",
+      "options": [
+        "Customers will love talking to Scout",
+        "Scout feels smart in demos",
+        "At least 90 percent of 60 real test questions pass"
+      ],
+      "correct": 2,
+      "explain": "A measure you can check is specific: a set of test questions, a check and a target number. The others are hopes.",
+      "hint": "Which one gives you a number you could compare next week?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "In Scout's architecture, how does the agent loop reach Orbit's order data?",
+      "options": [
+        "Only through its tools, like get_order",
+        "The whole order file is pasted into the system prompt",
+        "The model remembers the orders from its training"
+      ],
+      "correct": 0,
+      "explain": "Scout touches the outside world only through tools. That keeps the data fresh and makes every access visible in the trace.",
+      "hint": "Look at what sits between the loop and the data on the hub."
+    },
+    {
+      "q": "A customer asks Scout which climbing rope to buy. What does the design say Scout should do?",
+      "options": [
+        "Give its best general advice",
+        "Hand the chat to a person with a short summary",
+        "Say it can't help and end the chat"
+      ],
+      "correct": 1,
+      "explain": "Product advice is outside Scout's job. A hand-off with a summary gets the customer to someone who can help, without making them repeat themselves.",
+      "hint": "The architecture has a path built for exactly this."
+    }
+  ]
+}

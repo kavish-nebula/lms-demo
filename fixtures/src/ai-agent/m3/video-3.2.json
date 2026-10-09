@@ -1,0 +1,241 @@
+{
+  "lesson": "3.2",
+  "title": "Defining and registering tools",
+  "notes": [
+    "A tool definition has three parts: a name, a description, and an input_schema that describes its arguments.",
+    "The description is a prompt: say what the tool does, when to use it, what input looks like and what it returns.",
+    "Registering a tool means passing the TOOLS list on every request and mapping each name to a Python function."
+  ],
+  "quizAfter": 4,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "pencil",
+      "kicker": "Module 3 · Lesson 2",
+      "title": "Defining and registering tools",
+      "sub": "How the model learns what your tools are, and when to use each one",
+      "sentences": [
+        "In the last lesson, Scout asked for a tool called get order, as if it already knew the tool existed.",
+        "It knew because you told it, with a tool definition.",
+        "In this lesson you will read one line by line, see why its description matters most, and connect it to real Python code."
+      ]
+    },
+    {
+      "kind": "hub",
+      "title": "Anatomy of a tool definition",
+      "center": { "icon": "wrench", "label": "get_order", "sub": "one tool definition" },
+      "spokes": [
+        { "icon": "pencil", "label": "name", "sub": "short, unique, like get_order", "cue": 1 },
+        { "icon": "message", "label": "description", "sub": "what, when, input, output", "cue": 2 },
+        { "icon": "json", "label": "input_schema", "sub": "the arguments, as JSON Schema", "cue": 3 },
+        { "icon": "check", "label": "required", "sub": "arguments that must be filled", "cue": 5 }
+      ],
+      "note": { "text": "The model sees this definition on every request. It never sees your Python code.", "cue": 6 },
+      "sentences": [
+        "Every tool definition is a small Python dictionary with three main parts.",
+        "A name, short and unique, with underscores between the words, such as get order.",
+        "A description, in plain English, of what the tool does, when to use it, and what it returns.",
+        "And an input schema, which describes the arguments the tool takes.",
+        "Each argument gets a type, and its own short description with an example.",
+        "Inside the schema, a required list says which arguments must always be filled in.",
+        "The model reads this definition with every request, but it never sees your Python code."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "get_order, written out",
+      "lead": "This is the definition Scout uses. It is plain data: a dictionary your code sends with each request.",
+      "rows": [
+        { "code": "\"name\": \"get_order\",", "out": "What the model writes when it asks", "cue": 1 },
+        { "code": "\"description\": \"Look up an Orbit order by its ID...\"", "out": "When to use it, and what comes back", "cue": 2 },
+        { "code": "\"properties\": {\"order_id\": {\"type\": \"string\"}}", "out": "One argument: text such as ORB-10482", "cue": 3 },
+        { "code": "\"required\": [\"order_id\"]", "out": "Every call must include it", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "lightbulb",
+        "label": "Looks familiar?",
+        "text": "input_schema is ordinary JSON Schema, the same format you used for structured outputs in Module 2.",
+        "cue": 5
+      },
+      "sentences": [
+        "Here is the get order definition, part by part.",
+        "The name is exactly what the model will write when it asks for this tool.",
+        "The description says to look up an Orbit order by its ID, and lists what comes back: status, items, carrier and tracking number.",
+        "Under properties there is one argument, the order ID, and its type is string.",
+        "The required list says the model must always provide it.",
+        "If the shape looks familiar, it should: the input schema is ordinary JSON Schema, just like your structured outputs in Module 2."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "The description is a prompt",
+      "left": {
+        "label": "Vague",
+        "tone": "bad",
+        "cue": 2,
+        "points": [
+          "\"Gets data.\"",
+          "Which data? For what?",
+          "No hint of when to use it",
+          "Scout reaches for search instead"
+        ]
+      },
+      "right": {
+        "label": "Clear",
+        "tone": "ok",
+        "cue": 4,
+        "points": [
+          "\"Look up an Orbit order by its ID, like ORB-10482.\"",
+          "When: any question about one order",
+          "Returns: status, items, carrier, tracking",
+          "Scout picks it whenever it fits"
+        ]
+      },
+      "sentences": [
+        "Here is the part beginners skip: the description is a prompt.",
+        "The model chooses tools by reading their descriptions, just as it reads your system prompt.",
+        "A vague description like gets data tells it nothing: which data, and when?",
+        "Faced with that, Scout may reach for a search tool instead, or answer from memory.",
+        "A clear description names the job, shows the input with an example, and says when to use it.",
+        "It also says what comes back, so the model can tell whether the result will answer the question.",
+        "Most wrong tool choices are fixed here, in the description, not in the code."
+      ]
+    },
+    {
+      "kind": "bullets",
+      "title": "Writing a good tool description",
+      "lead": "Write it for a smart new colleague who has never seen your systems.",
+      "bullets": [
+        { "icon": "target", "text": "What it does, in one plain sentence", "cue": 1 },
+        { "icon": "clock", "text": "When to use it, and when not to", "cue": 2 },
+        { "icon": "form", "text": "What the input looks like, with an example", "cue": 3 },
+        { "icon": "package", "text": "What comes back, so the model can plan", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "alert",
+        "label": "Watch for overlap",
+        "text": "Two tools with similar descriptions force the model to guess. Make each tool's job clearly different.",
+        "cue": 5
+      },
+      "sentences": [
+        "So what goes into a good description?",
+        "First, what the tool does, in one plain sentence.",
+        "Second, when to use it, and just as useful, when not to.",
+        "Third, what the input looks like, with an example, so the model sends the order ID in exactly the shape your code expects.",
+        "Fourth, what comes back, so the model knows what it will learn before it asks.",
+        "And watch for overlap: if two tools sound alike, the model has to guess, so make each job clearly different."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "Registering: from definition to function",
+      "run": true,
+      "nodes": [
+        { "kind": "data", "icon": "list-checks", "label": "TOOLS list", "sub": "all your definitions", "cue": 1 },
+        { "kind": "llm", "icon": "brain", "label": "messages.create", "sub": "tools=TOOLS", "cue": 2 },
+        { "kind": "logic", "icon": "split", "label": "run_tool", "sub": "looks up the name", "cue": 3 },
+        { "kind": "tool", "icon": "code", "label": "Python function", "sub": "get_order(order_id)", "cue": 4 }
+      ],
+      "note": { "text": "The definition tells the model a tool exists. The mapping to a function makes it real.", "cue": 5 },
+      "sentences": [
+        "Defining a tool is half the job; registering it is the other half.",
+        "First, put all your definitions in one list, which we call TOOLS.",
+        "Pass that list to messages create with the tools parameter, on every request.",
+        "When a tool request comes back, a small dispatcher function looks up the tool's name.",
+        "It finds the matching Python function and calls it with the model's arguments.",
+        "The definition tells the model the tool exists, and the mapping is what makes it real."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "The mapping, in code",
+      "lead": "A dictionary connects each tool name to the Python function that does the work.",
+      "rows": [
+        { "code": "FUNCTIONS = {\"get_order\": get_order}", "out": "Each tool name points to a function", "cue": 1 },
+        { "code": "def run_tool(name, tool_input):", "out": "Called once for each tool request", "cue": 2 },
+        { "code": "    return FUNCTIONS[name](**tool_input)", "out": "Becomes get_order(order_id=\"ORB-10482\")", "cue": 3 },
+        { "code": "client.messages.create(..., tools=TOOLS)", "out": "The model learns what it may ask for", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "shield",
+        "label": "Only what you list",
+        "text": "Only functions in your mapping can ever run. An unknown name is refused, not guessed at.",
+        "cue": 5
+      },
+      "sentences": [
+        "Here is the mapping in code, and it is short.",
+        "A dictionary links each tool name to the Python function that does the work.",
+        "A function called run tool takes the name and the input from the model's request.",
+        "It looks up the function and calls it, unpacking the input so each argument lands in the right place.",
+        "And the TOOLS list goes into every messages create call.",
+        "This is also a safety line: only functions in your mapping can ever run, and an unknown name is refused."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "A tool is a name, a description and an input_schema", "cue": 1 },
+        { "text": "The description is a prompt: what, when, input and output", "cue": 2 },
+        { "text": "Register by passing TOOLS and mapping names to functions", "cue": 3 },
+        { "text": "Wrong tool picked? Fix the description first", "cue": 4 }
+      ],
+      "sentences": [
+        "Let us pull it together.",
+        "A tool definition has a name, a description and an input schema.",
+        "The description is a prompt, so say what the tool does, when to use it, what it needs and what it returns.",
+        "Registering means passing the list on every request, and mapping each name to a Python function.",
+        "And when Scout picks the wrong tool, read the descriptions before you touch the code.",
+        "Next, you will build three useful tools: web search, a calculator and a file reader."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "Which part of a tool definition does the model rely on most to decide when to call the tool?",
+      "options": [
+        "The name of your Python function",
+        "The description",
+        "The tool's position in the TOOLS list"
+      ],
+      "correct": 1,
+      "explain": "The model never sees your Python code. It chooses tools by reading their descriptions, which work like prompts.",
+      "hint": "The model reads the definition, not your code. Which part is written in plain English?"
+    },
+    {
+      "q": "When customers give an order number, Scout keeps calling a help-page search tool instead of get_order. What is the best first fix?",
+      "options": [
+        "Rewrite get_order's description: what it does, when to use it, and an example ID",
+        "Delete the search tool so get_order is the only choice",
+        "Ask customers to write their order number twice"
+      ],
+      "correct": 0,
+      "explain": "Wrong tool choices usually come from vague or overlapping descriptions. Say clearly what get_order is for and when to use it.",
+      "hint": "Where does the model learn what each tool is for?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "What does registering a tool involve?",
+      "options": [
+        "Uploading your Python function to Anthropic",
+        "Passing the definitions in the tools parameter, and mapping each name to a function in your code",
+        "Mentioning the tool's name somewhere in the system prompt"
+      ],
+      "correct": 1,
+      "explain": "The definitions go with every request so the model knows the tool; your dispatcher maps names to functions. Your code never leaves your machine.",
+      "hint": "There are two halves: what the model sees, and what your code does."
+    },
+    {
+      "q": "get_order's input_schema lists order_id under required. What does that tell the model?",
+      "options": [
+        "Every get_order call must include an order_id",
+        "It can leave order_id out if it isn't sure",
+        "Your code will invent an order_id when one is missing"
+      ],
+      "correct": 0,
+      "explain": "required lists the arguments every call must include. If the customer hasn't given an ID, a good agent asks for it before calling.",
+      "hint": "What does the word required promise?"
+    }
+  ]
+}

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { StageShell } from "@/components/player/stage-shell";
 import { McQuestion } from "@/components/player/items";
+import { DEMO_OPEN } from "@/lib/demo";
 import type { WorkedBlock, WorkedExample } from "@/data/types";
 import type { StageProps } from "./types";
 
@@ -83,6 +84,8 @@ function ExampleView({
   const t = useTranslations("player");
   const reduce = useReducedMotionConfig() ?? false;
   const [predicted, setPredicted] = React.useState(!example.predict);
+  // predicting first is asked for, not required: the demo lets the run start straight away
+  const canRun = predicted || DEMO_OPEN;
   const [frame, setFrame] = React.useState(-1);
   const [playing, setPlaying] = React.useState(false);
   const frames = example.frames;
@@ -131,7 +134,7 @@ function ExampleView({
         </Surface>
       ) : null}
 
-      <Surface pad="md" className={cn("flex flex-col gap-4 transition-opacity", !predicted && "pointer-events-none opacity-50")} aria-disabled={!predicted}>
+      <Surface pad="md" className={cn("flex flex-col gap-4 transition-opacity", !canRun && "pointer-events-none opacity-50")} aria-disabled={!canRun}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm font-semibold">{t("watchRun")}</div>
           {frame >= 0 ? (
@@ -148,7 +151,7 @@ function ExampleView({
           <div className="grid-texture flex h-32 items-center justify-center rounded-lg border border-dashed border-line">
             <Button
               variant="brand"
-              disabled={!predicted}
+              disabled={!canRun}
               onClick={() => {
                 go(0);
                 setPlaying(!reduce);

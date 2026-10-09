@@ -1,0 +1,218 @@
+{
+  "lesson": "1.1",
+  "title": "What is an AI agent?",
+  "notes": [
+    "An AI agent uses a language model to decide its own next steps, and takes actions with tools until it reaches a goal.",
+    "Every agent runs the same loop: perceive what is in front of it, decide the next step, act, then look at the result.",
+    "Autonomy is a dial, not a switch: give an agent the least power that does the job, and widen it as you trust it."
+  ],
+  "quizAfter": 3,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "bot",
+      "kicker": "Module 1 · Lesson 1",
+      "title": "What is an AI agent?",
+      "sub": "From a bot that can only talk to one that can look things up and act",
+      "sentences": [
+        "Welcome to the course, and welcome to Orbit Outdoor.",
+        "Orbit is a small online shop for hiking, camping and climbing gear, and its support team is drowning in tickets.",
+        "Over six modules, you will build Scout, an AI agent that helps them.",
+        "In this first lesson, you will learn what an agent actually is, and what makes it different from a bot that only talks."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Same question, two very different answers",
+      "left": {
+        "label": "Orbit's FAQ chatbot",
+        "tone": "bad",
+        "cue": 2,
+        "points": [
+          "Reads Ana's question",
+          "Has no way to see orders",
+          "Replies: sorry, I can't check that",
+          "Ana is still waiting"
+        ]
+      },
+      "right": {
+        "label": "Scout, an agent",
+        "tone": "ok",
+        "cue": 4,
+        "points": [
+          "Reads Ana's question",
+          "Decides to look up the order",
+          "Calls the orders system",
+          "Replies with the real tracking number"
+        ]
+      },
+      "sentences": [
+        "Start with the question Orbit hears all day long: where is my order?",
+        "Ana asks it in the website chat, and Orbit's current chatbot understands her perfectly.",
+        "But it has no way to see orders, so it apologises, and Ana is still waiting.",
+        "Now picture Scout, the agent you will build, getting the same question.",
+        "Scout decides it needs the order's status, looks it up, and reads the result.",
+        "Then it replies with the real status and the tracking number.",
+        "Both use the same kind of model underneath; the difference is that Scout can act."
+      ]
+    },
+    {
+      "kind": "define",
+      "title": "So, what is an AI agent?",
+      "term": "AI agent",
+      "definition": "A system that uses a language model to decide its own next steps, and takes actions with tools, until it reaches a goal.",
+      "parts": [
+        { "text": "Built on a language model", "cue": 1 },
+        { "text": "Decides its own steps", "cue": 2 },
+        { "text": "Acts through tools", "cue": 3 },
+        { "text": "Works toward a goal", "cue": 4 }
+      ],
+      "analogy": {
+        "label": "Think of it as",
+        "text": "A new colleague on the support team: you give them a goal and access to the order system, and they work out the clicks themselves."
+      },
+      "sentences": [
+        "Here is the definition we will use for the whole course.",
+        "An AI agent is built around a large language model, or LLM: a model that reads and writes text.",
+        "The model decides the next step itself, instead of following a script that someone wrote in advance.",
+        "It takes actions through tools, such as looking up an order or searching a policy document.",
+        "And it keeps going until it reaches a goal, like answering Ana with her real order status.",
+        "Think of a new colleague on the support team.",
+        "You give them a goal and access to the order system, and they work out the clicks themselves."
+      ]
+    },
+    {
+      "kind": "cycle",
+      "title": "The agent loop",
+      "center": { "label": "Goal", "sub": "answer Ana with real facts" },
+      "steps": [
+        { "icon": "eye", "label": "Perceive", "sub": "read the message and results", "cue": 1 },
+        { "icon": "brain", "label": "Decide", "sub": "choose the next step", "cue": 2 },
+        { "icon": "wrench", "label": "Act", "sub": "call a tool or reply", "cue": 3 }
+      ],
+      "note": { "text": "Round again until the goal is met, or until a limit you set says stop.", "cue": 6 },
+      "sentences": [
+        "Under the hood, every agent runs the same simple loop.",
+        "First, it perceives: it reads what is in front of it, like Ana's message.",
+        "Then it decides: given the goal, what is the most useful next step?",
+        "Then it acts: it calls a tool, such as the order lookup, or it writes the reply.",
+        "The result of that action is new information, so the loop starts again.",
+        "Scout perceives the order details, decides it now knows enough, and acts by replying.",
+        "The loop ends when the goal is met, or when a limit you set tells it to stop."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "One run, step by step",
+      "run": true,
+      "nodes": [
+        { "kind": "user", "icon": "message", "label": "Ana's question", "sub": "where is my order?", "cue": 1 },
+        { "kind": "llm", "icon": "brain", "label": "Scout decides", "sub": "I need the order status", "cue": 2 },
+        { "kind": "tool", "icon": "search", "label": "get_order", "sub": "shipped, ParcelPath", "cue": 3 },
+        { "kind": "llm", "icon": "brain", "label": "Scout decides again", "sub": "that's enough to answer", "cue": 4 },
+        { "kind": "output", "icon": "send", "label": "Reply", "sub": "real status and tracking", "cue": 5 }
+      ],
+      "note": { "text": "Two decisions, one tool call, one reply. Nobody wrote these steps in advance.", "cue": 6 },
+      "sentences": [
+        "Here is one full run of that loop, step by step.",
+        "Ana's question arrives, with her order number in it.",
+        "Scout decides it can't answer from what it already knows, and that it needs the order status.",
+        "It calls the get order tool, and the result comes back: shipped with ParcelPath, tracking number included.",
+        "Scout looks at that result and decides it now has enough to answer.",
+        "It replies to Ana with the real status and the tracking number.",
+        "Two decisions, one tool call and one reply, and nobody wrote those steps in advance."
+      ]
+    },
+    {
+      "kind": "bullets",
+      "title": "How much should an agent do alone?",
+      "lead": "Autonomy is a dial, not a switch. You choose where to set it.",
+      "bullets": [
+        { "icon": "eye", "text": "Read only: look up orders and tracking, change nothing", "cue": 1 },
+        { "icon": "pencil", "text": "Draft: write a reply that a person checks and sends", "cue": 2 },
+        { "icon": "hand", "text": "Act with approval: refunds over $200 wait for a person", "cue": 3 },
+        { "icon": "zap", "text": "Act alone: only small steps that are easy to undo", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "shield",
+        "label": "Rule of thumb",
+        "text": "Give an agent the least power that does the job, and widen it as you learn to trust it.",
+        "cue": 5
+      },
+      "sentences": [
+        "Autonomy means how much an agent may do on its own, and it is a dial, not a switch.",
+        "At the low end, an agent only reads: it looks up orders and tracking, and changes nothing.",
+        "One step up, it drafts a reply, and a person checks it before it is sent.",
+        "Higher still, it takes real actions, but risky ones wait for approval, like Orbit's refunds over two hundred dollars.",
+        "Acting completely alone only makes sense for small steps that are easy to undo, because models can be wrong.",
+        "A good rule: give an agent the least power that does the job, and widen it as you learn to trust it."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "An agent uses a model to decide its own steps and acts with tools", "cue": 1 },
+        { "text": "It loops: perceive, decide, act, then look at the result", "cue": 2 },
+        { "text": "It stops when the goal is met or a limit says stop", "cue": 3 },
+        { "text": "Autonomy is a dial: start with the least power that does the job", "cue": 4 }
+      ],
+      "sentences": [
+        "Let's pull it together.",
+        "An agent uses a language model to decide its own steps, and acts through tools.",
+        "It runs a loop: perceive, decide, act, and then look at what happened.",
+        "It stops when the goal is met, or when a limit tells it to.",
+        "And autonomy is a dial, so start with the least power that does the job.",
+        "Next, we put agents side by side with chatbots and fixed workflows, and see when each one wins."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "What can Scout do that Orbit's FAQ chatbot can't?",
+      "options": [
+        "Understand what the customer is asking",
+        "Decide to use a tool, like an order lookup, and act on the result",
+        "Reply in a friendly, natural tone"
+      ],
+      "correct": 1,
+      "explain": "Both understand Ana's question and both write fluent text. Only Scout can act: it decides to call a tool, gets the real status and uses it.",
+      "hint": "Both bots understood Ana perfectly. What could only one of them do next?"
+    },
+    {
+      "q": "In the agent loop, what happens right after Scout calls a tool?",
+      "options": [
+        "The run ends and the tool's raw output goes straight to the customer",
+        "Scout perceives the result and decides the next step",
+        "Scout starts again from Ana's first message and ignores the result"
+      ],
+      "correct": 1,
+      "explain": "A tool's result is new information. Scout reads it and decides again: another step, or the reply. That's why it's a loop.",
+      "hint": "Perceive, decide, act... and then where does the loop go?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "Which of these is an AI agent?",
+      "options": [
+        "A bot that answers from a fixed list of FAQ answers",
+        "A script that emails every customer the same message at 8 AM",
+        "A system that reads a request, chooses which lookups to make, and replies with the results"
+      ],
+      "correct": 2,
+      "explain": "Only the third decides its own steps and acts with tools toward a goal. The first only talks; the second follows steps someone wrote in advance.",
+      "hint": "Look for the one where the system, not a person, chooses what happens next."
+    },
+    {
+      "q": "Scout is getting a refund tool. What's the safest starting point?",
+      "options": [
+        "Let Scout refund any amount on its own",
+        "Let Scout start refunds, but refunds over $200 wait for a person to approve",
+        "Never give Scout any tools at all"
+      ],
+      "correct": 1,
+      "explain": "Autonomy is a dial. Small, reversible steps can run alone; risky ones wait for a person. Orbit's policy already says refunds over $200 need approval.",
+      "hint": "Think about the least power that still does the job, and what is hard to undo."
+    }
+  ]
+}

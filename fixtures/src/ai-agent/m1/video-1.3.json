@@ -1,0 +1,244 @@
+{
+  "lesson": "1.3",
+  "title": "Real-world use cases of AI agents",
+  "notes": [
+    "Agents already do real work in customer support, coding, research and operations, usually with a person checking what matters.",
+    "A good first agent job is repetitive, needs lookups to answer, and has mistakes that are easy to spot and cheap to fix.",
+    "Start with one narrow job and add the next only when the last one works reliably; that is how Scout grows in this course."
+  ],
+  "quizAfter": 4,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "globe",
+      "kicker": "Module 1 · Lesson 3",
+      "title": "Real-world use cases of AI agents",
+      "sub": "Where agents earn their keep today, and how to spot a good first job for one",
+      "sentences": [
+        "You know what an agent is, and when a simpler system would do the job better.",
+        "Now let's look at where agents are actually used, outside of demos.",
+        "Then you will learn three questions that tell you whether a job is a good first agent project."
+      ]
+    },
+    {
+      "kind": "cards",
+      "title": "Where agents work today",
+      "tags": ["The request", "The agent", "The result"],
+      "cards": [
+        {
+          "icon": "headset",
+          "title": "Customer support",
+          "flow": ["Where is my order?", "Looks up order and tracking", "Answers, or hands to a person"],
+          "cue": 1
+        },
+        {
+          "icon": "code",
+          "title": "Coding",
+          "flow": ["Fix this failing test", "Reads files, edits, reruns tests", "A change for a developer to review"],
+          "cue": 2
+        },
+        {
+          "icon": "search",
+          "title": "Research",
+          "flow": ["Compare three tent suppliers", "Searches, reads, takes notes", "A summary with its sources"],
+          "cue": 3
+        }
+      ],
+      "sentences": [
+        "Agents are already doing real work, and three areas stand out.",
+        "In customer support, an agent reads a question, looks up the order or account, and answers, or hands over to a person.",
+        "In coding, an agent reads files, edits code and runs the tests again, and a developer reviews the change.",
+        "In research, an agent searches the web, reads what it finds and writes a summary with its sources.",
+        "Notice what they share: each makes several lookups, and each decides what to look at next.",
+        "And in every one of them, a person still checks the result that matters."
+      ]
+    },
+    {
+      "kind": "example",
+      "title": "Operations: the delayed tents",
+      "scenario": "A supplier emails Orbit: the next batch of green Trailhead tents will arrive two weeks late.",
+      "steps": [
+        { "time": "9:00", "icon": "mail", "text": "The supplier's email arrives in Orbit's inbox", "cue": 2 },
+        { "time": "9:01", "icon": "search", "text": "The agent finds every open order waiting for that tent", "cue": 3 },
+        { "time": "9:02", "icon": "pencil", "text": "It drafts a short, personal note to each of those customers", "cue": 4 },
+        { "time": "9:10", "icon": "hand", "text": "Leo reads the drafts and sends them with one click", "cue": 5 }
+      ],
+      "result": {
+        "text": "Customers hear the news from Orbit before they have to ask, and a person approves every message.",
+        "cue": 6
+      },
+      "sentences": [
+        "The fourth area is operations: the behind-the-scenes work that keeps a business running.",
+        "Picture this at Orbit.",
+        "A supplier emails to say the next batch of green tents will arrive two weeks late.",
+        "An agent reads the email and finds every open order that is waiting for that tent.",
+        "For each one, it drafts a short note to the customer, explaining the delay.",
+        "Leo reads the drafts and sends them with one click.",
+        "Customers hear the news before they have to ask, and a person still approves every message that goes out."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "What agents do well, and where they struggle",
+      "left": {
+        "label": "Good at",
+        "tone": "ok",
+        "cue": 1,
+        "points": [
+          "Messy requests in plain language",
+          "Choosing which lookup comes next",
+          "Drafting replies and summaries",
+          "Working at any hour, at scale"
+        ]
+      },
+      "right": {
+        "label": "Struggle with",
+        "tone": "bad",
+        "cue": 4,
+        "points": [
+          "Facts they can't look up",
+          "Sounding sure when they're wrong",
+          "Long tasks with many steps",
+          "Judgement calls with real stakes"
+        ]
+      },
+      "sentences": [
+        "Before we pick a first job, let's be honest about strengths and weaknesses.",
+        "Agents are good at understanding messy requests written in plain language.",
+        "They are good at choosing which lookup to make next, and at drafting replies and summaries.",
+        "And they work at any hour, on hundreds of requests at once.",
+        "But they struggle with facts they have no way to look up, and they can fill the gap with a confident guess.",
+        "Long tasks with many steps give more chances for one step to go wrong.",
+        "And judgement calls with real money or safety at stake still belong with people."
+      ]
+    },
+    {
+      "kind": "bullets",
+      "title": "Three signs of a good first agent job",
+      "lead": "Before you build anything, check the job against three questions.",
+      "bullets": [
+        { "icon": "repeat", "text": "Repetitive: it comes up many times a week, each time a bit different", "cue": 1 },
+        { "icon": "search", "text": "Needs lookups: the answer lives in a system, not in the question", "cue": 2 },
+        { "icon": "history", "text": "Recoverable: a mistake is easy to spot and cheap to fix", "cue": 3 }
+      ],
+      "aside": {
+        "icon": "lightbulb",
+        "label": "If it fails the test",
+        "text": "A person, a help page or a simple workflow probably does the job better.",
+        "cue": 4
+      },
+      "sentences": [
+        "So how do you choose a good first job for an agent?",
+        "First, it is repetitive: it comes up many times a week, and each time it is a little different.",
+        "Second, it needs lookups: the answer lives in a system, like an orders database, not in the question itself.",
+        "Third, mistakes are recoverable: if the agent gets one wrong, someone can spot it and fix it cheaply.",
+        "A job that fails these checks is usually better done by a person, a help page or a simple workflow."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "Checking Orbit's jobs",
+      "columns": ["Job", "Repetitive?", "Needs lookups?", "Recoverable?"],
+      "rows": [
+        { "cells": ["Where is my order?", "Yes, hundreds a week", "Yes, the order", "Yes"], "cue": 1 },
+        { "cells": ["Do you sell gift cards?", "Yes", "No, same for everyone", "Yes"], "cue": 2 },
+        { "cells": ["Approve a $310 refund", "Not often", "Yes", "No, the money is gone"], "tone": "bad", "cue": 3 },
+        { "cells": ["Pick next year's suppliers", "No", "Yes", "No, a big bet"], "tone": "bad", "cue": 4 }
+      ],
+      "note": { "text": "Only the order question passes all three, which is why Scout starts there.", "cue": 5 },
+      "sentences": [
+        "Let's run four of Orbit's jobs through those three questions.",
+        "Where is my order passes easily: it comes up hundreds of times, needs a lookup, and a mistake is easy to correct.",
+        "Do you sell gift cards repeats a lot, but the answer is the same for everyone, so a help page is enough.",
+        "Approving a three hundred and ten dollar refund needs lookups, but once the money is sent, a mistake is hard to undo.",
+        "And choosing next year's suppliers is rare and high stakes, which makes it a job for people.",
+        "Only the order question passes all three, which is exactly why Scout starts there."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "Start narrow, then grow",
+      "nodes": [
+        { "kind": "tool", "icon": "truck", "label": "Order status", "sub": "where is my order?", "cue": 1 },
+        { "kind": "data", "icon": "book", "label": "Policy answers", "sub": "returns and shipping", "cue": 2 },
+        { "kind": "logic", "icon": "boxes", "label": "Exchanges", "sub": "check stock, then offer", "cue": 3 },
+        { "kind": "guard", "icon": "hand", "label": "Refunds", "sub": "big ones need a person", "cue": 4 }
+      ],
+      "note": { "text": "Add one job at a time, and only when the last one works reliably.", "cue": 5 },
+      "sentences": [
+        "One last lesson from real projects: start narrow.",
+        "Scout's first job is order status, and nothing else.",
+        "Once that works, it learns to answer policy questions about returns and shipping.",
+        "Then it handles exchanges, checking the stock before it offers a new size.",
+        "Only later does it touch refunds, and big ones always wait for a person.",
+        "Each new job is added only when the last one works reliably, and that is the path this course follows."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "Agents already work in support, coding, research and operations", "cue": 1 },
+        { "text": "Good first jobs repeat often, need lookups and forgive mistakes", "cue": 2 },
+        { "text": "Rare, high-stakes or irreversible decisions stay with people", "cue": 3 },
+        { "text": "Start with one narrow job, then grow", "cue": 4 }
+      ],
+      "sentences": [
+        "Let's recap.",
+        "Agents already do real work in support, coding, research and operations.",
+        "A good first agent job repeats often, needs lookups, and has mistakes that are cheap to fix.",
+        "Rare, high stakes or irreversible decisions stay with people, or at least wait for their approval.",
+        "And start with one narrow job, then grow.",
+        "Next, we open Scout up and look at the four parts every agent is built from."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "In the delayed-tents example, what does Leo still do?",
+      "options": [
+        "Nothing: the agent sends every note by itself",
+        "He reads the drafted notes and sends them",
+        "He writes every note by hand"
+      ],
+      "correct": 1,
+      "explain": "The agent does the searching and the drafting; Leo approves what goes out. A person still checks the result that matters.",
+      "hint": "Look at the last step before the result."
+    },
+    {
+      "q": "Which is one of the three signs of a good first agent job?",
+      "options": [
+        "It happens rarely, but each case is very important",
+        "The answer lives in a system and needs a lookup",
+        "Mistakes can't be undone, so speed matters most"
+      ],
+      "correct": 1,
+      "explain": "Good first jobs are repetitive, need lookups, and have mistakes that are easy to fix. Rare, high-stakes or irreversible jobs are poor first choices.",
+      "hint": "Think about where the answer to \"where is my order?\" actually lives."
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "Which Orbit job is the best first job for an agent?",
+      "options": [
+        "Answering where-is-my-order questions",
+        "Approving refunds over $200 on its own",
+        "Choosing next year's suppliers"
+      ],
+      "correct": 0,
+      "explain": "Order questions repeat hundreds of times, need a lookup, and mistakes are easy to correct. Big refunds and supplier choices are rare, costly or hard to undo.",
+      "hint": "Run each one through the three questions: repetitive, needs lookups, recoverable."
+    },
+    {
+      "q": "Why does Scout start with order status and add refunds much later?",
+      "options": [
+        "Agents can't technically issue refunds",
+        "Start narrow: add a job when the last one works, and keep risky actions for later",
+        "Customers never ask about refunds"
+      ],
+      "correct": 1,
+      "explain": "Each job is added once the last one works reliably, and actions that move money come last, with a person approving the big ones.",
+      "hint": "Think about which actions are easy to undo, and which aren't."
+    }
+  ]
+}

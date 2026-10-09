@@ -1,0 +1,235 @@
+{
+  "lesson": "2.1",
+  "title": "How large language models work",
+  "notes": [
+    "A language model writes by predicting the next token, adding it and repeating; a token is about three quarters of a word.",
+    "The model sees only what is in its context window and keeps nothing between requests, so your code sends the whole conversation every time.",
+    "It sounds just as sure when it is wrong, so give it the facts and rules it needs instead of leaving gaps for it to fill."
+  ],
+  "quizAfter": 3,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "brain",
+      "kicker": "Module 2 · Lesson 1",
+      "title": "How large language models work",
+      "sub": "Tokens, prediction and the context window, and why a fluent answer can still be wrong",
+      "sentences": [
+        "Welcome to Module 2, where you get to know the brain inside Scout.",
+        "In the hook, Scout promised Grace a ninety-day refund that Orbit has never offered.",
+        "To see why, you need to know how a language model actually produces text.",
+        "In about five minutes you will learn about tokens, how a reply gets written, what the model can see, and why it can be confidently wrong."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "One job: predict the next token",
+      "run": true,
+      "nodes": [
+        { "kind": "user", "icon": "message", "label": "Your text", "sub": "“Where is my order?”", "cue": 1 },
+        { "kind": "data", "icon": "layers", "label": "Tokens", "sub": "Where · is · my · order · ?", "cue": 2 },
+        { "kind": "llm", "icon": "brain", "label": "Model", "sub": "scores every next token", "cue": 3 },
+        { "kind": "output", "icon": "sparkles", "label": "Next token", "sub": "one piece, added to the end", "cue": 4 }
+      ],
+      "note": { "text": "Then it runs again with the longer text. A 300-word reply is about 400 of these steps.", "cue": 5 },
+      "sentences": [
+        "A large language model, or LLM, has one core job: given some text, predict what comes next.",
+        "It starts with your text, such as a customer asking where her order is.",
+        "That text is cut into small pieces called tokens.",
+        "The model reads all the tokens and gives every possible next token a score for how likely it is.",
+        "One token is chosen and added to the end of the text.",
+        "Then the whole thing runs again with the slightly longer text, until the reply is complete.",
+        "A three hundred word reply takes about four hundred of these steps."
+      ]
+    },
+    {
+      "kind": "define",
+      "title": "What is a token?",
+      "term": "Token",
+      "definition": "A small piece of text, often a whole word or part of one, that the model reads and writes.",
+      "parts": [
+        { "text": "Common words: one token", "cue": 1 },
+        { "text": "Rare words and codes: several", "cue": 2 },
+        { "text": "About three quarters of a word", "cue": 3 }
+      ],
+      "analogy": {
+        "label": "Think of it as",
+        "text": "Lego bricks: the model has a fixed box of pieces, and every reply is snapped together one brick at a time."
+      },
+      "sentences": [
+        "You will hear the word token constantly when you build with models, so let us pin it down.",
+        "Common words, like order or boots, are usually a single token.",
+        "Rare words, long product codes and many names are split into several pieces.",
+        "On average a token is about three quarters of a word, so a hundred words is roughly a hundred and thirty tokens.",
+        "Think of Lego bricks: the model has a fixed box of pieces, and every reply is snapped together one brick at a time.",
+        "Tokens matter to you because you pay per token, and a model's limits are counted in tokens too."
+      ]
+    },
+    {
+      "kind": "cycle",
+      "title": "How a reply gets written",
+      "center": { "label": "Generation loop", "sub": "until an end token or your limit" },
+      "steps": [
+        { "icon": "eye", "label": "Read", "sub": "everything written so far", "cue": 1 },
+        { "icon": "chart", "label": "Score", "sub": "a likelihood for each token", "cue": 2 },
+        { "icon": "target", "label": "Pick", "sub": "likely, not always the top", "cue": 3 },
+        { "icon": "repeat", "label": "Append", "sub": "then go round again", "cue": 4 }
+      ],
+      "note": { "text": "Picking among likely tokens is called sampling. It is why wording varies from run to run.", "cue": 6 },
+      "sentences": [
+        "Let us slow the loop down and watch one turn of it.",
+        "First, the model reads everything so far: your prompt, plus any part of the reply it has already written.",
+        "Next, it scores every token it knows, perhaps ninety percent for one word and tiny chances for thousands of others.",
+        "Then one token is picked, usually a very likely one, but not always the single top choice.",
+        "That token is added to the text, and the loop goes round again.",
+        "It stops when the model writes a special end token, or when it reaches the length limit you set.",
+        "Picking among likely options is called sampling, and it is why the same question can get differently worded answers.",
+        "That is normal, and it is one reason your code should never depend on exact wording."
+      ]
+    },
+    {
+      "kind": "hub",
+      "title": "The context window: all the model can see",
+      "center": { "icon": "layers", "label": "Context window", "sub": "up to 1 million tokens" },
+      "spokes": [
+        { "icon": "file", "label": "System prompt", "sub": "role, rules and facts", "cue": 1 },
+        { "icon": "message", "label": "Conversation", "sub": "every earlier message", "cue": 2 },
+        { "icon": "wrench", "label": "Tool results", "sub": "data your code looked up", "cue": 3 },
+        { "icon": "pencil", "label": "Reply so far", "sub": "its own words count too", "cue": 4 }
+      ],
+      "note": { "text": "Not in the window? Then, as far as the model knows, it does not exist.", "cue": 6 },
+      "sentences": [
+        "Everything the model can see during one request lives in its context window.",
+        "That includes the system prompt, where you give it a role, rules and facts.",
+        "It includes the conversation so far, every message from the customer and from Scout.",
+        "From Module 3 on, it will include tool results too, such as an order your code looked up.",
+        "And the reply it is writing counts as well, token by token.",
+        "The models in this course can hold up to a million tokens, which is several long novels.",
+        "But the model keeps nothing between requests: whatever is not in the window, it cannot see.",
+        "That is exactly why your chatbot in Module 1 kept a list of messages and sent the whole list every turn."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "What it learned versus what you must tell it",
+      "left": {
+        "label": "Learned in training",
+        "tone": "info",
+        "cue": 1,
+        "points": [
+          "How language works",
+          "Broad facts, up to a cutoff date",
+          "Common patterns, like typical return windows",
+          "Fixed: chatting doesn't teach it"
+        ]
+      },
+      "right": {
+        "label": "Only if you send it",
+        "tone": "ok",
+        "cue": 4,
+        "points": [
+          "Orbit's 30-day return policy",
+          "Grace's order and delivery date",
+          "Where a parcel is today",
+          "Anything after the cutoff"
+        ]
+      },
+      "sentences": [
+        "So where does the model's knowledge come from?",
+        "During training, it read a vast amount of text and learned how language works, along with a lot of general knowledge.",
+        "That learning stopped at a cutoff date, and chatting with it does not teach it anything new.",
+        "It also learned common patterns, such as many shops offering thirty, sixty or ninety day returns.",
+        "What it never saw is anything private to Orbit.",
+        "It does not know Orbit's policy, Grace's order, or where a parcel is today.",
+        "The only way it can use those facts is if you put them into its context window."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "Sure, fluent and wrong",
+      "messages": [
+        { "role": "user", "label": "Grace", "text": "Hi! Can I still return my Ridge boots? They arrived about two months ago.", "cue": 1 },
+        { "role": "agent", "label": "Scout · no policy", "text": "Absolutely, we offer 90-day refunds! You're well within the window.", "cue": 2 },
+        { "role": "system", "label": "Added to the system prompt", "text": "Returns: unused items within 30 days of delivery. Never promise what the policy doesn't say.", "cue": 5 },
+        { "role": "agent", "label": "Scout · policy in context", "text": "Sorry, Grace. Returns are accepted within 30 days of delivery, so boots from two months ago are outside the window. I can ask the team if anything else is possible.", "cue": 6 }
+      ],
+      "aside": {
+        "icon": "alert",
+        "label": "Hallucination",
+        "text": "A fluent, confident answer that is not true. The model filled a gap with something likely.",
+        "cue": 3
+      },
+      "sentences": [
+        "Now you can see what went wrong in the hook.",
+        "Grace asked whether she could return boots that arrived two months ago.",
+        "Scout had no policy in its context, so it predicted the most plausible reply, and ninety-day refunds sounded plausible.",
+        "This is called a hallucination: a fluent, confident answer that is simply not true.",
+        "The model sounds just as sure when it is wrong as when it is right, because it is predicting text, not checking facts.",
+        "So we add the real policy, and one rule, to the system prompt.",
+        "Now the same model gives Grace the honest answer, and offers a next step it can actually keep."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "An LLM writes by predicting the next token, again and again", "cue": 1 },
+        { "text": "A token is about three quarters of a word, and you pay per token", "cue": 2 },
+        { "text": "It sees only its context window and keeps nothing between requests", "cue": 3 },
+        { "text": "It sounds just as sure when wrong: give it the facts and the rules", "cue": 4 }
+      ],
+      "sentences": [
+        "Let us pull it together.",
+        "A language model writes by predicting the next token, again and again.",
+        "A token is about three quarters of a word, and tokens are what you pay for.",
+        "The model only sees what is in its context window, and it keeps nothing between requests.",
+        "It sounds just as sure when it is wrong, so give it the facts and the rules it needs.",
+        "Next, you will choose which model Scout should use, and look closely at a request and its response."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "A customer email is about 300 words long. Roughly how many tokens is that?",
+      "options": ["About 100", "About 400", "About 3,000"],
+      "correct": 1,
+      "explain": "A token is about three quarters of a word, so 300 words is roughly 400 tokens.",
+      "hint": "Each token is a bit less than a whole word, so expect a few more tokens than words."
+    },
+    {
+      "q": "You ask Scout the same question twice and get two differently worded answers. Why?",
+      "options": [
+        "Something is broken and needs fixing",
+        "Sampling: it picks among likely tokens, not always the top one",
+        "The context window was full the second time"
+      ],
+      "correct": 1,
+      "explain": "Each step picks from the likely next tokens, so the wording varies between runs. That is normal.",
+      "hint": "Think about the Pick step in the generation loop."
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "Why did Scout promise Grace a 90-day refund?",
+      "options": [
+        "It read an old version of Orbit's policy",
+        "No policy was in its context, so it predicted a plausible answer",
+        "Grace's email told it to say 90 days"
+      ],
+      "correct": 1,
+      "explain": "The model only sees its context. With no policy and no rule, it filled the gap with a common, plausible answer.",
+      "hint": "What was actually in the context window when Scout wrote the reply?"
+    },
+    {
+      "q": "In a chat, Scout answers the third message as if the first two never happened. What is the most likely cause?",
+      "options": [
+        "The context window only holds one message",
+        "Your code sent only the newest message, not the whole conversation",
+        "The model's training cutoff is too old"
+      ],
+      "correct": 1,
+      "explain": "The model keeps nothing between requests, so your code must send the whole conversation every time.",
+      "hint": "Between requests, where does the conversation live: in the model, or in your code?"
+    }
+  ]
+}

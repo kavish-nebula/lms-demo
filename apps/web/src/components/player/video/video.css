@@ -74,6 +74,12 @@
 .vl-node.trigger .vl-node-ic { background: var(--warn-soft); color: var(--warn-ink); }
 .vl-node.action .vl-node-ic { background: var(--ok-soft); color: var(--ok); }
 .vl-node.logic .vl-node-ic { background: var(--err-soft); color: var(--err); }
+.vl-node.user .vl-node-ic { background: var(--warn-soft); color: var(--warn-ink); }
+.vl-node.llm .vl-node-ic { background: var(--accent-soft); color: var(--accent-ink); }
+.vl-node.tool .vl-node-ic { background: var(--info-soft); color: var(--info); }
+.vl-node.memory .vl-node-ic { background: var(--stage-worked-soft); color: var(--stage-worked); }
+.vl-node.output .vl-node-ic { background: var(--ok-soft); color: var(--ok); }
+.vl-node.guard .vl-node-ic { background: var(--err-soft); color: var(--err); }
 .vl-node b, .vl-node span { overflow-wrap: anywhere; }
 .vl-node.ran { border-color: var(--ok); background: var(--ok-soft); }
 .vl-node.ran .vl-node-ic { background: var(--ok); color: var(--on-ok, #fff); }
@@ -117,6 +123,51 @@
 .vl-recap-row { padding: 1.6cqw 2cqw; border-radius: var(--r); background: var(--panel2); border: 1px solid var(--line); box-shadow: var(--shadow-sm); }
 .vl-recap-row svg { color: var(--ok); flex: 0 0 auto; width: 2.6cqw; height: 2.6cqw; min-width: 18px; min-height: 18px; }
 
+/* hub: one thing in the middle, its parts round it */
+.vl-hubwrap, .vl-cyclewrap { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 2cqw; }
+.vl-hub { position: relative; width: 100%; height: 38cqw; }
+.vl-hub-lines, .vl-cycle-ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.vl-hub-lines line { stroke: var(--accent); stroke-opacity: 0.45; stroke-width: 2; stroke-dasharray: 5 5; transition: opacity 0.45s; }
+.vl-hub-pos, .vl-cycle-pos { position: absolute; transform: translate(-50%, -50%); }
+.vl-hub-pos { width: 24cqw; }
+.vl-hub-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 17cqw; padding: 1.2cqw; border-radius: var(--r); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.5cqw; background: linear-gradient(150deg, var(--accent-deep), color-mix(in srgb, var(--accent-deep) 70%, var(--accent))); color: #fff; box-shadow: var(--shadow-lg); }
+.vl-hub-center .vl-node-ic { width: 4.2cqw; height: 4.2cqw; min-width: 30px; min-height: 30px; background: rgba(255, 255, 255, 0.16); color: #fff; }
+.vl-hub-center b { font-size: clamp(14px, 2.5cqw, 30px); }
+.vl-hub-center span:last-child { font-size: clamp(10px, 1.5cqw, 18px); opacity: 0.85; line-height: 1.25; }
+.vl-hub-spoke { display: flex; align-items: center; gap: 1.2cqw; padding: 1.1cqw 1.4cqw; border-radius: var(--r); background: var(--panel2); border: 1px solid var(--line); box-shadow: var(--shadow-md); }
+.vl-hub-txt { display: flex; flex-direction: column; min-width: 0; }
+.vl-hub-txt b { font-size: clamp(12px, 1.9cqw, 24px); line-height: 1.2; }
+.vl-hub-txt span { font-size: clamp(10px, 1.45cqw, 18px); color: var(--muted); line-height: 1.25; }
+
+/* cycle: steps that repeat round a loop */
+.vl-cycle { position: relative; width: 100%; height: 34cqw; }
+.vl-cycle-ring ellipse { fill: none; stroke: var(--accent); stroke-opacity: 0.35; stroke-width: 2.5; stroke-dasharray: 7 6; }
+.vl-cycle-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.4cqw; max-width: 30cqw; }
+.vl-cycle-center b { font-size: clamp(15px, 2.8cqw, 34px); color: var(--accent-ink); letter-spacing: -0.01em; }
+.vl-cycle-center span { color: var(--muted); font-size: clamp(10px, 1.6cqw, 20px); }
+.vl-cycle-pos { width: 20cqw; }
+.vl-cycle-step { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.5cqw; padding: 1.2cqw; border-radius: var(--r); background: var(--panel2); border: 2px solid var(--line); box-shadow: var(--shadow-md); transition: border-color 0.4s, background 0.4s; }
+.vl-cycle-step.now { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--panel2)); }
+.vl-cycle-step b { font-size: clamp(12px, 2cqw, 25px); line-height: 1.2; }
+.vl-cycle-step span:last-child { font-size: clamp(10px, 1.4cqw, 17px); color: var(--muted); line-height: 1.25; }
+.vl-cycle-step .vl-node-ic { width: 4.4cqw; height: 4.4cqw; min-width: 30px; min-height: 30px; }
+.vl-cycle-arrow { position: absolute; display: grid; place-items: center; width: 3cqw; height: 3cqw; min-width: 18px; min-height: 18px; margin: -1.5cqw 0 0 -1.5cqw; color: var(--accent-ink); transition: opacity 0.45s; }
+.vl-cycle-arrow svg { width: 100%; height: 100%; }
+
+/* chat: a conversation or an agent trace */
+.vl-chatwrap { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 3cqw; align-content: center; }
+.vl-chatwrap.has-aside { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+.vl-chat { display: flex; flex-direction: column; gap: 1.1cqw; }
+.vl-msg { max-width: 86%; align-self: flex-start; padding: 1cqw 1.6cqw; border-radius: var(--r); border: 1px solid var(--line); background: var(--panel2); box-shadow: var(--shadow-sm); }
+.vl-msg.user { align-self: flex-end; background: var(--accent-soft); border-color: var(--accent-line); }
+.vl-msg.tool { margin-left: 3cqw; background: color-mix(in srgb, var(--accent-deep) 85%, black); border-color: transparent; color: #ece9f7; }
+.vl-msg.system { background: transparent; border-style: dashed; color: var(--muted); }
+.vl-msg-who { display: flex; align-items: center; gap: 0.6cqw; font-size: clamp(9px, 1.25cqw, 15px) !important; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--warn-ink); }
+.vl-msg.tool .vl-msg-who { color: #f6c98a; }
+.vl-msg-who svg { width: 1.6cqw; height: 1.6cqw; min-width: 12px; min-height: 12px; }
+.vl-msg p { font-size: clamp(11px, 1.8cqw, 23px); line-height: 1.4; }
+.vl-msg.tool p { font-family: var(--mono); font-size: clamp(10px, 1.55cqw, 20px); }
+
 /* the checks and the end screen sit over the (dimmed) slide */
 .vl-overlay { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, var(--panel) 55%, transparent); backdrop-filter: blur(3px); overflow: auto; }
 
@@ -128,6 +179,10 @@
   .vl-flow-step { flex-direction: column; }
   .vl-arrow { transform: rotate(90deg); margin: 6px 0; }
   .vl-node { width: 60cqw; }
+  .vl-hub, .vl-cycle { height: auto; display: grid; gap: 10px; }
+  .vl-hub-lines, .vl-cycle-ring, .vl-cycle-arrow { display: none; }
+  .vl-hub-pos, .vl-cycle-pos, .vl-hub-center, .vl-cycle-center { position: static; transform: none; width: auto; max-width: none; }
+  .vl-chatwrap.has-aside { grid-template-columns: 1fr; }
   .vl-slide { position: relative; }
   .vl-frame { overflow: visible; height: auto; }
   .vl-body { transform: none !important; width: auto !important; }

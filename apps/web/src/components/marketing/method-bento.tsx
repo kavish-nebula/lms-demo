@@ -13,8 +13,10 @@ import { Reveal } from "@/components/marketing/reveal";
  */
 export async function MethodBento() {
   const t = await getTranslations("marketing");
-  const course = (await getCourses())[0]!;
-  const first = course.modules[0]!;
+  // shown with a real course's topics, so it waits until the catalog has one
+  const course = (await getCourses())[0];
+  const first = course?.modules[0];
+  if (!course || !first) return null;
   const topics = moduleTopics(first);
 
   return (

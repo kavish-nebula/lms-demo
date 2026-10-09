@@ -1,0 +1,1246 @@
+{
+  "hook": {
+    "kicker": "Thursday, 2:47 PM",
+    "title": "\"Could you give me your order number?\" (again)",
+    "why": "Ravi Shah gave Scout his order number in his second message. Twenty messages later, Scout politely asked him for it again, and Ravi's patience ran out. Leo has forwarded you the transcript, and nobody can find an error anywhere.",
+    "stat": "Order number given in message 2 · asked for again in message 22",
+    "narration": "It's Thursday afternoon, and Leo has forwarded you a chat transcript. Ravi Shah has been asking Scout about his sleeping bag and foam mat for twenty minutes. In his second message, he gave his order number. Twenty messages later, Scout politely asked him for it again. Every call in the logs worked, and Maya wants an answer before the weekend. Scout had that number once. Where did it go?",
+    "messages": [
+      {
+        "who": "Leo — support lead",
+        "av": "L",
+        "at": "2:41 PM",
+        "text": "forwarding a chat from ravi shah. he gave scout his order number in message 2. in message 22 scout asked him for it again"
+      },
+      {
+        "who": "Leo — support lead",
+        "av": "L",
+        "at": "2:42 PM",
+        "text": "his reply: \"I already told you. ORB-10533. Are you even reading this?\" honestly, fair"
+      },
+      {
+        "who": "Priya — developer",
+        "av": "P",
+        "at": "2:45 PM",
+        "text": "no errors in the logs. every call to the model worked. it just... didn't use the number"
+      },
+      {
+        "who": "Maya — founder",
+        "av": "M",
+        "at": "2:47 PM",
+        "text": "slow we can forgive. ignored we can't. what happened?"
+      }
+    ],
+    "prompt": "Before anything is explained: why did Scout ask Ravi for his order number again?",
+    "hunches": [
+      {
+        "id": "a",
+        "label": "The model can't read order numbers like ORB-10533 reliably"
+      },
+      {
+        "id": "b",
+        "label": "The code sends only the last ten messages, so message 2 fell out"
+      },
+      {
+        "id": "c",
+        "label": "Ravi typed his order number wrong the first time"
+      }
+    ],
+    "correct": "b",
+    "pipeline": {
+      "nodes": [
+        {
+          "id": "msg2",
+          "kind": "data",
+          "label": "Message 2",
+          "sub": "ORB-10533 given",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "id": "user",
+          "kind": "user",
+          "label": "Customer",
+          "sub": "Ravi, message 22",
+          "x": 0,
+          "y": 120
+        },
+        {
+          "id": "history",
+          "kind": "memory",
+          "label": "Chat history",
+          "sub": "keeps last 10",
+          "x": 230,
+          "y": 60
+        },
+        {
+          "id": "scout",
+          "kind": "llm",
+          "label": "Scout",
+          "sub": "sees only what's sent",
+          "x": 460,
+          "y": 60
+        },
+        {
+          "id": "reply",
+          "kind": "output",
+          "label": "Reply",
+          "sub": "to Ravi",
+          "x": 690,
+          "y": 60
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "source": "msg2",
+          "target": "history"
+        },
+        {
+          "id": "e2",
+          "source": "user",
+          "target": "history"
+        },
+        {
+          "id": "e3",
+          "source": "history",
+          "target": "scout"
+        },
+        {
+          "id": "e4",
+          "source": "scout",
+          "target": "reply"
+        }
+      ]
+    },
+    "reveal": {
+      "narration": "Here's what really happened. Every time Ravi wrote, the code rebuilt the request from the chat history. To keep costs down, it sent Scout only the last ten messages. By message twelve, message two had dropped off the end, and the order number went with it. The model never forgot anything, because it never remembers anything between calls. It only sees what your code sends, and the code had stopped sending the number.",
+      "steps": [
+        {
+          "caption": "Message 2: Ravi gives his order number, ORB-10533. It lands in the chat history.",
+          "nodes": {
+            "msg2": "ok",
+            "history": "ok"
+          },
+          "edges": {
+            "e1": "ok"
+          }
+        },
+        {
+          "caption": "Scout is sent the history, reads the number fine and confirms it back to Ravi.",
+          "nodes": {
+            "scout": "ok",
+            "reply": "ok"
+          },
+          "edges": {
+            "e3": "ok",
+            "e4": "ok"
+          }
+        },
+        {
+          "caption": "The chat goes on. To keep the bill down, the code sends Scout only the last ten messages.",
+          "nodes": {
+            "history": "running",
+            "scout": "idle",
+            "reply": "idle"
+          },
+          "edges": {
+            "e3": "idle",
+            "e4": "idle"
+          }
+        },
+        {
+          "caption": "Message 12 arrives. Message 2 is now outside the last ten, so it is no longer sent. The order number goes with it.",
+          "nodes": {
+            "msg2": "error"
+          },
+          "edges": {
+            "e1": "error"
+          }
+        },
+        {
+          "caption": "Message 22: Ravi asks when his order will ship. Scout is sent the last ten messages, and none of them has the number.",
+          "nodes": {
+            "user": "running",
+            "history": "ok",
+            "scout": "running"
+          },
+          "edges": {
+            "e2": "ok",
+            "e3": "running"
+          }
+        },
+        {
+          "caption": "Scout has a question about an order, and no order number anywhere in what it was sent.",
+          "nodes": {
+            "user": "ok",
+            "scout": "error"
+          },
+          "edges": {
+            "e3": "ok"
+          }
+        },
+        {
+          "caption": "So it does the sensible thing with what it has: \"Could you give me your order number?\"",
+          "nodes": {
+            "reply": "error"
+          },
+          "edges": {
+            "e4": "error"
+          }
+        }
+      ]
+    },
+    "wrap_correct": "Right. The model didn't forget; it never remembers anything between calls. It sees only what your code sends, and the code stopped sending message 2 once it fell outside the last ten.",
+    "wrap_wrong": "Not quite. Scout read ORB-10533 fine and confirmed it back, so Ravi typed it correctly. The code trimmed the chat to the last ten messages, message 2 fell out, and Scout was never shown the number again.",
+    "wrap_point": "Memory is your code's job: decide what Scout sees on every call, trim old turns, and pin the facts that must never fall out.",
+    "film": {
+      "shots": [
+        {
+          "type": "long-chat",
+          "label": "Chat · Ravi Shah",
+          "say": "Ravi gives Scout his order number in message two. Now keep the chat going.",
+          "act": "Hold to keep chatting",
+          "then": "Twenty messages later, Scout asks him for it again.",
+          "customer": "Ravi",
+          "agent": "Scout",
+          "messages": [
+            {
+              "from": "agent",
+              "text": "Hi, I'm Scout, Orbit's assistant. How can I help?"
+            },
+            {
+              "from": "customer",
+              "text": "Hi! It's about order ORB-10533, a sleeping bag and a foam mat."
+            },
+            {
+              "from": "agent",
+              "text": "Thanks, Ravi! I can see that order. What would you like to know?"
+            },
+            {
+              "from": "customer",
+              "text": "Is the sleeping bag good below freezing?"
+            },
+            {
+              "from": "agent",
+              "text": "Yes, the Summit bag is rated to minus nine."
+            },
+            {
+              "from": "customer",
+              "text": "Great. Is the foam mat foldable?"
+            },
+            {
+              "from": "agent",
+              "text": "It rolls up, and weighs about a kilo."
+            },
+            {
+              "from": "customer",
+              "text": "Can I add a stuff sack to the order?"
+            },
+            {
+              "from": "agent",
+              "text": "Sure, which size would you like?"
+            },
+            {
+              "from": "customer",
+              "text": "Medium, in green please."
+            },
+            {
+              "from": "agent",
+              "text": "Done. Anything else I can help with?"
+            },
+            {
+              "from": "customer",
+              "text": "Can I change the delivery address?"
+            },
+            {
+              "from": "agent",
+              "text": "Of course. What's the new address?"
+            },
+            {
+              "from": "customer",
+              "text": "14 Pine Street, Boulder."
+            },
+            {
+              "from": "agent",
+              "text": "Updated. You're all set."
+            },
+            {
+              "from": "customer",
+              "text": "Do you price-match?"
+            },
+            {
+              "from": "agent",
+              "text": "We don't, but returns are free over $75."
+            },
+            {
+              "from": "customer",
+              "text": "OK. And the warranty on the bag?"
+            },
+            {
+              "from": "agent",
+              "text": "Two years on stitching and zips."
+            },
+            {
+              "from": "customer",
+              "text": "Nice, thanks."
+            },
+            {
+              "from": "agent",
+              "text": "Happy to help, Ravi!"
+            },
+            {
+              "from": "customer",
+              "text": "So when will my order ship?"
+            },
+            {
+              "from": "agent",
+              "text": "Could you give me your order number, please?"
+            },
+            {
+              "from": "customer",
+              "text": "I already told you. ORB-10533."
+            }
+          ],
+          "key": 1,
+          "ask": 22,
+          "keep": 10
+        },
+        {
+          "type": "terminal",
+          "label": "API calls · Thursday",
+          "say": "Priya checks every call Scout made to the model. Not one failed.",
+          "title": "requests.log",
+          "lines": [
+            {
+              "time": "14:21:07",
+              "text": "POST /v1/messages   200 OK   1.4s",
+              "tone": "ok"
+            },
+            {
+              "time": "14:23:40",
+              "text": "POST /v1/messages   200 OK   1.1s",
+              "tone": "ok"
+            },
+            {
+              "time": "14:26:12",
+              "text": "POST /v1/messages   200 OK   1.3s",
+              "tone": "ok"
+            },
+            {
+              "time": "14:31:55",
+              "text": "POST /v1/messages   200 OK   1.2s",
+              "tone": "ok"
+            },
+            {
+              "time": "14:38:20",
+              "text": "POST /v1/messages   200 OK   1.0s",
+              "tone": "ok"
+            },
+            {
+              "time": "14:40:02",
+              "text": "errors today: 0",
+              "tone": "ok"
+            }
+          ],
+          "badge": "All calls OK"
+        },
+        {
+          "type": "phone",
+          "label": "Team chat · 2:47 PM",
+          "say": "Ravi is not impressed, and neither is Maya.",
+          "time": "2:47",
+          "notes": [
+            {
+              "who": "Leo — support lead",
+              "av": "L",
+              "at": "2:45 PM",
+              "text": "Ravi: \"I already told you. ORB-10533. Are you even reading this?\""
+            },
+            {
+              "who": "Maya — founder",
+              "av": "M",
+              "at": "2:47 PM",
+              "text": "slow we can forgive. ignored we can't."
+            }
+          ]
+        },
+        {
+          "type": "numbers",
+          "label": "What it cost",
+          "say": "Given in message two. Asked for again in message twenty-two."
+        }
+      ]
+    }
+  },
+  "worked": {
+    "examples": [
+      {
+        "lesson": "4.2",
+        "title": "Watch pinned facts survive a long chat",
+        "intro": "The same long chat as the hook, but this time the order number is pinned as a fact.",
+        "narration": "This is Ravi's chat again, rebuilt the way this module teaches. In message 2 he gives his order number, and the code pins it as a fact straight away. The chat runs on, and the history is still trimmed to the last ten messages, so message 2 is eventually cut. But on message 22, the request carries the pinned facts in the system prompt, and the order number is right there. Scout uses it without asking again, and each call stays small.",
+        "predict": {
+          "stem": "Message 22 arrives, and the code still sends only the last ten messages. Will Scout know Ravi's order number?",
+          "options": [
+            {
+              "text": "Yes: it's pinned in the facts, which go into the system prompt on every call",
+              "correct": true
+            },
+            {
+              "text": "No: message 2 was trimmed, so the number is gone"
+            },
+            {
+              "text": "Only if Ravi repeats it within the last ten messages"
+            }
+          ],
+          "rationale": "Trimming drops old messages, but the pinned facts are rebuilt into the system prompt on every call, so they can't fall out."
+        },
+        "pipeline": {
+          "nodes": [
+            {
+              "id": "old",
+              "kind": "data",
+              "label": "Messages 1 to 12",
+              "sub": "trimmed away",
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "user",
+              "kind": "user",
+              "label": "Customer",
+              "sub": "Ravi, message 22",
+              "x": 0,
+              "y": 120
+            },
+            {
+              "id": "facts",
+              "kind": "memory",
+              "label": "Pinned facts",
+              "sub": "order ORB-10533",
+              "x": 230,
+              "y": 0
+            },
+            {
+              "id": "recent",
+              "kind": "memory",
+              "label": "Recent turns",
+              "sub": "last 10 messages",
+              "x": 230,
+              "y": 120
+            },
+            {
+              "id": "scout",
+              "kind": "llm",
+              "label": "Scout",
+              "sub": "facts + recent chat",
+              "x": 460,
+              "y": 60
+            },
+            {
+              "id": "reply",
+              "kind": "output",
+              "label": "Reply",
+              "sub": "no need to ask again",
+              "x": 690,
+              "y": 60
+            }
+          ],
+          "edges": [
+            {
+              "id": "e1",
+              "source": "old",
+              "target": "facts"
+            },
+            {
+              "id": "e2",
+              "source": "user",
+              "target": "recent"
+            },
+            {
+              "id": "e3",
+              "source": "facts",
+              "target": "scout"
+            },
+            {
+              "id": "e4",
+              "source": "recent",
+              "target": "scout"
+            },
+            {
+              "id": "e5",
+              "source": "scout",
+              "target": "reply"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "caption": "Message 2: Ravi gives ORB-10533. The code spots the order number and pins it in the facts dict.",
+            "show": [
+              "old",
+              "facts"
+            ],
+            "nodes": {
+              "old": "ok",
+              "facts": "ok"
+            },
+            "edges": {
+              "e1": "ok"
+            }
+          },
+          {
+            "caption": "Twenty messages later, the history is trimmed to the last ten. Messages 1 to 12 are no longer sent.",
+            "show": [
+              "user",
+              "recent"
+            ],
+            "nodes": {
+              "old": "idle"
+            },
+            "edges": {
+              "e1": "idle"
+            }
+          },
+          {
+            "caption": "Message 22: Ravi asks when his order will ship. It joins the last ten messages.",
+            "nodes": {
+              "user": "ok",
+              "recent": "ok"
+            },
+            "edges": {
+              "e2": "ok"
+            }
+          },
+          {
+            "caption": "The request is built: the system prompt with the pinned facts, then the last ten messages.",
+            "show": [
+              "scout"
+            ],
+            "nodes": {
+              "scout": "running"
+            },
+            "edges": {
+              "e3": "running",
+              "e4": "running"
+            }
+          },
+          {
+            "caption": "Scout reads order_id: ORB-10533 in its system prompt. The number never left.",
+            "nodes": {
+              "scout": "ok"
+            },
+            "edges": {
+              "e3": "ok",
+              "e4": "ok"
+            }
+          },
+          {
+            "caption": "Scout uses ORB-10533 without asking again, and the request stayed small: a few facts and ten messages, not all twenty-two.",
+            "show": [
+              "reply"
+            ],
+            "nodes": {
+              "reply": "ok"
+            },
+            "edges": {
+              "e5": "ok"
+            }
+          }
+        ]
+      },
+      {
+        "lesson": "4.3",
+        "title": "Watch Scout answer from two retrieved chunks",
+        "intro": "A policy question answered from the two best-matching sections, not from the model's memory.",
+        "narration": "Owen's new storm jacket is too big, and he wants to know two things: can he send it back, and is return shipping free? Scout calls the search tool with the key words. The tool splits the policy into its six sections and scores each one by shared words. Return shipping and Returns come out on top, and only those two go into Scout's context. Scout answers from them: unused items within 30 days of delivery, and free return shipping on orders over 75 dollars. It says nothing about refund timing, because Owen didn't ask and that section wasn't retrieved.",
+        "predict": {
+          "stem": "search_policy keeps the best 2 of Orbit's 6 policy sections. Which two will Scout get for Owen's question?",
+          "options": [
+            {
+              "text": "Return shipping and Returns",
+              "correct": true
+            },
+            {
+              "text": "Refunds and Shipping"
+            },
+            {
+              "text": "Exchanges and Damaged items"
+            }
+          ],
+          "rationale": "Scout's query was: return an item, is return shipping free. Return shipping shares three words with it (return, shipping, free), Returns shares two (return, item), and every other section shares one at most."
+        },
+        "pipeline": {
+          "nodes": [
+            {
+              "id": "user",
+              "kind": "user",
+              "label": "Customer",
+              "sub": "Owen: send it back?",
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "policy",
+              "kind": "data",
+              "label": "policy.md",
+              "sub": "6 sections",
+              "x": 0,
+              "y": 120
+            },
+            {
+              "id": "search",
+              "kind": "tool",
+              "label": "search_policy",
+              "sub": "scores shared words",
+              "x": 230,
+              "y": 60
+            },
+            {
+              "id": "chunks",
+              "kind": "data",
+              "label": "Top 2 chunks",
+              "sub": "best 2 of 6 sections",
+              "x": 460,
+              "y": 60
+            },
+            {
+              "id": "scout",
+              "kind": "llm",
+              "label": "Scout",
+              "sub": "answers from chunks",
+              "x": 690,
+              "y": 60
+            },
+            {
+              "id": "reply",
+              "kind": "output",
+              "label": "Reply",
+              "sub": "grounded answer",
+              "x": 920,
+              "y": 60
+            }
+          ],
+          "edges": [
+            {
+              "id": "e1",
+              "source": "user",
+              "target": "search"
+            },
+            {
+              "id": "e2",
+              "source": "policy",
+              "target": "search"
+            },
+            {
+              "id": "e3",
+              "source": "search",
+              "target": "chunks"
+            },
+            {
+              "id": "e4",
+              "source": "chunks",
+              "target": "scout"
+            },
+            {
+              "id": "e5",
+              "source": "scout",
+              "target": "reply"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "caption": "Owen: my new jacket is too big. Can I send it back, and is return shipping free? It was $310.",
+            "show": [
+              "user"
+            ],
+            "nodes": {
+              "user": "ok"
+            }
+          },
+          {
+            "caption": "Scout calls search_policy with the query: return an item, is return shipping free.",
+            "show": [
+              "search"
+            ],
+            "nodes": {
+              "search": "running"
+            },
+            "edges": {
+              "e1": "ok"
+            }
+          },
+          {
+            "caption": "The tool splits policy.md into its six sections and counts the words each one shares with the query.",
+            "show": [
+              "policy"
+            ],
+            "nodes": {
+              "policy": "ok"
+            },
+            "edges": {
+              "e2": "ok"
+            }
+          },
+          {
+            "caption": "Return shipping scores 3 and Returns scores 2. Only those two sections go back to Scout.",
+            "show": [
+              "chunks"
+            ],
+            "nodes": {
+              "search": "ok",
+              "chunks": "ok"
+            },
+            "edges": {
+              "e3": "ok"
+            }
+          },
+          {
+            "caption": "The two chunks sit in Scout's context, next to Owen's question. Nothing else from the policy is sent.",
+            "show": [
+              "scout"
+            ],
+            "nodes": {
+              "scout": "running"
+            },
+            "edges": {
+              "e4": "ok"
+            }
+          },
+          {
+            "caption": "Scout answers from the text: unused items within 30 days of delivery, in original packaging, and free return shipping because his order was over $75.",
+            "show": [
+              "reply"
+            ],
+            "nodes": {
+              "scout": "ok",
+              "reply": "ok"
+            },
+            "edges": {
+              "e5": "ok"
+            }
+          }
+        ]
+      },
+      {
+        "lesson": "4.4",
+        "title": "Watch Scout plan Ana's swap, then re-plan",
+        "intro": "A three-part request planned before acting, and re-planned when a step fails.",
+        "narration": "Ana wants to swap her two-person tent for the three-person one and know when it will arrive. Before touching a tool, Scout writes a plan: look up the order, check stock, then arrange the swap. The order lookup works: her green two-person tent has shipped. The stock check comes back with zero. Instead of pushing on to step three, Scout re-plans and tells Ana the truth, with two real options: keep the tent that's on its way, or return it within 30 days of delivery with free return shipping. If she returns it, the 240 dollar refund needs a person on the team to approve it, and Scout says so.",
+        "predict": {
+          "stem": "check_stock returns 0 for the 3-person tent. What should Scout do next?",
+          "options": [
+            {
+              "text": "Re-plan: explain it's out of stock and offer Ana real options",
+              "correct": true
+            },
+            {
+              "text": "Carry on with step 3 and promise a delivery date"
+            },
+            {
+              "text": "Call check_stock again until the tent is back"
+            }
+          ],
+          "rationale": "A plan is a guide, not a contract. When a result changes the facts, Scout re-plans. Pushing on would promise something false, and checking again won't change Sam's stock sheet."
+        },
+        "pipeline": {
+          "nodes": [
+            {
+              "id": "user",
+              "kind": "user",
+              "label": "Customer",
+              "sub": "Ana: swap the tent",
+              "x": 0,
+              "y": 60
+            },
+            {
+              "id": "plan",
+              "kind": "plan",
+              "label": "Plan",
+              "sub": "3 steps, written first",
+              "x": 230,
+              "y": 60
+            },
+            {
+              "id": "order",
+              "kind": "tool",
+              "label": "get_order",
+              "sub": "ORB-10482: 2P, shipped",
+              "x": 460,
+              "y": 0
+            },
+            {
+              "id": "stock",
+              "kind": "tool",
+              "label": "check_stock",
+              "sub": "TENT-3P-GRN: 0",
+              "x": 460,
+              "y": 120
+            },
+            {
+              "id": "replan",
+              "kind": "plan",
+              "label": "Re-plan",
+              "sub": "swap can't happen",
+              "x": 690,
+              "y": 60
+            },
+            {
+              "id": "reply",
+              "kind": "output",
+              "label": "Reply",
+              "sub": "two real options",
+              "x": 920,
+              "y": 60
+            }
+          ],
+          "edges": [
+            {
+              "id": "e1",
+              "source": "user",
+              "target": "plan"
+            },
+            {
+              "id": "e2",
+              "source": "plan",
+              "target": "order"
+            },
+            {
+              "id": "e3",
+              "source": "plan",
+              "target": "stock"
+            },
+            {
+              "id": "e4",
+              "source": "order",
+              "target": "replan"
+            },
+            {
+              "id": "e5",
+              "source": "stock",
+              "target": "replan"
+            },
+            {
+              "id": "e6",
+              "source": "replan",
+              "target": "reply"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "caption": "Ana: swap my tent for the 3-person one and tell me when it arrives. Order ORB-10482.",
+            "show": [
+              "user",
+              "plan"
+            ],
+            "nodes": {
+              "user": "ok",
+              "plan": "running"
+            },
+            "edges": {
+              "e1": "ok"
+            }
+          },
+          {
+            "caption": "Scout plans before acting: 1. get_order to confirm the tent. 2. check_stock for TENT-3P-GRN. 3. Arrange the swap and give a date.",
+            "nodes": {
+              "plan": "ok"
+            }
+          },
+          {
+            "caption": "Step 1: get_order returns a Trailhead 2P tent, green, $240, shipped with ParcelPath.",
+            "show": [
+              "order"
+            ],
+            "nodes": {
+              "order": "ok"
+            },
+            "edges": {
+              "e2": "ok"
+            }
+          },
+          {
+            "caption": "Step 2: check_stock for TENT-3P-GRN returns 0. The 3-person tent is out of stock.",
+            "show": [
+              "stock"
+            ],
+            "nodes": {
+              "stock": "error"
+            },
+            "edges": {
+              "e3": "error"
+            }
+          },
+          {
+            "caption": "Step 3 can't happen now. Scout re-plans with what it knows, instead of guessing a date or giving up.",
+            "show": [
+              "replan"
+            ],
+            "nodes": {
+              "replan": "ok"
+            },
+            "edges": {
+              "e4": "ok",
+              "e5": "ok"
+            }
+          },
+          {
+            "caption": "Scout explains the 3-person tent is sold out and offers options: keep the 2P on its way, or return it within 30 days of delivery, with free return shipping.",
+            "show": [
+              "reply"
+            ],
+            "nodes": {
+              "reply": "ok"
+            },
+            "edges": {
+              "e6": "ok"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "guided": {
+    "title": "Add memory, retrieval and a step limit to your agent",
+    "situation": "Ravi's chat showed the gap: Scout only knows what each call sends, so anything trimmed is gone. Today you give your own Scout a memory that trims the chat but pins the facts that matter, a search tool for Orbit's policy, and a prompt that makes it plan before it acts.",
+    "intro": "By the end, your Scout keeps a trimmed conversation with pinned facts, answers policy questions from the two best sections, plans multi-step requests and stops itself after six steps.",
+    "before": {
+      "items": [
+        "Your **scout** project from Module 3, with **tools.py**, **agent.py** and **docs/policy.md**",
+        "The virtual environment from Module 1, and **ANTHROPIC_API_KEY** set in your terminal",
+        "About 40 minutes, and a little API credit (this practice costs about a dollar at most)"
+      ],
+      "downloads": []
+    },
+    "steps": [
+      {
+        "title": "Open your Scout project from Module 3",
+        "body": "Today's work builds on the files you already have. Check they are in place before adding anything.",
+        "actions": [
+          "Open a terminal in your **scout** folder and activate the virtual environment: `.venv\\Scripts\\activate` on Windows, `source .venv/bin/activate` on macOS or Linux.",
+          "Check that **tools.py**, **agent.py** and a **docs** folder are there: type `dir` on Windows or `ls` on macOS and Linux.",
+          "Open **docs/policy.md** and make sure it matches the text below exactly. The search tool reads it section by section."
+        ],
+        "values": [
+          {
+            "label": "docs/policy.md",
+            "value": "# Orbit Outdoor policies\n## Returns\nYou can return any unused item within 30 days of delivery for a full refund. Items must be unused and in their original packaging.\n## Return shipping\nReturn shipping is free on orders over $75. Under $75, a $6.95 return label is taken off the refund.\n## Refunds\nRefunds go back to the original payment method within 5 business days of the return arriving. Refunds over $200 must be approved by a member of the support team.\n## Exchanges\nExchanging for a different size is free if the new size is in stock.\n## Shipping\nStandard shipping takes 3 to 5 business days. Express takes 1 to 2 business days.\n## Damaged items\nSend a photo within 7 days of delivery and we send a replacement or a full refund.\n"
+          }
+        ],
+        "check": "Your prompt starts with **(.venv)**, and **docs/policy.md** has six sections, each starting with `## `.",
+        "tip": "If Python later says it can't find the anthropic package, the virtual environment isn't active in this terminal. Run the activate command again."
+      },
+      {
+        "title": "Create memory.py",
+        "body": "This class is Scout's short-term memory. It trims the chat to the last few customer turns, and pins key facts like the order number so they never fall out.",
+        "actions": [
+          "Create a new file **memory.py** in the **scout** folder and paste the code below.",
+          "Save it, then run `python memory.py`. This tries the class on its own, without calling the model."
+        ],
+        "values": [
+          {
+            "label": "memory.py",
+            "value": "\"\"\"Scout's memory: the recent turns of the chat, plus facts that never fall out.\"\"\"\nimport re\n\nORDER_ID = re.compile(r\"\\bORB-\\d{5}\\b\", re.IGNORECASE)\nNAME = re.compile(r\"\\bmy name is ([A-Za-z]+)\", re.IGNORECASE)\n\n\ndef block_type(block):\n    \"\"\"Blocks from the SDK are objects; blocks you write yourself are dicts.\"\"\"\n    return block.get(\"type\") if isinstance(block, dict) else getattr(block, \"type\", None)\n\n\nclass Conversation:\n    def __init__(self, max_turns=10):\n        self.max_turns = max_turns  # customer turns sent with each call\n        self.messages = []          # short-term memory: what the model sees\n        self.facts = {}             # pinned facts: they survive trimming\n\n    def add_user(self, text):\n        \"\"\"A message the customer typed. Key details are pinned as facts.\"\"\"\n        order = ORDER_ID.search(text)\n        if order:\n            self.facts[\"order_id\"] = order.group(0).upper()\n        name = NAME.search(text)\n        if name:\n            self.facts[\"name\"] = name.group(1).capitalize()\n        self.drop_old_thinking()\n        self.messages.append({\"role\": \"user\", \"content\": text})\n        self.trim()\n\n    def add_assistant(self, content):\n        \"\"\"Scout's turn: the response's content blocks, or plain text.\"\"\"\n        self.messages.append({\"role\": \"assistant\", \"content\": content})\n\n    def add_tool_results(self, results):\n        \"\"\"All tool results from one step, in one user message.\"\"\"\n        self.messages.append({\"role\": \"user\", \"content\": results})\n\n    def drop_old_thinking(self):\n        \"\"\"The model's thinking blocks are tied to the exact conversation it saw.\n        Trimming turns or pinning a new fact changes that conversation, so when a\n        new turn starts, earlier turns keep only their text and tool calls.\"\"\"\n        for m in self.messages:\n            if m[\"role\"] == \"assistant\" and isinstance(m[\"content\"], list):\n                kept = [b for b in m[\"content\"] if block_type(b) not in (\"thinking\", \"redacted_thinking\")]\n                m[\"content\"] = kept or [{\"type\": \"text\", \"text\": \"(no reply)\"}]\n\n    def trim(self):\n        \"\"\"Keep the last max_turns customer turns. Cut only where a turn\n        starts, so a tool call is never separated from its result.\"\"\"\n        starts = [i for i, m in enumerate(self.messages)\n                  if m[\"role\"] == \"user\" and isinstance(m[\"content\"], str)]\n        if len(starts) > self.max_turns:\n            self.messages = self.messages[starts[-self.max_turns]:]\n\n    def system_prompt(self, base):\n        \"\"\"The base prompt plus the pinned facts, rebuilt for every call.\"\"\"\n        if not self.facts:\n            return base\n        lines = \"\\n\".join(f\"- {key}: {value}\" for key, value in self.facts.items())\n        return f\"{base}\\n\\nFacts about this customer (always use them):\\n{lines}\"\n\n\nif __name__ == \"__main__\":\n    convo = Conversation(max_turns=2)\n    convo.add_user(\"Hi, my name is Ravi and my order is orb-10533.\")\n    convo.add_assistant(\"Thanks, Ravi! How can I help?\")\n    convo.add_user(\"Can I return the foam mat?\")\n    convo.add_assistant(\"Yes, within 30 days of delivery.\")\n    convo.add_user(\"And the sleeping bag?\")\n    print(len(convo.messages), \"messages kept. Oldest:\", convo.messages[0][\"content\"])\n    print(convo.system_prompt(\"You are Scout.\"))\n"
+          },
+          {
+            "label": "Expected output",
+            "value": "3 messages kept. Oldest: Can I return the foam mat?\nYou are Scout.\n\nFacts about this customer (always use them):\n- order_id: ORB-10533\n- name: Ravi"
+          }
+        ],
+        "check": "You see **3 messages kept**: the first turn was trimmed, yet the facts still list **ORB-10533** and **Ravi**.",
+        "tip": "Trimming cuts only where a customer turn starts. If you cut by message count instead, you could keep a tool result and drop the tool call it answers, and the API would reject the request. Scout also drops its old thinking blocks when a new turn starts: the API ties each one to the exact conversation it saw, and trimming or a new fact changes that conversation."
+      },
+      {
+        "title": "Add search_policy to tools.py",
+        "body": "Scout's retrieval tool splits the policy into sections, scores each one by the words it shares with the query, and returns the top two with their headings.",
+        "actions": [
+          "Replace everything in **tools.py** with the code below. It keeps `calculate` and `read_file` from Module 3 and adds `search_policy`.",
+          "Save the file, then run the test command below from the **scout** folder."
+        ],
+        "values": [
+          {
+            "label": "tools.py",
+            "value": "\"\"\"Scout's tools: a safe calculator, a docs reader and a policy search.\"\"\"\nimport ast\nimport operator\nimport re\nfrom pathlib import Path\n\nDOCS = Path(__file__).parent / \"docs\"\n\n# calculate: safe arithmetic with ast, never eval\nOPS = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul,\n       ast.Div: operator.truediv, ast.USub: operator.neg}\n\n\ndef _calc(node):\n    if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):\n        return node.value\n    if isinstance(node, ast.BinOp) and type(node.op) in OPS:\n        return OPS[type(node.op)](_calc(node.left), _calc(node.right))\n    if isinstance(node, ast.UnaryOp) and type(node.op) in OPS:\n        return OPS[type(node.op)](_calc(node.operand))\n    raise ValueError(\"only numbers and + - * / are allowed\")\n\n\ndef calculate(expression):\n    result = _calc(ast.parse(expression, mode=\"eval\").body)\n    return str(round(result, 2))\n\n\n# read_file: only files inside docs/\ndef read_file(name):\n    path = (DOCS / name).resolve()\n    if DOCS.resolve() not in path.parents:\n        raise ValueError(\"you can only read files inside docs/\")\n    return path.read_text(encoding=\"utf-8\")\n\n\n# search_policy: split policy.md into sections, score them by shared words\nSTOPWORDS = {\"a\", \"an\", \"and\", \"are\", \"can\", \"do\", \"for\", \"i\", \"if\", \"in\",\n             \"is\", \"it\", \"my\", \"of\", \"on\", \"or\", \"the\", \"to\", \"what\", \"you\"}\n\n\ndef _words(text):\n    return {w for w in re.findall(r\"[a-z0-9]+\", text.lower()) if w not in STOPWORDS}\n\n\ndef load_sections():\n    \"\"\"One chunk per '## ' heading in docs/policy.md, as (heading, text).\"\"\"\n    sections, heading, lines = [], None, []\n    for line in (DOCS / \"policy.md\").read_text(encoding=\"utf-8\").splitlines():\n        if line.startswith(\"## \"):\n            if heading:\n                sections.append((heading, \" \".join(lines)))\n            heading, lines = line[3:].strip(), []\n        elif heading and line.strip():\n            lines.append(line.strip())\n    if heading:\n        sections.append((heading, \" \".join(lines)))\n    return sections\n\n\ndef search_policy(query, top=2):\n    \"\"\"The top sections that share the most words with the query.\"\"\"\n    query_words = _words(query)\n    scored = []\n    for heading, text in load_sections():\n        score = len(query_words & _words(heading + \" \" + text))\n        scored.append((score, heading, text))\n    scored.sort(key=lambda s: s[0], reverse=True)\n    best = [s for s in scored[:top] if s[0] > 0]\n    if not best:\n        return \"No policy section matches that question.\"\n    return \"\\n\\n\".join(f\"## {heading}\\n{text}\" for score, heading, text in best)\n\n\nTOOLS = [\n    {\n        \"name\": \"calculate\",\n        \"description\": \"Do arithmetic on prices, such as a refund minus a return label. Supports + - * / and brackets. Results are rounded to 2 decimal places.\",\n        \"input_schema\": {\n            \"type\": \"object\",\n            \"properties\": {\"expression\": {\"type\": \"string\", \"description\": \"e.g. 40 - 6.95\"}},\n            \"required\": [\"expression\"],\n        },\n    },\n    {\n        \"name\": \"read_file\",\n        \"description\": \"Read a whole file from Orbit's docs folder, e.g. policy.md.\",\n        \"input_schema\": {\n            \"type\": \"object\",\n            \"properties\": {\"name\": {\"type\": \"string\", \"description\": \"File name inside docs/, e.g. policy.md\"}},\n            \"required\": [\"name\"],\n        },\n    },\n    {\n        \"name\": \"search_policy\",\n        \"description\": \"Search Orbit's policy and return the 2 sections that best match the query, with their headings. Use it for any question about returns, refunds, shipping, exchanges or damaged items.\",\n        \"input_schema\": {\n            \"type\": \"object\",\n            \"properties\": {\"query\": {\"type\": \"string\", \"description\": \"The customer's question, or its key words\"}},\n            \"required\": [\"query\"],\n        },\n    },\n]\n\n\ndef run_tool(name, tool_input):\n    if name == \"calculate\":\n        return calculate(tool_input[\"expression\"])\n    if name == \"read_file\":\n        return read_file(tool_input[\"name\"])\n    if name == \"search_policy\":\n        return search_policy(tool_input[\"query\"])\n    raise ValueError(f\"Unknown tool: {name}\")\n"
+          },
+          {
+            "label": "Test command",
+            "value": "python -c \"from tools import search_policy; print(search_policy('Is return shipping free?'))\""
+          },
+          {
+            "label": "Expected output",
+            "value": "## Return shipping\nReturn shipping is free on orders over $75. Under $75, a $6.95 return label is taken off the refund.\n\n## Returns\nYou can return any unused item within 30 days of delivery for a full refund. Items must be unused and in their original packaging."
+          }
+        ],
+        "check": "You see two sections: **## Return shipping** first, because it shares three words with the question (return, shipping, free), then **## Returns**.",
+        "tip": "FileNotFoundError means Python can't find the policy: **policy.md** must sit in a **docs** folder next to **tools.py**. If the sections come back in a different order, compare your policy.md with step 1 word for word."
+      },
+      {
+        "title": "Update agent.py: memory, a plan-first prompt and the step limit",
+        "body": "The new agent.py keeps one Conversation across turns, asks Scout to plan before it uses tools, and still stops after six steps.",
+        "actions": [
+          "Replace everything in **agent.py** with the code below.",
+          "Read the **SYSTEM** prompt: Scout plans first, answers policy questions only from search_policy, and says when the policy doesn't cover something.",
+          "Run `python agent.py`, then type `quit` to stop."
+        ],
+        "values": [
+          {
+            "label": "agent.py",
+            "value": "\"\"\"Scout with memory, policy search, a plan-first prompt and a step limit.\"\"\"\nimport anthropic\n\nfrom memory import Conversation\nfrom tools import TOOLS, run_tool\n\nclient = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY\nMODEL = \"claude-opus-5-5\"\nMAX_STEPS = 6   # tool rounds allowed for each customer message\nMAX_TURNS = 4   # small on purpose, so you can watch trimming; use 10 or more for real\n\nSYSTEM = \"\"\"You are Scout, Orbit Outdoor's support assistant. Orbit sells hiking, camping and climbing gear online.\n\nHow you work:\n- If a request has more than one part, first write a short numbered plan (one to three steps), then use your tools.\n- For any question about returns, refunds, shipping, exchanges or damaged items, call search_policy and answer only from the sections it returns.\n- If those sections don't cover the question, say so and offer to pass it to the support team. Never guess, and never promise anything the policy doesn't say.\n- Use calculate for any arithmetic.\n- You can't look up orders yet. If a customer needs order details, say a teammate will check them.\n- Never ask for card numbers or passwords.\n- Keep replies short, warm and clear.\"\"\"\n\nconvo = Conversation(max_turns=MAX_TURNS)\n\n\ndef answer(question):\n    convo.add_user(question)\n    for step in range(MAX_STEPS):  # always a step limit\n        response = client.messages.create(model=MODEL, max_tokens=16000,\n                                          system=convo.system_prompt(SYSTEM),\n                                          tools=TOOLS, messages=convo.messages)\n        convo.add_assistant(response.content)\n        if response.stop_reason != \"tool_use\":\n            return next(b.text for b in response.content if b.type == \"text\")\n        results = []\n        for block in response.content:\n            if block.type == \"text\":\n                print(f\"  [plan] {block.text}\")\n            elif block.type == \"tool_use\":\n                print(f\"  [tool] {block.name} {block.input}\")\n                try:\n                    output = run_tool(block.name, block.input)\n                    results.append({\"type\": \"tool_result\", \"tool_use_id\": block.id, \"content\": output})\n                except Exception as err:\n                    results.append({\"type\": \"tool_result\", \"tool_use_id\": block.id,\n                                    \"content\": f\"Error: {err}\", \"is_error\": True})\n        convo.add_tool_results(results)  # all results in one message\n    reply = \"This is taking me more steps than it should, so I'm passing it to a person on our team.\"\n    convo.add_assistant(reply)\n    return reply\n\n\nif __name__ == \"__main__\":\n    print(\"Scout is ready. Type quit to stop.\")\n    while True:\n        question = input(\"\\nYou: \").strip()\n        if question.lower() == \"quit\":\n            break\n        if question:\n            print(f\"\\nScout: {answer(question)}\")\n            oldest = convo.messages[0][\"content\"][:40]\n            print(f\"  (memory: {len(convo.messages)} messages, oldest: {oldest!r}, facts: {convo.facts})\")\n"
+          }
+        ],
+        "check": "You see **Scout is ready. Type quit to stop.**, and typing `quit` ends the program without an error.",
+        "tip": "ModuleNotFoundError for memory or tools means **agent.py** isn't in the same folder as **memory.py** and **tools.py**. An authentication error means **ANTHROPIC_API_KEY** isn't set in this terminal."
+      },
+      {
+        "title": "Test memory: give your order number, then ask for it back",
+        "body": "Now replay Ravi's chat on purpose. MAX_TURNS is 4, so your first message is trimmed on the fifth turn, but the pinned facts keep the order number.",
+        "actions": [
+          "Run `python agent.py` and send these five messages one at a time, waiting for each reply.",
+          "`Hi, my name is Ravi and my order is ORB-10533.`",
+          "`Can I return a sleeping bag if I don't like it?`",
+          "`Is return shipping free?`",
+          "`How long does express shipping take?`",
+          "`Thanks! What was my order number again?`"
+        ],
+        "check": "Scout answers **ORB-10533**. The memory line now shows the oldest kept message starting with **Can I return a sleeping bag**: your first message is gone, but **facts** still holds your order number and name.",
+        "tip": "If the oldest message is still your first one, count again: trimming starts on the fifth customer message."
+      },
+      {
+        "title": "Test retrieval: one answer from the policy, and one gap",
+        "body": "Scout should answer policy questions from the sections search_policy returns, and say so plainly when they don't cover the question.",
+        "actions": [
+          "Ask: `Can I return boots that arrived 40 days ago?`",
+          "Then ask: `Do you price match if I find a tent cheaper elsewhere?`",
+          "Watch the **[tool]** lines: each shows the query Scout sent to search_policy."
+        ],
+        "check": "For the boots, Scout calls search_policy and explains that returns are accepted within 30 days of delivery, so 40 days is too late. For price matching, the search finds no matching section, and Scout says the policy doesn't cover it and offers to pass the question to the team.",
+        "tip": "If Scout answers a policy question with no **[tool]** line, it answered from its own knowledge. Check that the SYSTEM prompt in **agent.py** still tells it to call search_policy."
+      },
+      {
+        "title": "Watch Scout plan a request with several parts",
+        "body": "A request that needs a policy lookup, a calculation and a second lookup is where planning first pays off.",
+        "actions": [
+          "Ask: `I want to return my foam mat. The order was $40. How much will I get back, and when?`",
+          "Read the **[plan]** line, then follow the **[tool]** lines underneath it."
+        ],
+        "check": "Scout writes a short numbered plan, calls search_policy and calculate (40 - 6.95), and replies that you would get **$33.05** back, to your original payment method within 5 business days of the return arriving.",
+        "tip": "Scout may run two tools in one step, or word its plan differently. That's fine: what matters is a plan first, then tool calls that follow it."
+      },
+      {
+        "title": "Test the step limit",
+        "body": "The limit has to work even when the model wants more steps. Set it to 1 for a moment and watch Scout hand off.",
+        "actions": [
+          "In **agent.py**, change `MAX_STEPS = 6` to `MAX_STEPS = 1` and save.",
+          "Run `python agent.py` and ask: `Is return shipping free?`",
+          "Change it back to `MAX_STEPS = 6` and save."
+        ],
+        "check": "You see one **[tool] search_policy** line, then Scout says it is passing you to a person on the team instead of answering.",
+        "tip": "With one step, Scout can ask for a tool but never gets to read the result. That is exactly what happens when a real request runs out of steps."
+      },
+      {
+        "title": "Break memory on purpose",
+        "body": "To see the hook's bug with your own eyes, switch off the pinned facts and replay the chat from step 5.",
+        "actions": [
+          "In **memory.py**, inside `system_prompt`, change `if not self.facts:` to `if True:` and save. Now the facts never reach the model.",
+          "Run `python agent.py` and send the same five messages as in step 5.",
+          "Change `if True:` back to `if not self.facts:` and save."
+        ],
+        "check": "On the last message, Scout no longer knows your order number and asks you for it, exactly as it did with Ravi.",
+        "tip": "If Scout still remembers, one of its recent replies probably repeated the number, so it stayed inside the last four turns. Ask one or two more unrelated questions, then try again."
+      }
+    ],
+    "finish": {
+      "title": "Scout remembers, looks things up and knows when to stop",
+      "body": "Your Scout now keeps a trimmed conversation, pins the order number so it can't fall out, answers policy questions from the two best sections, plans requests with several parts, and stops itself after six steps. In Module 5 it gets real order tools and a test set.",
+      "checklist": [
+        "memory.py trims the chat at whole customer turns",
+        "Pinned facts put the order number into the system prompt on every call",
+        "search_policy returns the top 2 policy sections with their headings",
+        "Scout says when the policy doesn't cover a question",
+        "MAX_STEPS stops the loop and hands off to a person"
+      ]
+    }
+  },
+  "lab": {
+    "title": "What should Scout remember?",
+    "intro": "Three situations from Scout's first weeks with memory, retrieval and planning. Each looks small, and each could cost Orbit a customer's trust.",
+    "scenarios": [
+      {
+        "lesson": "4.1",
+        "title": "A card number in the chat",
+        "situation": "Tom wants to know whether his payment went through, and pastes his full card number and expiry date into the chat. Priya's new long-term memory saves facts from each chat into a customer profile, so Scout can greet people next time. This morning's memory log shows what it saved for Tom.",
+        "context": {
+          "label": "Memory log",
+          "lines": [
+            "Tom: did my payment go through? my card is 4111 1111 1111 1111, exp 08/28",
+            "memory: facts extracted for tom@example.com",
+            "  name      = Tom",
+            "  email     = tom@example.com",
+            "  card      = 4111 1111 1111 1111",
+            "  card_exp  = 08/28",
+            "memory: profile saved (4 facts)"
+          ]
+        },
+        "stem": "What should Scout's memory do with that card number?",
+        "options": [
+          {
+            "text": "Mask it before anything is saved or logged, never store it, and tell Tom kindly that Scout never needs card details",
+            "correct": true,
+            "why": "Scout checks payments by order number and email, so the card adds risk and no value. Masking it before saving keeps it out of profiles, logs and future prompts."
+          },
+          {
+            "text": "Save it encrypted in Tom's profile, so he can skip typing it next time",
+            "why": "Encryption lowers the risk but doesn't remove it, and no job Scout does needs a card number. Data you never store can't leak."
+          },
+          {
+            "text": "Keep it only in short-term memory, since the chat is trimmed after ten turns anyway",
+            "why": "Trimming only changes what the model sees later. The number still sits in the history for ten turns, and it has already been sent to the model and written to the logs."
+          }
+        ],
+        "hints": [
+          "Which of Scout's jobs actually needs a card number?",
+          "Think about everywhere a message goes: the prompt, the history, the logs and the profile."
+        ],
+        "debrief": "Store the least personal data that does the job. Redact patterns like card numbers before a message is saved, logged or sent on, and keep long-term memory to useful, low-risk facts such as preferences. When a customer overshares, Scout can say kindly that it never needs card details."
+      },
+      {
+        "lesson": "4.3",
+        "title": "The 60-day answer",
+        "situation": "Leo asked Priya to let search_policy look through every file in docs, so Scout can use the size guides too. Today a customer whose boots arrived 45 days ago asked about a return, and Scout said yes. Orbit's policy is 30 days. Last year's returns file is still in the folder.",
+        "context": {
+          "label": "Scout's trace",
+          "lines": [
+            "> search_policy(\"return boots 45 days\")",
+            "< ## Returns   (docs/returns-2025.md)",
+            "< You can return any unused item within 60 days of delivery...",
+            "< ## Returns   (docs/policy.md)",
+            "< You can return any unused item within 30 days of delivery...",
+            "Scout: Good news! You have 60 days, so you're still in time."
+          ]
+        },
+        "stem": "What is the right fix?",
+        "options": [
+          {
+            "text": "Remove last year's file from docs, and add a last-updated date to every policy file",
+            "correct": true,
+            "why": "The search did its job: it found what was in the folder. Retrieval can only be as current as its sources, and dates make stale text easy to spot and filter out."
+          },
+          {
+            "text": "Tell Scout in the system prompt to always pick the smaller number of days",
+            "why": "That patches one number. The next outdated file will disagree about something else, and the stale text is still there to be retrieved."
+          },
+          {
+            "text": "Return the top 5 chunks instead of the top 2",
+            "why": "The correct chunk was already retrieved. More chunks means more conflicting text in the prompt, not less."
+          }
+        ],
+        "hints": [
+          "Did the search fail, or did it faithfully find what was in the folder?",
+          "Fix the source, not the symptom."
+        ],
+        "debrief": "Treat your documents as part of the agent. Keep one current version of each policy, move old ones out of the searched folder, and date every file so retrieval can prefer the newest. Then add a test case: a return 45 days after delivery should get a no."
+      },
+      {
+        "lesson": "4.5",
+        "title": "The exchange that never ends",
+        "situation": "Ana asks to swap her tent for the 3-person one. A test copy of Scout, started without a step limit, keeps re-planning: it checks stock, tries another colour, then checks the first one again. Sam spots it in the logs twenty minutes later.",
+        "context": {
+          "label": "Scout's trace",
+          "lines": [
+            "step 1   > get_order(\"ORB-10482\")       < Trailhead 2P tent, shipped",
+            "step 2   > check_stock(\"TENT-3P-GRN\")   < 0",
+            "step 3   think: maybe another colour is in stock",
+            "step 3   > check_stock(\"TENT-3P-BLU\")   < Error: unknown SKU",
+            "step 4   > check_stock(\"TENT-3P-GRN\")   < 0",
+            "step 5   think: try another colour again",
+            "...      31 more steps",
+            "step 37  > check_stock(\"TENT-3P-GRN\")   < 0",
+            "cost so far: $0.52, still running"
+          ]
+        },
+        "stem": "What should the builder change?",
+        "options": [
+          {
+            "text": "Add a step limit in code; when it's reached, stop and hand off with a summary of what was tried",
+            "correct": true,
+            "why": "The limit doesn't rely on the model choosing to stop. Ana gets an honest answer, and a person starts from the summary instead of from scratch."
+          },
+          {
+            "text": "Tell Scout in the prompt to keep trying until the tent is back in stock",
+            "why": "That makes the loop longer, not shorter. Sam's stock sheet won't change while Scout keeps checking it."
+          },
+          {
+            "text": "Remove check_stock so Scout can't get stuck on it",
+            "why": "Then Scout can't answer stock questions at all. The tool isn't the problem; the missing exit is."
+          }
+        ],
+        "hints": [
+          "What stops this loop today?",
+          "Which kind of limit still works when the model keeps asking for tools?"
+        ],
+        "debrief": "Every agent loop needs an exit that lives in code: a step limit, and ideally a check for the same call repeated with the same input. When the limit is reached, Scout stops, writes down what it tried, and hands off. An identical call made twice in a row is a strong sign the agent is stuck."
+      }
+    ]
+  },
+  "review": {
+    "variants": [
+      {
+        "after_days": 3,
+        "title": "Memory check · Scout",
+        "stem": "Scout's code sends the newest 20 messages with each call. Elena gave her email in message 1 and asks about it in message 30. Why might Scout not know it?",
+        "options": [
+          {
+            "text": "Message 1 is no longer sent, and the model keeps nothing between calls",
+            "correct": true
+          },
+          {
+            "text": "The model's memory fills up after 20 messages and resets"
+          },
+          {
+            "text": "Models delete email addresses for privacy"
+          }
+        ],
+        "rationale": "The model only sees what each call sends. Once message 1 is trimmed, the email is gone, unless your code pinned it as a fact in the system prompt."
+      },
+      {
+        "after_days": 10,
+        "title": "Retrieval check · Scout",
+        "stem": "A customer asks if Orbit price-matches. Scout's search returns its two closest chunks, Refunds and Exchanges, and neither mentions price matching. What should Scout say?",
+        "options": [
+          {
+            "text": "That the policy doesn't cover price matching, and offer to pass the question to the team",
+            "correct": true
+          },
+          {
+            "text": "No, because price matching isn't listed in the policy"
+          },
+          {
+            "text": "Yes, because most outdoor shops price-match"
+          }
+        ],
+        "rationale": "Retrieval returns its closest chunks even when nothing relevant exists. Scout answers only from retrieved text, and when it doesn't cover the question, it says so instead of inventing a yes or a no."
+      },
+      {
+        "after_days": 30,
+        "title": "Loop check · Scout",
+        "stem": "Owen asks when the refund for his returned jacket will arrive. Scout's trace: think, track_parcel, timeout, think, track_parcel, timeout, until step 6 of 6. What should happen now?",
+        "options": [
+          {
+            "text": "Stop, tell Owen honestly that a teammate will follow up, and hand off with a summary of what failed",
+            "correct": true
+          },
+          {
+            "text": "Raise the step limit to 20 so ParcelPath has time to recover"
+          },
+          {
+            "text": "Tell Owen the refund will arrive within 5 business days, as the policy says"
+          }
+        ],
+        "rationale": "The limit did its job, so Scout stops, hands off with what it tried, and tells Owen the truth. Quoting the 5 days would be a guess: that clock starts when the return arrives, and Scout couldn't confirm that it has."
+      }
+    ]
+  }
+}

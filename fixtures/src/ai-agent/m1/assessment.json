@@ -1,0 +1,79 @@
+{
+  "title": "Module check: what makes an agent an agent",
+  "summary": "Six real situations: what an agent is, when to use one, good first jobs, the four core parts and a safe setup.",
+  "items": [
+    {
+      "lesson": "1.1",
+      "stem": "Maya wants Scout to update delivery addresses on orders that haven't shipped yet, like Ravi's ORB-10533. A wrong change could send his $188 order to a stranger's door. Where should Scout's autonomy start?",
+      "options": [
+        "Scout makes every change on its own, since the customer asked for it in writing",
+        "Scout makes changes on its own, and Leo reviews the week's changes every Friday",
+        "Scout prepares each change, and a person on Leo's team approves it before it's saved",
+        "Scout leaves addresses alone for good, and customers keep emailing the team instead"
+      ],
+      "correct": 2,
+      "explain": "Autonomy is a dial: give Scout the least power that does the job. A wrong address is hard to undo once the parcel leaves, so a person approves each change at first. A Friday review only finds mistakes after the parcels have gone."
+    },
+    {
+      "lesson": "1.2",
+      "stem": "Leo wants every support email tagged as order, return, product or other, then moved to that team's folder. Customers word things in endless ways, but once an email is tagged, the filing never changes. What fits best?",
+      "options": [
+        "A fixed workflow that calls a model only to tag each email, then files it by rule",
+        "An agent that reads each email, decides its own next steps and chooses where to file it",
+        "A fixed workflow with keyword rules, like \"refund\" means return, and no model at all",
+        "A chatbot Leo's team can paste each email into and ask which folder it belongs in"
+      ],
+      "correct": 0,
+      "explain": "Only one step needs judgement: reading the customer's words. The rest never changes, so a workflow can run it and call a model just for the tag. A full agent adds cost and surprises to steps nobody needs to decide, and keyword rules miss messy wording."
+    },
+    {
+      "lesson": "1.3",
+      "stem": "Leo has two ideas for Scout's next job: telling customers whether their return has reached the warehouse, or answering \"what's your returns address?\". Each comes up about 50 times a week. Which suits an agent?",
+      "options": [
+        "The address question: it's simpler, so Scout will get it wrong far less often",
+        "Both equally: they come up just as often, and that's what makes a good agent job",
+        "Neither: anything about returns touches money, so it should stay with a person",
+        "The return check: the answer is in Orbit's systems and differs for each customer"
+      ],
+      "correct": 3,
+      "explain": "A good first agent job repeats, needs lookups and forgives mistakes. Both repeat, but the returns address is the same for everyone, so a help page answers it for free. Return status needs a lookup for each customer, and a wrong answer is easy to correct."
+    },
+    {
+      "lesson": "1.4",
+      "stem": "Maya hears Scout is getting tools and asks Priya: \"So could it decide to wipe our orders database?\" Right now Scout's only tool is get_order. What's the accurate answer?",
+      "options": [
+        "Yes: once a model has any tool, it can run whatever code it decides it needs",
+        "No: it can only ask for tools you defined, and your code decides what runs",
+        "Only if the system prompt allows it, since the prompt controls which code runs",
+        "No: language models can't make decisions, so Scout only follows a fixed script"
+      ],
+      "correct": 1,
+      "explain": "For tools you define, the model only sends a request naming the tool and its input; your code runs it. With just get_order defined, there's nothing to ask for that deletes data. A prompt guides the model but runs no code, and the model does decide its own steps."
+    },
+    {
+      "lesson": "1.5",
+      "stem": "An hour ago you pushed hello.py to a public GitHub repo with your API key pasted into it. Nobody has mentioned it yet. What should you do first?",
+      "options": [
+        "Remove the key from hello.py and push a new commit so the repo stops showing it",
+        "Make the repository private so nobody else can see or open the file from now on",
+        "Add hello.py to .gitignore so Git stops sharing that file in every later push",
+        "Delete the key in the console, create a new one, and keep it out of your code"
+      ],
+      "correct": 3,
+      "explain": "Assume a leaked key is already copied: scanners search public code for keys, and Git keeps the old commit. Only deleting the key in the console stops others spending your credit. A new commit, a private repo or .gitignore all leave the old key working."
+    },
+    {
+      "lesson": "1.2",
+      "transfer": true,
+      "stem": "Rosa runs a small bike repair shop. She wants customers texted the moment a repair is marked done, and an assistant that answers questions like \"is it ready, and what did you replace?\" from the repair log. What should she build?",
+      "options": [
+        "A workflow for the texts, and an agent that checks the repair log for questions",
+        "One agent for both jobs, so a single system decides when to text and how to answer",
+        "A fixed workflow for both jobs, with a branch written for each question customers ask",
+        "A chatbot for both jobs, with the shop's price list and opening hours in its prompt"
+      ],
+      "correct": 0,
+      "explain": "The text has fixed steps, so a workflow sends it fast and cheaply every time. Questions vary and need lookups in the log, so the steps depend on the request: agent work, and it can start read-only. One agent for both adds cost and risk to a job with nothing to decide."
+    }
+  ]
+}

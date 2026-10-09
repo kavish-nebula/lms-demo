@@ -32,6 +32,7 @@ export const V1_STAGES: ReadonlySet<StageId> = new Set([
   "explainer",
   "worked",
   "guided",
+  "lab",
   "gate",
   "reflection",
   "review",
@@ -130,8 +131,12 @@ export const STAGE_META: Record<StageId, StageMeta> = {
 
 export type StageState = "done" | "current" | "todo" | "locked" | "absent" | "not_in_v1";
 
-/** Stages a module may contain. Project, gate and reflection happen once, in the course finale. */
-export const MODULE_STAGES: readonly StageId[] = ["hook", "explainer", "worked", "guided", "lab", "review"];
+/**
+ * Stages a module may contain. Each module closes with its own check (gate)
+ * before the spaced review; the project and the reflection happen once, in the
+ * course finale, which also holds the final check.
+ */
+export const MODULE_STAGES: readonly StageId[] = ["hook", "explainer", "worked", "guided", "lab", "gate", "review"];
 
 export function isModuleStage(value: string): value is StageId {
   return (MODULE_STAGES as readonly string[]).includes(value);

@@ -1,0 +1,248 @@
+{
+  "lesson": "5.2",
+  "title": "Building the agent step by step",
+  "notes": [
+    "Start with the smallest loop that runs, then add one tool or feature at a time.",
+    "After every change, run Scout on a real question and read the trace before moving on.",
+    "When something breaks, the cause is almost always the last piece you added."
+  ],
+  "quizAfter": 4,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "layers",
+      "kicker": "Module 5 · Lesson 2",
+      "title": "Building the agent step by step",
+      "sub": "Smallest loop first, then one piece at a time, running it after every change",
+      "sentences": [
+        "You have a scope and a drawing.",
+        "Now you build Scout, and the order you build it in matters as much as the code.",
+        "This lesson shows one habit that keeps your agent working at every step."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Two ways to build",
+      "left": {
+        "label": "All at once",
+        "tone": "bad",
+        "cue": 1,
+        "points": [
+          "Write six tools, memory and tests",
+          "Run everything for the first time",
+          "Twelve errors, no idea which change",
+          "A lost afternoon"
+        ]
+      },
+      "right": {
+        "label": "One piece at a time",
+        "tone": "ok",
+        "cue": 4,
+        "points": [
+          "Start with a loop that runs",
+          "Add one tool, then run it",
+          "Each error points to one change",
+          "A working Scout at every step"
+        ]
+      },
+      "sentences": [
+        "Picture two ways to build Scout.",
+        "In the first, you write all six tools, the memory and the tests, then run it for the first time.",
+        "It fails in twelve places, and you can't tell which change caused which error.",
+        "Everything is new, so everything is a suspect.",
+        "In the second, you start with the smallest thing that runs, and add one piece at a time.",
+        "When something breaks, only one thing changed, so you know exactly where to look.",
+        "And you always have a Scout that works, even if it can't do much yet."
+      ]
+    },
+    {
+      "kind": "cycle",
+      "title": "The build loop",
+      "center": { "label": "Build loop", "sub": "minutes per turn, not days" },
+      "steps": [
+        { "icon": "pencil", "label": "Build", "sub": "add one small piece", "cue": 1 },
+        { "icon": "play", "label": "Run", "sub": "ask a real question", "cue": 2 },
+        { "icon": "eye", "label": "Check", "sub": "read the trace and reply", "cue": 3 },
+        { "icon": "check", "label": "Keep", "sub": "save, pick the next piece", "cue": 4 }
+      ],
+      "note": { "text": "If the check fails, the bug is in the piece you just added.", "cue": 5 },
+      "sentences": [
+        "The habit is a small loop of your own, and you go round it many times.",
+        "Build: add one small piece, like a single tool.",
+        "Run: ask Scout a real customer question that needs that piece.",
+        "Check: read the trace and the reply, and compare them with the data.",
+        "Keep: when it works, save your work and choose the next piece.",
+        "If the check fails, you know the bug is in the piece you just added."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "Piece one: the smallest loop that runs",
+      "lead": "No tools yet. Just the model, Scout's system prompt and one customer question.",
+      "rows": [
+        { "code": "client = anthropic.Anthropic()", "out": "reads your API key from the environment", "cue": 1 },
+        { "code": "MODEL = \"claude-opus-5-5\"", "out": "the model behind Scout", "cue": 2 },
+        { "code": "r = client.messages.create(model=MODEL, ...)", "out": "system prompt plus the question", "cue": 3 },
+        { "code": "next(b.text for b in r.content if b.type == \"text\")", "out": "the text of the reply", "cue": 4 }
+      ],
+      "aside": { "icon": "play", "label": "Run it", "text": "Ask about ORB-10482. With no tools, Scout should say it can't look orders up yet. Honest is a pass.", "cue": 5 },
+      "sentences": [
+        "The first piece is the smallest Scout that can run.",
+        "You create a client, which reads your API key from the environment.",
+        "You choose the model.",
+        "You call the messages create method with the model, the system prompt and the customer's question.",
+        "Then you take the text block out of the reply.",
+        "Run it with an order question: Scout should admit it can't look orders up yet, and that honesty is your first pass."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "Scout's build order",
+      "columns": ["Piece", "Run it with", "Pass when"],
+      "rows": [
+        { "cells": ["1. Loop, no tools", "Where is ORB-10482?", "It admits it can't look"], "cue": 1 },
+        { "cells": ["2. get_order", "The same question", "One call, right order ID"], "cue": 2 },
+        { "cells": ["3. track_parcel", "The same question", "The reply says Thursday"], "cue": 3 },
+        { "cells": ["4. Four more tools", "One question per tool", "Each trace looks right"], "cue": 4 },
+        { "cells": ["5. Memory and trace", "A two-turn chat", "No repeated questions"], "cue": 5 }
+      ],
+      "note": { "text": "Every row ends with Scout running. Never two new pieces at once.", "cue": 6 },
+      "sentences": [
+        "Here is the order we build Scout in.",
+        "First the bare loop, which should answer honestly that it can't look anything up.",
+        "Then the get order tool, checked by asking the same question and seeing one call with the right order number.",
+        "Then the track parcel tool, so the reply can say when the parcel will arrive.",
+        "Then the other four tools, each tested with its own question.",
+        "Finally memory and the trace, tested with a short two-turn chat.",
+        "Each row ends with Scout running, and you never add two new pieces at once."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "Adding one tool: get_order",
+      "run": true,
+      "nodes": [
+        { "kind": "logic", "icon": "json", "label": "Define it", "sub": "name, description, schema", "cue": 1 },
+        { "kind": "tool", "icon": "code", "label": "Write the function", "sub": "reads data/orders.json", "cue": 2 },
+        { "kind": "action", "icon": "plug", "label": "Register it", "sub": "in TOOLS and run_tool", "cue": 3 },
+        { "kind": "user", "icon": "play", "label": "Run a question", "sub": "Where is ORB-10482?", "cue": 4 },
+        { "kind": "output", "icon": "eye", "label": "Read the trace", "sub": "right tool, right input", "cue": 5 }
+      ],
+      "note": { "text": "Five small moves per tool. Only then the next one.", "cue": 6 },
+      "sentences": [
+        "Adding one tool always takes the same five moves.",
+        "Define it: a name, a clear description and a schema for its input.",
+        "Write the function that does the work, here reading the order file.",
+        "Register it, both in the tools list the model sees and in the dispatcher that runs it.",
+        "Run Scout with a question that needs the new tool.",
+        "Read the trace: did Scout call the right tool with the right input?",
+        "Only when all five moves are done do you start on the next tool."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "Run, then check",
+      "messages": [
+        { "role": "user", "label": "You", "text": "Where is my order ORB-10482?", "cue": 1 },
+        { "role": "tool", "label": "trace · step 1", "text": "get_order {\"order_id\": \"ORB-10482\"} → shipped, ParcelPath, PP-88213", "cue": 2 },
+        { "role": "agent", "label": "Scout", "text": "Your Trailhead tent has shipped with ParcelPath. The tracking number is PP-88213.", "cue": 3 },
+        { "role": "system", "label": "Your check", "text": "Right tool, right input, and the facts match orders.json. Next piece: track_parcel.", "cue": 4 }
+      ],
+      "aside": { "icon": "lightbulb", "label": "Notice", "text": "No arrival day yet. That's expected: tracking is the next piece, not this one.", "cue": 5 },
+      "sentences": [
+        "Here is the run right after adding the get order tool.",
+        "You ask the same question as before.",
+        "The trace shows one step: get order, with the right order number, returning shipped and a tracking number.",
+        "Scout's reply uses exactly those facts.",
+        "You compare them with the order file, they match, and this piece passes.",
+        "There's no arrival day yet, and that's expected: tracking is the next piece."
+      ]
+    },
+    {
+      "kind": "example",
+      "title": "When a step breaks",
+      "scenario": "Priya adds track_parcel and runs the same question again.",
+      "steps": [
+        { "time": "10:02", "icon": "pencil", "text": "Adds the track_parcel definition and its function", "cue": 1 },
+        { "time": "10:03", "icon": "play", "text": "Runs it. The trace shows: Error: Unknown tool: track_parcel", "cue": 2 },
+        { "time": "10:04", "icon": "search", "text": "Only one thing changed, so she checks the new tool's wiring", "cue": 3 },
+        { "time": "10:05", "icon": "wrench", "text": "It was never added to run_tool. One line, run again: pass", "cue": 4 }
+      ],
+      "result": { "text": "Small steps turn a mystery into a three-minute fix.", "cue": 5 },
+      "sentences": [
+        "Here is why the habit pays off.",
+        "Priya adds the track parcel tool: the definition and the function.",
+        "She runs the same question, and the trace shows an error: unknown tool.",
+        "Only one thing changed since the last good run, so she looks straight at the new tool's wiring.",
+        "She had forgotten to add it to the dispatcher. One line, run again, and it passes.",
+        "In an all-at-once build, that same error would hide among a dozen others."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "Recap",
+      "points": [
+        { "text": "Start with the smallest loop that runs, even with no tools.", "cue": 1 },
+        { "text": "Add one piece at a time: define, write, register, run, check.", "cue": 2 },
+        { "text": "After every change, ask a real question and read the trace.", "cue": 3 },
+        { "text": "When it breaks, look first at the piece you just added.", "cue": 4 }
+      ],
+      "sentences": [
+        "Let's recap.",
+        "Start with the smallest loop that runs, even with no tools at all.",
+        "Add one piece at a time, using the same five moves for every tool.",
+        "After every change, run a real question and read the trace.",
+        "And when something breaks, the last piece you added is the first suspect.",
+        "Next, we look closely at the pieces themselves: Scout's six tools and its memory."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "You added get_order and track_parcel together, and now Scout errors. What would the build loop have had you do?",
+      "options": [
+        "Add them one at a time, running Scout after each",
+        "Write all six tools before running anything",
+        "Skip running until the test set is written"
+      ],
+      "correct": 0,
+      "explain": "With one change per run, an error points straight at its cause. Two changes at once means two suspects, and they can hide each other.",
+      "hint": "How many things should change between two runs?"
+    },
+    {
+      "q": "Your first Scout has no tools. Asked about an order, it says it can't look orders up yet. Is that a pass?",
+      "options": [
+        "No: it should guess the most likely status",
+        "Yes: it runs, and it's honest about what it can't do",
+        "No: a loop with no tools is useless"
+      ],
+      "correct": 1,
+      "explain": "The first piece only has to run and behave honestly. Every later piece builds on a loop you already trust.",
+      "hint": "What was the goal of the very first piece?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "What are the five moves for adding one tool?",
+      "options": [
+        "Write, deploy, wait for complaints, fix, repeat",
+        "Define, write, add to the prompt, test at the end, ship",
+        "Define, write, register, run a question, read the trace"
+      ],
+      "correct": 2,
+      "explain": "Each tool is defined, written, registered in TOOLS and the dispatcher, then run with a real question and checked in the trace before the next tool starts.",
+      "hint": "The last move is where you check your work."
+    },
+    {
+      "q": "Right after adding a tool, the trace says Unknown tool: track_parcel. Where should Priya look first?",
+      "options": [
+        "The model: it is inventing tool names",
+        "The wiring of the tool she just added, such as run_tool",
+        "The system prompt's tone section"
+      ],
+      "correct": 1,
+      "explain": "The model asked for a tool it was told about, but the dispatcher didn't know it. The error appeared right after one change, so that change is the first suspect.",
+      "hint": "What changed since the last good run?"
+    }
+  ]
+}

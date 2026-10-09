@@ -10,7 +10,7 @@ import { api, refreshEnrollments } from "@/lib/api";
  * own id, so a resend is harmless. Nothing is sent while only previewing.
  */
 
-export type SignalKind = "video_check" | "recall_answer" | "final_check" | "capstone_check";
+export type SignalKind = "video_check" | "recall_answer" | "scenario_answer" | "module_check" | "final_check" | "capstone_check";
 export type Signal = { kind: SignalKind; moduleId?: string | null; lesson?: string | null; payload: Record<string, unknown> };
 type Queued = Signal & { id: string };
 

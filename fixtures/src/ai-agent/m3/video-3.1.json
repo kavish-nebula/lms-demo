@@ -1,0 +1,241 @@
+{
+  "lesson": "3.1",
+  "title": "What is tool calling?",
+  "notes": [
+    "A model can't run code or reach your systems; it can only ask for a tool by name, with arguments.",
+    "Your code runs the tool and sends the result back as a tool_result, matched to the request by its id.",
+    "Tool calling is a cycle: the model asks, your code runs, the result returns, and the model answers or asks again."
+  ],
+  "quizAfter": 4,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "wrench",
+      "kicker": "Module 3 · Lesson 1",
+      "title": "What is tool calling?",
+      "sub": "How a model that can only write text gets real work done",
+      "sentences": [
+        "Welcome to Module 3.",
+        "So far Scout can read a question and write a good reply, but it cannot look anything up.",
+        "In this lesson you will see how a model asks for a tool, who actually runs it, and how the result gets back.",
+        "Halfway through there is a short check, so you know the first half has landed."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Talking about an order versus looking it up",
+      "left": {
+        "label": "Without tools",
+        "tone": "bad",
+        "cue": 1,
+        "points": [
+          "Ana asks where order ORB-10482 is",
+          "Scout has never seen Orbit's order system",
+          "It apologises, or worse, it guesses",
+          "Leo answers the ticket by hand"
+        ]
+      },
+      "right": {
+        "label": "With a tool",
+        "tone": "ok",
+        "cue": 4,
+        "points": [
+          "Scout asks for get_order with ORB-10482",
+          "Your code looks the order up",
+          "Scout reads the real status",
+          "Ana gets her tracking number in seconds"
+        ]
+      },
+      "sentences": [
+        "Start with Ana, who writes in to ask where her new tent is.",
+        "Without tools, Scout has a problem: it has never seen Orbit's order system.",
+        "It knows plenty about tents and shipping in general, but nothing about Ana's order.",
+        "So it apologises, or worse, it guesses, and Leo ends up answering the ticket by hand.",
+        "With a tool, Scout can ask for the order to be looked up.",
+        "Your code fetches the real status, and Ana gets her tracking number in seconds."
+      ]
+    },
+    {
+      "kind": "define",
+      "title": "So, what is tool calling?",
+      "term": "Tool calling",
+      "definition": "The model asks your code to run a named function with specific arguments, then uses the result in its answer.",
+      "parts": [
+        { "text": "The model asks", "cue": 1 },
+        { "text": "Your code runs the tool", "cue": 2 },
+        { "text": "The result goes back", "cue": 3 }
+      ],
+      "analogy": {
+        "label": "Think of it as",
+        "text": "A doctor writing a lab request. The doctor never runs the test, but reads the result and decides what to do next."
+      },
+      "sentences": [
+        "This is called tool calling, and the whole module rests on it.",
+        "The model asks for a tool by name, and fills in the arguments the tool needs.",
+        "Your code, not the model, runs that tool.",
+        "Then the result goes back to the model, which uses it in its answer.",
+        "Think of a doctor writing a request for a blood test.",
+        "The doctor never runs the test, but reads the result and decides what to do next."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "One tool call, message by message",
+      "messages": [
+        { "role": "user", "label": "Ana", "text": "Hi, where is my tent? Order ORB-10482.", "cue": 1 },
+        { "role": "agent", "label": "Scout asks for a tool", "text": "get_order(order_id=\"ORB-10482\")", "cue": 2 },
+        { "role": "tool", "label": "get_order result", "text": "{\"item\": \"Trailhead 2P tent\", \"status\": \"shipped\", \"carrier\": \"ParcelPath\", \"tracking\": \"PP-88213\"}", "cue": 3 },
+        { "role": "agent", "label": "Scout", "text": "Good news: your Trailhead tent has shipped with ParcelPath. Your tracking number is PP-88213.", "cue": 5 }
+      ],
+      "aside": {
+        "icon": "eye",
+        "label": "Notice",
+        "text": "Scout never touched the order system. It asked, and your code did the work.",
+        "cue": 6
+      },
+      "sentences": [
+        "Here is what that looks like in a real conversation.",
+        "Ana asks where her tent is, and gives her order number.",
+        "Scout does not answer yet; instead it replies with a tool request, get order, with Ana's order number as the argument.",
+        "Your code runs the lookup and sends back the result: shipped, with ParcelPath, plus a tracking number.",
+        "That result goes back to Scout as a new message in the conversation.",
+        "Now Scout writes the reply Ana actually sees, using only facts from the result.",
+        "Notice that Scout never touched the order system: it asked, and your code did the work."
+      ]
+    },
+    {
+      "kind": "cycle",
+      "title": "The tool-calling cycle",
+      "center": { "label": "Tool loop", "sub": "repeats until no tool is needed" },
+      "steps": [
+        { "icon": "message", "label": "Ask", "sub": "model requests a tool", "cue": 1 },
+        { "icon": "terminal", "label": "Run", "sub": "your code calls the function", "cue": 2 },
+        { "icon": "send", "label": "Return", "sub": "result goes back to the model", "cue": 3 },
+        { "icon": "sparkles", "label": "Answer", "sub": "or ask for another tool", "cue": 4 }
+      ],
+      "note": { "text": "The model chooses the tool. Your code decides what actually runs.", "cue": 6 },
+      "sentences": [
+        "Every tool call follows the same four steps.",
+        "Ask: the model stops and says which tool it wants, and with which arguments.",
+        "Run: your code finds the matching Python function and calls it.",
+        "Return: your code sends the result back to the model as a tool result.",
+        "Answer: the model reads the result and either replies, or asks for another tool.",
+        "If it asks again, the cycle goes round once more, and that is how an agent chains several steps together.",
+        "The model chooses the tools, but your code decides what actually runs."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "What your code actually receives",
+      "lead": "When the model wants a tool, the response tells you so. These are the fields your code reads and writes.",
+      "rows": [
+        { "code": "response.stop_reason == \"tool_use\"", "out": "The model is waiting for a tool result", "cue": 1 },
+        { "code": "block.type == \"tool_use\"", "out": "This block is the tool request", "cue": 2 },
+        { "code": "block.name, block.input", "out": "\"get_order\", {\"order_id\": \"ORB-10482\"}", "cue": 3 },
+        { "code": "{\"type\": \"tool_result\", \"tool_use_id\": block.id, ...}", "out": "Your answer, matched to the request by id", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "link",
+        "label": "The id matters",
+        "text": "Each result carries the id of the request it answers, so two tool calls at once never get mixed up.",
+        "cue": 5
+      },
+      "sentences": [
+        "Let us look at what actually arrives in your code.",
+        "When the model wants a tool, the response has a stop reason of tool use, which means it is waiting for you.",
+        "Inside the response is a tool use block: the request itself.",
+        "It holds the tool's name and its input, a small dictionary of arguments.",
+        "You answer with a tool result block that repeats the request's id, so the model can match each result to its request.",
+        "That id matters most when the model asks for two tools at once."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "Which jobs need a tool?",
+      "columns": ["Job", "Model on its own", "Tool"],
+      "rows": [
+        { "cells": ["Write a friendly reply", "Does it well", "None needed"], "cue": 1 },
+        { "cells": ["Know Ana's order status", "Can't: never saw your data", "get_order"], "tone": "bad", "cue": 2 },
+        { "cells": ["Exact arithmetic", "Often close, sometimes wrong", "calculate"], "tone": "bad", "cue": 3 },
+        { "cells": ["Today's carrier delays", "Can't: knowledge stops at training", "web_search"], "tone": "bad", "cue": 4 },
+        { "cells": ["Send a refund", "Can't: it only writes text", "request_refund"], "tone": "bad", "cue": 5 }
+      ],
+      "note": { "text": "If the answer lives in a system, a file or today's news, the model needs a tool.", "cue": 6 },
+      "sentences": [
+        "So which jobs need a tool, and which don't?",
+        "Writing a friendly reply is pure language, so the model does that well on its own.",
+        "Knowing a customer's order status is impossible without a lookup, because the model has never seen your data.",
+        "Exact arithmetic is the surprise: models are often close, but close is not good enough for a refund.",
+        "Anything recent, like today's carrier delays, comes after what the model learned in training.",
+        "And actions, like sending a refund, always need a tool, because the model can only write text.",
+        "A good rule: if the answer lives in a system, a file or today's news, the model needs a tool."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "A model can't run code or reach your systems; it can only ask", "cue": 1 },
+        { "text": "A tool request names the tool and fills in its arguments", "cue": 2 },
+        { "text": "Your code runs the tool and sends back a tool_result with the same id", "cue": 3 },
+        { "text": "The cycle repeats: ask, run, return, answer", "cue": 4 }
+      ],
+      "sentences": [
+        "Let us pull it together.",
+        "A model cannot run code or reach your systems by itself; it can only ask.",
+        "A tool request names the tool and fills in the arguments.",
+        "Your code runs the tool and sends the result back, matched to the request by its id.",
+        "And the cycle repeats, ask, run, return, answer, until the model has what it needs.",
+        "Next, you will see how to describe a tool, so the model knows when to use it."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "Ana asks Scout where order ORB-10482 is. Who actually looks the order up?",
+      "options": [
+        "The model, by connecting to Orbit's order database",
+        "Your Python code, after the model asks for get_order",
+        "Nobody: the model remembers recent orders from training"
+      ],
+      "correct": 1,
+      "explain": "The model only writes a tool request. Your code runs the get_order function and sends the result back.",
+      "hint": "Think of the doctor and the lab request: who writes the request, and who runs the test?"
+    },
+    {
+      "q": "Scout's response comes back with stop_reason \"tool_use\". What should your code do next?",
+      "options": [
+        "Show the response text to the customer",
+        "Run the requested tool and send back a tool_result",
+        "Send exactly the same request again"
+      ],
+      "correct": 1,
+      "explain": "tool_use means the model has paused to wait for a result. Run the tool, send the result back, and it carries on.",
+      "hint": "The model has stopped in the middle of the job. What is it waiting for?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "Which customer request most needs a tool?",
+      "options": [
+        "Rewrite this reply so it sounds friendlier",
+        "What is the status of my order ORB-10533?",
+        "Explain what a sleeping bag's temperature rating means"
+      ],
+      "correct": 1,
+      "explain": "Order status lives in Orbit's system, which the model has never seen. The other two are language jobs it does well alone.",
+      "hint": "Where does the answer live: in general knowledge, or in Orbit's own data?"
+    },
+    {
+      "q": "Scout asks for two tools in one response. How does it know which result belongs to which request?",
+      "options": [
+        "The results must come back in the same order as the requests",
+        "Each tool_result carries the tool_use_id of the request it answers",
+        "The model works it out from what the results say"
+      ],
+      "correct": 1,
+      "explain": "Every tool_result repeats the id of its tool_use block, so the model matches them exactly, whatever the order.",
+      "hint": "Look again at the fields inside a tool_result block."
+    }
+  ]
+}

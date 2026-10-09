@@ -4,25 +4,21 @@ import * as React from "react";
 import { cn } from "cn";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Check, ChevronDown, CircleCheck, ClipboardList, Copy, Download, Eye, Hammer, LifeBuoy, Maximize2 } from "lucide-react";
+import { Check, ChevronDown, CircleCheck, ClipboardList, Copy, Download, Eye, Hammer, LifeBuoy } from "lucide-react";
 import { Surface } from "@/components/kit/surface";
 import { ProgressBar } from "@/components/kit/progress-ring";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { StageShell, Callout } from "@/components/player/stage-shell";
-import { N8nScreenView } from "@/components/n8n/screen";
-import "@/components/n8n/n8n.css";
 import { useLocalJson, writeLocal } from "@/lib/local-store";
 import { planModule } from "@/lib/learner-plan";
 import type { Adaptation } from "@/lib/setup";
-import type { GuideStep, GuidedBlock, N8nScreen } from "@/data/types";
+import type { GuideStep, GuidedBlock } from "@/data/types";
 import type { StageProps } from "./types";
 
 /**
- * Guided practice: build the module's workflow in your own n8n, one step at
- * a time. Each step says what to do, shows the n8n screen with the exact
- * button or field numbered, gives values to copy, and says what you should
+ * Guided practice: build the module's project yourself, one step at a time.
+ * Each step says what to do, gives values to copy, and says what you should
  * see before moving on. Steps done are kept in the browser.
  */
 export function GuidedStage({ block, adaptation, ...nav }: StageProps<GuidedBlock> & { adaptation: Adaptation }) {
@@ -59,8 +55,6 @@ export function GuidedStage({ block, adaptation, ...nav }: StageProps<GuidedBloc
       </Callout>
 
       <Surface pad="md" className="flex flex-col gap-4">
-        <h2 className="font-semibold">{t("youllBuild")}</h2>
-        <ScreenFigure screen={block.goal} />
         <div className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2">
           <div className="flex flex-col gap-2">
             <h3 className="flex items-center gap-2 text-sm font-semibold">
@@ -196,7 +190,7 @@ function StepCard({
           <ol className="flex flex-col gap-2.5">
             {step.actions.map((a, i) => (
               <li key={i} className="flex gap-3">
-                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-(--nx-mark) font-mono text-[11px] font-bold text-(--nx-mark-ink)">{i + 1}</span>
+                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-stage-guided-line bg-stage-guided-soft font-mono text-[11px] font-bold text-stage-guided">{i + 1}</span>
                 <span className="leading-relaxed">
                   <Rich text={a} />
                 </span>
@@ -210,7 +204,6 @@ function StepCard({
               ))}
             </div>
           ) : null}
-          <ScreenFigure screen={step.screen} />
           <div className="flex gap-2.5 rounded-lg border border-ok-line bg-ok-soft p-3 text-sm">
             <Eye className="mt-0.5 size-4 shrink-0 text-ok" aria-hidden />
             <p>
@@ -268,31 +261,6 @@ function CopyValue({ label, value }: { label: string; value: string }) {
       </div>
       <code className="font-mono text-[13px] break-all whitespace-pre-wrap text-brand-ink">{value}</code>
     </div>
-  );
-}
-
-/** A recreated n8n screen, with a button to see it larger. */
-function ScreenFigure({ screen }: { screen: N8nScreen }) {
-  const t = useTranslations("guide");
-  const [big, setBig] = React.useState(false);
-  return (
-    <figure className="flex flex-col gap-2">
-      <N8nScreenView screen={screen} />
-      <div className="flex items-start justify-between gap-3">
-        <figcaption className="text-xs text-ink-faint">{screen.caption}</figcaption>
-        <Button variant="ghost" size="xs" className="shrink-0" onClick={() => setBig(true)}>
-          <Maximize2 data-icon="inline-start" />
-          {t("enlarge")}
-        </Button>
-      </div>
-      <Dialog open={big} onOpenChange={setBig}>
-        <DialogContent className="w-[96vw] p-3 sm:max-w-[min(1400px,96vw)]">
-          <DialogTitle className="sr-only">{screen.caption}</DialogTitle>
-          <DialogDescription className="sr-only">{t("enlargedHelp")}</DialogDescription>
-          <N8nScreenView screen={screen} />
-        </DialogContent>
-      </Dialog>
-    </figure>
   );
 }
 

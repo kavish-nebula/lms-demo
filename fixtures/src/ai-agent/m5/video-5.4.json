@@ -1,0 +1,213 @@
+{
+  "lesson": "5.4",
+  "title": "Testing and debugging the agent",
+  "notes": [
+    "A trace records every step of a run: the tool Scout chose, the input it sent and the result or error that came back.",
+    "To debug, reproduce the failing case, read the trace from the top and fix the first bad step; later mistakes often follow from it.",
+    "Most agent bugs are one of four: wrong tool, wrong arguments, an ignored tool error, or a loop."
+  ],
+  "quizAfter": 3,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "bug",
+      "kicker": "Module 5 · Lesson 4",
+      "title": "Testing and debugging the agent",
+      "sub": "Read the trace, find the first bad step, fix one thing",
+      "sentences": [
+        "Scout will get things wrong. Every agent does.",
+        "What matters is how fast you can find out why.",
+        "In this lesson you learn to read a trace, and to spot the four bugs you'll meet most often."
+      ]
+    },
+    {
+      "kind": "define",
+      "title": "What is a trace?",
+      "term": "Trace",
+      "definition": "A step-by-step record of one agent run: what Scout decided at each step, the input it sent, and what came back.",
+      "parts": [
+        { "text": "What Scout decided", "cue": 1 },
+        { "text": "The tool and its input", "cue": 2 },
+        { "text": "The result or error", "cue": 3 }
+      ],
+      "analogy": { "label": "Think of it as", "text": "A flight recorder. When something goes wrong, you replay exactly what happened instead of guessing." },
+      "sentences": [
+        "Your main debugging tool is called a trace.",
+        "At each numbered step, it records what Scout decided to do next.",
+        "It shows which tool Scout chose, and the exact input it sent.",
+        "And it shows what came back: a result, or an error.",
+        "Think of a flight recorder.",
+        "When something goes wrong, you replay exactly what happened instead of guessing."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "A healthy trace",
+      "lead": "agent.py prints one line for each tool call and one for its result. This run went well.",
+      "rows": [
+        { "code": "[1] get_order {\"order_id\": \"ORB-10482\"}", "out": "Scout looks up Ana's order", "cue": 1 },
+        { "code": "    -> {... \"status\": \"shipped\", \"tracking\": \"PP-88213\"}", "out": "the facts it found", "cue": 2 },
+        { "code": "[2] track_parcel {\"tracking_number\": \"PP-88213\"}", "out": "uses the tracking number it just found", "cue": 3 },
+        { "code": "    -> {... \"expected_delivery\": \"Thursday\"}", "out": "the arrival day for the reply", "cue": 4 }
+      ],
+      "aside": { "icon": "eye", "label": "Read it like a story", "text": "Each step should follow from the one before. Where the story stops making sense, that's your bug.", "cue": 5 },
+      "sentences": [
+        "Here is the trace of a healthy run.",
+        "Step one: Scout calls get order with Ana's order number.",
+        "The result comes back: shipped, with a tracking number.",
+        "Step two: Scout calls track parcel, using the tracking number it just found.",
+        "That result gives the arrival day, Thursday, which goes into the reply.",
+        "Read a trace like a story: each step should follow from the one before.",
+        "And when the reply and the trace disagree, trust the trace: it shows what Scout actually did."
+      ]
+    },
+    {
+      "kind": "cycle",
+      "title": "The debugging loop",
+      "center": { "label": "Debug loop", "sub": "one failing case at a time" },
+      "steps": [
+        { "icon": "play", "label": "Reproduce", "sub": "run the failing case alone", "cue": 1 },
+        { "icon": "search", "label": "Read", "sub": "find the first bad step", "cue": 2 },
+        { "icon": "wrench", "label": "Fix", "sub": "change one thing", "cue": 3 },
+        { "icon": "repeat", "label": "Re-run", "sub": "that case, then all tests", "cue": 4 }
+      ],
+      "note": { "text": "The first bad step matters most. Later mistakes often follow from it.", "cue": 5 },
+      "sentences": [
+        "When a case fails, go round this loop.",
+        "Reproduce: run that one case on its own, with the trace on.",
+        "Read: walk the trace from the top and find the first step that's wrong.",
+        "Fix: change one thing, aimed at that step.",
+        "Re-run: first the failing case, then the whole test set, to be sure nothing else broke.",
+        "Focus on the first bad step, because later mistakes often follow from it.",
+        "One change per loop keeps cause and effect clear, just like building one piece at a time."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "Four bugs you will meet",
+      "columns": ["Bug", "In the trace", "Usual fix"],
+      "rows": [
+        { "cells": ["Wrong tool", "search_policy for an order status", "Sharper tool descriptions"], "cue": 1 },
+        { "cells": ["Wrong arguments", "get_order with an email as order_id", "Fix the schema or description"], "cue": 2 },
+        { "cells": ["Ignored error", "An error, then a confident answer", "Prompt: report it, never guess"], "cue": 3 },
+        { "cells": ["Looping", "The same call, again and again", "Step limit plus a clearer error"], "cue": 4 }
+      ],
+      "note": { "text": "Most agent bugs are one of these four. Name it, then fix it.", "cue": 5 },
+      "sentences": [
+        "Most agent bugs fall into four families.",
+        "Wrong tool: Scout searches the policy when it should look up the order, usually because two descriptions overlap.",
+        "Wrong arguments: the right tool with the wrong input, like an email where an order number should be.",
+        "Ignored error: a tool fails, and Scout answers confidently anyway.",
+        "Looping: Scout calls the same tool again and again, hoping for a different result.",
+        "Once you can name the bug, the fix is usually clear.",
+        "Each family leaves its own fingerprint in the trace, so with practice you'll spot them at a glance."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "Reading a buggy trace",
+      "messages": [
+        { "role": "user", "label": "Grace", "text": "Hi, I ordered boots with grace@example.com. Can I return them?", "cue": 1 },
+        { "role": "tool", "label": "step 1", "text": "get_order {\"order_id\": \"grace@example.com\"} → Error: No order with ID grace@example.com", "cue": 2 },
+        { "role": "agent", "label": "Scout", "text": "Yes! You can return unused items within 30 days for a full refund.", "cue": 3 },
+        { "role": "system", "label": "checker", "text": "FAIL: no order was found, and the boots were delivered 62 days ago.", "cue": 4 }
+      ],
+      "aside": { "icon": "bug", "label": "Two bugs, one cause", "text": "Step 1 has wrong arguments. The reply ignores the error. Fix step 1 first.", "cue": 5 },
+      "sentences": [
+        "Now a trace from one of Scout's real failures.",
+        "Grace writes in with her email address, not an order number.",
+        "Step one: Scout calls get order, but puts her email in the order number field, and the tool returns an error.",
+        "Scout then answers anyway, cheerfully promising a return.",
+        "The checker fails it: her boots were delivered 62 days ago, well outside the window.",
+        "There are two bugs here, wrong arguments and an ignored error, but the first bad step is step one.",
+        "Fix that first, and the reply will have real data to work with."
+      ]
+    },
+    {
+      "kind": "example",
+      "title": "Catching a loop",
+      "scenario": "Elena asks where her climbing rope is. The carrier keeps timing out.",
+      "steps": [
+        { "time": "Step 1", "icon": "truck", "text": "track_parcel PP-90417 → Error: ParcelPath did not answer", "cue": 1 },
+        { "time": "Steps 2 to 5", "icon": "repeat", "text": "The same call and the same timeout, four more times", "cue": 2 },
+        { "time": "Step 6", "icon": "timer", "text": "MAX_STEPS ends the run with a polite apology", "cue": 3 },
+        { "time": "The fix", "icon": "pencil", "text": "The error now says: don't retry, tell the customer tracking is down", "cue": 4 }
+      ],
+      "result": { "text": "The step limit kept the run cheap. The clearer error message fixed the cause.", "cue": 5 },
+      "sentences": [
+        "The last bug is the loop, and it's the one that costs money.",
+        "Elena asks where her rope is, and the carrier times out.",
+        "Scout tries again, and again, with exactly the same call.",
+        "The step limit you added in Module 3 ends the run after six steps.",
+        "The real fix is a clearer error: the carrier isn't answering, so don't retry, and tell the customer.",
+        "The limit kept the run cheap, but only the better error message fixed the cause."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "Recap",
+      "points": [
+        { "text": "A trace shows every step: the tool, its input, the result.", "cue": 1 },
+        { "text": "Reproduce, read, fix one thing, then re-run everything.", "cue": 2 },
+        { "text": "Find the first bad step; later ones often follow from it.", "cue": 3 },
+        { "text": "Name the bug: wrong tool, wrong arguments, ignored error, loop.", "cue": 4 }
+      ],
+      "sentences": [
+        "Let's recap.",
+        "A trace shows each step of a run: the tool, its input and its result.",
+        "To debug, reproduce the case, read the trace, fix one thing, and re-run everything.",
+        "Look for the first bad step, because later mistakes often follow from it.",
+        "And most bugs are one of four: wrong tool, wrong arguments, an ignored error, or a loop.",
+        "Next, we zoom out from one case to all of them, and measure Scout as a whole."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "What does Scout's trace show for each step of a run?",
+      "options": [
+        "Only the final reply to the customer",
+        "The tool Scout called, the input it sent, and the result or error",
+        "How many tokens each reply used"
+      ],
+      "correct": 1,
+      "explain": "A trace replays the run step by step: what Scout decided, which tool it called with what input, and what came back. That is what lets you find the bad step.",
+      "hint": "Think of the flight recorder."
+    },
+    {
+      "q": "A failing case has three steps that look wrong. Where do you start?",
+      "options": [
+        "The first step that's wrong",
+        "The final reply, since that's what the customer saw",
+        "Whichever step looks easiest to fix"
+      ],
+      "correct": 0,
+      "explain": "Later steps work with what earlier steps produced. Fix the first bad step and the rest often fix themselves.",
+      "hint": "Read the trace like a story, from the top."
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "The trace shows get_order called with order_id set to grace@example.com, then an error. Which bug is this?",
+      "options": [
+        "Wrong tool",
+        "Looping",
+        "Wrong arguments"
+      ],
+      "correct": 2,
+      "explain": "get_order was the right tool, but it got the wrong input: an email in the order ID field. The usual fix is in the tool's schema or description.",
+      "hint": "Was the tool wrong, or what was passed to it?"
+    },
+    {
+      "q": "Scout calls track_parcel six times in a row, timing out each time. What is the best fix?",
+      "options": [
+        "Raise MAX_STEPS so Scout gets more tries",
+        "Make the error say not to retry and to tell the customer tracking is down",
+        "Delete track_parcel so it can't fail"
+      ],
+      "correct": 1,
+      "explain": "The step limit stops the damage, but the loop happens because the error gives Scout no better idea. A clear error message changes what it does next.",
+      "hint": "What does Scout read right after each failed call?"
+    }
+  ]
+}

@@ -15,9 +15,11 @@ const check = (label: string, cond: unknown, extra?: unknown) => {
   console.log(`${cond ? "PASS" : "FAIL"} ${label}${!cond && extra !== undefined ? ` -> ${JSON.stringify(extra).slice(0, 300)}` : ""}`);
 };
 
-const ctx = await courseContext("n8n");
+const ctx = await courseContext("ai-agent");
 console.log(`context: ${ctx.modules.length} modules, ${ctx.text.length} chars`);
-check("context lists every module", ctx.modules.map((m) => m.id).join() === "m1,m2,m3,m4,m5");
+check("context lists every module", ctx.modules.map((m) => m.id).join() === "m1,m2,m3,m4,m5,m6");
+check("context: no story from another course", !/nebula|coffee|\bana\b/i.test(ctx.text) && ctx.text.includes("Orbit"));
+check("context: quick check asks per module", ctx.text.includes("tests module 1"));
 
 /* ---------------------------------------------------------------- baseline */
 const engineer: PlannerInput = {
@@ -25,14 +27,14 @@ const engineer: PlannerInput = {
   answers: { domain: "it", role: "engineer", experience: "regularly", firstStep: "example", style: "short", goal: "work" },
   supportOverride: "auto",
   pace: { sessionMinutes: 20, studyDays: [1, 3] },
-  precheck: { at: "2026-10-08", lessons: { "1.1": 2, "1.2": 2, "1.3": 2, "2.1": 0, "2.2": 1, "2.3": 2 } },
+  precheck: { at: "2026-10-08", lessons: { "1": 2, "2": 1, "3": 0, "4": 2, "5": 1, "6": 2 } },
 };
 const beginner: PlannerInput = {
   name: "Kavish",
   answers: { domain: "retail", role: "student", experience: "never", firstStep: "idea" },
   supportOverride: "auto",
   pace: null,
-  precheck: { at: "2026-10-08", isNew: true, lessons: { "1.1": 0, "1.2": 0, "1.3": 0, "2.1": 0, "2.2": 0, "2.3": 0 } },
+  precheck: { at: "2026-10-08", isNew: true, lessons: { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0 } },
 };
 const blank: PlannerInput = { name: "Kavish", answers: {}, supportOverride: "auto", pace: null, precheck: null };
 
@@ -42,11 +44,15 @@ const b3 = baselinePlan(blank, ctx);
 for (const [n, p] of [["engineer", b1], ["beginner", b2], ["blank", b3]] as const) check(`baseline (${n}) matches the plan schema`, LearnerPlanSchema.safeParse(p).success);
 const m1 = b1.modules.find((m) => m.moduleId === "m1")!;
 check("example-first learner: worked before explainer in m1", m1.topicOrder.indexOf("worked") < m1.topicOrder.indexOf("explainer"), m1.topicOrder);
-check("quick check 2/2 → light help on 1.1", m1.lessons.find((l) => l.lessonId === "1.1")!.support === "light");
-check("quick check 0/2 → extra help on 2.1", b1.modules[1]!.lessons.find((l) => l.lessonId === "2.1")!.support === "extra");
+check("module 1 quick check 2/2 → light help on 1.1", m1.lessons.find((l) => l.lessonId === "1.1")!.support === "light");
+check("module 3 quick check 0/2 → extra help on every lesson of the module", b1.modules[2]!.lessons.every((l) => l.support === "extra"));
+check("module 2 quick check 1/2 → standard help on 2.2", b1.modules[1]!.lessons.find((l) => l.lessonId === "2.2")!.support === "standard");
+check("why cites the module's quick check", m1.lessons[0]!.why.includes("this module"), m1.lessons[0]!.why);
+check("strengths and gaps name modules, not numbers", b1.learner.strengths.includes("Introduction to AI Agents") && !b1.learner.gaps.some((g) => /^\d+$/.test(g)), b1.learner);
 check("IT field → an 'In your world' for 1.1", b1.modules[0]!.lessons[0]!.inYourWorld.body.includes("ticket"), b1.modules[0]!.lessons[0]);
-check("no template for 3.1 → empty 'In your world'", b1.modules[2]!.lessons[0]!.inYourWorld.body === "");
-check("engineer hook line on m1", !!m1.hookScene?.includes("7 AM"), m1.hookScene);
+check("no template for 2.1 → empty 'In your world'", b1.modules[1]!.lessons[0]!.inYourWorld.body === "");
+check("engineer hook line on m1", !!m1.hookScene?.includes("building it"), m1.hookScene);
+check("every module ends with its check, then review", b1.modules.every((m) => m.topicOrder.slice(-2).join() === "gate,review"));
 check("beginner (completely new) → extra everywhere", b2.modules.slice(0, 2).every((m) => m.lessons.every((l) => l.support === "extra")));
 check("beginner level 'new'", b2.learner.level === "new");
 check("engineer pacing from chosen pace", b1.pacing.minutesPerSession === 20 && b1.pacing.sessionsPerWeek === 2, b1.pacing);
@@ -56,7 +62,8 @@ console.log("  summary (engineer):", b1.summary);
 /* ---------------------------------------------------------------- validator */
 const bad: LearnerPlan = structuredClone(b1);
 bad.summary = "Visit https://evil.example.com now. " + "x".repeat(900);
-bad.modules[0]!.topicOrder = ["review", "hook", "explainer", "worked", "guided"];
+bad.modules[0]!.topicOrder = ["review", "hook", "explainer", "worked", "guided", "lab", "gate"];
+bad.modules[3]!.topicOrder = ["hook", "explainer", "gate", "worked", "guided", "lab", "review"];
 bad.modules[1]!.lessons = bad.modules[1]!.lessons.filter((l) => l.lessonId !== "2.2");
 bad.modules[2]!.lessons.push({ lessonId: "9.9", support: "light", why: "x", inYourWorld: { title: "", body: "" } });
 bad.modules.push({ ...bad.modules[0]!, moduleId: "m9" });
@@ -64,10 +71,31 @@ bad.pacing.minutesPerSession = 500;
 const v = validatePlan(bad, ctx, b1);
 check("validator: bad topic order replaced", v.plan.modules[0]!.topicOrder.join() === m1.topicOrder.join(), v.plan.modules[0]!.topicOrder);
 check("validator: missing lesson 2.2 restored from baseline", v.plan.modules[1]!.lessons.some((l) => l.lessonId === "2.2"));
-check("validator: unknown lesson and module dropped", !v.plan.modules[2]!.lessons.some((l) => l.lessonId === "9.9") && v.plan.modules.length === 5);
+check("validator: module check moved before practice is rejected", v.plan.modules[3]!.topicOrder.slice(-2).join() === "gate,review", v.plan.modules[3]!.topicOrder);
+check("validator: unknown lesson and module dropped", !v.plan.modules[2]!.lessons.some((l) => l.lessonId === "9.9") && v.plan.modules.length === 6);
 check("validator: links stripped and text capped", !v.plan.summary.includes("http") && v.plan.summary.length <= 600);
 check("validator: pacing clamped", v.plan.pacing.minutesPerSession === 90);
 check("validator: issues reported", v.issues.length >= 4, v.issues);
+
+// guardrails: what the learner told us bounds the model
+const lax: LearnerPlan = structuredClone(b1);
+for (const m of lax.modules) {
+  m.support = "standard";
+  for (const l of m.lessons) l.support = "standard";
+  if (m.moduleId === "m2") m.topicOrder = ["hook", "explainer", "worked", "guided", "lab", "gate", "review"];
+}
+const g1 = validatePlan(lax, ctx, b1, { override: "auto", floor: true });
+check("guard: quick-check extra help kept without in-course evidence", g1.plan.modules[2]!.lessons.every((l) => l.support === "extra") && g1.plan.modules[2]!.support === "extra", g1.plan.modules[2]);
+check("guard: the kept lesson explains itself with the baseline reason", g1.plan.modules[2]!.lessons[0]!.why === b1.modules[2]!.lessons[0]!.why);
+check("guard: example-first order kept", g1.plan.modules[1]!.topicOrder.indexOf("worked") < g1.plan.modules[1]!.topicOrder.indexOf("explainer"), g1.plan.modules[1]!.topicOrder);
+check("guard: adjustments reported", g1.issues.some((i) => i.startsWith("help kept")) && g1.issues.some((i) => i.startsWith("example-first")), g1.issues);
+const g2 = validatePlan(lax, ctx, b1, { override: "auto", floor: false });
+check("guard: with in-course evidence the model may lighten help", g2.plan.modules[2]!.lessons.every((l) => l.support === "standard"));
+const g3 = validatePlan(lax, ctx, b1, { override: "light", floor: true });
+check("guard: a help level the learner set applies everywhere", g3.plan.modules.every((m) => m.support === "light" && m.lessons.every((l) => l.support === "light")));
+const more: LearnerPlan = structuredClone(b1);
+more.modules[0]!.lessons[0]!.support = "extra";
+check("guard: the model may still add help", validatePlan(more, ctx, b1, { override: "auto", floor: true }).plan.modules[0]!.lessons[0]!.support === "extra");
 
 /* ---------------------------------------------------------------- policy */
 const sig = (kind: string, lesson: string | null, payload: Record<string, unknown>, moduleId: string | null = "m2"): SignalRow => ({
@@ -87,6 +115,15 @@ check("policy: one miss is not enough", replanReason([w1], [w1]) === null);
 check("policy: two misses in one lesson re-plan", replanReason([w2], [w1, w2]) === "two misses in lesson 2.1");
 check("policy: failed final check re-plans", replanReason([sig("final_check", null, { passed: false })], []) === "final check not passed");
 check("policy: module complete re-plans", replanReason([sig("module_complete", null, {}, "m1")], []) === "finished m1");
+check("policy: failed module check re-plans", replanReason([sig("module_check", null, { passed: false, missedLessons: ["2.3"] })], []) === "module check not passed in m2");
+check("policy: passed module check does not", replanReason([sig("module_check", null, { passed: true })], []) === null);
+const s1 = sig("scenario_answer", "2.4", { correct: false });
+const s2 = sig("video_check", "2.4", { correct: false });
+check("policy: a wrong scenario counts as a miss", replanReason([s2], [s1, s2]) === "two misses in lesson 2.4");
+const rm = ruleRevision(b3, [sig("module_check", null, { passed: false, missedLessons: ["2.3"] })]);
+check("rules: failed module check → extra help on 2.3", rm?.modules[1]!.lessons.find((l) => l.lessonId === "2.3")!.support === "extra" && rm.changes[0]!.reason.includes("module check"), rm?.changes);
+const rf = ruleRevision(b3, [sig("final_check", null, { passed: false, missedLessons: ["3"] })]);
+check("rules: final check weak on module 3 → extra help on every 3.x lesson", rf?.modules[2]!.lessons.every((l) => l.support === "extra") && rf.changes.length === 5, rf?.changes);
 const rr = ruleRevision(b3, [w1, w2]);
 check("rules: two misses → extra help on 2.1 with a reason", rr?.modules[1]!.lessons.find((l) => l.lessonId === "2.1")!.support === "extra" && rr.changes.length === 1, rr?.changes);
 
@@ -113,7 +150,7 @@ const stub: PlannerTransport = async (req: ChatRequest) => {
   plan.summary = "AI: tuned for an IT engineer who learns from examples.";
   plan.modules[2]!.emphasis = "deep";
   plan.modules[1]!.lessons[0]!.inYourWorld = { title: "Ticket fields", body: "Trim and lower-case the requester email on every ticket before matching it." };
-  if (mode === "badorder") plan.modules[0]!.topicOrder = ["explainer", "hook", "worked", "guided", "review"];
+  if (mode === "badorder") plan.modules[0]!.topicOrder = ["explainer", "hook", "worked", "guided", "lab", "gate", "review"];
   if (user.includes("PREVIOUS PLAN")) plan.changes = [{ target: "lesson 2.1 help", from: "extra", to: "extra", reason: "Two missed checks on expressions." }];
   // numbers quoted, as smaller models sometimes do
   const quoted = { ...plan, pacing: { ...plan.pacing, minutesPerSession: String(plan.pacing.minutesPerSession) } };
@@ -128,39 +165,41 @@ const flush = async () => {
 
 const view1 = await saveSetup(
   user,
-  "n8n",
-  { answers: engineer.answers, supportOverride: "auto", pace: engineer.pace, precheck: { responses: { p1: "a", p2: "b", p3: null } } },
+  "ai-agent",
+  { answers: engineer.answers, supportOverride: "auto", pace: engineer.pace, precheck: { responses: { p1: "c", p2: "a", p3: "a", p4: "b", p5: null } } },
   schedule,
   stub,
 );
 check("enrol: baseline plan v1 ready at once", view1.plan?.version === 1 && view1.plan.source === "baseline", view1.plan);
 check("enrol: AI plan v2 pending", view1.pending?.version === 2, view1.pending);
-check("enrol: quick check scored on the server", typeof view1.precheck?.lessons["1.1"] === "number" && !("responses" in (view1.precheck ?? {})), view1.precheck);
+check("enrol: quick check scored on the server", view1.precheck?.lessons["1"] === 2 && view1.precheck?.lessons["2"] === 1 && !("responses" in (view1.precheck ?? {})), view1.precheck);
 await flush();
-const view2 = await enrollmentOf(user, "n8n");
+const view2 = await enrollmentOf(user, "ai-agent");
 check("enrol: AI plan v2 is now current", view2.plan?.version === 2 && view2.plan.source === "ai" && view2.plan.plan?.summary.startsWith("AI:") && view2.plan.model === "glm-4.7-flash", view2.plan);
 check("enrol: first AI plan has no changes", view2.plan?.changes.length === 0);
 check("enrol: quoted numbers accepted in one round", calls.length === 1 && typeof view2.plan?.plan?.pacing.minutesPerSession === "number", calls.length);
+check("prompt: quick check reported per module", calls[0]!.user.includes("module 1: 2"), calls[0]!.user.slice(0, 900));
 check("prompt: course outline and JSON schema in the system prompt", calls[0]!.system.includes("MODULE m1") && calls[0]!.system.includes("QUICK CHECK") && calls[0]!.system.includes('"topicOrder"'));
-check("prompt: no mention of a provider", !/claude|anthropic|glm/i.test(calls[0]!.system + calls[0]!.user));
+// the course itself teaches the Claude API, so only the planner's own instructions are checked
+check("prompt: the instructions never name a provider", !/claude|anthropic|glm/i.test(plannerPrompt({ ctx, input: engineer, previous: null, evidence: [], trigger: "enrol" }).system[0]!));
 check("prompt: profile answers as labels", calls[0]!.user.includes("IT services") || calls[0]!.user.includes("IT"), calls[0]!.user.slice(0, 400));
-check("prompt: 'I don't know yet' answers passed on", calls[0]!.user.includes(`"I don't know yet" on: p3`));
+check("prompt: 'I don't know yet' answers passed on", calls[0]!.user.includes(`"I don't know yet" on: p5`));
 
 // signals: two misses in 2.2 → revision with the evidence
-const r1 = await recordSignals(user, "n8n", [{ key: "v1", kind: "video_check", moduleId: "m2", lesson: "2.2", payload: { videoId: "m2-2", questionId: "q1", correct: false, attempt: 1 } }], schedule, stub);
+const r1 = await recordSignals(user, "ai-agent", [{ key: "v1", kind: "video_check", moduleId: "m2", lesson: "2.2", payload: { videoId: "m2-2", questionId: "q1", correct: false, attempt: 1 } }], schedule, stub);
 check("signals: one miss stored, no re-plan", r1.accepted === 1 && !r1.replanning, r1);
-const dup = await recordSignals(user, "n8n", [{ key: "v1", kind: "video_check", moduleId: "m2", lesson: "2.2", payload: { correct: false } }], schedule, stub);
+const dup = await recordSignals(user, "ai-agent", [{ key: "v1", kind: "video_check", moduleId: "m2", lesson: "2.2", payload: { correct: false } }], schedule, stub);
 check("signals: duplicate id ignored", dup.accepted === 0, dup);
-const r2 = await recordSignals(user, "n8n", [{ key: "v2", kind: "video_check", moduleId: "m2", lesson: "2.2", payload: { videoId: "m2-2", questionId: "q2", correct: false, attempt: 1 } }], schedule, stub);
+const r2 = await recordSignals(user, "ai-agent", [{ key: "v2", kind: "video_check", moduleId: "m2", lesson: "2.2", payload: { videoId: "m2-2", questionId: "q2", correct: false, attempt: 1 } }], schedule, stub);
 check("signals: second miss inside the AI cooldown → rule revision at once", r2.replanning, r2);
-const view2b = await enrollmentOf(user, "n8n");
-check("rules: lesson 2.2 now extra, with the change and reason", view2b.plan?.source === "baseline" && view2b.plan.trigger === "signals" && view2b.plan.changes[0]?.target === "lesson 2.2 help", view2b.plan?.changes);
+const view2b = await enrollmentOf(user, "ai-agent");
+check("rules: lesson 2.2 now extra, with the change and reason; the AI plan it adjusts keeps its source", view2b.plan?.source === "ai" && view2b.plan.model === null && view2b.plan.trigger === "signals" && view2b.plan.changes[0]?.target === "lesson 2.2 help", view2b.plan?.changes);
 
 // setup change → the AI planner revises from the previous plan
 mode = "badorder";
-await saveSetup(user, "n8n", { answers: { ...engineer.answers, firstStep: "idea" }, supportOverride: "auto", pace: engineer.pace }, schedule, stub);
+await saveSetup(user, "ai-agent", { answers: { ...engineer.answers, firstStep: "idea" }, supportOverride: "auto", pace: engineer.pace }, schedule, stub);
 await flush();
-const view3 = await enrollmentOf(user, "n8n");
+const view3 = await enrollmentOf(user, "ai-agent");
 check("setup change: baseline then AI", view3.plan?.version === 5 && view3.plan.source === "ai", view3.plan);
 check("setup change: the planner saw the previous plan and the unused evidence", calls.at(-1)!.user.includes("PREVIOUS PLAN (version 4)") && calls.at(-1)!.user.includes("lesson 2.2"), calls.at(-1)!.user.slice(-600));
 check("setup change: bad order from the model replaced, issue logged", view3.plan?.error?.includes("topic order") && view3.plan.plan?.modules[0]!.topicOrder[0] === "hook", view3.plan?.error);
@@ -168,34 +207,34 @@ check("setup change: changes recorded", (view3.plan?.changes.length ?? 0) === 1)
 
 // content filter → failed attempt, current plan unchanged
 mode = "refuse";
-await saveSetup(user, "n8n", { answers: engineer.answers, supportOverride: "extra", pace: engineer.pace }, schedule, stub);
+await saveSetup(user, "ai-agent", { answers: engineer.answers, supportOverride: "extra", pace: engineer.pace }, schedule, stub);
 await flush();
-const view4 = await enrollmentOf(user, "n8n");
+const view4 = await enrollmentOf(user, "ai-agent");
 check("content filter: the new baseline stays current, error reported", view4.plan?.version === 6 && view4.plan.source === "baseline" && view4.lastError === "The AI planner declined to write this plan.", { plan: view4.plan?.version, err: view4.lastError });
 
 // invalid JSON → one correction round, then a valid plan
 mode = "badjson";
 const before = calls.length;
-await saveSetup(user, "n8n", { answers: engineer.answers, supportOverride: "auto", pace: engineer.pace }, schedule, stub);
+await saveSetup(user, "ai-agent", { answers: engineer.answers, supportOverride: "auto", pace: engineer.pace }, schedule, stub);
 await flush();
-const view4b = await enrollmentOf(user, "n8n");
-check("bad JSON: corrected in a second round", calls.length - before === 2 && view4b.plan?.source === "ai" && view4b.plan.error === null, { calls: calls.length - before, plan: view4b.plan?.source, err: view4b.plan?.error });
+const view4b = await enrollmentOf(user, "ai-agent");
+check("bad JSON: corrected in a second round", calls.length - before === 2 && view4b.plan?.source === "ai" && !/template|shape/.test(view4b.plan.error ?? ""), { calls: calls.length - before, plan: view4b.plan?.source, err: view4b.plan?.error });
 mode = "ok";
 
 // main model overloaded → the fallback model writes the plan
 mode = "busy";
-await saveSetup(user, "n8n", { answers: { ...engineer.answers, style: "analogies" }, supportOverride: "auto", pace: engineer.pace }, schedule, stub);
+await saveSetup(user, "ai-agent", { answers: { ...engineer.answers, style: "analogies" }, supportOverride: "auto", pace: engineer.pace }, schedule, stub);
 await flush();
-const view4c = await enrollmentOf(user, "n8n");
+const view4c = await enrollmentOf(user, "ai-agent");
 check("busy: fallback model writes the plan", view4c.plan?.source === "ai" && view4c.plan.model === "glm-4.5-flash" && view4c.lastError === null, { model: view4c.plan?.model, err: view4c.lastError });
-check("learner-facing errors never name the provider", !/glm|z\.ai/i.test(JSON.stringify((await planHistory(user, "n8n")).map((h) => h.error))));
+check("learner-facing errors never name the provider", !/glm|z\.ai/i.test(JSON.stringify((await planHistory(user, "ai-agent")).map((h) => h.error))));
 mode = "ok";
 
 // progress → module complete
-for (const s of ["hook", "explainer", "worked", "guided"]) await recordProgress(user, "n8n", "m1", s, schedule, stub);
-const view5 = await recordProgress(user, "n8n", "m1", "review", schedule, stub);
-check("progress: stored per module", view5.progress.m1?.length === 5, view5.progress);
-const history = await planHistory(user, "n8n");
+for (const s of ["hook", "explainer", "worked", "guided", "lab", "gate"]) await recordProgress(user, "ai-agent", "m1", s, schedule, stub);
+const view5 = await recordProgress(user, "ai-agent", "m1", "review", schedule, stub);
+check("progress: stored per module", view5.progress.m1?.length === 7, view5.progress);
+const history = await planHistory(user, "ai-agent");
 check("history: newest first with sources", history[0]!.version >= 6 && history.map((h) => h.source).includes("ai"), history.map((h) => `${h.version}:${h.source}:${h.status}:${h.trigger}`));
 console.log("  history:", history.map((h) => `v${h.version} ${h.source} ${h.status} (${h.trigger})`).join(" | "));
 

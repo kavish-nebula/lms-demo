@@ -33,6 +33,7 @@ import { SESSION_LENGTHS, WEEK_ORDER } from "@/lib/plan";
 import {
   QUESTIONS,
   adaptationOf,
+  precheckSupportFor,
   supportFor,
   type PrecheckResult,
   type SetupAnswers,
@@ -207,7 +208,7 @@ export function CustomizeStep({
                 <ul className="flex flex-col gap-1.5">
                   {m.lessons.map((l) => {
                     const s = supportFor(a, l.id);
-                    const fromCheck = !a.override && l.id in a.lessonSupport;
+                    const fromCheck = !a.override && precheckSupportFor(a, l.id) !== undefined;
                     return (
                       <li key={l.id} className="flex items-center justify-between gap-2 text-sm">
                         <span className="min-w-0 truncate">

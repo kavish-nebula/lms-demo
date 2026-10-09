@@ -1,0 +1,1007 @@
+{
+  "hook": {
+    "kicker": "Wednesday, 10:12 AM",
+    "title": "The refund policy nobody wrote",
+    "why": "Scout can talk now, and Leo has started letting it draft replies that he checks before they go out. This morning one draft promised a customer something Orbit has never offered. Before anyone swaps the model or blames the customer, work out where that promise came from.",
+    "stat": "1 draft reply · promised 90 days · policy says 30",
+    "narration": "Grace Liu emailed Orbit this morning. Her Ridge hiking boots arrived about two months ago, and she wants to send them back. Scout drafted a reply in seconds: absolutely, we offer ninety-day refunds. Leo caught it just before it went out, because Orbit's policy is thirty days. Nobody at Orbit has ever offered ninety. So where did Scout get it?",
+    "messages": [
+      {
+        "who": "Leo — support lead",
+        "av": "L",
+        "at": "10:03 AM",
+        "text": "caught this in scout's drafts just now. grace wants to return boots she got 62 days ago and scout wrote \"Absolutely, we offer 90-day refunds!\""
+      },
+      {
+        "who": "Maya — founder",
+        "av": "M",
+        "at": "10:05 AM",
+        "text": "we have never offered 90 days. if that had gone out we'd be refunding $165 we don't owe. is the model just not good enough?"
+      },
+      {
+        "who": "Leo — support lead",
+        "av": "L",
+        "at": "10:07 AM",
+        "text": "the scary part is how sure it sounded. exact same tone it uses when it's right"
+      }
+    ],
+    "prompt": "Before anything is explained: why did Scout promise a 90-day refund?",
+    "hunches": [
+      {
+        "id": "a",
+        "label": "The model is broken, or too small to know refund rules"
+      },
+      {
+        "id": "b",
+        "label": "Its prompt gave it no policy and no rule, so it filled the gap plausibly"
+      },
+      {
+        "id": "c",
+        "label": "Grace tricked it into promising a longer refund window"
+      }
+    ],
+    "correct": "b",
+    "pipeline": {
+      "nodes": [
+        {
+          "id": "user",
+          "kind": "user",
+          "label": "Grace's email",
+          "sub": "boots, 62 days ago",
+          "x": 0,
+          "y": 60
+        },
+        {
+          "id": "prompt",
+          "kind": "data",
+          "label": "Scout's prompt",
+          "sub": "no rules, no policy",
+          "x": 230,
+          "y": 60
+        },
+        {
+          "id": "model",
+          "kind": "llm",
+          "label": "Model",
+          "sub": "predicts a reply",
+          "x": 460,
+          "y": 60
+        },
+        {
+          "id": "reply",
+          "kind": "output",
+          "label": "Draft reply",
+          "sub": "\"90-day refunds!\"",
+          "x": 690,
+          "y": 60
+        },
+        {
+          "id": "policy",
+          "kind": "memory",
+          "label": "Policy doc",
+          "sub": "returns within 30 days",
+          "x": 0,
+          "y": 180
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "source": "user",
+          "target": "prompt"
+        },
+        {
+          "id": "e2",
+          "source": "prompt",
+          "target": "model"
+        },
+        {
+          "id": "e3",
+          "source": "model",
+          "target": "reply"
+        }
+      ]
+    },
+    "reveal": {
+      "narration": "Scout's model did exactly what language models do: it predicted the most likely reply to the text in front of it. That text was Grace's email and a single line: you are a helpful support assistant. There was no policy in it, and no rule to stay within one. Plenty of shops offer ninety-day returns, so ninety days was a plausible guess, written in the same confident tone as a true answer. Orbit's real policy sat in a document the prompt never included. The model wasn't broken; the prompt was.",
+      "steps": [
+        {
+          "caption": "Grace's email arrives: can she return boots that were delivered 62 days ago?",
+          "nodes": {
+            "user": "ok"
+          },
+          "edges": {
+            "e1": "running"
+          }
+        },
+        {
+          "caption": "Scout's prompt is one line, \"You are a helpful support assistant.\", plus the email. Nothing else.",
+          "nodes": {
+            "prompt": "running"
+          },
+          "edges": {
+            "e1": "ok"
+          }
+        },
+        {
+          "caption": "Orbit's policy doc says 30 days. No arrow reaches it: it is never added to the prompt.",
+          "nodes": {
+            "policy": "idle"
+          }
+        },
+        {
+          "caption": "The model sees a return question and no rules. It predicts what shops usually say.",
+          "nodes": {
+            "prompt": "ok",
+            "model": "running"
+          },
+          "edges": {
+            "e2": "running"
+          }
+        },
+        {
+          "caption": "\"Absolutely, we offer 90-day refunds!\" Fluent, confident, and not Orbit's policy.",
+          "nodes": {
+            "model": "ok",
+            "reply": "error"
+          },
+          "edges": {
+            "e2": "ok",
+            "e3": "error"
+          }
+        },
+        {
+          "caption": "The model did its job. The gap was upstream: a prompt with no policy and no rule to stay within it.",
+          "nodes": {
+            "prompt": "error"
+          },
+          "edges": {
+            "e2": "error"
+          }
+        }
+      ]
+    },
+    "wrap_correct": "Exactly. The model wasn't broken and Grace didn't trick it. Scout's prompt never gave it Orbit's policy or a rule to stay within it, so it filled the gap with something that sounded right. This module is about closing that gap.",
+    "wrap_wrong": "Not quite. The model worked as designed, and Grace asked an honest question. Scout's prompt held no policy and no rule, so the model predicted what shops often say. A bigger model would have guessed just as confidently.",
+    "wrap_point": "A model only knows what's in its prompt, so you give it a role, rules, the real facts and a shape to answer in.",
+    "film": {
+      "shots": [
+        {
+          "type": "email",
+          "label": "Support inbox · 10:01 AM",
+          "say": "Grace wants to send back hiking boots. They arrived sixty-two days ago.",
+          "act": "Let Scout draft a reply",
+          "then": "Scout answers in seconds, and it sounds completely sure.",
+          "from": "Grace Liu",
+          "address": "grace@example.com",
+          "subject": "Returning my Ridge boots",
+          "body": "Hi! My Ridge hiking boots arrived about two months ago and they just don't fit right. Can I send them back for a refund? Thanks, Grace",
+          "meta": "Order ORB-10517 · delivered 62 days ago",
+          "replyBy": "Scout · draft reply",
+          "reply": "Hi Grace! Absolutely, we offer 90-day refunds, so you're well within the window. Just pack the boots up and we'll refund you in full.",
+          "highlight": "we offer 90-day refunds"
+        },
+        {
+          "type": "doc-vs-reply",
+          "label": "Leo checks the policy · 10:03 AM",
+          "say": "This is Orbit's real returns policy. Tap the part of Scout's reply that breaks it.",
+          "then": "Thirty days, not ninety. Nobody at Orbit has ever offered ninety.",
+          "doc": {
+            "title": "docs/policy.md",
+            "heading": "Returns",
+            "text": "You can return any unused item within 30 days of delivery for a full refund.",
+            "highlight": "within 30 days"
+          },
+          "reply": {
+            "title": "Scout's draft",
+            "text": "Absolutely, we offer 90-day refunds, so you're well within the window.",
+            "highlight": "90-day refunds"
+          },
+          "stamp": "Not our policy"
+        },
+        {
+          "type": "phone",
+          "label": "Team chat · 10:07 AM",
+          "say": "Leo caught it just before it went out. Maya is not pleased.",
+          "time": "10:07",
+          "notes": [
+            {
+              "who": "Maya — founder",
+              "av": "M",
+              "at": "10:06 AM",
+              "text": "we have never offered 90 days. that's $165 we don't owe"
+            },
+            {
+              "who": "Maya — founder",
+              "av": "M",
+              "at": "10:07 AM",
+              "text": "is the model just not good enough?"
+            }
+          ]
+        },
+        {
+          "type": "numbers",
+          "label": "What nearly went out",
+          "say": "One reply away from a promise Orbit never made."
+        }
+      ]
+    }
+  },
+  "worked": {
+    "examples": [
+      {
+        "lesson": "2.3",
+        "title": "Run 1: a vague prompt",
+        "intro": "Grace's email, sent with a one-line prompt. Watch what the model does with the gaps.",
+        "narration": "Priya starts with the simplest prompt there is. She sends Grace's email with a single instruction: reply to this customer. The model has the email and nothing else, so it writes the most typical reply it can. Three warm paragraphs come back: thanks for shopping with us, some tips on breaking in new boots, and a promise of an easy return within ninety days. It reads well, and almost none of it has been checked against Orbit's policy. The prompt asked for a reply, not the right reply.",
+        "predict": {
+          "stem": "With only \"Reply to this customer.\" as the prompt, what will the answer look like?",
+          "options": [
+            {
+              "text": "Long, friendly and wandering, with details it made up",
+              "correct": true
+            },
+            {
+              "text": "Short and correct, quoting Orbit's 30-day policy"
+            },
+            {
+              "text": "An error, because the prompt is too short"
+            }
+          ],
+          "rationale": "With no facts, no length and no rules, the model writes a typical, generous reply and fills the gaps with plausible details."
+        },
+        "pipeline": {
+          "nodes": [
+            {
+              "id": "email",
+              "kind": "user",
+              "label": "Grace's email",
+              "sub": "boots, two months ago",
+              "x": 0,
+              "y": 60
+            },
+            {
+              "id": "prompt",
+              "kind": "data",
+              "label": "Prompt",
+              "sub": "one line, no facts",
+              "x": 230,
+              "y": 60
+            },
+            {
+              "id": "model",
+              "kind": "llm",
+              "label": "Model",
+              "sub": "predicts a reply",
+              "x": 460,
+              "y": 60
+            },
+            {
+              "id": "reply",
+              "kind": "output",
+              "label": "Reply",
+              "sub": "210 words, wandering",
+              "x": 690,
+              "y": 60
+            }
+          ],
+          "edges": [
+            {
+              "id": "e1",
+              "source": "email",
+              "target": "prompt"
+            },
+            {
+              "id": "e2",
+              "source": "prompt",
+              "target": "model"
+            },
+            {
+              "id": "e3",
+              "source": "model",
+              "target": "reply"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "caption": "Grace asks whether she can return Ridge boots that arrived about two months ago.",
+            "show": [
+              "email"
+            ],
+            "nodes": {
+              "email": "ok"
+            }
+          },
+          {
+            "caption": "The whole prompt: \"Reply to this customer.\" No policy, no length, no rules.",
+            "show": [
+              "prompt"
+            ],
+            "nodes": {
+              "prompt": "running"
+            },
+            "edges": {
+              "e1": "ok"
+            }
+          },
+          {
+            "caption": "The model predicts the most typical reply to a return question.",
+            "show": [
+              "model"
+            ],
+            "nodes": {
+              "prompt": "ok",
+              "model": "running"
+            },
+            "edges": {
+              "e2": "running"
+            }
+          },
+          {
+            "caption": "210 words: thanks, boot-care tips, and \"an easy return within 90 days\". Friendly, long, partly invented.",
+            "show": [
+              "reply"
+            ],
+            "nodes": {
+              "model": "ok",
+              "reply": "error"
+            },
+            "edges": {
+              "e2": "ok",
+              "e3": "ok"
+            }
+          },
+          {
+            "caption": "Diagnosis: the prompt was missing context (the policy), a format (the length) and rules (no promises).",
+            "nodes": {
+              "prompt": "error"
+            }
+          }
+        ]
+      },
+      {
+        "lesson": "2.4",
+        "title": "Run 2: a system prompt with role, rules and policy",
+        "intro": "Same email, same model. Now Scout's system prompt carries its role, its rules and Orbit's real policy.",
+        "narration": "Priya keeps Grace's email exactly as it was and changes only the system prompt. It now says who Scout is, gives the rule never to promise what the policy doesn't state, includes Orbit's returns policy word for word, and says what to do when unsure. The model reads the thirty-day rule next to an email about boots from two months ago, and the gap from the hook is gone. Three sentences come back: an apology, the thirty-day rule, and an offer to ask the team. Leo could send it as it is. There's one catch: it's still prose, so the code can't easily tell that this was a return request.",
+        "predict": {
+          "stem": "Same email, but the system prompt now includes the 30-day policy and a \"never promise beyond the policy\" rule. What changes?",
+          "options": [
+            {
+              "text": "A short reply: returns are within 30 days, plus an offer to ask the team",
+              "correct": true
+            },
+            {
+              "text": "Nothing: the email is the same, so the reply is the same"
+            },
+            {
+              "text": "Scout refuses to talk about returns at all"
+            }
+          ],
+          "rationale": "With the facts and a rule in its context, the most likely reply is now the correct one, and the when-unsure line gives it an honest next step."
+        },
+        "pipeline": {
+          "nodes": [
+            {
+              "id": "policy",
+              "kind": "memory",
+              "label": "Orbit policy",
+              "sub": "returns within 30 days",
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "system",
+              "kind": "data",
+              "label": "System prompt",
+              "sub": "role · rules · facts",
+              "x": 230,
+              "y": 0
+            },
+            {
+              "id": "email",
+              "kind": "user",
+              "label": "Grace's email",
+              "sub": "unchanged from run 1",
+              "x": 230,
+              "y": 120
+            },
+            {
+              "id": "model",
+              "kind": "llm",
+              "label": "Model",
+              "sub": "same model as run 1",
+              "x": 460,
+              "y": 60
+            },
+            {
+              "id": "reply",
+              "kind": "output",
+              "label": "Reply",
+              "sub": "3 sentences, on policy",
+              "x": 690,
+              "y": 60
+            }
+          ],
+          "edges": [
+            {
+              "id": "e1",
+              "source": "policy",
+              "target": "system"
+            },
+            {
+              "id": "e2",
+              "source": "system",
+              "target": "model"
+            },
+            {
+              "id": "e3",
+              "source": "email",
+              "target": "model"
+            },
+            {
+              "id": "e4",
+              "source": "model",
+              "target": "reply"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "caption": "Orbit's returns policy is copied into the system prompt, word for word.",
+            "show": [
+              "policy",
+              "system"
+            ],
+            "nodes": {
+              "policy": "ok",
+              "system": "running"
+            },
+            "edges": {
+              "e1": "ok"
+            }
+          },
+          {
+            "caption": "Role and rules sit beside it: never promise what the policy doesn't state; if unsure, offer to ask the team.",
+            "nodes": {
+              "system": "ok"
+            }
+          },
+          {
+            "caption": "Grace's email arrives, unchanged from run 1.",
+            "show": [
+              "email"
+            ],
+            "nodes": {
+              "email": "ok"
+            }
+          },
+          {
+            "caption": "The model reads both. With the 30-day rule in view, the likely reply is now the true one.",
+            "show": [
+              "model"
+            ],
+            "nodes": {
+              "model": "running"
+            },
+            "edges": {
+              "e2": "running",
+              "e3": "running"
+            }
+          },
+          {
+            "caption": "\"Sorry, Grace. Returns are accepted within 30 days of delivery, so these boots are outside the window. I can ask the team if anything else is possible.\"",
+            "show": [
+              "reply"
+            ],
+            "nodes": {
+              "model": "ok",
+              "reply": "ok"
+            },
+            "edges": {
+              "e2": "ok",
+              "e3": "ok",
+              "e4": "ok"
+            }
+          },
+          {
+            "caption": "Short, correct and kind. But it's prose: Leo's queue still can't tell, in code, that this was a return."
+          }
+        ]
+      },
+      {
+        "lesson": "2.5",
+        "title": "Run 3: a schema that returns clean data",
+        "intro": "Same system prompt, plus a JSON schema. This time the answer is data the code can route.",
+        "narration": "Leo doesn't only want good replies; he wants every email sorted before anyone opens it. So Priya adds a JSON schema to the request, with four fields: intent, order ID, urgent and a one-line summary. The model's answer has to fit that shape. It comes back as intent return, order ID null because Grace never gave one, urgent false, and a short summary. Python loads it into a dictionary in one line, and the code drops the ticket into the returns queue. Nothing to guess, and nothing to dig out of a paragraph.",
+        "predict": {
+          "stem": "Grace's email has no order number, and order_id may be a string or null. What will the model return for it?",
+          "options": [
+            {
+              "text": "null",
+              "correct": true
+            },
+            {
+              "text": "A made-up number like ORB-10000"
+            },
+            {
+              "text": "The text \"unknown\""
+            }
+          ],
+          "rationale": "The schema gives the model an honest way to say \"not given\", and the prompt tells it to use null rather than guess. It has no reason to invent a number."
+        },
+        "pipeline": {
+          "nodes": [
+            {
+              "id": "email",
+              "kind": "user",
+              "label": "Grace's email",
+              "sub": "no order number",
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "schema",
+              "kind": "guard",
+              "label": "JSON schema",
+              "sub": "4 fields, intent enum",
+              "x": 0,
+              "y": 120
+            },
+            {
+              "id": "model",
+              "kind": "llm",
+              "label": "Model",
+              "sub": "system prompt + schema",
+              "x": 230,
+              "y": 60
+            },
+            {
+              "id": "json",
+              "kind": "data",
+              "label": "JSON reply",
+              "sub": "intent: return",
+              "x": 460,
+              "y": 60
+            },
+            {
+              "id": "code",
+              "kind": "logic",
+              "label": "classify.py",
+              "sub": "json.loads → dict",
+              "x": 690,
+              "y": 60
+            },
+            {
+              "id": "queue",
+              "kind": "output",
+              "label": "Returns queue",
+              "sub": "routed, no guessing",
+              "x": 920,
+              "y": 60
+            }
+          ],
+          "edges": [
+            {
+              "id": "e1",
+              "source": "email",
+              "target": "model"
+            },
+            {
+              "id": "e2",
+              "source": "schema",
+              "target": "model"
+            },
+            {
+              "id": "e3",
+              "source": "model",
+              "target": "json"
+            },
+            {
+              "id": "e4",
+              "source": "json",
+              "target": "code"
+            },
+            {
+              "id": "e5",
+              "source": "code",
+              "target": "queue"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "caption": "Same system prompt and email as run 2, plus a schema: intent, order_id, urgent, summary.",
+            "show": [
+              "email",
+              "schema"
+            ],
+            "nodes": {
+              "email": "ok",
+              "schema": "ok"
+            }
+          },
+          {
+            "caption": "The request passes the schema in output_config, so the answer must match its shape.",
+            "show": [
+              "model"
+            ],
+            "nodes": {
+              "model": "running"
+            },
+            "edges": {
+              "e1": "running",
+              "e2": "running"
+            }
+          },
+          {
+            "caption": "{\"intent\": \"return\", \"order_id\": null, \"urgent\": false, \"summary\": \"Wants to return boots delivered about two months ago.\"}",
+            "show": [
+              "json"
+            ],
+            "nodes": {
+              "model": "ok",
+              "json": "ok"
+            },
+            "edges": {
+              "e1": "ok",
+              "e2": "ok",
+              "e3": "ok"
+            }
+          },
+          {
+            "caption": "order_id is null: Grace gave no number, and the schema let the model say so instead of inventing one."
+          },
+          {
+            "caption": "json.loads turns the text into a dict, so data[\"intent\"] is \"return\" and the code has nothing to guess.",
+            "show": [
+              "code"
+            ],
+            "nodes": {
+              "code": "ok"
+            },
+            "edges": {
+              "e4": "ok"
+            }
+          },
+          {
+            "caption": "The ticket lands in the returns queue, with run 2's on-policy reply ready for Leo to send.",
+            "show": [
+              "queue"
+            ],
+            "nodes": {
+              "queue": "ok"
+            },
+            "edges": {
+              "e5": "ok"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "guided": {
+    "title": "Build a ticket classifier that returns JSON",
+    "situation": "Leo's queue gets 400 emails a day, and right now someone reads every one just to decide where it goes. Before Scout can act on an email, it has to understand it: what the customer wants, which order, and how urgent it is. Today you give Scout a proper system prompt and a classifier that turns each email into clean data.",
+    "intro": "By the end you'll have prompts.py with Scout's system prompt, and classify.py, which turns customer emails into JSON your code can route.",
+    "before": {
+      "items": [
+        "Your **scout** folder from Module 1, with its virtual environment and `anthropic` installed",
+        "`ANTHROPIC_API_KEY` set as an environment variable (Module 1, lesson 1.5)",
+        "A code editor, and a terminal open in the **scout** folder"
+      ],
+      "downloads": []
+    },
+    "steps": [
+      {
+        "title": "Open your Scout project",
+        "body": "Everything today goes in the scout folder you made in Module 1. Structured outputs need a recent SDK, so you upgrade it first.",
+        "actions": [
+          "Open a terminal in your **scout** folder.",
+          "Activate the virtual environment: `.venv\\Scripts\\activate` on Windows, or `source .venv/bin/activate` on macOS or Linux.",
+          "Upgrade the SDK: `pip install --upgrade anthropic`.",
+          "Run `python hello.py` to confirm the key and the SDK still work."
+        ],
+        "values": [
+          {
+            "label": "Terminal (use the activate line for your system)",
+            "value": ".venv\\Scripts\\activate          # Windows\nsource .venv/bin/activate       # macOS / Linux\npip install --upgrade anthropic\npython hello.py"
+          }
+        ],
+        "check": "Your prompt starts with (.venv), pip reports anthropic as installed or upgraded, and hello.py prints a reply from the model.",
+        "tip": "An authentication error means the key isn't set in this terminal window. Set ANTHROPIC_API_KEY again as you did in Module 1 (in PowerShell: $env:ANTHROPIC_API_KEY = \"sk-ant-...\"), then rerun."
+      },
+      {
+        "title": "Write Scout's system prompt",
+        "body": "SCOUT_SYSTEM is Scout's job description: role, goal, rules, tone, Orbit's real policy, and what to do when unsure. The test at the bottom asks the exact question that went wrong in the hook.",
+        "actions": [
+          "Create **prompts.py** in the **scout** folder and paste the code below.",
+          "Save it, then run `python prompts.py`."
+        ],
+        "values": [
+          {
+            "label": "prompts.py",
+            "value": "\"\"\"Scout's prompts. Files that talk to the model import their instructions from here.\"\"\"\n\nSCOUT_SYSTEM = \"\"\"You are Scout, the customer support assistant for Orbit Outdoor, a small online shop for hiking, camping and climbing gear.\n\nYour goal: answer each customer's question accurately and kindly, in as few messages as possible.\n\nRules:\n- Only state policy that appears in the policy below. Never promise a refund, discount, date or exception that it does not state.\n- Refunds over $200 need approval from a member of the support team, so never promise one yourself.\n- Never invent order details. If you need an order number, ask for it.\n- If you are unsure, or the policy does not cover the question, say so and offer to pass the question to the team.\n\nTone: warm, plain and brief. Two to four sentences, no jargon. Customers often read replies on their phones, so keep them short.\n\nOrbit Outdoor policy:\n- Returns: You can return any unused item within 30 days of delivery for a full refund. Items must be unused and in their original packaging.\n- Return shipping: Return shipping is free on orders over $75. Under $75, a $6.95 return label is taken off the refund.\n- Refunds: Refunds go back to the original payment method within 5 business days of the return arriving. Refunds over $200 must be approved by a member of the support team.\n- Exchanges: Exchanging for a different size is free if the new size is in stock.\n- Shipping: Standard shipping takes 3 to 5 business days. Express takes 1 to 2 business days.\n- Damaged items: Send a photo within 7 days of delivery and we send a replacement or a full refund.\n\"\"\"\n\nif __name__ == \"__main__\":\n    # Quick test: Grace's question from the hook, now with Scout's real system prompt.\n    import anthropic\n\n    client = anthropic.Anthropic()\n    question = \"Hi, can I still return my Ridge hiking boots? They arrived about two months ago. Thanks, Grace\"\n    response = client.messages.create(\n        model=\"claude-opus-5-5\",\n        max_tokens=16000,\n        system=SCOUT_SYSTEM,\n        messages=[{\"role\": \"user\", \"content\": question}],\n    )\n    print(next(b.text for b in response.content if b.type == \"text\"))\n"
+          }
+        ],
+        "check": "Scout answers Grace in two to four sentences: returns are accepted within 30 days of delivery, so boots from two months ago are outside the window, and it offers to pass her question to the team. No 90 days, no promise.",
+        "tip": "The wording changes from run to run; that's sampling. The facts must not change: 30 days and no promise. If it still invents a policy, check that the call includes system=SCOUT_SYSTEM."
+      },
+      {
+        "title": "Add the classifier's instructions",
+        "body": "Sorting an email is a different job from replying to it, so it gets its own short prompt. Notice how specific it is about every field, and that it tells the model to use null rather than guess.",
+        "actions": [
+          "Open **prompts.py**.",
+          "Paste the code below on a new line just above `if __name__ == \"__main__\":`, with no indentation.",
+          "Save, then run `python -c \"from prompts import CLASSIFY_SYSTEM; print(CLASSIFY_SYSTEM[:40])\"`."
+        ],
+        "values": [
+          {
+            "label": "prompts.py (add above the test block)",
+            "value": "CLASSIFY_SYSTEM = \"\"\"You sort incoming customer emails for Orbit Outdoor's support team. You do not reply to the customer.\n\nFor each email, fill in the ticket fields:\n- intent: what the customer mainly wants. If none of the labels fit, use \"other\".\n- order_id: the order number exactly as written in the email, like ORB-10482. If the email has no order number, use null. Never guess or invent one.\n- urgent: true only if the item arrived damaged, the customer needs it within the next few days, or they are very upset. Otherwise false.\n- summary: one short sentence the support team can read at a glance.\n\"\"\"\n"
+          }
+        ],
+        "check": "The terminal prints the first 40 characters of the new prompt: You sort incoming customer emails for Or",
+        "tip": "An ImportError means Python can't see CLASSIFY_SYSTEM at the top level of the file. Make sure it isn't indented under the if __name__ block, and that the file is saved."
+      },
+      {
+        "title": "Turn three emails into JSON",
+        "body": "TICKET_SCHEMA is the shape every answer must have. output_config sends it with the request, so the reply's text is JSON that matches it, and json.loads turns it into a Python dict. The stop_reason check refuses to trust a reply that didn't finish normally.",
+        "actions": [
+          "Create **classify.py** in the **scout** folder and paste the code below. The three sample emails are in the `EMAILS` list.",
+          "Run `python classify.py`."
+        ],
+        "values": [
+          {
+            "label": "classify.py",
+            "value": "import json\n\nimport anthropic\n\nfrom prompts import CLASSIFY_SYSTEM\n\nclient = anthropic.Anthropic()\nMODEL = \"claude-opus-5-5\"\n\nTICKET_SCHEMA = {\n    \"type\": \"object\",\n    \"properties\": {\n        \"intent\": {\n            \"type\": \"string\",\n            \"enum\": [\"where_is_order\", \"return\", \"exchange\", \"product_question\", \"other\"],\n        },\n        \"order_id\": {\"type\": [\"string\", \"null\"]},\n        \"urgent\": {\"type\": \"boolean\"},\n        \"summary\": {\"type\": \"string\"},\n    },\n    \"required\": [\"intent\", \"order_id\", \"urgent\", \"summary\"],\n    \"additionalProperties\": False,\n}\n\nEMAILS = [\n    \"Hi, I ordered the Trailhead 2P tent last week, order ORB-10482. The tracking hasn't moved in three days and we leave for a camping trip on Friday. Where is it? Ana\",\n    \"Hello! The Storm shell jacket from order ORB-10588 arrived five days ago and it's a bit big. Can I swap the L for an M? Thanks, Owen\",\n    \"Is the Summit sleeping bag warm enough for a night just below freezing? I'm thinking of buying one for a trip in March. Tom\",\n]\n\n\ndef classify(email_text):\n    \"\"\"Send one email to the model and return the ticket as a Python dict.\"\"\"\n    response = client.messages.create(\n        model=MODEL,\n        max_tokens=16000,\n        system=CLASSIFY_SYSTEM,\n        messages=[{\"role\": \"user\", \"content\": email_text}],\n        output_config={\"format\": {\"type\": \"json_schema\", \"schema\": TICKET_SCHEMA}},\n    )\n    if response.stop_reason != \"end_turn\":  # cut off or refused: don't trust it\n        raise ValueError(f\"The reply did not finish normally: {response.stop_reason}\")\n    text = next(b.text for b in response.content if b.type == \"text\")\n    return json.loads(text)\n\n\nif __name__ == \"__main__\":\n    for email in EMAILS:\n        ticket = classify(email)\n        print(json.dumps(ticket, indent=2))\n"
+          }
+        ],
+        "check": "Three JSON objects, one per email. Ana's has intent where_is_order and order_id ORB-10482; Owen's is exchange with ORB-10588; Tom's is product_question with order_id null. Each one also has urgent and a one-line summary.",
+        "tip": "TypeError: unexpected keyword argument 'output_config' means your SDK is too old for structured outputs: run pip install --upgrade anthropic. ModuleNotFoundError: No module named 'prompts' means you're not running from the scout folder."
+      },
+      {
+        "title": "Try an email with no order number",
+        "body": "The hook went wrong because the model filled a gap. This is the same test for data: an email with no order number. The right answer is null, not a plausible guess, and the assert line checks it for you.",
+        "actions": [
+          "In **classify.py**, delete everything from `if __name__ == \"__main__\":` to the end of the file.",
+          "Paste the code below in its place, then run `python classify.py`."
+        ],
+        "values": [
+          {
+            "label": "classify.py (new ending)",
+            "value": "if __name__ == \"__main__\":\n    email = \"Hi, I'd like to return the boots I bought from you last month. They pinch at the toes. Could you send me a return label?\"\n    ticket = classify(email)\n    print(json.dumps(ticket, indent=2))\n    assert ticket[\"order_id\"] is None, \"Scout invented an order number!\"\n    print(\"OK: the email has no order number, so order_id is null.\")\n"
+          }
+        ],
+        "check": "The JSON shows intent return and \"order_id\": null, and the last line reads: OK: the email has no order number, so order_id is null.",
+        "tip": "If the assert fails, check two things: order_id's type in TICKET_SCHEMA is [\"string\", \"null\"], and CLASSIFY_SYSTEM still says to use null and never guess."
+      },
+      {
+        "title": "Print the queue as a table",
+        "body": "Leo doesn't want to read JSON; he wants to scan the queue. Because every ticket has the same fields, turning them into a table takes a few lines and no guessing.",
+        "actions": [
+          "In **classify.py**, delete everything from `if __name__ == \"__main__\":` to the end again.",
+          "Paste the code below in its place, then run `python classify.py`."
+        ],
+        "values": [
+          {
+            "label": "classify.py (new ending)",
+            "value": "if __name__ == \"__main__\":\n    print(f\"{'#':<3}{'intent':<18}{'order_id':<11}{'urgent':<8}summary\")\n    for number, email in enumerate(EMAILS, start=1):\n        ticket = classify(email)\n        order_id = ticket[\"order_id\"] or \"-\"\n        urgent = \"yes\" if ticket[\"urgent\"] else \"no\"\n        print(f\"{number:<3}{ticket['intent']:<18}{order_id:<11}{urgent:<8}{ticket['summary']}\")\n"
+          }
+        ],
+        "check": "A header and three rows, something like: 1 where_is_order ORB-10482 yes, 2 exchange ORB-10588 no, 3 product_question - no, each followed by its summary. The summaries are worded differently each run; the fields stay the same.",
+        "tip": "Each row is one API call, so the table appears over a few seconds. If an email raises ValueError, the message shows its stop_reason."
+      },
+      {
+        "title": "Add an email of your own",
+        "body": "Real inboxes are messier than three tidy samples. Add a tricky email and watch the enum keep every answer inside your five labels.",
+        "actions": [
+          "In **classify.py**, add the line below inside the `EMAILS` list, after Tom's email and before the closing `]`.",
+          "Run `python classify.py` again. Then try an email you write yourself."
+        ],
+        "values": [
+          {
+            "label": "Add to EMAILS",
+            "value": "    \"My climbing rope, order ORB-10560, still hasn't arrived. Honestly, once it does I'd like to send it back. Elena\","
+          }
+        ],
+        "check": "A fourth row appears for Elena with ORB-10560. Her email asks two things, so the model picks the one it judges main, but the intent is always one of your five labels, never a new one.",
+        "tip": "Each email is a string in quotes followed by a comma. Miss a comma and Python silently joins two emails into one, so you'd see three rows instead of four."
+      }
+    ],
+    "finish": {
+      "title": "Scout can sort its own inbox",
+      "body": "You wrote Scout's system prompt with a role, rules, tone and Orbit's real policy, and a classifier that turns messy emails into JSON your code can read. Tagging is simple and high-volume, so once you have tests in Module 5 it's a good candidate for a cheaper model. In Module 3, Scout gets tools, so it can look up the orders it just recognised.",
+      "checklist": [
+        "prompts.py holds SCOUT_SYSTEM and CLASSIFY_SYSTEM",
+        "python prompts.py answers Grace within the 30-day policy, with no promise",
+        "classify.py returns intent, order_id, urgent and summary for every email",
+        "An email with no order number gives order_id null",
+        "The table prints one row per email in EMAILS"
+      ]
+    }
+  },
+  "lab": {
+    "title": "Fix the prompt",
+    "intro": "Three prompts from Scout's first week, each failing in a different way. For each one, pick the change that actually fixes it, not the one that just feels stronger.",
+    "scenarios": [
+      {
+        "lesson": "2.3",
+        "title": "The summary nobody reads",
+        "situation": "Leo wants a one-line summary at the top of every ticket so he can scan the queue before his first coffee. Priya's first prompt sends each email with a single instruction. The summaries come back as whole paragraphs, some with advice for the customer mixed in. Leo has stopped reading them.",
+        "context": {
+          "label": "Prompt and output",
+          "lines": [
+            "PROMPT  Summarise this email.",
+            "EMAIL   My tent (ORB-10482) hasn't moved in 3 days and we",
+            "        leave on Friday! Where is it? Ana",
+            "OUTPUT  Thank you for sharing this email. It sounds like the",
+            "        customer, Ana, is understandably worried about her",
+            "        tent order. Delays can happen for many reasons, such",
+            "        as high carrier volume or bad weather. It may help to",
+            "        reassure her that most parcels arrive within...",
+            "        (176 more words)"
+          ]
+        },
+        "stem": "Which change fixes it?",
+        "options": [
+          {
+            "text": "Say exactly what's wanted: one sentence under 20 words, for the support team, with the customer's request and order number",
+            "correct": true,
+            "why": "It's specific and names the format: the length, the reader and the details to include. Now the model knows what good looks like."
+          },
+          {
+            "text": "Switch to a bigger model that understands what a summary is",
+            "why": "The model understood fine. The prompt never said how long, for whom, or what to include, and a bigger model writes an equally typical, long summary."
+          },
+          {
+            "text": "Add \"Be concise!!!\" to the end of the prompt",
+            "why": "Emphasis isn't information. Concise could still mean a paragraph. Say the length, the reader and the details you need."
+          }
+        ],
+        "hints": [
+          "What would a new colleague need to know to write the summary Leo wants?",
+          "Think about length, who reads it, and which details must be in it."
+        ],
+        "debrief": "Most bad outputs are vague prompts doing exactly what they were asked. Name the length, the reader and the details you need; if the style still drifts, add one example of a good summary."
+      },
+      {
+        "lesson": "2.4",
+        "title": "Free express shipping?",
+        "situation": "Tom is about to place a $140 order and asks whether express shipping is free. Scout's system prompt has a role, a tone and two lines of policy, both about returns. Scout answers instantly, kindly and wrongly: nothing in Orbit's policy says express shipping is free.",
+        "context": {
+          "label": "System prompt and chat",
+          "lines": [
+            "SYSTEM  You are Scout, Orbit Outdoor's support assistant.",
+            "        Be warm and brief.",
+            "        Returns: unused items within 30 days of delivery.",
+            "        Return shipping is free on orders over $75.",
+            "TOM     Is express shipping free on my $140 order?",
+            "SCOUT   Good news! Express shipping is free on all orders",
+            "        over $75, so you're covered."
+          ]
+        },
+        "stem": "What is the best fix?",
+        "options": [
+          {
+            "text": "Paste in the full policy, and add a rule: if the policy doesn't cover something, say so and offer to ask the team",
+            "correct": true,
+            "why": "Scout stretched the nearest fact it had. With the real policy and an honest fallback, it says express takes 1 to 2 business days and offers to check the price with the team."
+          },
+          {
+            "text": "Add \"Never make mistakes\" to the system prompt",
+            "why": "The model doesn't know it's making a mistake; it's predicting a likely answer. It needs facts and a fallback, not a wish."
+          },
+          {
+            "text": "Switch to a larger model that knows more about shipping",
+            "why": "No model knows Orbit's prices. A larger model would make the same kind of guess, just as confidently."
+          }
+        ],
+        "hints": [
+          "Where did \"free over $75\" come from? Look closely at the system prompt.",
+          "Even Orbit's full policy says how long express takes, not what it costs. What should Scout do then?"
+        ],
+        "debrief": "The model blended the nearest fact it had into a confident new one. The fix has two parts: give it the real facts, and give it an honest move for anything those facts don't cover. Orbit's policy lists no express price, so the right reply offers to check with the team."
+      },
+      {
+        "lesson": "2.5",
+        "title": "The crash on Tuesday",
+        "situation": "Priya's first classifier asked for JSON in the prompt. It passed all ten of Monday's test emails. On Tuesday one reply came back wrapped in a friendly sentence and a code fence, json.loads crashed, and 40 tickets sat unsorted until lunch.",
+        "context": {
+          "label": "Prompt, output and error",
+          "lines": [
+            "PROMPT  Classify this email. Reply in JSON with intent",
+            "        and order_id.",
+            "OUTPUT  Sure! Here's the classification:",
+            "        ```json",
+            "        {\"intent\": \"return\", \"order_id\": \"ORB-10517\"}",
+            "        ```",
+            "        Let me know if you need anything else!",
+            "ERROR   json.decoder.JSONDecodeError: Expecting value:",
+            "        line 1 column 1 (char 0)"
+          ]
+        },
+        "stem": "What should Priya change?",
+        "options": [
+          {
+            "text": "Pass a JSON schema in output_config, and keep a check on the result before acting on it",
+            "correct": true,
+            "why": "Structured output constrains the reply to the schema, so there's no chatter to strip. The check still catches a reply that was cut off or doesn't make sense."
+          },
+          {
+            "text": "Cut out the text between the first { and the last } before parsing",
+            "why": "It patches this one failure. The next time a field is missing or misnamed, nothing catches it."
+          },
+          {
+            "text": "Add \"ONLY JSON, NO OTHER TEXT\" to the prompt",
+            "why": "It helps, but it's still a request, not a guarantee. A schema in output_config is the guarantee."
+          }
+        ],
+        "hints": [
+          "Asking for JSON in words is a request. What turns it into a guarantee?",
+          "Think about where the schema goes in the request."
+        ],
+        "debrief": "Asking in prose works most of the time, and most of the time isn't good enough for code that runs on every ticket. Use structured outputs for the shape, then check the stop reason and the values before Scout acts on them."
+      }
+    ]
+  },
+  "review": {
+    "variants": [
+      {
+        "after_days": 3,
+        "title": "Health check · Scout",
+        "stem": "Scout tells a customer that Orbit's climbing ropes come with a lifetime warranty. Nothing in its system prompt mentions warranties. What is the most likely cause?",
+        "options": [
+          {
+            "text": "Warranties weren't in its context, so it predicted a plausible answer",
+            "correct": true
+          },
+          {
+            "text": "The model looked up an old Orbit web page"
+          },
+          {
+            "text": "The customer's question changed Orbit's policy"
+          }
+        ],
+        "rationale": "A model only knows what's in its context. Faced with a gap and no rule for when it's unsure, it fills in what sounds likely, in the same confident tone. The fix: give it the facts, and an honest fallback."
+      },
+      {
+        "after_days": 10,
+        "title": "Health check · model choice",
+        "stem": "Black Friday is coming. Orbit expects 5,000 emails a day, and each is tagged by intent before Scout replies. Tagging runs on Opus today and gets 49 of your 50 test emails right. What should you do?",
+        "options": [
+          {
+            "text": "Run the same 50 tests with Haiku for tagging; switch only if it scores as well, and keep replies on Opus",
+            "correct": true
+          },
+          {
+            "text": "Move every step, replies included, to Haiku today"
+          },
+          {
+            "text": "Keep everything on Opus, because cheaper models are never good enough"
+          }
+        ],
+        "rationale": "Tagging is simple and high-volume, the ideal step to move to a cheaper model, but only once tests show quality holds. At about 500 input and 100 output tokens per email, tagging costs roughly $20 a day on Opus and 50 cents on Haiku."
+      },
+      {
+        "after_days": 30,
+        "title": "Health check · structured data",
+        "stem": "A teammate copies your classifier but changes order_id's type to just \"string\" because null felt awkward. Now emails without an order number come back with values like \"ORB-00000\" or \"unknown\". What is the best fix?",
+        "options": [
+          {
+            "text": "Allow null again, keep the prompt's \"use null, never guess\" line, and have code check the ID format before using it",
+            "correct": true
+          },
+          {
+            "text": "Keep the string type and add \"never invent order numbers\" to the prompt"
+          },
+          {
+            "text": "Remove order_id from the schema"
+          }
+        ],
+        "rationale": "If the schema forces a string, the model has to put something there. Null gives it an honest option, the prompt says when to use it, and a format check in code catches anything else. Prompt, schema and code work together."
+      }
+    ]
+  }
+}

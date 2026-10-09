@@ -23,16 +23,19 @@ import {
 import { StageShell } from "@/components/player/stage-shell";
 import { ChoiceList } from "@/components/player/items";
 import { gradeGate, type GateResponse, type GateResult } from "@/data/mock-grader";
+import { DEMO_OPEN } from "@/lib/demo";
 import type { GateBlock, GateItem, Objective } from "@/data/types";
 import type { StageProps } from "./types";
 
 type Phase = "intro" | "running" | "submitting" | "result";
 
 /**
- * The course's final check, after the capstone. Summative and pass/fail
- * (ch13 T5): no feedback until submit, 80% overall plus at least one correct
- * per lesson, links back to the lessons to revisit, retakes allowed.
- * Answers never appear in the UI data; explanations show once it is passed.
+ * A summative check: the check that closes each module, and the course's
+ * final check after the capstone. Pass/fail (ch13 T5): no feedback until
+ * submit, 80% overall (the final check also wants one right per module),
+ * links back to what to revisit, retakes allowed. Answers never appear in the
+ * UI data; explanations show once it is passed. The demo lets a learner move
+ * on without passing.
  */
 export function GateStage({
   block,
@@ -41,6 +44,7 @@ export function GateStage({
   remediationHref,
   preview,
   onGraded,
+  scope = "course",
   ...nav
 }: StageProps<GateBlock> & {
   objectives: Objective[];
@@ -51,8 +55,11 @@ export function GateStage({
   /** locked: show what it covers, but it cannot be started */
   preview?: boolean;
   onGraded?: (result: GateResult) => void;
+  /** a module's closing check, or the course's final check */
+  scope?: "module" | "course";
 }) {
   const t = useTranslations("player");
+  const forModule = scope === "module";
   const [phase, setPhase] = React.useState<Phase>(nav.done ? "result" : "intro");
   const [responses, setResponses] = React.useState<Record<string, GateResponse>>({});
   const [result, setResult] = React.useState<GateResult | null>(null);
@@ -91,7 +98,10 @@ export function GateStage({
             </ul>
           </div>
           <ul className="grid gap-3 sm:grid-cols-2">
-            <Rule icon={<ShieldCheck />} text={t("gatePass", { percent: Math.round(block.pass_threshold * 100) })} />
+            <Rule
+              icon={<ShieldCheck />}
+              text={t(block.min_correct_per_objective > 0 ? "gatePass" : "gatePassOverall", { percent: Math.round(block.pass_threshold * 100) })}
+            />
             <Rule icon={<EyeOff />} text={t("gateNoFeedback")} />
             <Rule icon={<RotateCcw />} text={t("gateRetry", { hours: block.retry_policy.wait_hours })} />
             <Rule icon={<Clock />} text={t("gateLength", { count: block.items.length, minutes: block.duration_min })} />
@@ -107,7 +117,7 @@ export function GateStage({
             <span />
           )}
           <Button size="lg" variant="brand" disabled={preview} onClick={() => setPhase("running")}>
-            {t("gateStart")}
+            {forModule ? t("gateStartModule") : t("gateStart")}
             <ArrowRight data-icon="inline-end" />
           </Button>
         </div>
@@ -122,6 +132,7 @@ export function GateStage({
         objectives={tested}
         result={result}
         remediationHref={remediationHref}
+        scope={scope}
         onContinue={nav.onComplete}
         onRetry={() => {
           setResponses({});
@@ -260,6 +271,7 @@ function GateResultView({
   objectives,
   result,
   remediationHref,
+  scope,
   onContinue,
   onRetry,
 }: {
@@ -267,10 +279,12 @@ function GateResultView({
   objectives: Objective[];
   result: GateResult | null;
   remediationHref: (stepId: string) => string;
+  scope: "module" | "course";
   onContinue: () => void;
   onRetry: () => void;
 }) {
   const t = useTranslations("player");
+  const forModule = scope === "module";
   // Revisiting a passed gate: no stored attempt in the UI phase, show the pass state only.
   const passed = result ? result.passed : true;
 
@@ -292,10 +306,12 @@ function GateResultView({
           />
         ) : null}
         <div className="min-w-0">
-          <p className="text-lg font-semibold">{passed ? t("gatePassedBody") : t("gateFailedBody")}</p>
+          <p className="text-lg font-semibold">{passed ? (forModule ? t("gatePassedBodyModule") : t("gatePassedBody")) : t("gateFailedBody")}</p>
           <p className="mt-1 text-ink-muted">
             {passed
-              ? t("gatePassedNext")
+              ? forModule
+                ? t("gatePassedNextModule")
+                : t("gatePassedNext")
               : t("gateRetry", { hours: block.retry_policy.wait_hours })}
           </p>
         </div>
@@ -307,7 +323,7 @@ function GateResultView({
           <ul className="flex flex-col gap-3">
             {result.perObjective.map((o) => {
               const obj = objectives.find((x) => x.id === o.objective_id);
-              const ok = o.correct >= block.min_correct_per_objective;
+              const ok = o.correct >= Math.max(1, block.min_correct_per_objective);
               return (
                 <li key={o.objective_id} className="flex flex-col gap-1.5">
                   <div className="flex items-center justify-between gap-3 text-sm">
@@ -388,9 +404,9 @@ function GateResultView({
             {t("retryDemo")}
           </Button>
         ) : null}
-        {passed ? (
-          <Button size="lg" variant="brand" onClick={onContinue}>
-            {t("completeContinue")}
+        {passed || DEMO_OPEN ? (
+          <Button size="lg" variant={passed ? "brand" : "outline"} onClick={onContinue}>
+            {passed ? t("completeContinue") : t("continueAnyway")}
             <ArrowRight data-icon="inline-end" />
           </Button>
         ) : null}

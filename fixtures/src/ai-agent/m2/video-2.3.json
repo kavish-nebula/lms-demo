@@ -1,0 +1,235 @@
+{
+  "lesson": "2.3",
+  "title": "Prompt engineering essentials",
+  "notes": [
+    "Most bad answers come from missing information, not missing magic words: be specific and give the model the facts.",
+    "Examples teach style fastest, and naming the format tells the model exactly what shape to answer in.",
+    "Break big tasks into steps, test prompts on real emails, and fix one gap at a time."
+  ],
+  "quizAfter": 3,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "pencil",
+      "kicker": "Module 2 · Lesson 3",
+      "title": "Prompt engineering essentials",
+      "sub": "Five habits that turn a vague request into one the model gets right",
+      "sentences": [
+        "You now know the model predicts the most likely text, given what it can see.",
+        "So the words you send are your main control over what comes back.",
+        "In this lesson you will learn five habits that make a prompt clear, and watch a vague prompt for Scout become a good one."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Same email, two prompts",
+      "left": {
+        "label": "Vague prompt",
+        "tone": "bad",
+        "cue": 1,
+        "points": [
+          "“Reply to this customer.”",
+          "No policy, no order details",
+          "No length, tone or rules",
+          "Three wandering paragraphs, one invented promise"
+        ]
+      },
+      "right": {
+        "label": "Clear prompt",
+        "tone": "ok",
+        "cue": 4,
+        "points": [
+          "Who Scout is and who is asking",
+          "The policy facts that apply",
+          "2 to 3 plain sentences, no promises",
+          "Short, correct, ready to send"
+        ]
+      },
+      "sentences": [
+        "Here is one customer email, sent to the same model with two different prompts.",
+        "On the left, the vague one: reply to this customer.",
+        "The model has no policy, no order details and no idea how long or how formal to be.",
+        "So it writes three friendly paragraphs, and fills every gap with whatever sounds likely.",
+        "On the right, the clear prompt says who Scout is, gives the policy that applies, and asks for two or three plain sentences with no promises.",
+        "Same model, same email, and now the answer is short and correct.",
+        "The difference is not magic words; it is information the model needed and did not have."
+      ]
+    },
+    {
+      "kind": "hub",
+      "title": "Five habits of a clear prompt",
+      "center": { "icon": "pencil", "label": "Clear prompt", "sub": "what a new colleague needs" },
+      "spokes": [
+        { "icon": "target", "label": "Be specific", "sub": "exactly what you want", "cue": 1 },
+        { "icon": "book", "label": "Give context", "sub": "facts, reader, purpose", "cue": 2 },
+        { "icon": "copy", "label": "Show examples", "sub": "one or two good answers", "cue": 3 },
+        { "icon": "json", "label": "Name the format", "sub": "length, layout, fields", "cue": 4 },
+        { "icon": "list-checks", "label": "Break it down", "sub": "one step at a time", "cue": 5 }
+      ],
+      "note": { "text": "The test: would a smart new colleague, on day one, know what to do?", "cue": 6 },
+      "sentences": [
+        "Prompt engineering sounds technical, but it is mostly clear writing for a very literal reader.",
+        "First, be specific: say exactly what you want, not roughly what you mean.",
+        "Second, give context: the facts it needs, who the reader is, and why the task matters.",
+        "Third, show examples, because one or two good answers teach style faster than a paragraph of rules.",
+        "Fourth, name the output format: how long, what layout, and which fields.",
+        "Fifth, break big tasks into smaller steps the model can take one at a time.",
+        "A good test is to imagine handing your prompt to a smart new colleague on their first day: would they know what to do?"
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "Small edits, big difference",
+      "columns": ["Habit", "Instead of", "Write"],
+      "rows": [
+        { "cells": ["Be specific", "Help this customer.", "Answer her return question in 2 to 3 sentences."], "cue": 1 },
+        { "cells": ["Give context", "(nothing)", "Policy: returns within 30 days of delivery."], "cue": 2 },
+        { "cells": ["Name the format", "What does she want?", "Reply with one word: return, exchange or other."], "cue": 3 },
+        { "cells": ["Break it down", "Handle this ticket.", "First find the order number, then the request."], "cue": 4 }
+      ],
+      "note": { "text": "Each fix adds something the model could not have guessed.", "cue": 5 },
+      "sentences": [
+        "Here is what those habits look like as small edits to real instructions.",
+        "Instead of help this customer, say what to answer and how long the answer should be.",
+        "Instead of hoping it knows the policy, paste in the rule that applies.",
+        "Instead of asking what she wants, list the exact answers you will accept.",
+        "Instead of handle this ticket, give the steps in order.",
+        "Every one of these edits adds something the model could not have guessed on its own."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "Show, don't just tell",
+      "lead": "A few solved examples before the real task. This is called few-shot prompting.",
+      "rows": [
+        { "code": "Tag each email: where_is_order, return or other.", "out": "the instruction", "cue": 1 },
+        { "code": "Email: Has my tent shipped yet?  Tag: where_is_order", "out": "solved example one", "cue": 2 },
+        { "code": "Email: Boots pinch, can I send them back?  Tag: return", "out": "solved example two", "cue": 3 },
+        { "code": "Email: {the new email}  Tag:", "out": "the model continues the pattern", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "lightbulb",
+        "label": "Vary your examples",
+        "text": "Models copy examples closely, including length and wording. Use different ones so it copies the idea.",
+        "cue": 6
+      },
+      "sentences": [
+        "Examples are one of the strongest tools you have.",
+        "Start with the instruction: tag each email as where is order, return or other.",
+        "Then show a solved example: has my tent shipped yet is tagged where is order.",
+        "And another: boots that pinch and need sending back are tagged return.",
+        "Finally, give the new email, and the model continues the pattern.",
+        "This is called few-shot prompting: a few solved examples, shown before the real task.",
+        "Keep your examples varied, because the model copies their length and wording as well as their meaning."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "Break big tasks into steps",
+      "run": true,
+      "nodes": [
+        { "kind": "user", "icon": "mail", "label": "Customer email", "sub": "messy, several asks", "cue": 1 },
+        { "kind": "llm", "icon": "search", "label": "1. Pull out facts", "sub": "order number, item, ask", "cue": 2 },
+        { "kind": "logic", "icon": "book", "label": "2. Match the policy", "sub": "which rule applies", "cue": 3 },
+        { "kind": "output", "icon": "send", "label": "3. Draft the reply", "sub": "short, on policy", "cue": 4 }
+      ],
+      "note": { "text": "Small steps are easier to get right and easier to check. Later, each can be its own call.", "cue": 5 },
+      "sentences": [
+        "The last habit is breaking big tasks down.",
+        "Customer emails are messy: one message can ask about an order, a return and a size, all at once.",
+        "So ask the model to first pull out the facts: the order number, the item and what the customer wants.",
+        "Then to work out which policy rule applies.",
+        "And only then to draft the reply, short and within policy.",
+        "Smaller steps are easier for the model to get right, and easier for you to check.",
+        "Later in the course, each of these steps can become its own call, or a tool."
+      ]
+    },
+    {
+      "kind": "cycle",
+      "title": "Prompts are tested, not just written",
+      "center": { "label": "Prompt loop", "sub": "until the tests pass" },
+      "steps": [
+        { "icon": "pencil", "label": "Write", "sub": "a clear first version", "cue": 1 },
+        { "icon": "play", "label": "Run", "sub": "on ten real emails", "cue": 2 },
+        { "icon": "eye", "label": "Read", "sub": "every answer, not just one", "cue": 3 },
+        { "icon": "wrench", "label": "Fix", "sub": "the biggest gap you found", "cue": 4 }
+      ],
+      "note": { "text": "Keep the emails you test with. In Module 5 they become Scout's test set.", "cue": 6 },
+      "sentences": [
+        "Nobody writes a perfect prompt first time, so treat it like code: write, run, read and fix.",
+        "Write the clearest first version you can.",
+        "Run it on ten or so real emails, not just the one you had in mind.",
+        "Read every answer, because the problems hide in the ones you skip.",
+        "Then fix the single biggest gap, and run the same emails again.",
+        "Changing one thing at a time tells you which change actually helped.",
+        "Keep those emails, because in Module 5 they become Scout's test set."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "Bad answers usually mean missing information, not missing magic words", "cue": 1 },
+        { "text": "Be specific, give context, show examples, name the format", "cue": 2 },
+        { "text": "Break big tasks into steps the model can take one at a time", "cue": 3 },
+        { "text": "Test on real emails and fix one gap at a time", "cue": 4 }
+      ],
+      "sentences": [
+        "Let us pull it together.",
+        "When the model gives a poor answer, look first for information the prompt left out.",
+        "Be specific, give context, show examples and name the format you want.",
+        "Break big tasks into steps the model can take one at a time.",
+        "And test your prompt on real emails, fixing one gap at a time.",
+        "Next, you will put these habits into the most important prompt of all: Scout's system prompt."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "Scout's one-line prompt produced three paragraphs and an invented promise. What was mainly missing?",
+      "options": [
+        "Polite words, like please and thank you",
+        "Information: the policy, the length and the rules",
+        "A bigger max_tokens setting"
+      ],
+      "correct": 1,
+      "explain": "The model filled the gaps with typical text. Giving it the facts, the length and the rules removes the gaps.",
+      "hint": "Did the model misbehave, or did it do its best with what it was given?"
+    },
+    {
+      "q": "Which instruction names the output format?",
+      "options": [
+        "You are a helpful assistant.",
+        "Answer in two or three sentences, with no lists.",
+        "This customer seems upset."
+      ],
+      "correct": 1,
+      "explain": "It tells the model exactly how long the answer should be and what layout to use.",
+      "hint": "Look for the one that describes the shape of the answer, not who is speaking."
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "Both of your example replies open with \"Great question!\". What will the model most likely do?",
+      "options": [
+        "Ignore the wording of the examples",
+        "Start its own replies with \"Great question!\" too",
+        "Refuse to answer"
+      ],
+      "correct": 1,
+      "explain": "Models copy examples closely, including wording and length, so vary your examples.",
+      "hint": "Examples teach more than meaning."
+    },
+    {
+      "q": "One email asks about an order, a return and a size swap. What is a good prompt strategy?",
+      "options": [
+        "One instruction: handle everything in this email",
+        "Steps: pull out the facts, match the policy, then draft the reply",
+        "Ask the customer to send three separate emails"
+      ],
+      "correct": 1,
+      "explain": "Smaller steps are easier for the model to get right and easier for you to check.",
+      "hint": "Think about the fifth habit on the hub slide."
+    }
+  ]
+}

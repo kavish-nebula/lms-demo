@@ -38,14 +38,64 @@ type BlockBase = {
   status?: "not_in_v1";
 };
 
+/* ---------------------------------------------------------------- hook film */
+
+/**
+ * One illustrated scene of the hook's opening film, played at the learner's
+ * pace. `say` is spoken and shown as the caption when the scene starts. Most
+ * scenes then wait for the learner to do something (`act` names it: tap a
+ * button, or hold one down to make time pass); `then` is spoken and shown
+ * once they have. Each `say` and `then` has its own narration clip.
+ */
+type ShotBase = { label: string; say: string };
+/** a scene the learner sets going with one tap (or holds down, for the hold types) */
+type Acted = { act: string; then: string };
+export type ChatLine = { from: "customer" | "agent"; text: string };
+export type TerminalLine = { time: string; text: string; tone: "ok" | "warn" | "err" | "dim" };
+export type HookMessage = { who: string; av: string; at: string; text: string };
+
+export type FilmShot =
+  /** the shop's website and its chatbot: the learner sends the first three `asks` and gets `reply` each time, then a counter runs */
+  | (ShotBase & { type: "site-chat"; then: string; url: string; product: string; asks: string[]; reply: string; count: number; countLabel: string })
+  /** a helpdesk queue, empty until the learner opens it, then flooding */
+  | (ShotBase & Acted & { type: "tickets"; count: number; subjects: string[]; tag: string })
+  /** a phone buzzing with the team's messages (`notes`, kept short) */
+  | (ShotBase & { type: "phone"; time: string; notes: HookMessage[] })
+  /** an email arrives; when the learner asks, the agent types its reply, with `highlight` marked */
+  | (ShotBase & Acted & { type: "email"; from: string; address: string; subject: string; body: string; meta: string; replyBy: string; reply: string; highlight: string })
+  /** the source of truth beside the agent's reply: the learner taps the part of the reply that is wrong, then a stamp */
+  | (ShotBase & {
+      type: "doc-vs-reply";
+      then: string;
+      doc: { title: string; heading: string; text: string; highlight: string };
+      reply: { title: string; text: string; highlight: string };
+      stamp: string;
+    })
+  /** the agent's "delivered" claim; when the learner tracks the parcel, the truck stops at `stop` (0 to 1) */
+  | (ShotBase & Acted & { type: "parcel-map"; from: string; to: string; hub: string; stop: number; claim: string; truth: string })
+  /** a log or terminal printing; `flood` repeats one line faster and faster */
+  | (ShotBase & { type: "terminal"; title: string; lines: TerminalLine[]; badge?: string; flood?: { text: string; count: number } })
+  /** a long chat the learner keeps going by holding: message `key` leaves the last `keep` messages, then message `ask` lands */
+  | (ShotBase & Acted & { type: "long-chat"; customer: string; agent: string; messages: ChatLine[]; key: number; ask: number; keep: number })
+  /** a test run the learner starts, filling a grid pass by pass */
+  | (ShotBase & Acted & { type: "test-grid"; total: number; passed: number; countdown: string })
+  /** a clock the learner fast-forwards by holding, while a bill and a step count climb */
+  | (ShotBase & Acted & { type: "timelapse"; startDay: string; startTime: string; hours: number; amount: number; steps: number; error: string })
+  /** the hook's `stat`, number by number */
+  | (ShotBase & { type: "numbers" });
+
+export type HookFilm = { shots: FilmShot[] };
+
 export type HookBlock = BlockBase & {
   stage: "hook";
+  /** the opening as a film of illustrated scenes; without it the opening is shown as text */
+  film?: HookFilm;
   kicker: string;
   title: string;
   narration: string;
   why: string;
   stat: string;
-  messages: { who: string; av: string; at: string; text: string }[];
+  messages: HookMessage[];
   prompt: string;
   hunches: { id: string; label: string }[];
   correct: string;
@@ -84,10 +134,17 @@ export type VideoSlide =
   | (SlideBase & { kind: "flow"; run?: boolean; nodes: (Cued & { kind: string; icon: string; label: string; sub: string })[]; note: Cued & { text: string } })
   | (SlideBase & { kind: "bullets"; lead: string; bullets: (Cued & { icon: string; text: string })[]; aside: Aside })
   | (SlideBase & { kind: "example"; scenario: string; steps: (Cued & { time: string; icon: string; text: string })[]; result: Cued & { text: string } })
-  | (SlideBase & { kind: "cards"; cards: (Cued & { icon: string; title: string; flow: string[] })[] })
+  /** `tags` labels each card's rows (e.g. ["Input", "Tool", "Output"]); without it the rows are numbered */
+  | (SlideBase & { kind: "cards"; tags?: string[]; cards: (Cued & { icon: string; title: string; flow: string[] })[] })
   | (SlideBase & { kind: "table"; columns: string[]; rows: (Cued & { cells: string[]; tone?: string })[]; note: Cued & { text: string } })
   | (SlideBase & { kind: "code"; lead: string; rows: (Cued & { code: string; out: string })[]; aside: Aside })
-  | (SlideBase & { kind: "recap"; points: (Cued & { text: string })[] });
+  | (SlideBase & { kind: "recap"; points: (Cued & { text: string })[] })
+  /** one thing in the middle, its parts around it (e.g. an agent and its LLM, tools, memory, planning) */
+  | (SlideBase & { kind: "hub"; center: { icon: string; label: string; sub: string }; spokes: (Cued & { icon: string; label: string; sub: string })[]; note?: Cued & { text: string } })
+  /** steps that repeat in a loop (e.g. think, act, observe) */
+  | (SlideBase & { kind: "cycle"; center: { label: string; sub: string }; steps: (Cued & { icon: string; label: string; sub: string })[]; note?: Cued & { text: string } })
+  /** a conversation or agent trace, message by message */
+  | (SlideBase & { kind: "chat"; messages: (Cued & { role: "user" | "agent" | "tool" | "system"; label?: string; text: string })[]; aside?: Aside });
 
 /** A short check inside a video: a wrong answer gets a hint, not the answer. */
 export type VideoQuiz = { q: string; options: string[]; correct: number; explain: string; hint: string };
@@ -127,35 +184,6 @@ export type WorkedBlock = BlockBase & { stage: "worked"; examples: WorkedExample
 
 /* ---------------------------------------------------------------- guided practice */
 
-/** Node icons on the recreated n8n screens. */
-export type ScreenIcon = "sheets" | "schedule" | "webhook" | "set" | "filter" | "if" | "dedupe" | "hubspot" | "slack" | "http" | "wait" | "noop" | "manual" | "form";
-
-export type ScreenNode = { id: string; icon: ScreenIcon; name: string; x: number; y: number; trigger?: boolean; status?: "ok" | "error" };
-export type ScreenEdge = { from: string; to: string; label?: string; branch?: string };
-/** Data shown in an input or output pane: column names, then rows. */
-export type ScreenData = { items: number; columns: string[]; rows: string[][] };
-
-export type ScreenField =
-  | { id: string; kind: "select" | "text"; label: string; value: string }
-  | { id: string; kind: "expr"; label: string; value: string; result?: string }
-  | { id: string; kind: "toggle"; label: string; on: boolean }
-  | { id: string; kind: "assign"; label: string; rows: { name: string; type: string; value: string; result?: string }[] }
-  | { id: string; kind: "condition"; label: string; rows: { left: string; op: string; right?: string }[] }
-  | { id: string; kind: "button"; label: string };
-
-/**
- * A recreated n8n screen (n8n 2.x, dark theme). `marks` puts a numbered
- * badge on an element: the number matches the step's action list.
- */
-export type N8nScreen = { marks?: Record<string, number>; caption: string } & (
-  | { view: "canvas"; name: string; nodes: ScreenNode[]; edges: ScreenEdge[]; published?: boolean; toast?: string }
-  | { view: "panel"; name: string; title: string; search: string; items: { id: string; icon: ScreenIcon; name: string; desc: string; group?: string }[]; nodes: ScreenNode[]; edges: ScreenEdge[] }
-  | { view: "ndv"; icon: ScreenIcon; node: string; tab?: "parameters" | "settings"; action: string; fields: ScreenField[]; input?: ScreenData; output?: ScreenData; notice?: string }
-  | { view: "credential"; icon: ScreenIcon; title: string; fields: { id: string; label: string; value: string }[]; button: string }
-  | { view: "sheet"; title: string; tabs: string[]; tab: string; columns: string[]; rows: string[][] }
-  | { view: "slack"; channel: string; messages: { who: string; time: string; text: string }[] }
-);
-
 export type GuideStep = {
   id: string;
   title: string;
@@ -163,9 +191,8 @@ export type GuideStep = {
   body: string;
   /** what to do, in order; **bold** names a button or field, `code` is something to type */
   actions: string[];
-  /** values to copy into n8n */
+  /** values to copy into the tool the learner is using */
   values?: { label: string; value: string }[];
-  screen: N8nScreen;
   /** "You should see" */
   check: string;
   /** "Stuck?" */
@@ -177,14 +204,33 @@ export type GuidedBlock = BlockBase & {
   title: string;
   situation: string;
   intro: string;
-  /** the finished workflow */
-  goal: N8nScreen;
   before: { items: string[]; downloads: { label: string; href: string; note: string }[] };
   steps: GuideStep[];
   finish: { title: string; body: string; checklist: string[] };
 };
 
-export type PlaceholderBlock = BlockBase & { stage: "lab" | "project" };
+/* ---------------------------------------------------------------- scenarios */
+
+/**
+ * A realistic situation the learner has not seen, and a decision to make in it:
+ * the module's ideas applied somewhere new (transfer). `context` is evidence
+ * shown as-is, such as a log, a chat or a config.
+ */
+export type Scenario = {
+  id: string;
+  lesson: string;
+  title: string;
+  situation: string;
+  context?: { label: string; lines: string[] };
+  question: McItem;
+  /** what an expert would do and why, shown once the learner has answered */
+  debrief: string;
+};
+
+/** Stage 5 (stored as "lab"): scenarios that apply the module to new situations. */
+export type ScenarioBlock = BlockBase & { stage: "lab"; title: string; intro: string; scenarios: Scenario[] };
+
+export type PlaceholderBlock = BlockBase & { stage: "project" };
 
 export type GateItem = {
   id: string;
@@ -229,6 +275,7 @@ export type StageBlock =
   | ExplainerBlock
   | WorkedBlock
   | GuidedBlock
+  | ScenarioBlock
   | PlaceholderBlock
   | GateBlock
   | ReflectionBlock
@@ -283,7 +330,8 @@ export type CourseModule = {
   current_stage?: StageId;
   lite: boolean;
   pain: string;
-  hours_saved: number;
+  /** course design estimate of manual work a week the module takes over, for courses where that applies */
+  hours_saved?: number;
   lead_in: string | null;
   lessons: Lesson[];
   topics: Topic[];
@@ -323,33 +371,21 @@ export type PrecheckContent = { course_id: string; version: string; items: Prech
 
 /* ---------------------------------------------------------------- finale content */
 
-/** What the capstone sandbox provides: the sheets, channels and credentials, and sample rows to run. */
-export type CapstoneSandbox = {
-  document: string;
-  sheets: { name: string; columns: string[]; note: string }[];
-  channels: { name: string; note: string }[];
-  credentials: { name: string; app: string }[];
-  /** "Execute workflow" runs these, one execution per row; a fault makes HubSpot fail on that row */
-  sample: { row: Record<string, string>; fault?: { crm?: "rateLimitOnce" | "down" }; note?: string }[];
-};
-
 export type CapstoneBlock = {
   step_id: string;
   duration_min: number;
   kicker: string;
   title: string;
-  workflow_name: string;
+  /** the finished project's name, listed under "What you built" */
+  project_name: string;
   scene: string;
-  /** ids match the grader's requirement ids */
   requirements: { id: string; text: string }[];
   edge_cases: string[];
-  /** the fields HubSpot expects */
-  data_contract: { field: string; rule: string; example: string }[];
   closing: string;
-  sandbox: CapstoneSandbox;
-  real_n8n: { intro: string; steps: string[] };
+  /** shown once the project is done; may be empty */
   reactions: { who: string; av: string; text: string }[];
-  hours_saved: number;
+  /** course design estimate of manual work a week the project takes over, for courses where that applies */
+  hours_saved?: number;
 };
 
 export type WrapUpBlock = {
