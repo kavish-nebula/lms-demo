@@ -1,0 +1,79 @@
+{
+  "title": "Module check: giving Scout tools it can rely on",
+  "summary": "Six situations covering tool calls, tool definitions, safe tools, API wrappers and tool errors.",
+  "items": [
+    {
+      "lesson": "3.1",
+      "stem": "Maya adds a line to Scout's system prompt: \"When a return qualifies, refund the customer.\" Scout now tells a customer, \"Done, I've refunded your $60.\" No money ever moved. What is missing?",
+      "options": [
+        "A request_refund tool Scout can ask for, which your code runs, because the model only writes text",
+        "A firmer rule in the system prompt, so Scout treats the refund as a step it must carry out",
+        "A larger model that is able to reach Orbit's payment system and send the refund itself",
+        "Permission for Scout to run its own Python, so it can call the payment system directly"
+      ],
+      "correct": 0,
+      "explain": "Scout can only write text, so \"I've refunded your $60\" was just words. A real action happens only when Scout asks for a tool like request_refund and your code runs it. A firmer rule or a bigger model still only produces text."
+    },
+    {
+      "lesson": "3.2",
+      "stem": "Priya adds a track_parcel definition to TOOLS and writes the Python function in tools.py. Scout now asks for track_parcel, but every call comes back as an error: \"unknown tool track_parcel\". What did she most likely miss?",
+      "options": [
+        "Writing a clearer description, since the model can't tell when track_parcel fits",
+        "Passing TOOLS on every request, not only the first, so the model still sees the tool",
+        "Adding track_parcel to FUNCTIONS, so run_tool can map the name to the function",
+        "Listing tracking_number under required, so the model always sends that argument"
+      ],
+      "correct": 2,
+      "explain": "Scout asked for track_parcel, so the definition reached the model. The error comes from run_tool: the name has no entry in FUNCTIONS, so there is nothing to call. The definition tells the model a tool exists; the mapping makes it real."
+    },
+    {
+      "lesson": "3.3",
+      "stem": "A customer returns a $58 order. Policy takes the $6.95 return label off orders under $75, and Scout replies, \"You'll get $51.15 back.\" The right figure is $51.05. What is the best fix?",
+      "options": [
+        "Tell Scout in the system prompt to check every sum twice before it replies",
+        "Have Scout pass the sum to calculate, as 58 - 6.95, and quote the result",
+        "Switch Scout to a larger model, which gets small sums like this one right",
+        "Have Scout show its working in the reply, so the customer can spot slips"
+      ],
+      "correct": 1,
+      "explain": "Models predict digits much like words, so a sum can be a little off while sounding sure. Checking twice in its head repeats the same weakness. Handing 58 - 6.95 to calculate gives exactly 51.05, every time."
+    },
+    {
+      "lesson": "3.4",
+      "stem": "Priya is connecting ParcelPath's tracking API so Scout can answer \"where is my parcel?\" questions. Which way of giving Scout access is the safest, and the easiest for the model to use well?",
+      "options": [
+        "A general API tool that takes any ParcelPath URL, so Scout can reach every endpoint",
+        "A general API tool that takes a URL and the key, so Scout can sign its own requests",
+        "The key and ParcelPath's endpoint list in the system prompt, so Scout knows how to call it",
+        "A track_parcel tool that takes a tracking number; your code adds the key and a timeout"
+      ],
+      "correct": 3,
+      "explain": "A thin track_parcel function gives Scout one clear job and only the power it needs, while the key, timeout and trimming stay in your code. A general tool hands the model every endpoint, and a key the model can see can be repeated or leaked."
+    },
+    {
+      "lesson": "3.5",
+      "stem": "Tom pastes a tracking number with one digit missing, PP-9041, and asks where his parcel is. Scout calls track_parcel and ParcelPath answers 404, tracking number not found. What should happen next?",
+      "options": [
+        "Retry a few times with backoff, in case ParcelPath is only having a brief problem",
+        "Return an empty result, so Scout can tell Tom there is no tracking news yet",
+        "Report it at once as is_error saying not found, so Scout asks Tom to check the number",
+        "Hand Tom straight to a person, since a failed tool means Scout can't help him"
+      ],
+      "correct": 2,
+      "explain": "A 404 fails the same way every time, so retrying only keeps Tom waiting. An empty result would let Scout guess, as it did for Elena. Reported as is_error, the failure lets Scout ask Tom to check the number, with no hand-off needed yet."
+    },
+    {
+      "lesson": "3.5",
+      "transfer": true,
+      "stem": "A small bike repair shop's assistant uses a tool to check free booking slots. When the booking API times out, the code returns an empty list, so the assistant tells customers Saturday is full. It had six free slots. What should change?",
+      "options": [
+        "Add a prompt rule: only say a day is full when the assistant is certain that it is",
+        "Retry the timeout briefly, then return is_error so the assistant says it can't check",
+        "When the API fails, return the shop's usual Saturday slots so people can still book",
+        "Keep retrying the booking API until it answers, however long the customer waits"
+      ],
+      "correct": 1,
+      "explain": "An empty list reads as \"no slots\", so the assistant was certain and wrong, and a prompt rule can't fix that. A short retry handles a blip; is_error tells the truth after that. Usual slots are a guess that can double-book, and endless retries keep customers waiting."
+    }
+  ]
+}

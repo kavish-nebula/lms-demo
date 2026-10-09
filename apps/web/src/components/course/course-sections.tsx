@@ -35,7 +35,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FinaleArt, ModuleArt } from "@/components/course/module-art";
 import { LessonOrderPreview } from "@/components/enroll/lesson-order-preview";
+import { ModuleMap } from "@/components/player/module-map";
+import { useWatchedVideos } from "@/components/player/video/watched";
+import { DEMO_OPEN } from "@/lib/demo";
 import { useEnrollment } from "@/lib/enrollment";
+import { flatParts, type ModuleSection } from "@/lib/module-outline";
 import { useCourseProgress, type ModuleProgress } from "@/lib/course-progress";
 import { QUESTIONS, lessonOrder } from "@/lib/setup";
 import { STAGE_META, type StageId } from "@/lib/stages";
@@ -355,11 +359,13 @@ export function MethodSection({ course }: { course: Course }) {
 
 export function OutcomesSection({ course }: { course: Course }) {
   const t = useTranslations("course");
-  const max = Math.max(...course.modules.map((m) => m.hours_saved));
+  // hours of manual work only apply to courses that estimate them
+  const hasHours = course.modules.some((m) => m.hours_saved != null);
+  const max = Math.max(1, ...course.modules.map((m) => m.hours_saved ?? 0));
   return (
     <section id="outcomes" tabIndex={-1} aria-labelledby="outcomes-title" className="flex scroll-mt-40 flex-col gap-6 outline-none">
       <SectionTitle id="outcomes">{t("outcomesTitle")}</SectionTitle>
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2">
+      <div className={cn("grid grid-cols-[minmax(0,1fr)] gap-6", hasHours && "lg:grid-cols-2")}>
         <Surface pad="lg" className="flex flex-col gap-4">
           <p className="text-lg leading-relaxed">{course.goal}</p>
           <ul className="flex flex-col gap-2">
@@ -371,6 +377,7 @@ export function OutcomesSection({ course }: { course: Course }) {
             ))}
           </ul>
         </Surface>
+        {hasHours ? (
         <Surface pad="lg" className="flex flex-col gap-4">
           <div>
             <h3 className="font-semibold">{t("hoursTitle")}</h3>
@@ -383,7 +390,7 @@ export function OutcomesSection({ course }: { course: Course }) {
                 <span className="relative h-2.5 overflow-hidden rounded-pill bg-chart-track">
                   <motion.span
                     className="absolute inset-y-0 left-0 origin-left rounded-pill bg-[linear-gradient(90deg,var(--accent-deep),var(--accent))]"
-                    style={{ width: `${(m.hours_saved / max) * 100}%` }}
+                    style={{ width: `${((m.hours_saved ?? 0) / max) * 100}%` }}
                     initial={{ scaleX: 0 }}
                     whileInView={{ scaleX: 1 }}
                     viewport={{ once: true }}
@@ -391,13 +398,14 @@ export function OutcomesSection({ course }: { course: Course }) {
                   />
                 </span>
                 <span className="text-right font-semibold tabular-nums">
-                  <NumberTicker value={m.hours_saved} suffix=" h" />
+                  <NumberTicker value={m.hours_saved ?? 0} suffix=" h" />
                 </span>
               </li>
             ))}
           </ul>
           <p className="text-xs text-ink-faint">{t("hoursNote")}</p>
         </Surface>
+        ) : null}
       </div>
       <EmptyState icon={<BarChart3 />} title={t("careerEmptyTitle")} description={t("careerEmptyBody")} />
     </section>
@@ -411,7 +419,7 @@ export function OutcomesSection({ course }: { course: Course }) {
  * then the capstone, final check and wrap-up. Each row's arrow opens what you
  * will learn there.
  */
-export function ModulesSection({ course }: { course: Course }) {
+export function ModulesSection({ course, outlines }: { course: Course; outlines: Record<string, ModuleSection[]> }) {
   const t = useTranslations("course");
   const tc = useTranslations("common");
   const { enrolled } = useEnrollment(course.course_id);
@@ -472,7 +480,7 @@ export function ModulesSection({ course }: { course: Course }) {
                   </>
                 }
               >
-                <ModulePanel course={course} module={m} enrolled={enrolled} />
+                <ModulePanel course={course} module={m} enrolled={enrolled} sections={outlines[m.module_id] ?? []} />
               </OutlineRow>
             );
           })}
@@ -646,11 +654,27 @@ function Learn({ outcomes }: { outcomes: string[] }) {
   );
 }
 
-function ModulePanel({ course, module: m, enrolled }: { course: Course; module: ModuleProgress; enrolled: boolean }) {
+function ModulePanel({
+  course,
+  module: m,
+  enrolled,
+  sections,
+}: {
+  course: Course;
+  module: ModuleProgress;
+  enrolled: boolean;
+  /** the module under its side headings, part by part */
+  sections: ModuleSection[];
+}) {
   const t = useTranslations("course");
-  const href = `/learn/courses/${course.course_id}/${m.module_id}/${m.next ?? m.stages[0]}`;
-  const topics = moduleTopics(m);
+  const to = useTranslations("outline");
+  const moduleHref = `/learn/courses/${course.course_id}/${m.module_id}`;
+  const href = `${moduleHref}/${m.next ?? m.stages[0]}`;
   const [showTopics, setShowTopics] = React.useState(false);
+  const { watched } = useWatchedVideos();
+  const parts = flatParts(sections);
+  const doneKeys = new Set(parts.filter((p) => (p.video ? watched.includes(p.video.id) || m.done.includes("explainer") : m.done.includes(p.stage))).map((p) => p.key));
+  const nextKey = enrolled ? parts.find((p) => !doneKeys.has(p.key))?.key : undefined;
 
   return (
     <div className="flex flex-col gap-5">
@@ -676,53 +700,14 @@ function ModulePanel({ course, module: m, enrolled }: { course: Course; module: 
           aria-expanded={showTopics}
           className="flex w-fit items-center gap-1.5 rounded-md text-sm font-semibold text-brand-ink outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/60"
         >
-          {t("topicsInModuleCount", { count: topics.length })}
+          {to("partsCount", { count: parts.length })}
           <ChevronDown className={cn("size-4 transition-transform", showTopics && "rotate-180")} aria-hidden />
         </button>
         <AnimatePresence initial={false}>
           {showTopics ? (
-            <motion.ol
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="flex flex-col gap-2 overflow-hidden"
-            >
-              {topics.map((tp, i) => {
-                const meta = STAGE_META[tp.stage];
-                const Icon = meta.icon;
-                const done = m.done.includes(tp.stage);
-                const next = enrolled && tp.stage === m.next;
-                return (
-                  <li key={tp.stage} className={cn("rounded-lg border p-3", next ? "border-brand-line bg-brand-soft/40" : "border-line")}>
-                    <div className="flex items-start gap-3">
-                      <span
-                        className={cn(
-                          "flex size-7 shrink-0 items-center justify-center rounded-md border [&_svg]:size-3.5",
-                          done ? "border-transparent bg-ok text-on-ok" : meta.chip,
-                        )}
-                      >
-                        {done ? <Check aria-hidden /> : <Icon aria-hidden />}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex flex-wrap items-center gap-2 text-sm font-medium">
-                          <span className="font-mono text-xs text-ink-faint">{i + 1}</span>
-                          {tp.title}
-                          {next ? (
-                            <Chip size="sm" tone="accent">
-                              {t("upNext")}
-                            </Chip>
-                          ) : null}
-                        </span>
-                        <span className="mt-0.5 block text-sm text-ink-muted">{tp.summary}</span>
-                        {tp.stage === "explainer" ? (
-                          <span className="mt-1 block text-xs text-ink-faint">{m.lessons.map((l) => `${l.id} ${l.title}`).join(" · ")}</span>
-                        ) : null}
-                      </span>
-                    </div>
-                  </li>
-                );
-              })}
-            </motion.ol>
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+              <ModuleMap sections={sections} moduleHref={moduleHref} doneKeys={doneKeys} nextKey={nextKey} variant="page" label={m.title} />
+            </motion.div>
           ) : null}
         </AnimatePresence>
       </div>
@@ -734,7 +719,7 @@ function ModulePanel({ course, module: m, enrolled }: { course: Course; module: 
               {m.liveState === "done" ? t("revisit") : m.done.length ? t("continueModule") : t("startModule")}
             </Link>
           </Button>
-        ) : m.index === 1 ? (
+        ) : m.index === 1 || DEMO_OPEN ? (
           <Button asChild variant="outline" className="w-fit bg-transparent">
             <Link href={href}>
               <Play data-icon="inline-start" />
@@ -742,9 +727,11 @@ function ModulePanel({ course, module: m, enrolled }: { course: Course; module: 
             </Link>
           </Button>
         ) : null}
-        <Chip size="sm" tone="ok">
-          {t("hoursSaved", { hours: m.hours_saved })}
-        </Chip>
+        {m.hours_saved != null ? (
+          <Chip size="sm" tone="ok">
+            {t("hoursSaved", { hours: m.hours_saved })}
+          </Chip>
+        ) : null}
       </div>
     </div>
   );

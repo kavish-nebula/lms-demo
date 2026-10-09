@@ -15,13 +15,18 @@ import { moduleTopics } from "@/lib/topics";
 export default async function HomePage() {
   const t = await getTranslations("marketing");
   const tc = await getTranslations("common");
-  const course = (await getCourses())[0]!;
-  const first = course.modules[0]!;
-  const preview = {
-    course: course.title,
-    module: first.title,
-    topics: moduleTopics(first).map((x) => ({ stage: x.stage, title: x.title })),
-  };
+  // the hero previews the first course's first module, when there is one
+  const course = (await getCourses())[0];
+  const first = course?.modules[0];
+  const preview =
+    course && first
+      ? {
+          course: course.title,
+          module: first.title,
+          modules: course.modules.length,
+          topics: moduleTopics(first).map((x) => ({ stage: x.stage, title: x.title })),
+        }
+      : null;
   return (
     <>
       <SiteNav />

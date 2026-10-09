@@ -1,0 +1,106 @@
+{
+  "lesson": "0",
+  "title": "What you'll be able to do",
+  "notes": [
+    "The course preview, shown while enrolling, before the quick check. About a minute. It builds trust and interest by showing the learner the end of the course: the agent they will have built, working; that it is steps they can learn; what they will be able to do; what it takes; and what they will walk away with. It does not tour the modules or explain how the course works."
+  ],
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "bot",
+      "kicker": "Course preview · about 1 minute",
+      "title": "Picture the end of this course",
+      "sub": "What you'll have built, and what you'll be able to do",
+      "sentences": [
+        "Picture the end of this course.",
+        "Here is what you will have built."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "Your agent, at work",
+      "messages": [
+        { "role": "user", "label": "Customer · 11:47 PM", "text": "Where's my tent? Order ORB-10482. I leave for a trip on Friday.", "cue": 0 },
+        { "role": "tool", "label": "get_order", "text": "ORB-10482 · shipped · ParcelPath PP-88213", "cue": 1 },
+        { "role": "tool", "label": "track_parcel", "text": "In transit · arriving Thursday", "cue": 1 },
+        { "role": "agent", "label": "Your agent", "text": "Good news: your tent arrives Thursday, a day before your trip. Want the tracking link?", "cue": 2 }
+      ],
+      "aside": { "icon": "rocket", "label": "Built by you", "text": "Line by line, and running online.", "cue": 3 },
+      "sentences": [
+        "Late at night, a customer asks where her tent is.",
+        "Your agent looks up the order and tracks the parcel.",
+        "Seconds later, she has a real answer.",
+        "And you built it, line by line."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "No magic: just steps",
+      "run": true,
+      "nodes": [
+        { "kind": "user", "icon": "message", "label": "Read", "sub": "the question", "cue": 1 },
+        { "kind": "tool", "icon": "search", "label": "Look up", "sub": "the order", "cue": 1 },
+        { "kind": "tool", "icon": "truck", "label": "Track", "sub": "the parcel", "cue": 1 },
+        { "kind": "guard", "icon": "book", "label": "Check", "sub": "the policy", "cue": 2 },
+        { "kind": "output", "icon": "send", "label": "Reply", "sub": "in plain words", "cue": 2 }
+      ],
+      "note": { "text": "Five steps, and you'll write every one.", "cue": 3 },
+      "sentences": [
+        "There is no magic in it.",
+        "It reads the question, looks up the order and tracks the parcel.",
+        "Then it checks the policy, and replies.",
+        "Five steps, and you will write every one."
+      ]
+    },
+    {
+      "kind": "hub",
+      "title": "By the end, you'll be able to",
+      "center": { "icon": "bot", "label": "Your agent", "sub": "built by you" },
+      "spokes": [
+        { "icon": "plug", "label": "Make it act", "sub": "connect it to real systems", "cue": 1 },
+        { "icon": "database", "label": "Make it remember", "sub": "it never asks twice", "cue": 1 },
+        { "icon": "book", "label": "Keep it truthful", "sub": "answers from your own documents", "cue": 2 },
+        { "icon": "flask", "label": "Prove it works", "sub": "tests and a pass rate", "cue": 2 },
+        { "icon": "shield", "label": "Keep it safe", "sub": "limits, and a person for big calls", "cue": 3 },
+        { "icon": "rocket", "label": "Put it live", "sub": "an endpoint any app can call", "cue": 3 }
+      ],
+      "sentences": [
+        "By the end, you will be able to do six things.",
+        "Make an agent act, and remember.",
+        "Keep it truthful, and prove it works.",
+        "Keep it safe, and put it live."
+      ]
+    },
+    {
+      "kind": "bullets",
+      "title": "What it takes",
+      "lead": "You'll read and run Python. That's the only skill you need to bring.",
+      "bullets": [
+        { "icon": "cpu", "text": "Python 3.11 or newer", "cue": 1 },
+        { "icon": "key", "text": "An API key with a few dollars of credit", "cue": 1 },
+        { "icon": "timer", "text": "About 10 hours, at your own pace", "cue": 1 }
+      ],
+      "aside": { "icon": "help", "label": "No AI experience needed", "text": "We explain every line of code.", "cue": 0 },
+      "sentences": [
+        "What does it take? No experience with AI.",
+        "Python, an API key with a few dollars of credit, and about ten hours."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What you'll walk away with",
+      "points": [
+        { "text": "A working agent, built by you", "cue": 1 },
+        { "text": "Tests that prove it works", "cue": 1 },
+        { "text": "A live endpoint you can share", "cue": 2 },
+        { "text": "A credential for your profile", "cue": 2 }
+      ],
+      "sentences": [
+        "You will walk away with real proof.",
+        "A working agent, built by you, with tests that prove it works.",
+        "A live endpoint, and a credential to show for it.",
+        "Next, twelve quick questions, to shape the course around you."
+      ]
+    }
+  ]
+}

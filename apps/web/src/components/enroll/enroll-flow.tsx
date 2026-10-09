@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/kit/logo";
 import { CardSkeleton } from "@/components/kit/states";
 import { ProfileStep } from "@/components/enroll/profile-step";
+import { IntroStep } from "@/components/enroll/intro-step";
 import { PrecheckStep } from "@/components/enroll/precheck-step";
 import { CustomizeStep, type Pace } from "@/components/enroll/customize-step";
 import { BuildStep } from "@/components/enroll/build-step";
@@ -20,18 +21,19 @@ import { useHydrated } from "@/lib/local-store";
 import { autoFill } from "@/lib/plan";
 import { applyComfort, useProfile } from "@/lib/profile";
 import { adaptationOf, type PrecheckResult, type SetupAnswers, type SupportOverride } from "@/lib/setup";
-import type { Course, PrecheckItem } from "@/data/types";
+import type { ConceptVideo, Course, PrecheckItem } from "@/data/types";
 
-export type EnrollPhase = "profile" | "precheck" | "customize" | "build";
-const PHASES: EnrollPhase[] = ["profile", "precheck", "customize", "build"];
+export type EnrollPhase = "profile" | "intro" | "precheck" | "customize" | "build";
 
 /**
- * Enrolling in a course: about you (asked once) -> quick check of what you
- * know -> customise the course -> build it -> the course page. Opening it on
- * an enrolled course goes straight to customising, to edit the setup.
+ * Enrolling in a course: about you (asked once) -> the course preview video
+ * (when the course has one) -> quick check of what you know -> customise the
+ * course -> build it -> the course page. Opening it on an enrolled course goes
+ * straight to customising, to edit the setup.
  */
 export function EnrollFlow({
   course,
+  introVideo,
   precheckItems,
   name,
   today,
@@ -39,12 +41,16 @@ export function EnrollFlow({
   initialPhase,
 }: {
   course: Course;
+  introVideo?: ConceptVideo;
   precheckItems: PrecheckItem[];
   name: string;
   today: string;
   authoredModules: string[];
   initialPhase?: EnrollPhase;
 }) {
+  const PHASES: EnrollPhase[] = introVideo ? ["profile", "intro", "precheck", "customize", "build"] : ["profile", "precheck", "customize", "build"];
+  // what comes right after "About you"
+  const afterProfile: EnrollPhase = introVideo ? "intro" : "precheck";
   const t = useTranslations("enroll");
   const router = useRouter();
   const hydrated = useHydrated();
@@ -72,7 +78,7 @@ export function EnrollFlow({
     setOverride(enrollment?.supportOverride ?? "auto");
     setPace({ sessionMinutes: plan.sessionMinutes, studyDays: plan.studyDays, addToPlan: !enrolled });
     setReusedProfile(!!profile && !enrolled && !initialPhase);
-    setPhase(initialPhase ?? (enrolled ? "customize" : profile ? "precheck" : "profile"));
+    setPhase(initialPhase ?? (enrolled ? "customize" : profile ? afterProfile : "profile"));
   }
 
   React.useEffect(() => {
@@ -101,15 +107,17 @@ export function EnrollFlow({
         setAnswers={setAnswers}
         needs={needs}
         setNeeds={setNeeds}
-        continueLabel={returnTo === "customize" ? t("backToCustomize") : t("toQuickCheck")}
+        continueLabel={returnTo === "customize" ? t("backToCustomize") : introVideo ? t("toIntro") : t("toQuickCheck")}
         onDone={() => {
           saveProfile(answers, needs);
           setReusedProfile(false);
-          setPhase(returnTo ?? "precheck");
+          setPhase(returnTo ?? afterProfile);
           setReturnTo(null);
         }}
       />
     );
+  else if (phase === "intro" && introVideo)
+    body = <IntroStep course={course} video={introVideo} onDone={() => setPhase("precheck")} />;
   else if (phase === "precheck")
     body = (
       <PrecheckStep
@@ -218,7 +226,7 @@ export function EnrollFlow({
           </span>
         </div>
       </header>
-      {phase === "precheck" && reusedProfile ? (
+      {phase === afterProfile && reusedProfile ? (
         <div className="mx-auto w-full max-w-6xl page-pad pt-6">
           <p className="text-sm text-ink-muted">
             {t("usingProfile")}{" "}
@@ -226,7 +234,7 @@ export function EnrollFlow({
               type="button"
               className="font-medium text-brand-ink underline-offset-4 hover:underline"
               onClick={() => {
-                setReturnTo("precheck");
+                setReturnTo(afterProfile);
                 setPhase("profile");
               }}
             >

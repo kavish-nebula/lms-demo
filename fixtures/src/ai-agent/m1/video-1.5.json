@@ -1,0 +1,283 @@
+{
+  "lesson": "1.5",
+  "title": "Setting up your development environment",
+  "notes": [
+    "Use Python 3.11 or newer, with one virtual environment per project so its packages stay separate.",
+    "Keep your API key in an environment variable, never in code, and never commit it to Git.",
+    "A model call is a client, the messages create method and the text block from the reply; keep a messages list and you have a chatbot that remembers."
+  ],
+  "quizAfter": 4,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "terminal",
+      "kicker": "Module 1 · Lesson 5",
+      "title": "Setting up your development environment",
+      "sub": "Python, a virtual environment, an API key and your first model call",
+      "sentences": [
+        "Time to put your hands on the keyboard.",
+        "In this lesson you will see everything Scout needs: Python, a project folder, the Anthropic SDK and an API key.",
+        "Then you will see your first call to a model, in about ten lines of code.",
+        "Right after this video, the guided practice walks you through every step on your own machine."
+      ]
+    },
+    {
+      "kind": "bullets",
+      "title": "What you need",
+      "lead": "Four things. The tools are free; only the model calls cost money.",
+      "bullets": [
+        { "icon": "terminal", "text": "Python 3.11 or newer", "cue": 1 },
+        { "icon": "code", "text": "A code editor, such as VS Code, and a terminal", "cue": 2 },
+        { "icon": "key", "text": "An Anthropic account and an API key from the console", "cue": 3 },
+        { "icon": "dollar", "text": "A little API credit: this module's calls cost a few cents", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "help",
+        "label": "Never coded?",
+        "text": "That's fine. Every command and file is given in full: you copy, run and read the result.",
+        "cue": 5
+      },
+      "sentences": [
+        "Here is what you need before you start.",
+        "Python, version three point eleven or newer, which you can check from the terminal.",
+        "A code editor, such as VS Code, and a terminal window to run commands.",
+        "An Anthropic account, where you create an API key: a secret code that lets your programs use the model.",
+        "And a little API credit, because model calls are paid, though everything in this module costs a few cents.",
+        "If you have never written code before, that's fine: every command and file is given in full."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "A folder and a virtual environment",
+      "lead": "A virtual environment is a private set of Python packages for one project.",
+      "rows": [
+        { "code": "python -m venv .venv", "out": "creates the environment, once", "cue": 2 },
+        { "code": ".venv\\Scripts\\activate", "out": "turns it on in Windows PowerShell", "cue": 3 },
+        { "code": "source .venv/bin/activate", "out": "turns it on in macOS or Linux", "cue": 3 },
+        { "code": "pip install anthropic", "out": "installs Anthropic's official SDK", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "check",
+        "label": "How to tell",
+        "text": "When it's active, your prompt starts with (.venv). Activate it again in every new terminal.",
+        "cue": 5
+      },
+      "sentences": [
+        "Everything for Scout lives in one folder, called scout.",
+        "Inside it, you make a virtual environment: a private set of Python packages for this project only, so projects never clash.",
+        "You create it once, with a tool that comes built into Python.",
+        "Then you activate it, with one command on Windows and a slightly different one on Mac or Linux.",
+        "With it active, pip install anthropic adds Anthropic's official SDK, the library your code uses to talk to the model.",
+        "You can tell it's active because its name appears in brackets at the start of your terminal prompt.",
+        "Activate it again every time you open a new terminal."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Where your API key lives",
+      "left": {
+        "label": "In your code",
+        "tone": "bad",
+        "cue": 1,
+        "points": [
+          "Pasted into hello.py",
+          "Pushed to GitHub by accident",
+          "Anyone can spend your credit",
+          "You must delete it, fast"
+        ]
+      },
+      "right": {
+        "label": "In an environment variable",
+        "tone": "ok",
+        "cue": 4,
+        "points": [
+          "Set once in your terminal",
+          "The SDK finds it by itself",
+          "Never appears in your files",
+          "Your code is safe to share"
+        ]
+      },
+      "sentences": [
+        "Your API key works like a password with your payment card attached, so where you keep it matters.",
+        "Never paste it into your code.",
+        "Code gets shared, copied and pushed to GitHub, and automated scanners search public code for leaked keys.",
+        "Anyone who finds your key can spend your credit until you delete it.",
+        "Instead, put it in an environment variable: a named value your terminal holds for programs to read.",
+        "The SDK looks for a variable called Anthropic API key, so your code never contains the key at all.",
+        "Add a git ignore file too, so the virtual environment and any secrets file are never committed."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "Setting the key",
+      "lead": "Run one line in the terminal where you'll run Scout, with your own key in place of the dots.",
+      "rows": [
+        { "code": "$env:ANTHROPIC_API_KEY = \"sk-ant-...\"", "out": "Windows PowerShell", "cue": 1 },
+        { "code": "export ANTHROPIC_API_KEY=\"sk-ant-...\"", "out": "macOS and Linux", "cue": 2 },
+        { "code": "client = anthropic.Anthropic()", "out": "the SDK reads the key by itself", "cue": 3 }
+      ],
+      "aside": {
+        "icon": "timer",
+        "label": "Only this terminal",
+        "text": "A key set this way lasts until you close the terminal. Set it again in each new one.",
+        "cue": 4
+      },
+      "sentences": [
+        "Setting the key takes one line in the terminal.",
+        "On Windows, you set it in PowerShell.",
+        "On Mac or Linux, you use the export command instead.",
+        "Then, in Python, creating the client is enough: the SDK finds the key in the environment by itself.",
+        "One catch: a key set like this lasts only until you close that terminal, so set it again in each new one.",
+        "The guided practice also shows you how to make it permanent."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "Your first model call",
+      "lead": "hello.py sends one message to the model and prints the reply.",
+      "rows": [
+        { "code": "MODEL = \"claude-opus-5-5\"", "out": "the model Scout uses", "cue": 1 },
+        { "code": "response = client.messages.create(...)", "out": "calls the model: model, max_tokens, messages", "cue": 2 },
+        { "code": "{\"role\": \"user\", \"content\": \"In one sentence, ...\"}", "out": "the conversation: one user message", "cue": 3 },
+        { "code": "next(b.text for b in response.content if b.type == \"text\")", "out": "picks the text block out of the reply", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "gauge",
+        "label": "max_tokens=16000",
+        "text": "A ceiling on the reply's length, not a target. Short questions still get short answers.",
+        "cue": 5
+      },
+      "sentences": [
+        "Here is your first model call, in a small script named hello.",
+        "First, the script creates a client and names the model; this course uses Claude Opus five point five.",
+        "Then it calls the messages create method with the model, a maximum length, and the conversation so far.",
+        "Here the conversation is just one user message: a question about AI agents.",
+        "Finally, it picks the text block out of the reply and prints it.",
+        "The maximum tokens setting is a ceiling, not a target, so short questions still get short answers."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "What happens when you run it",
+      "run": true,
+      "nodes": [
+        { "kind": "user", "icon": "code", "label": "hello.py", "sub": "builds your message", "cue": 1 },
+        { "kind": "logic", "icon": "package", "label": "Anthropic SDK", "sub": "adds the key, sends it", "cue": 2 },
+        { "kind": "llm", "icon": "brain", "label": "Claude Opus 5.5", "sub": "may think, then writes", "cue": 3 },
+        { "kind": "data", "icon": "layers", "label": "Content blocks", "sub": "pick the text block", "cue": 4 },
+        { "kind": "output", "icon": "terminal", "label": "Your terminal", "sub": "prints the answer", "cue": 5 }
+      ],
+      "note": {
+        "text": "One model call, not an agent yet: no tools and no loop. It can talk, but it can't act.",
+        "cue": 6
+      },
+      "sentences": [
+        "Let's follow that call from start to finish.",
+        "Your script builds the request, with the model name and your message.",
+        "The SDK attaches your API key and sends the request over the internet to Anthropic's API.",
+        "The model reads the message, may think it through first, and writes its answer.",
+        "The reply comes back as a list of content blocks, which is why you pick out the block whose type is text.",
+        "Your script prints it, and the answer appears in your terminal.",
+        "That is one model call, not an agent yet: there are no tools and no loop, so it can talk, but it can't act."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "From one call to a chatbot",
+      "messages": [
+        { "role": "user", "label": "You", "text": "Hi, I'm Ana.", "cue": 1 },
+        { "role": "agent", "label": "Scout", "text": "Hi Ana! How can I help with your gear today?", "cue": 1 },
+        { "role": "user", "label": "You", "text": "What's my name?", "cue": 2 },
+        { "role": "agent", "label": "Scout", "text": "You're Ana.", "cue": 2 },
+        { "role": "user", "label": "You", "text": "Where is my order ORB-10482?", "cue": 4 },
+        {
+          "role": "agent",
+          "label": "Scout",
+          "text": "I'm sorry, I can't look up orders. Your confirmation email should have the details.",
+          "cue": 5
+        }
+      ],
+      "aside": {
+        "icon": "alert",
+        "label": "Sound familiar?",
+        "text": "Scout remembers and talks, but can't look anything up. That's Orbit's problem, and Module 3 fixes it.",
+        "cue": 6
+      },
+      "sentences": [
+        "In the guided practice, you will turn that single call into a small chatbot that runs in your terminal.",
+        "It keeps a list of messages, adding your turn and the model's reply each time round.",
+        "Because the whole list is sent with every call, it remembers that your name is Ana.",
+        "The model itself remembers nothing between calls; the list is the memory.",
+        "Then you ask it about a real order, with the order number.",
+        "It can't know: there is no orders system anywhere in your code, so the best it can do is apologise.",
+        "That is Orbit's chatbot problem, recreated on your own machine, and it is exactly what the next modules fix."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "Your checklist",
+      "points": [
+        { "text": "Python 3.11+, a scout folder and an active virtual environment", "cue": 1 },
+        { "text": "anthropic installed; the API key in an environment variable, never in Git", "cue": 2 },
+        { "text": "A model call: client, messages.create, then the text block", "cue": 3 },
+        { "text": "A messages list turns one call into a chatbot that remembers", "cue": 4 }
+      ],
+      "sentences": [
+        "Here is your checklist.",
+        "Python three point eleven or newer, a scout folder, and a virtual environment that you activate in every new terminal.",
+        "The Anthropic SDK installed with pip, and your API key in an environment variable, never in code and never in Git.",
+        "A model call is a client, the messages create method, and the text block from the reply.",
+        "Keep a list of messages, and your chatbot remembers the conversation.",
+        "Now open your terminal: the guided practice walks you through every step."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "Why give the scout project its own virtual environment?",
+      "options": [
+        "It makes Python run faster",
+        "It keeps this project's packages separate from everything else",
+        "It stores your API key safely"
+      ],
+      "correct": 1,
+      "explain": "A virtual environment is a private set of packages for one project, so installing or upgrading things for Scout never breaks another project.",
+      "hint": "Think about where pip install puts the packages."
+    },
+    {
+      "q": "Where should your Anthropic API key live?",
+      "options": [
+        "In hello.py, so it's easy to find",
+        "In an environment variable that the SDK reads",
+        "In a comment at the top of chat.py"
+      ],
+      "correct": 1,
+      "explain": "The SDK reads ANTHROPIC_API_KEY from the environment, so the key never appears in your files and can't be committed by accident.",
+      "hint": "Which option keeps the key out of every file you might share?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "A reply holds two content blocks: thinking, then text. How does hello.py get the answer?",
+      "options": [
+        "It prints response.content[0]",
+        "It takes the first block whose type is text",
+        "It prints the whole response object"
+      ],
+      "correct": 1,
+      "explain": "The first block may be the model's thinking. next(b.text for b in response.content if b.type == \"text\") picks the text block, wherever it is.",
+      "hint": "Which approach still works if the text isn't the first block?"
+    },
+    {
+      "q": "chat.py remembers that you're Ana. Why?",
+      "options": [
+        "The model stores every conversation on Anthropic's servers",
+        "The script sends the whole messages list with every call",
+        "The API key links all your calls together"
+      ],
+      "correct": 1,
+      "explain": "The model remembers nothing between calls. chat.py appends each turn to the messages list and sends the whole list every time.",
+      "hint": "What does chat.py add to after every turn?"
+    }
+  ]
+}

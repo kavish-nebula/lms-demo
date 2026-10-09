@@ -3,10 +3,27 @@
 import * as React from "react";
 import { cn } from "cn";
 import { motion } from "motion/react";
-import { Check, Clock, Filter, Globe, Send, Table2, X, Zap, type LucideIcon } from "lucide-react";
+import {
+  Bot,
+  Check,
+  Clock,
+  Database,
+  Filter,
+  Globe,
+  ListChecks,
+  MessageSquare,
+  Send,
+  ShieldCheck,
+  Table2,
+  UserRound,
+  Wrench,
+  X,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
 import type { Pipeline, PipelineNode } from "@/data/types";
 
-const NODE_W = 184;
+const NODE_W = 196;
 const NODE_H = 68;
 const PAD = 16;
 
@@ -17,6 +34,15 @@ const KIND: Record<string, { icon: LucideIcon; tone: string; label: string }> = 
   action: { icon: Send, tone: "text-brand-ink border-brand-line bg-brand-soft", label: "Action" },
   wait: { icon: Clock, tone: "text-ink-muted border-line bg-panel-2", label: "Wait" },
   http: { icon: Globe, tone: "text-info border-info-line bg-info-soft", label: "HTTP" },
+  // agent courses: who asks, the model, what it can use, and what keeps it safe
+  user: { icon: UserRound, tone: "text-stage-hook border-stage-hook-line bg-stage-hook-soft", label: "User" },
+  llm: { icon: Bot, tone: "text-brand-ink border-brand-line bg-brand-soft", label: "Model" },
+  tool: { icon: Wrench, tone: "text-stage-guided border-stage-guided-line bg-stage-guided-soft", label: "Tool" },
+  memory: { icon: Database, tone: "text-stage-worked border-stage-worked-line bg-stage-worked-soft", label: "Memory" },
+  api: { icon: Globe, tone: "text-info border-info-line bg-info-soft", label: "API" },
+  guard: { icon: ShieldCheck, tone: "text-err border-err-line bg-err-soft", label: "Guardrail" },
+  output: { icon: MessageSquare, tone: "text-ok border-ok-line bg-ok-soft", label: "Output" },
+  plan: { icon: ListChecks, tone: "text-stage-review border-stage-review-line bg-stage-review-soft", label: "Plan" },
 };
 
 export function nodeKind(kind: string) {
@@ -24,7 +50,7 @@ export function nodeKind(kind: string) {
 }
 
 /**
- * n8n-style pipeline (the prototype's React Flow canvas, simplified to a
+ * Flow diagram of connected steps (the prototype's React Flow canvas, simplified to a
  * static, accessible diagram). Node and edge states animate between frames:
  * idle, running, ok, error. Scales down to fit narrow containers.
  */
@@ -34,6 +60,8 @@ export function PipelineDiagram({
   label,
   onNodeClick,
   selectedId,
+  maxScale = 1,
+  center = false,
 }: {
   pipeline: Pipeline;
   className?: string;
@@ -41,6 +69,10 @@ export function PipelineDiagram({
   label?: string;
   onNodeClick?: (id: string) => void;
   selectedId?: string;
+  /** how far the diagram may grow past its natural size to fill wide containers */
+  maxScale?: number;
+  /** centre the diagram in its container instead of aligning it left */
+  center?: boolean;
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const [width, setWidth] = React.useState(0);
@@ -49,7 +81,8 @@ export function PipelineDiagram({
   const minY = nodes.length ? Math.min(...nodes.map((n) => n.y)) : 0;
   const naturalW = Math.max(...nodes.map((n) => n.x - minX), 0) + NODE_W + PAD * 2;
   const naturalH = Math.max(...nodes.map((n) => n.y - minY), 0) + NODE_H + PAD * 2;
-  const scale = width ? Math.min(1, width / naturalW) : 1;
+  const scale = width ? Math.min(maxScale, width / naturalW) : 1;
+  const left = center && width ? Math.max(0, (width - naturalW * scale) / 2) : 0;
 
   React.useEffect(() => {
     const el = ref.current;
@@ -71,8 +104,8 @@ export function PipelineDiagram({
         <div
           role="img"
           aria-label={summary}
-          className="absolute top-0 left-0 origin-top-left"
-          style={{ width: naturalW, height: naturalH, transform: `scale(${scale})` }}
+          className="absolute top-0 origin-top-left"
+          style={{ left, width: naturalW, height: naturalH, transform: `scale(${scale})` }}
         >
           <svg aria-hidden className="absolute inset-0 overflow-visible" width={naturalW} height={naturalH}>
             <defs>

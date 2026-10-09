@@ -1,0 +1,264 @@
+{
+  "lesson": "3.5",
+  "title": "Handling tool errors and edge cases",
+  "notes": [
+    "When a tool fails, send back a tool_result with is_error true and a clear message, so the model can recover.",
+    "Never swallow an error into an empty string: the model reads silence as success and fills the gap with a guess.",
+    "Retry temporary failures with backoff, cap the loop with a step limit, and when stuck, tell the customer honestly or hand off."
+  ],
+  "quizAfter": 4,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "bug",
+      "kicker": "Module 3 · Lesson 5",
+      "title": "Handling tool errors and edge cases",
+      "sub": "What Scout should do when a tool fails, so it never fills the gap with a guess",
+      "sentences": [
+        "Remember Elena, whose rope Scout called delivered while it was still on a truck?",
+        "That was not a bad model; it was a tool error that got hidden.",
+        "In this lesson you will see how to report errors to the model, when to retry, and when to stop and say so."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "What went wrong for Elena",
+      "messages": [
+        { "role": "user", "label": "Elena", "text": "Has my rope arrived yet? Order ORB-10560.", "cue": 1 },
+        { "role": "agent", "label": "Scout asks", "text": "track_parcel(tracking_number=\"PP-90417\")", "cue": 2 },
+        { "role": "tool", "label": "track_parcel", "text": "\"\"   (timeout caught, empty string returned)", "cue": 3 },
+        { "role": "agent", "label": "Scout", "text": "Good news, your rope has been delivered!", "cue": 5 }
+      ],
+      "aside": {
+        "icon": "alert",
+        "label": "The real bug",
+        "text": "An empty result looks like nothing to report, so the model filled the silence with the likeliest story.",
+        "cue": 6
+      },
+      "sentences": [
+        "Here is the conversation from the hook, one message at a time.",
+        "Elena asks whether her climbing rope has arrived.",
+        "Scout calls track parcel with her tracking number.",
+        "ParcelPath times out, and the code catches the error and returns an empty string.",
+        "From where the model sits, the tool worked and simply had nothing new to say.",
+        "So it writes the likeliest ending to the story: delivered.",
+        "The model did not lie on purpose; the code hid the one fact it needed, that the lookup had failed."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Swallowing an error versus reporting it",
+      "left": {
+        "label": "Swallowed",
+        "tone": "bad",
+        "cue": 1,
+        "points": [
+          "except: return \"\"",
+          "The model sees an empty, normal result",
+          "It guesses: delivered",
+          "Nobody knows anything failed"
+        ]
+      },
+      "right": {
+        "label": "Reported",
+        "tone": "ok",
+        "cue": 3,
+        "points": [
+          "tool_result with \"is_error\": True",
+          "\"Error: ParcelPath timed out. Status unknown.\"",
+          "The model knows that it doesn't know",
+          "It retries, explains, or hands off"
+        ]
+      },
+      "sentences": [
+        "There are two ways to handle a tool that fails.",
+        "The first is to swallow it: catch the error and return an empty string, or some default value.",
+        "It feels tidy, but it hides the failure from the model, and from you.",
+        "The second is to report it: send back a tool result marked as an error, with a clear message.",
+        "Now the model knows that it does not know.",
+        "It can try another way, explain the delay honestly, or hand the question to a person."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "Reporting an error in the tool loop",
+      "lead": "The loop from this module catches any tool failure and sends it back, marked as an error.",
+      "rows": [
+        { "code": "except Exception as err:", "out": "Any failure inside the tool", "cue": 1 },
+        { "code": "\"content\": f\"Error: {err}\",", "out": "Says what went wrong, in words", "cue": 2 },
+        { "code": "\"is_error\": True", "out": "Tells the model this call failed", "cue": 3 },
+        { "code": "messages.append({\"role\": \"user\", \"content\": results})", "out": "Errors go back with the other results", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "pencil",
+        "label": "Write it for the model",
+        "text": "Say what failed and what is now unknown, for example: ParcelPath timed out, status unknown.",
+        "cue": 5
+      },
+      "sentences": [
+        "In code, the fix is a few lines in the tool loop you already have.",
+        "The try block runs the tool, and if anything goes wrong, the except block catches it.",
+        "Instead of hiding the error, you write it into the result's content, in words.",
+        "And you set the is error flag to true, which tells the model this call failed.",
+        "The error goes back in the same user message as any other results, so every request still gets an answer.",
+        "Make the message useful to the model: say what failed, and what is now unknown."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "Which errors are worth a retry?",
+      "columns": ["Error", "Temporary?", "What to do"],
+      "rows": [
+        { "cells": ["Timeout", "Usually", "Retry with backoff, then report"], "cue": 1 },
+        { "cells": ["429 Too Many Requests", "Yes", "Wait as asked, then retry"], "cue": 2 },
+        { "cells": ["500 or 503 server error", "Often", "Retry a couple of times"], "cue": 3 },
+        { "cells": ["404 tracking number not found", "No", "Report now; ask the customer to check"], "tone": "bad", "cue": 4 },
+        { "cells": ["401 bad API key", "No", "Report now and alert the team"], "tone": "bad", "cue": 5 }
+      ],
+      "note": { "text": "Retry what might work next time. Report what won't, straight away.", "cue": 6 },
+      "sentences": [
+        "Some errors are worth a second try, and some are not.",
+        "A timeout is usually temporary, so retry, waiting a little longer each time.",
+        "A four twenty-nine means slow down, so wait as long as the API asks, then retry.",
+        "Server errors in the five hundreds are often brief, so a couple of retries is reasonable.",
+        "But a four oh four, tracking number not found, will fail the same way every time, so report it straight away.",
+        "And a four oh one, a bad API key, needs a person on your team, not another attempt.",
+        "Retry what might work next time, and report what will not."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "Retrying with backoff",
+      "lead": "Retries live inside the tool, where your code handles them quietly. Then it gives up, loudly.",
+      "rows": [
+        { "code": "for attempt in range(3):", "out": "At most three tries", "cue": 1 },
+        { "code": "    except httpx.TimeoutException:", "out": "Retry only temporary errors", "cue": 2 },
+        { "code": "        time.sleep(2 ** attempt)", "out": "Back off: wait 1 second, then 2", "cue": 3 },
+        { "code": "raise TimeoutError(\"ParcelPath timed out 3 times\")", "out": "Then fail clearly; the loop reports it", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "timer",
+        "label": "A customer is waiting",
+        "text": "Three tries with a ten-second timeout is already half a minute. Keep retries few and short.",
+        "cue": 5
+      },
+      "sentences": [
+        "Retries belong inside the tool, where your code can handle them quietly.",
+        "Try the call up to three times.",
+        "Catch only the temporary errors, like a timeout, and let everything else fail at once.",
+        "Between tries, wait a little longer each time, which is called backoff, so a struggling server gets room to recover.",
+        "If the last try fails too, raise a clear error, and the tool loop reports it to the model with the is error flag.",
+        "Keep the total short, because a customer is waiting while you retry."
+      ]
+    },
+    {
+      "kind": "bullets",
+      "title": "Edge cases to plan for",
+      "lead": "Errors aren't the only surprises. Plan for these before customers find them.",
+      "bullets": [
+        { "icon": "repeat", "text": "Endless loops: cap the tool loop with MAX_STEPS", "cue": 1 },
+        { "icon": "help", "text": "Missing input: no order number, so ask instead of guessing", "cue": 2 },
+        { "icon": "x-circle", "text": "Bad arguments or unknown tool: report it as an error too", "cue": 3 },
+        { "icon": "layers", "text": "Huge results: trim them before they reach the model", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "gauge",
+        "label": "Why a step limit",
+        "text": "A failing tool can make the model try again and again. MAX_STEPS stops the loop, and the bill.",
+        "cue": 5
+      },
+      "sentences": [
+        "Errors are not the only surprises, so plan for a few edge cases too.",
+        "The model might keep calling tools, so the loop always has a step limit, and Scout's is six.",
+        "A customer might not give an order number, and the right move is to ask, not to call a tool with a guess.",
+        "The model might send arguments your function rejects, and that is reported as an error too, so it can correct itself.",
+        "And a tool might return far too much, which you trim, as you saw in the last lesson.",
+        "The step limit matters most: a failing tool can make the model try again and again, and every try costs money."
+      ]
+    },
+    {
+      "kind": "chat",
+      "title": "Telling the customer honestly",
+      "messages": [
+        { "role": "tool", "label": "track_parcel · is_error", "text": "Error: ParcelPath timed out 3 times. Status unknown.", "cue": 1 },
+        { "role": "agent", "label": "Scout", "text": "I can't reach our carrier's tracking right now, so I can't confirm where your rope is. Shall I pass this to our support team? They can check with the carrier directly.", "cue": 2 },
+        { "role": "user", "label": "Elena", "text": "Yes please. Thanks for being straight with me.", "cue": 4 },
+        { "role": "agent", "label": "Scout", "text": "Done. I've passed on your order number and question, and the team will reply by email.", "cue": 5 }
+      ],
+      "sentences": [
+        "When the retries are used up, the last step is honesty.",
+        "The tool result says ParcelPath timed out three times, and the status is unknown.",
+        "Scout tells Elena exactly that, in plain words, without guessing where the parcel is.",
+        "Then it offers something useful: a person who can check with the carrier directly.",
+        "Elena says yes, and an honest answer keeps her trust, where a wrong delivered lost it.",
+        "Scout passes on her question, using a hand-off tool you will add in Module 5."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "Report tool failures as a tool_result with is_error true", "cue": 1 },
+        { "text": "Never return an empty string: the model will guess", "cue": 2 },
+        { "text": "Retry temporary errors with backoff; report the rest at once", "cue": 3 },
+        { "text": "Cap the steps; when stuck, say so honestly or hand off", "cue": 4 }
+      ],
+      "sentences": [
+        "Let us pull the module together.",
+        "When a tool fails, send the error back as a tool result marked as an error, with a clear message.",
+        "Never swallow it into an empty string, because the model will fill the gap with a guess.",
+        "Retry temporary failures with backoff, and report the rest straight away.",
+        "Cap the loop's steps, and when Scout is stuck, it says so honestly or hands off to a person.",
+        "Next, watch Scout call its first tools, then build your own in the guided practice."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "Why did Scout tell Elena her rope was delivered?",
+      "options": [
+        "ParcelPath sent a wrong status for her parcel",
+        "The tool hid a timeout by returning an empty string, so the model guessed",
+        "The model misread her tracking number"
+      ],
+      "correct": 1,
+      "explain": "The timeout was caught and turned into an empty string. To the model that looked like a normal, empty result, so it filled the gap.",
+      "hint": "What did the model actually receive from track_parcel?"
+    },
+    {
+      "q": "Which of these errors is worth retrying?",
+      "options": [
+        "404: tracking number not found",
+        "401: invalid API key",
+        "A timeout from ParcelPath"
+      ],
+      "correct": 2,
+      "explain": "A timeout is often temporary, so a short retry with backoff may succeed. A 404 or 401 will fail the same way every time.",
+      "hint": "Which one might work if you simply tried again in a second?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "A tool fails with an exception. What should go back to the model?",
+      "options": [
+        "Nothing: skip the tool_result for that call",
+        "A tool_result with is_error true and a clear message",
+        "An empty tool_result, so the model carries on"
+      ],
+      "correct": 1,
+      "explain": "Every tool request needs a matching tool_result. Mark failures with is_error and say what went wrong, so the model can recover.",
+      "hint": "The model asked a question. What does it need to hear, even when the news is bad?"
+    },
+    {
+      "q": "ParcelPath has been down for twenty minutes and Elena is waiting in the chat. What should Scout do?",
+      "options": [
+        "Keep retrying until ParcelPath comes back",
+        "Say it can't check right now, and offer to hand off to a person",
+        "Tell her the rope has probably been delivered by now"
+      ],
+      "correct": 1,
+      "explain": "Retries are for brief blips, not outages. Being honest about what Scout can't check, plus a clear next step, keeps the customer's trust.",
+      "hint": "Is twenty minutes a blip? And what does Elena need from Scout right now?"
+    }
+  ]
+}

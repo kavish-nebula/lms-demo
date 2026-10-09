@@ -1,0 +1,242 @@
+{
+  "lesson": "5.5",
+  "title": "Evaluating agent performance",
+  "notes": [
+    "A test set is real customer questions with expected outcomes, run the same way every time so scores can be compared.",
+    "Check every answer for the right tool, the key facts, policy kept and nothing invented, and track the pass rate after every change.",
+    "Read the failures, not just the number: good enough to ship means the failures left are safe."
+  ],
+  "quizAfter": 4,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "chart",
+      "kicker": "Module 5 · Lesson 5",
+      "title": "Evaluating agent performance",
+      "sub": "A test set, four checks and a pass rate you track after every change",
+      "sentences": [
+        "Debugging fixes one case at a time.",
+        "Evaluation tells you how Scout does across all of them, and whether a change really helped.",
+        "By the end, you'll have a real answer to Maya's favourite question: is it ready?"
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Seems fine versus measured",
+      "left": {
+        "label": "Trying it by hand",
+        "tone": "bad",
+        "cue": 1,
+        "points": [
+          "A few questions you thought of",
+          "Looks fine today",
+          "No idea if a change helped",
+          "Breaks quietly"
+        ]
+      },
+      "right": {
+        "label": "A test set",
+        "tone": "ok",
+        "cue": 4,
+        "points": [
+          "60 real questions from tickets",
+          "The same checks on every run",
+          "A score you can compare",
+          "Failures you can read"
+        ]
+      },
+      "sentences": [
+        "Most people test an agent by chatting with it.",
+        "You try a few questions you thought of, and the answers look fine.",
+        "But you can't tell whether yesterday's change helped or hurt.",
+        "And things break quietly, in questions you didn't think to ask.",
+        "A test set fixes that: real questions, taken from Leo's ticket queue.",
+        "Scout answers every one, the same checks run every time, and you get a score you can compare."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "One test case",
+      "lead": "Each case is a real question plus what a good answer must, and must not, contain.",
+      "rows": [
+        { "code": "\"question\": \"Has order ORB-10533 shipped yet?\"", "out": "a real question from a ticket", "cue": 1 },
+        { "code": "\"expected_tool\": \"get_order\"", "out": "the tool Scout must call", "cue": 2 },
+        { "code": "\"must_include\": [\"processing\"]", "out": "a fact the reply must contain", "cue": 3 },
+        { "code": "\"must_not_include\": [\"PP-\"]", "out": "no made-up tracking number", "cue": 4 }
+      ],
+      "aside": { "icon": "book", "label": "Where cases come from", "text": "Leo's queue: the common questions, the awkward ones and the risky ones.", "cue": 5 },
+      "sentences": [
+        "Here is one test case.",
+        "The question is real: Ravi asks whether his order has shipped.",
+        "The case says which tool Scout must call: get order.",
+        "It lists a fact the reply must contain: his order is still processing.",
+        "And it lists something the reply must never contain: a tracking number, because Ravi doesn't have one yet.",
+        "Good cases come from real tickets: the common ones, the awkward ones and the risky ones."
+      ]
+    },
+    {
+      "kind": "hub",
+      "title": "Four checks on every answer",
+      "center": { "icon": "target", "label": "One test case", "sub": "Scout's reply and trace" },
+      "spokes": [
+        { "icon": "wrench", "label": "Right tool", "sub": "the expected tool was called", "cue": 1 },
+        { "icon": "check", "label": "Key facts", "sub": "the reply contains them", "cue": 2 },
+        { "icon": "shield", "label": "Policy kept", "sub": "no promise policy doesn't make", "cue": 3 },
+        { "icon": "eye", "label": "Nothing invented", "sub": "no made-up status or date", "cue": 4 }
+      ],
+      "note": { "text": "A case passes only if all four checks pass.", "cue": 5 },
+      "sentences": [
+        "Every answer goes through four checks.",
+        "Right tool: did Scout call the tool the case expects?",
+        "Key facts: does the reply contain what it must, like the arrival day?",
+        "Policy kept: no refund approved without a person, and no return outside thirty days.",
+        "Nothing invented: no status, date or tracking number that didn't come from a tool.",
+        "A case passes only when all four checks pass."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "From test set to pass rate",
+      "run": true,
+      "nodes": [
+        { "kind": "data", "icon": "list-checks", "label": "Test set", "sub": "60 real cases", "cue": 1 },
+        { "kind": "llm", "icon": "bot", "label": "Scout", "sub": "answers each one", "cue": 2 },
+        { "kind": "guard", "icon": "shield", "label": "Checker", "sub": "four checks per case", "cue": 3 },
+        { "kind": "output", "icon": "chart", "label": "Pass rate", "sub": "53 of 60, 88 percent", "cue": 4 }
+      ],
+      "note": { "text": "One command runs it all. Run it after every change, and write the score down.", "cue": 5 },
+      "sentences": [
+        "Put together, an evaluation is a simple pipeline.",
+        "The test set feeds in sixty cases.",
+        "Scout answers each one, starting from a fresh memory every time.",
+        "The checker applies the four checks to every answer.",
+        "Out comes a pass rate: here, 53 of 60, or 88 percent.",
+        "It's one command, so run it after every change and write the score down."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "Track it after every change",
+      "columns": ["Change", "Score", "What it told us"],
+      "rows": [
+        { "cells": ["First full run", "38 of 60", "15 failures share one cause"], "cue": 1 },
+        { "cells": ["get_order takes email", "53 of 60", "Fixed 15, broke nothing"], "cue": 2 },
+        { "cells": ["Shorter system prompt", "50 of 60", "Broke 3 return cases: undone"], "tone": "bad", "cue": 3 },
+        { "cells": ["Refund reply rule", "58 of 60", "2 left, both wording"], "cue": 4 }
+      ],
+      "note": { "text": "A drop is useful: it tells you exactly which change hurt.", "cue": 5 },
+      "sentences": [
+        "Here is Scout's score history, one line per change.",
+        "The first full run scored 38, and 15 of the failures shared one cause.",
+        "Letting get order take an email lifted it to 53, and no case that passed before broke.",
+        "Then a shorter system prompt dropped it to 50, breaking three return cases, so Priya undid it.",
+        "A clearer rule about refund replies took it to 58.",
+        "Without the history, that drop to 50 would have slipped through to customers.",
+        "Scores can wobble a little between runs, so always look at which cases moved, not just the total."
+      ]
+    },
+    {
+      "kind": "cards",
+      "title": "Read the failures, not just the number",
+      "tags": ["Failure", "Why it matters", "Action"],
+      "cards": [
+        { "icon": "alert", "title": "Unsafe", "flow": ["Refund over $200 approved", "Breaks policy, costs money", "Fix before launch"], "cue": 1 },
+        { "icon": "x-circle", "title": "Wrong", "flow": ["Made-up arrival date", "Misleads the customer", "Fix soon"], "cue": 2 },
+        { "icon": "pencil", "title": "Awkward", "flow": ["Stiff or clumsy wording", "The facts are still right", "Watch it, fix later"], "cue": 3 }
+      ],
+      "sentences": [
+        "Two agents can both score 90 percent and be very different.",
+        "Some failures are unsafe, like approving a big refund without a person, and they block a launch.",
+        "Some are wrong, like a made-up arrival date, and they need fixing soon.",
+        "Some are just awkward: stiff wording, but the right facts, and they can wait.",
+        "So read every failure and sort it, because the number alone can't tell you which kind you have."
+      ]
+    },
+    {
+      "kind": "bullets",
+      "title": "Good enough to ship",
+      "lead": "Good enough doesn't mean 100 percent. It means the failures left are safe.",
+      "bullets": [
+        { "icon": "shield", "text": "Zero unsafe failures: policy and money rules always kept", "cue": 1 },
+        { "icon": "target", "text": "Pass rate at or above the target you set when scoping", "cue": 2 },
+        { "icon": "eye", "text": "Every remaining failure read, sorted and understood", "cue": 3 },
+        { "icon": "headset", "text": "People reviewing real chats for the first weeks", "cue": 4 }
+      ],
+      "aside": { "icon": "lightbulb", "label": "Maya's question", "text": "Is it ready? becomes: here is what still fails, and here is why that's safe.", "cue": 5 },
+      "sentences": [
+        "So when is Scout good enough to ship?",
+        "First, zero unsafe failures: the policy and money rules hold in every case.",
+        "Second, the pass rate meets the target you set back when you scoped the project.",
+        "Third, you have read every remaining failure, and you know why each one is harmless.",
+        "Fourth, people review real chats in the first weeks, because no test set covers everything.",
+        "Then Maya's question has a real answer: here is what still fails, and here is why that's safe."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "Recap",
+      "points": [
+        { "text": "A test set: real questions with expected outcomes.", "cue": 1 },
+        { "text": "Four checks: right tool, key facts, policy kept, nothing invented.", "cue": 2 },
+        { "text": "Run it after every change and keep the score history.", "cue": 3 },
+        { "text": "Ship when the failures left are safe, not when the score is perfect.", "cue": 4 }
+      ],
+      "sentences": [
+        "Let's recap.",
+        "A test set is real customer questions, each with an expected outcome.",
+        "Every answer gets four checks: right tool, key facts, policy kept and nothing invented.",
+        "Run it after every change, and keep the history so you can see what helped and what hurt.",
+        "And ship when the failures left are safe, not when the score is perfect.",
+        "Next, you'll assemble Scout yourself and write its first tests."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "Why use a fixed test set instead of chatting with Scout to see if a change made it better?",
+      "options": [
+        "It's quicker to type than a chat",
+        "The same cases and checks on every run make the scores comparable",
+        "Chatting with an agent costs more tokens"
+      ],
+      "correct": 1,
+      "explain": "A score only means something next to another score from the same cases and checks. That is what tells you whether a change helped or hurt.",
+      "hint": "What do you need in order to compare two runs?"
+    },
+    {
+      "q": "Which of these is a nothing-invented failure?",
+      "options": [
+        "Scout says a parcel arrives Thursday, though track_parcel timed out",
+        "Scout says the medium jacket is in stock after check_stock returned 3",
+        "Scout asks for an order number when the customer gave none"
+      ],
+      "correct": 0,
+      "explain": "The arrival day didn't come from any tool: the tracking call failed. Scout made it up, which is exactly what this check catches.",
+      "hint": "Which fact has no tool result behind it?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "After a prompt change, Scout's score drops from 53 to 50. What should you do?",
+      "options": [
+        "Read the cases that now fail, to see what the change broke",
+        "Ignore it: scores always wobble a little",
+        "Delete the cases that now fail"
+      ],
+      "correct": 0,
+      "explain": "Scores can wobble slightly between runs, so re-run if unsure, but the newly failing cases show exactly where to look. Deleting them only hides the problem.",
+      "hint": "The total tells you something changed. What tells you what?"
+    },
+    {
+      "q": "What does good enough to ship mean in this lesson?",
+      "options": [
+        "The score is 100 percent",
+        "Maya has tried it and likes it",
+        "The target is met and every failure left is safe"
+      ],
+      "correct": 2,
+      "explain": "Perfect scores don't exist for real agents. Ship when unsafe failures are at zero, the target is met, every remaining failure is understood, and people watch the first weeks.",
+      "hint": "It's about what still fails, not about perfection."
+    }
+  ]
+}

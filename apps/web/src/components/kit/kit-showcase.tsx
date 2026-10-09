@@ -107,7 +107,8 @@ export function KitShowcase({
   course,
   credential,
 }: {
-  course: Course;
+  /** the course composites need one; they are skipped while the catalog is empty */
+  course: Course | undefined;
   credential: Credential;
 }) {
   const [tickerValue, setTickerValue] = React.useState(1284);
@@ -362,17 +363,17 @@ export function KitShowcase({
                 included={["hook", "explainer", "worked", "guided", "gate", "reflection", "review"]}
                 states={{ hook: "done", explainer: "done", worked: "done", guided: "current" }}
               />
-              <StageDots included={["hook", "explainer", "worked", "guided", "lab", "gate", "reflection", "review"]} states={{ lab: "not_in_v1" }} />
+              <StageDots included={["hook", "explainer", "worked", "guided", "lab", "gate", "reflection", "review"]} states={{ project: "not_in_v1" }} />
             </Row>
             <Surface className="max-w-xs">
               <TopicRail
                 label="Topics"
                 items={[
-                  { id: "hook", stage: "hook", label: "2:07 AM: the alert that went silent", state: "done", minutes: 3 },
-                  { id: "explainer", stage: "explainer", label: "How a workflow runs", sublabel: "1.1 Workflow anatomy · 1.2 Data & items", state: "done", minutes: 21 },
-                  { id: "worked", stage: "worked", label: "Watch the lead alert run", state: "current", minutes: 24 },
-                  { id: "guided", stage: "guided", label: "Build the lead alert yourself", state: "todo", minutes: 25 },
-                  { id: "review", stage: "review", label: "Lock it in: triggers, items, guards", state: "todo", minutes: 5 },
+                  { id: "hook", stage: "hook", label: "The problem this module solves", state: "done", minutes: 3 },
+                  { id: "explainer", stage: "explainer", label: "The core ideas", sublabel: "1.1 First idea · 1.2 Second idea", state: "done", minutes: 21 },
+                  { id: "worked", stage: "worked", label: "Watch a full example", state: "current", minutes: 24 },
+                  { id: "guided", stage: "guided", label: "Build it yourself, step by step", state: "todo", minutes: 25 },
+                  { id: "review", stage: "review", label: "Lock it in", state: "todo", minutes: 5 },
                   { id: "final", stage: "gate", label: "Final check", state: "locked", minutes: 15 },
                 ]}
               />
@@ -536,8 +537,12 @@ export function KitShowcase({
           </Section>
 
           <Section id="composites" title="Composites">
-            <ResumeCard course={course} progress={deriveProgress(course, {})} />
-            <ProgramCard course={course} />
+            {course ? (
+              <>
+                <ResumeCard course={course} progress={deriveProgress(course, {})} />
+                <ProgramCard course={course} />
+              </>
+            ) : null}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               <CredentialCard credential={credential} />
             </div>

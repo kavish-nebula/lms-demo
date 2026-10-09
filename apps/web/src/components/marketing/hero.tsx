@@ -22,9 +22,9 @@ const rise = {
  * preview built from real UI pieces. A soft glow follows the pointer
  * (GetLayers-style) and stays still under reduced motion.
  */
-export type HeroPreview = { course: string; module: string; topics: { stage: StageId; title: string }[] };
+export type HeroPreview = { course: string; module: string; modules: number; topics: { stage: StageId; title: string }[] };
 
-export function Hero({ preview }: { preview: HeroPreview }) {
+export function Hero({ preview }: { preview: HeroPreview | null }) {
   const t = useTranslations("marketing");
   const router = useRouter();
   const reduce = useReducedMotion();
@@ -53,7 +53,7 @@ export function Hero({ preview }: { preview: HeroPreview }) {
         className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[520px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(125,108,255,0.45),transparent)] blur-2xl"
       />
 
-      <div className="mx-auto grid max-w-6xl items-center gap-14 px-4 md:px-6 lg:grid-cols-[1.05fr_1fr]">
+      <div className={cn("mx-auto grid max-w-6xl items-center gap-14 px-4 md:px-6", preview && "lg:grid-cols-[1.05fr_1fr]")}>
         <div className="flex flex-col gap-7">
           <motion.div custom={0} variants={rise} initial="hidden" animate="show">
             <span className="inline-flex items-center gap-2 rounded-pill border border-brand-line bg-brand-soft px-3 py-1 text-sm text-brand-ink">
@@ -111,7 +111,7 @@ export function Hero({ preview }: { preview: HeroPreview }) {
 
           <motion.dl custom={5} variants={rise} initial="hidden" animate="show" className="mt-2 grid max-w-md grid-cols-3 gap-6">
             {[
-              { v: 5, suffix: "", l: t("statSteps") },
+              { v: preview?.modules ?? 6, suffix: "", l: t("statSteps") },
               { v: 80, suffix: "%", l: t("statGate") },
               { v: 3, suffix: "×", l: t("statReviews") },
             ].map((s, i) => (
@@ -127,6 +127,7 @@ export function Hero({ preview }: { preview: HeroPreview }) {
         </div>
 
         {/* Product preview: assembled from the same stage tokens the app uses. */}
+        {preview ? (
         <motion.div
           initial={{ opacity: 0, y: 24, rotate: -1 }}
           animate={{ opacity: 1, y: 0, rotate: 0 }}
@@ -168,22 +169,13 @@ export function Hero({ preview }: { preview: HeroPreview }) {
             </ul>
           </div>
 
-          <div className="glass glass-edge absolute -bottom-10 -left-4 w-64 rounded-2xl p-4 sm:-left-10">
-            <div className="mb-2 text-xs font-medium text-brand-ink">Quick check</div>
-            <div className="mb-3 text-sm">Which node starts every workflow?</div>
-            <div className="grid grid-cols-3 gap-1.5 text-xs">
-              <span className="rounded-lg border border-white/15 px-2 py-1.5 text-center">Filter</span>
-              <span className="rounded-lg border border-ok-line bg-ok-soft px-2 py-1.5 text-center text-ok">Trigger</span>
-              <span className="rounded-lg border border-white/15 px-2 py-1.5 text-center">Action</span>
-            </div>
-          </div>
-
           <div className="glass glass-edge absolute -top-6 -right-2 flex items-center gap-2 rounded-pill px-3.5 py-2 text-sm sm:-right-6">
             <ShieldCheck className="size-4 text-ok" />
             {t("heroAccepted")}
           </div>
           <MousePointer2 className="absolute right-10 bottom-4 size-6 fill-brand text-brand-ink" />
         </motion.div>
+        ) : null}
       </div>
     </section>
   );

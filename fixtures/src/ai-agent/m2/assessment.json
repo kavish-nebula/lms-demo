@@ -1,0 +1,79 @@
+{
+  "title": "Module check: a model only knows what you send it",
+  "summary": "Six real situations covering how models work, choosing one, clear prompts, system prompts and JSON your code can trust.",
+  "items": [
+    {
+      "lesson": "2.1",
+      "stem": "Last week Priya pasted Orbit's full policy into a test chat with Scout. Today Maya wants to cut the policy from SCOUT_SYSTEM to save tokens: \"Scout has already read it.\" What do you tell her?",
+      "options": [
+        "Cut it: a week of test chats taught the model Orbit's rules, the same way it learned language",
+        "Cut it, but keep that test chat open, so the model can still look back at what it read",
+        "Keep it: the model keeps nothing between requests, so the policy must be sent every time",
+        "Swap it for one short line telling Scout to follow Orbit's policy; the model fills in the rest"
+      ],
+      "correct": 2,
+      "explain": "The model learned only in training and keeps nothing between requests, so last week's chat is gone. If the policy isn't in the context window, it doesn't exist for the model. A one-line reminder is rules without facts, which is how the 90-day promise happened."
+    },
+    {
+      "lesson": "2.2",
+      "stem": "Maya wants Scout's Opus bill down. Priya can trim 300 words from the system prompt, or ask for 100-word replies instead of 300. Both apply to every ticket. Which saves more, and why?",
+      "options": [
+        "Shorter replies: output tokens cost five times as much as input, so 200 fewer words saves more",
+        "The shorter prompt: the system prompt is resent with every request, so it outweighs the reply",
+        "Neither stands out: a token costs the same whether you send it or the model writes it",
+        "The shorter prompt: 300 words removed is more than 200, and the price is per word either way"
+      ],
+      "correct": 0,
+      "explain": "Both happen on every ticket. 300 input words is about 400 tokens at $4 per million; 200 output words is about 270 tokens at $20 per million, over three times the saving. The reply is written on every request too, so the resent prompt doesn't outweigh it."
+    },
+    {
+      "lesson": "2.3",
+      "stem": "Priya's classifier mis-tags some exchange emails. She edits four things in the prompt at once and reruns her ten test emails: two now pass, but one that used to pass fails. What should she do next?",
+      "options": [
+        "Keep all four edits, since more emails pass now than before and the trend is good",
+        "Tune the prompt on the one email that broke until it passes, then call the job done",
+        "Add a fifth edit telling the model to take extra care with emails like the one that broke",
+        "Undo the edits, then make one at a time, rerunning the same ten emails after each"
+      ],
+      "correct": 3,
+      "explain": "With four changes at once she can't tell which one helped and which one broke the old email. One change per run, on the same emails, shows what each edit really does. Tuning on a single email risks breaking the other nine."
+    },
+    {
+      "lesson": "2.4",
+      "stem": "After the 90-day scare, Leo added \"NEVER MENTION REFUNDS.\" to SCOUT_SYSTEM. Now when Tom asks if he can return an unused tent he got last week, Scout dodges and won't mention the 30-day window. What is the best fix?",
+      "options": [
+        "Add \"BUT ALWAYS HELP WITH RETURNS.\" in capitals, so the two rules balance each other out",
+        "Rewrite it calmly with a reason: promise only what the policy states, since Orbit must keep it",
+        "Move the refund rule out of the system prompt and into each customer message, next to the question",
+        "Delete the rule and rely on the policy facts already in the prompt to keep Scout accurate"
+      ],
+      "correct": 1,
+      "explain": "Shouting makes models stiff and over-cautious, and \"never mention refunds\" clashes with a policy full of them. A calm rule with a reason keeps Scout on policy and still helpful. Deleting the rule removes the guard that stops invented promises."
+    },
+    {
+      "lesson": "2.5",
+      "stem": "Leo's routing code has five queues, one per intent. In a teammate's copy of the schema, intent is a plain string, and some tickets come back as \"refund_request\" or \"size swap\", so they land in no queue. What is the right fix?",
+      "options": [
+        "List the five labels in the prompt and ask the model to stick to them, with a reminder",
+        "Set additionalProperties to false, so the model can't return values that aren't allowed",
+        "Give intent an enum of the five labels, so every answer must be one of your queues",
+        "Map each new label to a queue in code as it shows up, adding a branch every time"
+      ],
+      "correct": 2,
+      "explain": "An enum limits a field to a fixed list, so the model can only pick one of your five labels. additionalProperties false blocks extra fields, not odd values inside a field. Asking in the prompt usually works, but it is a request, not a guarantee."
+    },
+    {
+      "lesson": "2.5",
+      "transfer": true,
+      "stem": "Priya's friend runs a small plant shop. A model turns complaint emails into JSON with a refund_amount, and code pays that amount out. The prompt gives the order total and says never to exceed it, yet a $35 order got $90 back. What should change?",
+      "options": [
+        "Restate the limit in capitals at the top and bottom of the prompt so the model can't miss it",
+        "Have code check refund_amount against the real order total, and send anything odd to a person",
+        "Move the extraction step to the most capable model, which follows written rules more reliably",
+        "Ask the model to double-check refund_amount against the order total before it answers"
+      ],
+      "correct": 1,
+      "explain": "A valid shape is not a true answer, and a sentence in a prompt can't protect money: the model may copy the amount the customer asked for. Code that checks the value and routes odd cases to a person owns the decision. Louder rules or a bigger model still leave it to the model."
+    }
+  ]
+}

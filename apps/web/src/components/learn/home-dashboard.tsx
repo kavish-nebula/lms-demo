@@ -50,13 +50,13 @@ export function HomeDashboard({ learner, courses, today }: { learner: Learner; c
   return enrolled.length ? (
     <EnrolledHome learner={learner} courses={enrolled} enrollments={enrollments} progress={progress} today={today} />
   ) : (
-    <WelcomeHome learner={learner} course={courses[0]!} today={today} />
+    <WelcomeHome learner={learner} course={courses[0]} today={today} />
   );
 }
 
 /* ---------------------------------------------------------------- not enrolled */
 
-function WelcomeHome({ learner, course, today }: { learner: Learner; course: Course; today: string }) {
+function WelcomeHome({ learner, course, today }: { learner: Learner; course: Course | undefined; today: string }) {
   const t = useTranslations("home");
   const tc = useTranslations("course");
   const steps = [
@@ -67,6 +67,7 @@ function WelcomeHome({ learner, course, today }: { learner: Learner; course: Cou
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex min-w-0 flex-col gap-6">
+        {course ? (
         <Surface pad="lg" spotlight className="relative isolate overflow-hidden">
           <div
             aria-hidden
@@ -108,6 +109,9 @@ function WelcomeHome({ learner, course, today }: { learner: Learner; course: Cou
             </div>
           </div>
         </Surface>
+        ) : (
+          <EmptyState icon={<GraduationCap />} title={t("noCoursesTitle")} description={t("noCoursesBody")} />
+        )}
 
         <section aria-labelledby="how-it-starts" className="flex flex-col gap-4">
           <SectionHeader title={<span id="how-it-starts">{t("howItStarts")}</span>} />

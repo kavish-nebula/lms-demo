@@ -284,8 +284,13 @@ function SegmentTrack({
 
 /**
  * The concept topic: taught by narrated slide videos when the module has
- * them (every module does now), otherwise by the narrated beats.
+ * them (every module does now), one video per part of the module; otherwise
+ * by the narrated beats.
  */
-export function ExplainerStage(props: StageProps<ExplainerBlock> & { adaptation: Adaptation }) {
-  return props.block.videos?.length ? <VideoExplainer {...props} /> : <BeatsExplainer {...props} />;
+export function ExplainerStage({
+  videoId,
+  nextTitle,
+  ...props
+}: StageProps<ExplainerBlock> & { adaptation: Adaptation; videoId?: string; nextTitle?: string }) {
+  return props.block.videos?.length ? <VideoExplainer {...props} videoId={videoId} nextTitle={nextTitle} /> : <BeatsExplainer {...props} />;
 }

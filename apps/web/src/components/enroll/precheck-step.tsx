@@ -98,7 +98,9 @@ export function PrecheckStep({ items, courseTitle, onDone }: { items: PrecheckIt
           <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-brand-ink">
             {t("precheckOf", { n: i + 1, total: items.length })}
             <span className="rounded-pill border border-line px-2 py-0.5 text-xs font-normal text-ink-faint">
-              {t("precheckWhere", { module: item.module.replace("m", ""), lesson: item.lesson })}
+              {item.lesson.includes(".")
+                ? t("precheckWhere", { module: item.module.replace("m", ""), lesson: item.lesson })
+                : t("precheckModule", { module: item.module.replace("m", "") })}
             </span>
           </div>
           <h1 id="precheck-q" className="text-2xl font-semibold tracking-tight text-balance md:text-3xl">

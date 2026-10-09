@@ -1,0 +1,973 @@
+{
+  "hook": {
+    "kicker": "Monday, 9:04 AM",
+    "title": "The chatbot that apologised 400 times",
+    "why": "It's your first Monday at Orbit Outdoor. Over the weekend, hundreds of customers asked the website chatbot where their order was. It answered every one of them instantly and politely, and helped none of them.",
+    "stat": "400 tickets · 400 apologies · 0 orders looked up",
+    "narration": "It's nine in the morning on Monday, your first week at Orbit Outdoor. Over the weekend, four hundred customers asked the website chatbot where their order was. The chatbot answered every single one, instantly and politely. And every answer was the same: sorry, I can't access order information. Now Leo's queue is full of angry follow-ups, and Maya wants to know what went wrong. Before anyone explains anything: what do you think the chatbot was missing?",
+    "messages": [
+      {
+        "who": "Leo — support lead",
+        "av": "L",
+        "at": "8:58 AM",
+        "text": "morning. weekend queue: 400 new tickets. i've opened 40 so far and every single one is some version of \"where is my order\""
+      },
+      {
+        "who": "Leo — support lead",
+        "av": "L",
+        "at": "9:01 AM",
+        "text": "and the bot answered all of them. same reply every time: \"I'm sorry, I can't access order information.\" now they're writing back. angrier."
+      },
+      {
+        "who": "Maya — founder",
+        "av": "M",
+        "at": "9:03 AM",
+        "text": "we pay for that bot every month. it can write a poem about tents but it can't tell ana where hers is?"
+      },
+      {
+        "who": "Maya — founder",
+        "av": "M",
+        "at": "9:04 AM",
+        "text": "you've got fresh eyes. before priya and i decide anything: what is it actually missing?"
+      }
+    ],
+    "prompt": "Before anything is explained: why couldn't the chatbot answer a single order question?",
+    "hunches": [
+      {
+        "id": "a",
+        "label": "It needs a bigger, smarter model that understands customers better"
+      },
+      {
+        "id": "b",
+        "label": "It can only talk: it has no way to look up an order"
+      },
+      {
+        "id": "c",
+        "label": "The FAQ page it answers from is out of date"
+      }
+    ],
+    "correct": "b",
+    "pipeline": {
+      "nodes": [
+        {
+          "id": "user",
+          "kind": "user",
+          "label": "Customer",
+          "sub": "where is my order?",
+          "x": 0,
+          "y": 60
+        },
+        {
+          "id": "bot",
+          "kind": "llm",
+          "label": "FAQ bot",
+          "sub": "answers from FAQ text",
+          "x": 230,
+          "y": 60
+        },
+        {
+          "id": "orders",
+          "kind": "api",
+          "label": "Orders system",
+          "sub": "status and tracking",
+          "x": 460,
+          "y": 0
+        },
+        {
+          "id": "reply",
+          "kind": "output",
+          "label": "Reply",
+          "sub": "sent to the customer",
+          "x": 460,
+          "y": 120
+        }
+      ],
+      "edges": [
+        {
+          "id": "e1",
+          "source": "user",
+          "target": "bot"
+        },
+        {
+          "id": "e2",
+          "source": "bot",
+          "target": "reply"
+        }
+      ]
+    },
+    "reveal": {
+      "narration": "Here's what happened, four hundred times over. A customer asks where her order is, and the question reaches the FAQ bot. The bot understands the question perfectly well; the model was never the problem. But look at the diagram: there is no line from the bot to the orders system. With no way to look anything up, the only thing it can produce is text, so out goes the same polite apology. A smarter model would only apologise more elegantly, and a newer FAQ page still wouldn't contain Ana's parcel.",
+      "steps": [
+        {
+          "caption": "Saturday, 10:12 PM. Ana types into the website chat: \"Where is my order ORB-10482?\"",
+          "nodes": {
+            "user": "running"
+          }
+        },
+        {
+          "caption": "Her question reaches the FAQ bot. It understands it perfectly: she wants her order's status.",
+          "nodes": {
+            "user": "ok",
+            "bot": "running"
+          },
+          "edges": {
+            "e1": "ok"
+          }
+        },
+        {
+          "caption": "That status lives in the orders system: shipped with ParcelPath, tracking PP-88213.",
+          "nodes": {
+            "orders": "running"
+          }
+        },
+        {
+          "caption": "But there's no arrow from the bot to the orders system. No tool, no access, no way to ask.",
+          "nodes": {
+            "orders": "error"
+          }
+        },
+        {
+          "caption": "So the bot does the only thing it can do: it writes text.",
+          "nodes": {
+            "bot": "ok"
+          },
+          "edges": {
+            "e2": "running"
+          }
+        },
+        {
+          "caption": "Reply sent: \"I'm sorry, I can't access order information.\" Ana writes back, angrier.",
+          "nodes": {
+            "reply": "error"
+          },
+          "edges": {
+            "e2": "ok"
+          }
+        },
+        {
+          "caption": "Repeat 400 times over one weekend. The model was fine. It could talk, but it couldn't act."
+        }
+      ]
+    },
+    "wrap_correct": "Exactly. The model understood every question; it simply had no way to reach the orders system. With nothing to look up and nothing it could do, all it could produce was words. That missing piece, the ability to act through tools, is what turns a chatbot into an agent.",
+    "wrap_wrong": "Not quite. A bigger model would only write a more elegant apology, and a fresher FAQ page still wouldn't contain Ana's parcel. Look at the diagram: there's no line from the bot to the orders system. It could understand and talk, but it had no way to look anything up or act.",
+    "wrap_point": "An agent is a language model that can act: it decides which tools to use, uses them and works toward a goal, instead of only replying with text.",
+    "film": {
+      "shots": [
+        {
+          "type": "site-chat",
+          "label": "orbitoutdoor.com · Saturday night",
+          "say": "Be the customer for a minute. Your new tent is six days late, so you ask Orbit's chatbot.",
+          "then": "Same answer, every time. And four hundred other customers got it this weekend.",
+          "url": "orbitoutdoor.com/help",
+          "product": "Trailhead 2P tent",
+          "asks": [
+            "Where is my order?",
+            "Order ORB-10482. Any update?",
+            "It's been six days. Where is it??",
+            "Has my tent shipped yet?",
+            "Can you check my order please",
+            "Is my parcel lost?"
+          ],
+          "reply": "I'm sorry, I can't access order information. Is there anything else I can help with?",
+          "count": 400,
+          "countLabel": "apologies sent"
+        },
+        {
+          "type": "tickets",
+          "label": "Orbit Helpdesk · Monday 8:58 AM",
+          "say": "Monday morning. Leo, who runs support, opens the helpdesk.",
+          "act": "Open the inbox",
+          "then": "Four hundred new tickets. Nearly every one asks the same thing.",
+          "count": 400,
+          "subjects": [
+            "Re: Where is my order?",
+            "Re: Re: still no answer",
+            "Your chatbot just says sorry",
+            "Order ORB-10482, any update?",
+            "Re: Where is my tent??",
+            "Please cancel my order",
+            "Has my order even shipped?",
+            "Third time asking"
+          ],
+          "tag": "where is my order"
+        },
+        {
+          "type": "phone",
+          "label": "Your phone · 9:04 AM",
+          "say": "Then Maya, Orbit's founder, messages you.",
+          "time": "9:04",
+          "notes": [
+            {
+              "who": "Maya — founder",
+              "av": "M",
+              "at": "9:03 AM",
+              "text": "it can write a poem about tents, but it can't tell Ana where hers is?"
+            },
+            {
+              "who": "Maya — founder",
+              "av": "M",
+              "at": "9:04 AM",
+              "text": "you've got fresh eyes. what is it actually missing?"
+            }
+          ]
+        },
+        {
+          "type": "numbers",
+          "label": "Monday morning, the damage",
+          "say": "Here's the weekend, in three numbers."
+        }
+      ]
+    }
+  },
+  "worked": {
+    "examples": [
+      {
+        "lesson": "1.2",
+        "title": "The FAQ chatbot answers Ana",
+        "intro": "Orbit's chatbot gets a real customer question. Watch where its answer comes from, and where it can't come from.",
+        "narration": "Ana ordered a tent four days ago, and she wants to know where it is. She asks the website chat, which is Orbit's FAQ chatbot: a capable language model with the FAQ page pasted into its prompt. It understands her question perfectly. But the FAQ only knows general shipping times, and the chatbot has no connection to the orders system where her status lives. With nothing to look up, it does the only thing it can: it writes text. Ana gets a polite apology and the standard shipping times, and she is no closer to her tent.",
+        "predict": {
+          "stem": "Ana asks the FAQ chatbot: \"Where is my order ORB-10482?\" What will it reply?",
+          "options": [
+            {
+              "text": "A polite apology plus general shipping times, because it can't see orders",
+              "correct": true
+            },
+            {
+              "text": "Her real status: shipped with ParcelPath, tracking PP-88213"
+            },
+            {
+              "text": "Nothing useful, because the question is too hard for a chatbot to understand"
+            }
+          ],
+          "rationale": "The chatbot understands the question fine. What it lacks is access: the order status lives in Orbit's orders system, and the chatbot has no connection to it. So it falls back on the only thing in its prompt, the FAQ."
+        },
+        "pipeline": {
+          "nodes": [
+            {
+              "id": "user",
+              "kind": "user",
+              "label": "Customer",
+              "sub": "Ana: where's my order?",
+              "x": 0,
+              "y": 0
+            },
+            {
+              "id": "faq",
+              "kind": "data",
+              "label": "FAQ page",
+              "sub": "general answers only",
+              "x": 0,
+              "y": 120
+            },
+            {
+              "id": "bot",
+              "kind": "llm",
+              "label": "FAQ chatbot",
+              "sub": "model + FAQ in prompt",
+              "x": 230,
+              "y": 60
+            },
+            {
+              "id": "reply",
+              "kind": "output",
+              "label": "Reply",
+              "sub": "to Ana",
+              "x": 460,
+              "y": 0
+            },
+            {
+              "id": "orders",
+              "kind": "api",
+              "label": "Orders system",
+              "sub": "not connected",
+              "x": 460,
+              "y": 120
+            }
+          ],
+          "edges": [
+            {
+              "id": "e1",
+              "source": "user",
+              "target": "bot"
+            },
+            {
+              "id": "e2",
+              "source": "faq",
+              "target": "bot"
+            },
+            {
+              "id": "e3",
+              "source": "bot",
+              "target": "reply"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "caption": "Ana types into the website chat: \"Hi, where is my order ORB-10482? It's been four days.\"",
+            "show": [
+              "user"
+            ],
+            "nodes": {
+              "user": "running"
+            }
+          },
+          {
+            "caption": "Her message reaches the FAQ chatbot: a capable language model with the FAQ page pasted into its prompt.",
+            "show": [
+              "bot",
+              "faq"
+            ],
+            "nodes": {
+              "user": "ok",
+              "bot": "running"
+            },
+            "edges": {
+              "e1": "ok"
+            }
+          },
+          {
+            "caption": "The FAQ says standard shipping takes 3 to 5 business days. It says nothing about Ana's order.",
+            "nodes": {
+              "faq": "ok"
+            },
+            "edges": {
+              "e2": "ok"
+            }
+          },
+          {
+            "caption": "Ana's real status sits in the orders system. The chatbot has no connection to it and no way to ask.",
+            "show": [
+              "orders"
+            ],
+            "nodes": {
+              "orders": "error"
+            }
+          },
+          {
+            "caption": "Reply: \"I'm sorry, I can't access order information. Standard shipping takes 3 to 5 business days.\"",
+            "show": [
+              "reply"
+            ],
+            "nodes": {
+              "bot": "ok",
+              "reply": "error"
+            },
+            "edges": {
+              "e3": "ok"
+            }
+          },
+          {
+            "caption": "Polite, instant and no help to Ana. A less careful bot might even guess \"it's on its way!\" with nothing behind it."
+          }
+        ]
+      },
+      {
+        "lesson": "1.1",
+        "title": "Scout the agent answers Ana",
+        "intro": "Same customer, same question, but this time the model has one tool and decides for itself when to use it.",
+        "narration": "Now the same question goes to Scout, an agent. Scout runs on the same kind of language model, but it has a goal, to answer Ana with her real order status, and one tool: an order lookup called get_order. Scout reads the question and decides it needs facts it doesn't have. It asks for the lookup; your code runs it and hands back the result: shipped with ParcelPath, with a tracking number. Scout reads that, decides it now knows enough, and writes a reply with the real status. Perceive, decide, act, then look at the result: one trip round the agent loop.",
+        "predict": {
+          "stem": "Scout has one tool, get_order. What will it do first?",
+          "options": [
+            {
+              "text": "Call get_order with ORB-10482",
+              "correct": true
+            },
+            {
+              "text": "Reply with the standard shipping times from the FAQ"
+            },
+            {
+              "text": "Ask Ana to confirm her order number before doing anything"
+            }
+          ],
+          "rationale": "The answer depends on facts Scout doesn't have, and Ana already gave her order number, so the lookup is the most useful next step. Asking again would waste her time; replying with shipping times would repeat the chatbot's mistake."
+        },
+        "pipeline": {
+          "nodes": [
+            {
+              "id": "user",
+              "kind": "user",
+              "label": "Customer",
+              "sub": "Ana: where's my order?",
+              "x": 0,
+              "y": 60
+            },
+            {
+              "id": "scout",
+              "kind": "llm",
+              "label": "Scout",
+              "sub": "decides: look it up",
+              "x": 230,
+              "y": 60
+            },
+            {
+              "id": "order",
+              "kind": "tool",
+              "label": "get_order",
+              "sub": "ORB-10482",
+              "x": 460,
+              "y": 60
+            },
+            {
+              "id": "scout2",
+              "kind": "llm",
+              "label": "Scout",
+              "sub": "reads the result",
+              "x": 690,
+              "y": 60
+            },
+            {
+              "id": "reply",
+              "kind": "output",
+              "label": "Reply",
+              "sub": "real status, tracking",
+              "x": 920,
+              "y": 60
+            }
+          ],
+          "edges": [
+            {
+              "id": "e1",
+              "source": "user",
+              "target": "scout"
+            },
+            {
+              "id": "e2",
+              "source": "scout",
+              "target": "order"
+            },
+            {
+              "id": "e3",
+              "source": "order",
+              "target": "scout2"
+            },
+            {
+              "id": "e4",
+              "source": "scout2",
+              "target": "reply"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "caption": "Same customer, same question, this time to Scout: \"Hi, where is my order ORB-10482? It's been four days.\"",
+            "show": [
+              "user"
+            ],
+            "nodes": {
+              "user": "running"
+            }
+          },
+          {
+            "caption": "Scout reads it. Its goal: answer Ana with her real order status. It has one tool, get_order.",
+            "show": [
+              "scout"
+            ],
+            "nodes": {
+              "user": "ok",
+              "scout": "running"
+            },
+            "edges": {
+              "e1": "ok"
+            }
+          },
+          {
+            "caption": "Scout decides it needs facts it doesn't have, and asks to call get_order with order_id ORB-10482.",
+            "show": [
+              "order"
+            ],
+            "nodes": {
+              "scout": "ok",
+              "order": "running"
+            },
+            "edges": {
+              "e2": "running"
+            }
+          },
+          {
+            "caption": "Your code runs the lookup and returns: Trailhead 2P tent, shipped, ParcelPath, tracking PP-88213.",
+            "nodes": {
+              "order": "ok"
+            },
+            "edges": {
+              "e2": "ok"
+            }
+          },
+          {
+            "caption": "The result goes back to Scout. It decides it now has everything it needs: no second lookup.",
+            "show": [
+              "scout2"
+            ],
+            "nodes": {
+              "scout2": "running"
+            },
+            "edges": {
+              "e3": "ok"
+            }
+          },
+          {
+            "caption": "Reply: \"Your Trailhead 2P tent has shipped with ParcelPath. Your tracking number is PP-88213.\"",
+            "show": [
+              "reply"
+            ],
+            "nodes": {
+              "scout2": "ok",
+              "reply": "ok"
+            },
+            "edges": {
+              "e4": "ok"
+            }
+          },
+          {
+            "caption": "Same kind of model as the chatbot. The difference: a goal, a tool, and the freedom to decide when to use it."
+          }
+        ]
+      },
+      {
+        "lesson": "1.2",
+        "title": "When no agent is needed: the shipping email",
+        "intro": "A job with fixed steps, and why a plain workflow beats an agent here.",
+        "narration": "Not every job at Orbit needs an agent. When Sam's warehouse marks an order as shipped, the customer should get an email with the tracking number. The steps never change: the orders system reports the change, a template fills in the name, the item and the tracking number, and the email goes out. There is nothing to decide, so there is no language model in this picture at all. It runs in about a second, costs almost nothing, and does exactly the same thing every time. And there's a bonus: customers who already have their tracking number are far less likely to ask where their order is.",
+        "predict": {
+          "stem": "Orbit wants every customer to get an email with their tracking number the moment their order ships. What should handle it?",
+          "options": [
+            {
+              "text": "A fixed workflow: the same three steps every time",
+              "correct": true
+            },
+            {
+              "text": "Scout, so it can decide what to write to each customer"
+            },
+            {
+              "text": "The FAQ chatbot, whenever a customer asks"
+            }
+          ],
+          "rationale": "Nothing here needs deciding: the trigger, the content and the recipient are all known in advance. A workflow does it faster, cheaper and the same way every time. An agent would add cost and room for mistakes, and a chatbot only answers when asked."
+        },
+        "pipeline": {
+          "nodes": [
+            {
+              "id": "orders",
+              "kind": "api",
+              "label": "Orders system",
+              "sub": "order marked shipped",
+              "x": 0,
+              "y": 60
+            },
+            {
+              "id": "template",
+              "kind": "logic",
+              "label": "Fill template",
+              "sub": "name, item, tracking",
+              "x": 230,
+              "y": 60
+            },
+            {
+              "id": "send",
+              "kind": "output",
+              "label": "Shipping email",
+              "sub": "sent to the customer",
+              "x": 460,
+              "y": 60
+            }
+          ],
+          "edges": [
+            {
+              "id": "e1",
+              "source": "orders",
+              "target": "template"
+            },
+            {
+              "id": "e2",
+              "source": "template",
+              "target": "send"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "caption": "Sam's warehouse marks ORB-10482 as shipped. The orders system announces the change.",
+            "nodes": {
+              "orders": "running"
+            }
+          },
+          {
+            "caption": "A fixed template fills in Ana's name, the Trailhead 2P tent and tracking number PP-88213.",
+            "nodes": {
+              "orders": "ok",
+              "template": "running"
+            },
+            "edges": {
+              "e1": "ok"
+            }
+          },
+          {
+            "caption": "The email goes out to ana@example.com.",
+            "nodes": {
+              "template": "ok",
+              "send": "running"
+            },
+            "edges": {
+              "e2": "ok"
+            }
+          },
+          {
+            "caption": "Done in about a second. No model call, no decisions, almost no cost, and the same result every time.",
+            "nodes": {
+              "send": "ok"
+            }
+          },
+          {
+            "caption": "Bonus: with the tracking number already in her inbox, Ana may never need to ask where her order is."
+          }
+        ]
+      }
+    ]
+  },
+  "guided": {
+    "title": "Set up your machine and make your first model call",
+    "situation": "Priya has found you a desk and a laptop. Before Scout can look up a single order, it needs a home: a project folder, Python and a working connection to the model. Today you set that up and build a small chatbot, so you can see for yourself what Orbit's FAQ bot can and can't do.",
+    "intro": "By the end you'll have a scout folder with a virtual environment, the Anthropic SDK, your API key set safely, a first model call and a terminal chatbot that remembers the conversation.",
+    "before": {
+      "items": [
+        "**Python 3.11 or newer**, from python.org",
+        "A code editor, such as **VS Code**, and a terminal: **PowerShell** on Windows, **Terminal** on macOS",
+        "An **Anthropic account** at console.anthropic.com with a little API credit under **Billing**",
+        "About 30 minutes"
+      ],
+      "downloads": []
+    },
+    "steps": [
+      {
+        "title": "Check Python and create the project folder",
+        "body": "Everything you build in this course lives in one folder called scout. First make sure your Python is new enough.",
+        "actions": [
+          "Open a terminal: **PowerShell** on Windows, **Terminal** on macOS or Linux.",
+          "Type `python --version` and press Enter. On macOS or Linux, use `python3 --version` if `python` is not found.",
+          "Create the folder and move into it with the two commands below."
+        ],
+        "values": [
+          {
+            "label": "Terminal",
+            "value": "mkdir scout\ncd scout"
+          }
+        ],
+        "check": "The version shows Python 3.11 or higher, and your prompt now ends in scout.",
+        "tip": "If typing python on Windows opens the Microsoft Store or says it isn't recognised, Python isn't installed yet. Install it from python.org, tick **Add python.exe to PATH** during setup, then open a new terminal."
+      },
+      {
+        "title": "Create and activate a virtual environment",
+        "body": "A virtual environment is a private set of packages for this project, so it never clashes with anything else on your machine.",
+        "actions": [
+          "Inside **scout**, create the environment with `python -m venv .venv` (on macOS or Linux, `python3 -m venv .venv`).",
+          "Activate it with the command for your system below.",
+          "Remember: activate it again every time you open a new terminal."
+        ],
+        "values": [
+          {
+            "label": "Create (all systems)",
+            "value": "python -m venv .venv"
+          },
+          {
+            "label": "Activate on Windows (PowerShell)",
+            "value": ".venv\\Scripts\\activate"
+          },
+          {
+            "label": "Activate on macOS / Linux",
+            "value": "source .venv/bin/activate"
+          }
+        ],
+        "check": "Your prompt now starts with (.venv). Inside it, `python --version` shows 3.11 or higher, even on macOS.",
+        "tip": "On Windows, if you see \"running scripts is disabled on this system\", run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` and activate again. It only affects this terminal window."
+      },
+      {
+        "title": "Install the Anthropic SDK",
+        "body": "The SDK is Anthropic's official Python library. It handles the connection, your key and the request format, so your code stays short.",
+        "actions": [
+          "With **(.venv)** showing in your prompt, run `pip install anthropic`.",
+          "Confirm it installed with `pip show anthropic`."
+        ],
+        "values": [
+          {
+            "label": "Terminal",
+            "value": "pip install anthropic\npip show anthropic"
+          }
+        ],
+        "check": "pip show prints Name: anthropic and a version number.",
+        "tip": "If pip isn't found, or the package installs somewhere else, the environment isn't active. Activate it (step 2) and run the install again."
+      },
+      {
+        "title": "Create an API key and set it as an environment variable",
+        "body": "The key lets your programs use the model and is billed to your account, so treat it like a password. It goes in an environment variable, never in a file.",
+        "actions": [
+          "Sign in at **console.anthropic.com**, open **API Keys** and click **Create Key**. Name it `scout-dev`.",
+          "Copy the key. It starts with `sk-ant-` and the console shows it only once.",
+          "In the terminal where **(.venv)** is active, run the line for your system, with your key in place of `sk-ant-...`.",
+          "Check that Python can see the key with the last command below. It prints True or False, never the key."
+        ],
+        "values": [
+          {
+            "label": "Windows PowerShell",
+            "value": "$env:ANTHROPIC_API_KEY = \"sk-ant-...\""
+          },
+          {
+            "label": "macOS / Linux",
+            "value": "export ANTHROPIC_API_KEY=\"sk-ant-...\""
+          },
+          {
+            "label": "Check (all systems)",
+            "value": "python -c \"import os; print('ANTHROPIC_API_KEY' in os.environ)\""
+          }
+        ],
+        "check": "The check prints True.",
+        "tip": "A key set this way lasts only until you close the terminal. In a new terminal, activate the environment and set the key again. To make it permanent, run `setx ANTHROPIC_API_KEY \"sk-ant-...\"` on Windows and open a new terminal, or add the export line to **~/.zshrc** or **~/.bashrc** on macOS or Linux."
+      },
+      {
+        "title": "Keep secrets out of Git",
+        "body": "If this folder ever goes into Git, the virtual environment and any secrets file must stay out. A .gitignore file tells Git what to skip.",
+        "actions": [
+          "In your editor, open the **scout** folder and create a file named **.gitignore**.",
+          "Paste the lines below and save."
+        ],
+        "values": [
+          {
+            "label": ".gitignore",
+            "value": ".venv/\n.env\n__pycache__/\n"
+          }
+        ],
+        "check": "Your scout folder now contains .venv and .gitignore. If you use Git, `git status` does not list .venv.",
+        "tip": "If a key ever lands in a commit, a chat or a screenshot, don't just delete the line: delete the key in the console and create a new one. Assume a leaked key has already been copied."
+      },
+      {
+        "title": "Make your first model call",
+        "body": "hello.py sends one message to the model and prints the reply. It's the smallest useful program in the course.",
+        "actions": [
+          "Create **hello.py** in the **scout** folder and paste the code below.",
+          "Run it with `python hello.py`."
+        ],
+        "values": [
+          {
+            "label": "hello.py",
+            "value": "import anthropic\n\nclient = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from the environment\nMODEL = \"claude-opus-5-5\"\n\nresponse = client.messages.create(\n    model=MODEL,\n    max_tokens=16000,  # a ceiling, not a target\n    messages=[{\"role\": \"user\", \"content\": \"In one sentence, what is an AI agent?\"}],\n)\n\n# The reply can contain several blocks (the model may think first), so take the text block:\ntext = next(b.text for b in response.content if b.type == \"text\")\nprint(text)\nprint(f\"Tokens used: {response.usage.input_tokens} in, {response.usage.output_tokens} out\")\n"
+          }
+        ],
+        "check": "After a few seconds you see a one-sentence answer, then a line with the token counts.",
+        "tip": "An error about authentication (\"Could not resolve authentication method\" or AuthenticationError) means the key isn't set in this terminal or is wrong: repeat step 4. \"No module named 'anthropic'\" means the environment isn't active: repeat step 2. A message about your credit balance means you need to add credit under **Billing**."
+      },
+      {
+        "title": "Turn it into a chatbot that remembers",
+        "body": "A chatbot is a loop: read what you type, send the whole conversation to the model, print the reply, repeat. The messages list is its memory.",
+        "actions": [
+          "Create **chat.py** in the **scout** folder and paste the code below.",
+          "Run it with `python chat.py`.",
+          "Type `Hi, I'm Ana.` and then ask `What's my name?`",
+          "Type `quit` to exit."
+        ],
+        "values": [
+          {
+            "label": "chat.py",
+            "value": "import anthropic\n\nclient = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from the environment\nMODEL = \"claude-opus-5-5\"\nSYSTEM = (\n    \"You are Scout, Orbit Outdoor's support assistant. \"\n    \"Orbit is an online shop for hiking, camping and climbing gear. \"\n    \"Be friendly and brief.\"\n)\n\nmessages = []  # the whole conversation so far: this list is Scout's memory\n\nprint(\"Scout is ready. Type quit to exit.\")\nwhile True:\n    user_text = input(\"You: \").strip()\n    if user_text.lower() == \"quit\":\n        break\n    if not user_text:\n        continue\n\n    messages.append({\"role\": \"user\", \"content\": user_text})\n    response = client.messages.create(\n        model=MODEL,\n        max_tokens=16000,\n        system=SYSTEM,\n        messages=messages,\n    )\n    text = next(b.text for b in response.content if b.type == \"text\")\n    messages.append({\"role\": \"assistant\", \"content\": text})\n    print(f\"Scout: {text}\\n\")\n"
+          }
+        ],
+        "check": "Scout greets you, and when you ask your name it answers Ana. Typing quit ends the program.",
+        "tip": "If Scout forgets your name, check that both append lines are there: one for your message and one for Scout's reply. Without them, every call starts from zero, because the model itself remembers nothing between calls."
+      },
+      {
+        "title": "Ask it about an order",
+        "body": "Now ask the question Orbit hears all day, and watch what a chatbot without tools does with it.",
+        "actions": [
+          "Run `python chat.py` again.",
+          "Ask: `Where is my order ORB-10482?`",
+          "Read the reply carefully, then follow up: `It's a green tent. When will it arrive?`",
+          "Type `quit` when you're done."
+        ],
+        "check": "Scout says it can't see orders or tracking, and points you to your confirmation email or Orbit's support team. It can't give the real status (shipped with ParcelPath, tracking PP-88213), because nothing in your code can look it up.",
+        "tip": "If Scout ever sounds sure, for example \"it's on its way and should arrive Thursday\", that's a guess: there is no order data anywhere in your code. Spotting that is the point of this step."
+      }
+    ],
+    "finish": {
+      "title": "Scout can talk. It can't act yet.",
+      "body": "You've set up a real Python project, kept your key out of your code, made your first model call and built a chatbot that remembers. You've also recreated Orbit's Monday problem on your own machine: Scout understands the order question but has no way to look anything up. Module 2 gives it a proper system prompt and answers your code can trust; Module 3 gives it hands: tools it can call.",
+      "checklist": [
+        "**scout/** folder with an active **.venv**",
+        "`anthropic` installed, and `pip show anthropic` works",
+        "**ANTHROPIC_API_KEY** set in your terminal, not in any file",
+        "**.gitignore** that skips .venv/ and .env",
+        "**hello.py** prints a reply from claude-opus-5-5",
+        "**chat.py** remembers your name and exits on quit"
+      ]
+    }
+  },
+  "lab": {
+    "title": "Agent, chatbot or workflow?",
+    "intro": "Three requests landed in your inbox this week from Orbit's team. For each one, decide what kind of system it really needs, and remember that the most impressive option isn't always the right one.",
+    "scenarios": [
+      {
+        "lesson": "1.2",
+        "title": "Sam's Monday stock report",
+        "situation": "Every Monday, Sam spends 40 minutes copying numbers from the stock sheet into an email for Maya and Leo: what's low, what's out, what's arriving. The sheet and the email look the same every week. Sam asks whether the new AI project could take this off his plate.",
+        "context": {
+          "label": "Sam's message",
+          "lines": [
+            "sam: every monday i build the same stock report by hand",
+            "sam: same sheet, same columns, same two people",
+            "sam: anything under 2 in stock goes in a 'low' list",
+            "sam: could it just land in their inbox at 8 AM?"
+          ]
+        },
+        "stem": "What should Orbit build for Sam?",
+        "options": [
+          {
+            "text": "A scheduled workflow: every Monday at 8, read the sheet, list low and out-of-stock items, email the report",
+            "correct": true,
+            "why": "Every step is known in advance and nothing needs judgement. A workflow does it the same way every week, in seconds, for almost nothing."
+          },
+          {
+            "text": "An agent that checks the stock sheet and decides when a report would be useful",
+            "why": "Nothing here needs deciding, so an agent only adds cost, delay and the risk of a different report each week. Sam wants the same report, on time."
+          },
+          {
+            "text": "A chatbot that Sam, Maya and Leo can ask about stock levels",
+            "why": "That might be handy later, but Sam asked for a report that arrives by itself. A chatbot waits to be asked."
+          }
+        ],
+        "hints": [
+          "Could you write every step down before Monday comes?",
+          "If the steps never change, does anything need to decide them?"
+        ],
+        "debrief": "When the trigger, the steps and the output are all known in advance, build a workflow. It's cheaper, faster and easier to trust than an agent. Experienced builders reach for an agent only when the steps depend on the request."
+      },
+      {
+        "lesson": "1.3",
+        "title": "Leo's customers, in their own words",
+        "situation": "Leo wants customers to get help at any hour, in their own words, without waiting for the team. Most messages are about orders, returns and exchanges, and no two look alike. Answering them means checking the order, the policy and sometimes the stock, in a different order each time. Every answer would be logged, so Leo can spot and fix mistakes.",
+        "context": {
+          "label": "This morning's queue (sample)",
+          "lines": [
+            "#4471 Ana: where's my tent?? ORB-10482",
+            "#4472 Grace: can I still send back the boots from ORB-10517?",
+            "#4473 Owen: jacket's too big, can I swap the L for an M?",
+            "#4474 Ravi: my order says processing since tuesday, is that normal?"
+          ]
+        },
+        "stem": "What kind of system fits Leo's request?",
+        "options": [
+          {
+            "text": "An agent: it reads each message, decides which lookups it needs (order, policy, stock) and answers from the results",
+            "correct": true,
+            "why": "The steps depend on the message, the answers need real lookups, and mistakes are recoverable. That's a textbook first agent job, and exactly what Scout is."
+          },
+          {
+            "text": "A bigger FAQ chatbot with every policy pasted into its prompt",
+            "why": "It could explain the return policy, but it still can't see Grace's delivery date, the stock for Owen's swap or Ana's tracking number. It can talk, but not look anything up."
+          },
+          {
+            "text": "A workflow with one fixed branch for each type of question",
+            "why": "Customers mix questions and phrase them in endless ways. Grace needs her order and the policy; Owen needs his order, the policy and the stock. Fixed branches multiply fast and still miss cases."
+          }
+        ],
+        "hints": [
+          "Do all four messages need the same steps, in the same order?",
+          "Check it against the three signs of a good first agent job: repetitive, needs lookups, recoverable."
+        ],
+        "debrief": "This passes all three tests from lesson 1.3: it repeats hundreds of times, the answers live in Orbit's systems, and a wrong answer can be caught and corrected. That's why Scout exists. One detail shows why the lookups matter: Grace's boots were delivered 62 days ago, outside the 30-day return window, so a good agent must check and say no politely rather than promise a return."
+      },
+      {
+        "lesson": "1.2",
+        "title": "Maya's website questions",
+        "situation": "Maya looked at the website's contact form: a third of all messages ask the same few things. How long does shipping take? Is there express? How long do I have to return something? The answers are already in Orbit's policy and change maybe once a year. Maya wants these answered instantly, right on the website.",
+        "context": {
+          "label": "Top contact-form questions, last 30 days",
+          "lines": [
+            "How long does shipping take?          212",
+            "Do you have express shipping?          97",
+            "How long do I have to return things?   84",
+            "Do I pay for return shipping?          61"
+          ]
+        },
+        "stem": "What should Orbit put on the website for these questions?",
+        "options": [
+          {
+            "text": "A clear FAQ page, or a simple chatbot that answers from the policy text",
+            "correct": true,
+            "why": "The answers are fixed and already written down. No lookups and no decisions: a FAQ page, or a chatbot grounded in the policy, answers instantly and costs little."
+          },
+          {
+            "text": "An agent with tools for shipping times and return windows",
+            "why": "There's nothing to look up for each customer: the answers are the same for everyone. Tools and a decision loop add cost and moving parts for no gain."
+          },
+          {
+            "text": "A weekly workflow that emails every customer the shipping and returns policy",
+            "why": "Customers ask at the moment they need the answer. A weekly email nobody asked for won't be there when the question comes up."
+          }
+        ],
+        "hints": [
+          "Does the answer change from one customer to the next?",
+          "What's the simplest thing that would answer these instantly?"
+        ],
+        "debrief": "Fixed answers to common questions don't need an agent. A good FAQ page, or a chatbot that answers from the policy, does the job cheaply. Save the agent for questions where the answer depends on this customer's order. In fact, Monday's FAQ bot was fine for exactly these questions; it only failed when asked about a specific order."
+      }
+    ]
+  },
+  "review": {
+    "variants": [
+      {
+        "after_days": 3,
+        "title": "Day 3 · What makes it an agent",
+        "stem": "Priya shows you two prototypes. A answers questions using the FAQ text in its prompt. B reads the question, decides to call get_order, reads the result and then replies. Which one is an agent?",
+        "options": [
+          {
+            "text": "B, because it decides on its own steps and takes actions toward a goal",
+            "correct": true
+          },
+          {
+            "text": "A, because it answers in fluent, natural language"
+          },
+          {
+            "text": "Both, because both use a language model"
+          }
+        ],
+        "rationale": "Using a language model doesn't make something an agent, and neither do fluent replies. B decides what to do next, acts with a tool and uses the result: the perceive, decide, act loop."
+      },
+      {
+        "after_days": 10,
+        "title": "Day 10 · Agent or workflow?",
+        "stem": "Maya wants each day's orders copied from the shop into the accounting sheet every night at 11 PM. The columns never change. An intern proposes an agent \"so it can work out what to copy\". What do you recommend?",
+        "options": [
+          {
+            "text": "A scheduled workflow: the same steps every night, no model needed",
+            "correct": true
+          },
+          {
+            "text": "The agent, because it can adapt if something changes"
+          },
+          {
+            "text": "A chatbot the accountant can ask for each night's orders"
+          }
+        ],
+        "rationale": "The steps are known in advance and identical every night. A workflow is cheaper, faster and predictable; an agent adds model costs and the chance of a different result each night. Many jobs don't need an agent."
+      },
+      {
+        "after_days": 30,
+        "title": "Day 30 · Which part is failing?",
+        "stem": "A test version of Scout answers Elena's first question about her climbing rope order perfectly. Then she writes \"ok, and when will it arrive?\" and Scout replies \"Which order do you mean?\" Which core part is failing?",
+        "options": [
+          {
+            "text": "Memory: the earlier messages aren't being sent with the new question",
+            "correct": true
+          },
+          {
+            "text": "Tools: it needs a better tracking lookup"
+          },
+          {
+            "text": "Planning: it should split the question into more steps"
+          }
+        ],
+        "rationale": "Scout looked up the order fine the first time, so its tools work. It lost track of which order the chat was about, which means the conversation isn't being kept and sent with each call. In chat.py, that's the messages list."
+      }
+    ]
+  }
+}

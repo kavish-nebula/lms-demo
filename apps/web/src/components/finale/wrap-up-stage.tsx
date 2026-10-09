@@ -8,6 +8,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { Award, Boxes, CalendarRange, Clock3, GraduationCap, Hammer, LayoutDashboard, PartyPopper, RotateCcw, ShieldCheck } from "lucide-react";
 import { Surface } from "@/components/kit/surface";
 import { StatTile } from "@/components/kit/stat-tile";
+import { DEMO_OPEN } from "@/lib/demo";
 import { Button } from "@/components/ui/button";
 import { StageShell } from "@/components/player/stage-shell";
 import { ReflectionPrompt } from "@/components/player/stages/reflection-stage";
@@ -32,7 +33,7 @@ export function courseCredential(course: Course, completedAt: string): Credentia
 /**
  * The course wrap-up, once, after the final check: what you built, real
  * figures from your progress, three reflection prompts, your credential and
- * what comes next. Hours of manual work are the course's own estimates.
+ * what comes next. Hours of manual work, when a course has them, are its own estimates.
  */
 export function WrapUpStage({
   course,
@@ -64,11 +65,13 @@ export function WrapUpStage({
     ...progress.modules
       .filter((m) => m.stages.includes("guided") && m.done.includes("guided"))
       .map((m) => ({ id: m.module_id, title: topicOf(m, "guided")?.topic.title ?? m.title, sub: m.title })),
-    ...(capstoneDone ? [{ id: "capstone", title: finale.capstone.workflow_name, sub: finale.capstone.title }] : []),
+    ...(capstoneDone ? [{ id: "capstone", title: finale.capstone.project_name, sub: finale.capstone.title }] : []),
   ];
+  // hours of manual work only apply to courses that estimate them
+  const hasHours = finale.capstone.hours_saved != null || course.modules.some((m) => m.hours_saved != null);
   const hours =
-    progress.modules.filter((m) => m.liveState === "done").reduce((n, m) => n + m.hours_saved, 0) +
-    (capstoneDone ? finale.capstone.hours_saved : 0);
+    progress.modules.filter((m) => m.liveState === "done").reduce((n, m) => n + (m.hours_saved ?? 0), 0) +
+    (capstoneDone ? (finale.capstone.hours_saved ?? 0) : 0);
   const percent = state.score != null && state.total ? Math.round((state.score / state.total) * 100) : null;
 
   const headline = complete ? t("completeTitle") : state.passed ? t("lastStepTitle") : t("oneThingLeft");
@@ -97,7 +100,7 @@ export function WrapUpStage({
         </Surface>
       </motion.div>
 
-      <div className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
+      <div className={cn("grid grid-cols-2 gap-3 md:gap-4", hasHours ? "xl:grid-cols-4" : "xl:grid-cols-3")}>
         <StatTile
           icon={<ShieldCheck />}
           value={percent ?? "—"}
@@ -112,7 +115,7 @@ export function WrapUpStage({
           hint={t("ofModules", { total: progress.modules.length })}
         />
         <StatTile icon={<Hammer />} value={built.length} label={t("statBuilt")} />
-        <StatTile icon={<Clock3 />} value={hours} suffix=" h" label={t("statHours")} hint={t("estimateShort")} />
+        {hasHours ? <StatTile icon={<Clock3 />} value={hours} suffix=" h" label={t("statHours")} hint={t("estimateShort")} /> : null}
       </div>
 
       <Surface pad="md" className="flex flex-col gap-3">
@@ -214,7 +217,8 @@ export function WrapUpStage({
             {!reflected ? (
               <span className="hidden text-sm text-ink-faint sm:inline">{tp("minSentencesEach", { count: block.min_sentences })}</span>
             ) : null}
-            <Button size="lg" variant="brand" disabled={preview || !state.passed || !reflected} onClick={onComplete}>
+            {/* the demo lets anyone finish; in the real course it waits for a passed final check and the reflection */}
+            <Button size="lg" variant="brand" disabled={!DEMO_OPEN && (preview || !state.passed || !reflected)} onClick={onComplete}>
               <GraduationCap data-icon="inline-start" />
               {t("finishCourse")}
             </Button>

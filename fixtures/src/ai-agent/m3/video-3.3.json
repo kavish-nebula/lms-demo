@@ -1,0 +1,233 @@
+{
+  "lesson": "3.3",
+  "title": "Building tools: web search, calculator, file access",
+  "notes": [
+    "Web search can be a server tool: add web_search to the tools list and Anthropic runs it, returning results with sources.",
+    "Models are unreliable at exact arithmetic, so give them a calculator that parses with ast and never calls eval.",
+    "A file tool opens files only inside one allowed folder, and refuses paths like ../ that climb out of it."
+  ],
+  "quizAfter": 4,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "boxes",
+      "kicker": "Module 3 · Lesson 3",
+      "title": "Building tools: web search, calculator, file access",
+      "sub": "Three tools almost every agent needs, and how to keep each one safe",
+      "sentences": [
+        "Now that you can define a tool, let us build some.",
+        "In this lesson you will meet three tools almost every agent needs: web search, a calculator and a file reader.",
+        "For each one you will see what it is for, and the one mistake that makes it dangerous."
+      ]
+    },
+    {
+      "kind": "cards",
+      "title": "Three tools, three gaps",
+      "tags": ["The gap", "The tool", "Scout uses it for"],
+      "cards": [
+        { "icon": "globe", "title": "Web search", "flow": ["Knowledge stops at training", "web_search, run by Anthropic", "This week's carrier delays"], "cue": 1 },
+        { "icon": "calculator", "title": "Calculator", "flow": ["Exact sums are unreliable", "calculate, run by your code", "Discounts and refund totals"], "cue": 3 },
+        { "icon": "folder", "title": "File reader", "flow": ["Never saw your documents", "read_file, docs folder only", "Orbit's policy file"], "cue": 5 }
+      ],
+      "sentences": [
+        "Each of these tools fills a gap the model has on its own.",
+        "The model's knowledge stops when its training did, so web search lets it look up what is happening now.",
+        "For Scout, that might be a storm closing a ParcelPath depot this week.",
+        "Models are also surprisingly unreliable at exact arithmetic, so a calculator does the sums.",
+        "Scout needs that for discounts and refunds, where one cent out means a complaint.",
+        "And the model has never seen your documents, so a file reader lets it open Orbit's policy."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "Web search: a tool you don't run yourself",
+      "lead": "Web search is a server tool: Anthropic runs it. You only add one entry to the tools list.",
+      "rows": [
+        { "code": "WEB_SEARCH = {\"type\": \"web_search_20260209\",", "out": "A tool Anthropic hosts, not your code", "cue": 1 },
+        { "code": "    \"name\": \"web_search\", \"max_uses\": 3}", "out": "At most three searches per request", "cue": 2 },
+        { "code": "tools=TOOLS + [WEB_SEARCH]", "out": "Sits alongside your own tools", "cue": 3 },
+        { "code": "block.type == \"web_search_tool_result\"", "out": "Results arrive in the same response", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "dollar",
+        "label": "Worth knowing",
+        "text": "Each search costs extra and adds time. Turn it on only where Scout really needs fresh facts.",
+        "cue": 6
+      },
+      "sentences": [
+        "Web search is the easiest of the three, because you do not run it yourself.",
+        "It is a server tool: you add a small entry with a type, and Anthropic runs the search on its side.",
+        "Max uses caps how many searches the model may make in one request, and three is plenty for Scout.",
+        "You add it to the same tools list as your own tools.",
+        "The searches and their results come back inside the same response, with links to the sources, so your loop never has to run anything.",
+        "If you already pay for a search service, you can wrap its API as an ordinary tool instead.",
+        "Either way, searches cost money and add time, so turn web search on only where Scout needs fresh facts."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Why give a language model a calculator?",
+      "left": {
+        "label": "In its head",
+        "tone": "bad",
+        "cue": 1,
+        "points": [
+          "15 percent off 240 dollars: usually right",
+          "17.5 percent of 1,387.40 dollars: maybe not",
+          "Sounds just as sure either way",
+          "One cent out is a refund complaint"
+        ]
+      },
+      "right": {
+        "label": "With calculate",
+        "tone": "ok",
+        "cue": 4,
+        "points": [
+          "Scout writes 240 * 0.85",
+          "Python works it out: 204.0",
+          "Exact, every time",
+          "Scout explains the answer"
+        ]
+      },
+      "sentences": [
+        "Why would a model that writes so well need a calculator?",
+        "Because it predicts digits much like words, so easy sums usually come out right, and harder ones sometimes don't.",
+        "The worrying part is that it sounds just as sure either way.",
+        "For refunds and discounts, one cent out is a complaint, or money lost.",
+        "With a calculator tool, the model writes the expression, and your code works it out exactly.",
+        "The model does what it is good at, choosing the right sum and explaining it, and Python does the arithmetic."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "A safe calculator: parse it, never eval it",
+      "lead": "Never pass model text to eval. Parse it with ast, and allow only numbers and arithmetic.",
+      "rows": [
+        { "code": "eval(expression)", "out": "Never: runs any Python the text contains", "cue": 1 },
+        { "code": "tree = ast.parse(expression, mode=\"eval\")", "out": "Text becomes a tree; nothing runs", "cue": 3 },
+        { "code": "if type(node.op) in OPERATORS: ...", "out": "Only + - * / ** and parentheses", "cue": 4 },
+        { "code": "raise ValueError(\"only arithmetic allowed\")", "out": "Anything else is refused", "cue": 5 }
+      ],
+      "aside": {
+        "icon": "shield",
+        "label": "The rule",
+        "text": "Treat every tool input as untrusted text, even when it comes from your own agent.",
+        "cue": 6
+      },
+      "sentences": [
+        "Here is the one mistake that makes a calculator dangerous.",
+        "Python's eval function would happily work out the sum, but it runs any Python the text contains.",
+        "If a customer talks Scout into calculating a line of code that deletes files, eval would run it.",
+        "Instead, use Python's ast module to parse the text into a tree, which runs nothing at all.",
+        "Then walk the tree and allow only numbers, the four basic operations, powers and parentheses.",
+        "Anything else, such as a name, a function call or an import, is refused with a clear error.",
+        "Treat every tool input as untrusted text, even when it comes from your own agent."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "A file reader that stays in its folder",
+      "nodes": [
+        { "kind": "llm", "icon": "brain", "label": "Scout asks", "sub": "read_file(\"policy.md\")", "cue": 1 },
+        { "kind": "logic", "icon": "folder", "label": "Build the path", "sub": "docs plus the name, resolved", "cue": 2 },
+        { "kind": "guard", "icon": "lock", "label": "Inside docs?", "sub": "if not, refuse", "cue": 3 },
+        { "kind": "data", "icon": "file", "label": "Read the text", "sub": "send it back to Scout", "cue": 5 }
+      ],
+      "note": { "text": "read_file(\"../.env\") resolves outside docs, so it is refused before anything is opened.", "cue": 4 },
+      "sentences": [
+        "The file reader lets Scout open Orbit's documents, and only those.",
+        "Scout asks for a file by name, such as the policy file.",
+        "Your code joins that name to the docs folder and resolves it into a full, absolute path.",
+        "Then it checks that the result is still inside docs, and refuses if it is not.",
+        "That stops tricks like dot dot slash, which climbs out of the folder towards your code and your API keys.",
+        "Only then does it read the file and send the text back to Scout."
+      ]
+    },
+    {
+      "kind": "table",
+      "title": "How much power should a tool get?",
+      "columns": ["Tool", "Can reach", "Guard"],
+      "rows": [
+        { "cells": ["web_search", "The public web", "max_uses, on only where needed"], "cue": 1 },
+        { "cells": ["calculate", "Numbers only", "ast and an allow-list of operators"], "cue": 2 },
+        { "cells": ["read_file", "The docs folder only", "Resolve the path, check it's inside"], "cue": 3 },
+        { "cells": ["run_python (don't)", "Everything on your machine", "No simple guard exists"], "tone": "bad", "cue": 4 }
+      ],
+      "note": { "text": "Least privilege: give each tool the least power that still does the job.", "cue": 5 },
+      "sentences": [
+        "Put the three side by side and a pattern appears.",
+        "Web search reaches the public web, so you cap it and switch it on only where it is needed.",
+        "The calculator reaches numbers only, guarded by an allow-list of operators.",
+        "The file reader reaches one folder, guarded by the path check.",
+        "Compare a tool that runs any Python the model writes: it reaches everything, and there is no simple guard.",
+        "The principle is called least privilege: give each tool the least power that still does the job."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "web_search is a server tool: add it to the list, Anthropic runs it", "cue": 1 },
+        { "text": "Give the model a calculator; parse with ast, never eval", "cue": 2 },
+        { "text": "File access stays in one folder; resolve and check every path", "cue": 3 },
+        { "text": "Least privilege: each tool gets only the power it needs", "cue": 4 }
+      ],
+      "sentences": [
+        "Let us pull it together.",
+        "Web search is a server tool: add it to your list, and Anthropic runs it for you.",
+        "Models are unreliable at exact sums, so give them a calculator that parses with ast and never calls eval.",
+        "A file tool stays inside one folder, and checks every path before it opens anything.",
+        "And every tool gets the least power that does its job.",
+        "In the guided practice, you will build the calculator and the file reader yourself."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "Scout has the web_search tool in its list. Who runs the searches?",
+      "options": [
+        "Your run_tool dispatcher, which calls a search API",
+        "Anthropic, on its servers; results come back in the same response",
+        "Nobody: the model answers from what it learned in training"
+      ],
+      "correct": 1,
+      "explain": "web_search is a server tool. You add it to the tools list; Anthropic runs the search and returns results with their sources.",
+      "hint": "Did you write a Python function for web search?"
+    },
+    {
+      "q": "Why should calculate never pass the model's expression to eval?",
+      "options": [
+        "eval is too slow for large numbers",
+        "eval runs any Python in the text, not just arithmetic",
+        "eval can't handle decimals like 0.85"
+      ],
+      "correct": 1,
+      "explain": "eval executes code. Parsing with ast and allowing only arithmetic means nothing else can ever run.",
+      "hint": "Besides sums, what else can one line of Python do?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "Scout calls read_file with \"../.env\". What should happen?",
+      "options": [
+        "Open it, because Scout asked for it",
+        "Refuse it: the resolved path is outside the docs folder",
+        "Remove the dots and open .env from inside docs"
+      ],
+      "correct": 1,
+      "explain": "Resolve the full path and check it is inside docs before opening anything. ../ climbs out of the folder, so the request is refused.",
+      "hint": "Where does ../ point, compared with the docs folder?"
+    },
+    {
+      "q": "Which tool design follows least privilege?",
+      "options": [
+        "A run_python tool, so Scout can do anything it needs",
+        "A read_file tool that can open only files inside docs",
+        "A read_file tool that can open any path on the server"
+      ],
+      "correct": 1,
+      "explain": "Least privilege means each tool gets only the power its job needs. Scout only needs Orbit's documents, so read_file reaches docs and nothing else.",
+      "hint": "Which option gives Scout the smallest reach that still does the job?"
+    }
+  ]
+}

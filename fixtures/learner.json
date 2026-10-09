@@ -10,16 +10,7 @@
     "settings": {}
   },
   "due_reviews": [],
-  "assignments": [
-    {
-      "id": "as-1",
-      "title": "Finish Module 1: Your first working workflow",
-      "course_title": "Automate Real Work with n8n",
-      "course_id": "n8n",
-      "due": "2026-10-14",
-      "assigned_by": "Priya (instructor)"
-    }
-  ],
+  "assignments": [],
   "daily_progress": [
     { "day": "2026-10-01", "minutes": 0 },
     { "day": "2026-10-02", "minutes": 0 },

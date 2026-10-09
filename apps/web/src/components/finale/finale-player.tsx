@@ -104,7 +104,6 @@ export function FinalePlayer({
     body = (
       <CapstoneStage
         block={finale.capstone}
-        courseId={course.course_id}
         preview={preview}
         roleKey={adaptation.roleKey}
         roleLabel={adaptation.roleLabel}

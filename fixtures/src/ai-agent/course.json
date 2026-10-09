@@ -1,0 +1,275 @@
+{
+  "$comment": "Course spine for Build Your First AI Agent. Source file: fixtures/scripts/build-ai-agent.mjs fills each lesson's notes from its video and each module's minutes from its content, then writes fixtures/courses.json.",
+  "course_id": "ai-agent",
+  "slug": "build-your-first-ai-agent",
+  "title": "Build Your First AI Agent",
+  "tagline": "Orbit Outdoor's support team is drowning: 400 tickets a day, most of them \"where is my order?\". Their FAQ chatbot can talk, but it can't look anything up. Over six modules you build Scout, an AI agent that reads the question, calls the right tools, remembers the conversation and knows when to hand over to a person.",
+  "goal": "Design, build, test and deploy a working AI agent in Python: a language model that plans, calls tools, uses memory and stays inside safe limits.",
+  "domain": "Artificial intelligence",
+  "provider": "Nebula KnowLab",
+  "level": "Beginner",
+  "estimated_hours": 10,
+  "locales": ["en"],
+  "languages": [{ "code": "en", "name": "English", "native": "English" }],
+  "version": "1.0.0",
+  "skills": [
+    "AI Agents",
+    "Large Language Models",
+    "Prompt Engineering",
+    "System Prompts",
+    "Structured Outputs",
+    "Tool Calling",
+    "API Integration",
+    "Error Handling",
+    "Memory and Context",
+    "Retrieval-Augmented Generation",
+    "Planning and ReAct",
+    "Agent Testing and Evaluation",
+    "Guardrails and Safety",
+    "Cost and Monitoring",
+    "Deployment"
+  ],
+  "learn": [
+    "Explain what makes an agent different from a chatbot or a fixed workflow, and when each one is the right tool.",
+    "Call a language model from Python with a clear system prompt and get back structured JSON you can trust.",
+    "Give an agent tools, let it decide when to use them, and handle the errors real APIs throw.",
+    "Add memory, retrieval and a think-act-observe loop, then test, evaluate, guard and deploy the agent you built."
+  ],
+  "tools": ["Python 3.11+", "Anthropic Claude API", "JSON Schema", "Pydantic", "FastAPI", "A code editor and terminal"],
+  "modules": [
+    {
+      "module_id": "m1",
+      "title": "Introduction to AI Agents",
+      "stages": ["hook", "explainer", "worked", "guided", "lab", "review"],
+      "state": "available",
+      "lite": false,
+      "pain": "Orbit's FAQ chatbot apologised 400 times on Monday. It could talk about orders, but it couldn't look one up.",
+      "lead_in": null,
+      "lessons": [
+        { "id": "1.1", "title": "What is an AI agent?" },
+        { "id": "1.2", "title": "Agents vs. chatbots vs. workflows" },
+        { "id": "1.3", "title": "Real-world use cases of AI agents" },
+        { "id": "1.4", "title": "Core components: LLM, tools, memory, planning" },
+        { "id": "1.5", "title": "Setting up your development environment" }
+      ],
+      "topics": [
+        { "stage": "hook", "title": "The chatbot that apologised 400 times", "summary": "Orbit's support bot can talk but can't act. Guess what it is missing before you learn the word for it." },
+        { "stage": "explainer", "title": "What makes an agent an agent", "summary": "Agents, chatbots and workflows, real use cases, the four core parts, and your setup, in five short videos." },
+        { "stage": "worked", "title": "Watch a chatbot and an agent answer the same customer", "summary": "Two runs side by side: one that guesses, one that looks it up." },
+        { "stage": "guided", "title": "Set up your machine and make your first model call", "summary": "Python, a virtual environment, an API key and a first reply from the model, step by step." },
+        { "stage": "lab", "title": "Agent, chatbot or workflow?", "summary": "Three real requests from Orbit's team. Decide which kind of system each one needs." },
+        { "stage": "review", "title": "Lock it in: what an agent is", "summary": "Short recall questions that come back after 3, 10 and 30 days." }
+      ],
+      "outcomes": [
+        "Explain what an AI agent is and what makes it act rather than just reply",
+        "Tell an agent, a chatbot and a fixed workflow apart, and pick the right one",
+        "Name the four core parts of an agent: the model, tools, memory and planning",
+        "Set up Python and an API key and make your first model call"
+      ],
+      "skills": ["AI agents", "Agent vs. workflow", "Agent components", "Python setup", "API keys"]
+    },
+    {
+      "module_id": "m2",
+      "title": "LLM Foundations for Agents",
+      "stages": ["hook", "explainer", "worked", "guided", "lab", "review"],
+      "state": "available",
+      "lite": false,
+      "pain": "Scout's first draft promised a customer a 90-day refund. Orbit's policy is 30 days.",
+      "lead_in": "You know what an agent is made of. Now you get to know its brain: how a language model produces text, how to pick one, and how to instruct it so it answers in a shape your code can use.",
+      "lessons": [
+        { "id": "2.1", "title": "How large language models work" },
+        { "id": "2.2", "title": "Choosing a model and API setup" },
+        { "id": "2.3", "title": "Prompt engineering essentials" },
+        { "id": "2.4", "title": "System prompts and role design" },
+        { "id": "2.5", "title": "Structured outputs (JSON, schemas)" }
+      ],
+      "topics": [
+        { "stage": "hook", "title": "The refund policy nobody wrote", "summary": "Scout confidently invented a 90-day refund. Work out why before you learn how to stop it." },
+        { "stage": "explainer", "title": "How the model thinks, and how to talk to it", "summary": "Tokens and prediction, model choice, prompts, system prompts and structured outputs, in five short videos." },
+        { "stage": "worked", "title": "Watch one prompt get rebuilt three times", "summary": "A vague prompt, a clear one, and one that returns clean JSON." },
+        { "stage": "guided", "title": "Build a ticket classifier that returns JSON", "summary": "Write a system prompt and a schema, and turn messy customer emails into clean data." },
+        { "stage": "lab", "title": "Fix the prompt", "summary": "Three prompts that fail in different ways. Choose the change that fixes each one." },
+        { "stage": "review", "title": "Lock it in: models and prompts", "summary": "Short recall questions that come back after 3, 10 and 30 days." }
+      ],
+      "outcomes": [
+        "Explain how a language model predicts text one token at a time, and why it can sound sure while being wrong",
+        "Choose a model for a task by weighing quality, speed and cost, and connect to it from Python",
+        "Write prompts and system prompts that give the model a role, rules and the facts it needs",
+        "Get structured JSON back that matches a schema your code can check"
+      ],
+      "skills": ["Tokens and context", "Model selection", "Prompt engineering", "System prompts", "JSON schemas"]
+    },
+    {
+      "module_id": "m3",
+      "title": "Giving Your Agent Tools",
+      "stages": ["hook", "explainer", "worked", "guided", "lab", "review"],
+      "state": "available",
+      "lite": false,
+      "pain": "Scout told a customer her parcel was delivered. The tracking service had timed out, and Scout filled the gap with a guess.",
+      "lead_in": "Your model can now follow instructions and answer in JSON. Next it gets hands: tools it can call to look things up and do things, and the code that keeps those calls safe when something goes wrong.",
+      "lessons": [
+        { "id": "3.1", "title": "What is tool calling?" },
+        { "id": "3.2", "title": "Defining and registering tools" },
+        { "id": "3.3", "title": "Building tools: web search, calculator, file access" },
+        { "id": "3.4", "title": "Connecting external APIs" },
+        { "id": "3.5", "title": "Handling tool errors and edge cases" }
+      ],
+      "topics": [
+        { "stage": "hook", "title": "\"Delivered\" (it wasn't)", "summary": "Scout reported a parcel as delivered while the tracking call failed. Find the broken step." },
+        { "stage": "explainer", "title": "How agents use tools", "summary": "Tool calling, tool definitions, three useful tools, real APIs and error handling, in five short videos." },
+        { "stage": "worked", "title": "Watch Scout call its first tools", "summary": "One tool, two tools in a row, and a tool that fails, played step by step." },
+        { "stage": "guided", "title": "Give your agent a calculator and a file reader", "summary": "Define two tools, run the tool loop, and handle a tool that fails." },
+        { "stage": "lab", "title": "Which tool, and what if it fails?", "summary": "Three tool-calling situations from Orbit. Decide what the agent should do in each." },
+        { "stage": "review", "title": "Lock it in: tools and tool errors", "summary": "Short recall questions that come back after 3, 10 and 30 days." }
+      ],
+      "outcomes": [
+        "Explain the tool-calling cycle: the model asks, your code runs the tool, the result goes back",
+        "Define tools with clear names, descriptions and input schemas the model can use correctly",
+        "Build and connect tools for calculation, file access, web search and external APIs",
+        "Return tool errors to the model so it can recover instead of guessing"
+      ],
+      "skills": ["Tool calling", "Tool schemas", "API integration", "Error handling", "Tool loop"]
+    },
+    {
+      "module_id": "m4",
+      "title": "Memory, Planning and Reasoning",
+      "stages": ["hook", "explainer", "worked", "guided", "lab", "review"],
+      "state": "available",
+      "lite": false,
+      "pain": "Twenty messages into a chat, Scout asked Ravi for his order number again. He had given it in the second message.",
+      "lead_in": "Scout can now use tools. Next it learns to remember what matters, look up the right facts, break a big request into steps, and keep thinking, acting and checking until the job is done.",
+      "lessons": [
+        { "id": "4.1", "title": "Short-term vs. long-term memory" },
+        { "id": "4.2", "title": "Managing conversation context" },
+        { "id": "4.3", "title": "Retrieval-Augmented Generation (RAG) basics" },
+        { "id": "4.4", "title": "Planning and task decomposition" },
+        { "id": "4.5", "title": "The agent loop: think, act, observe (ReAct)" }
+      ],
+      "topics": [
+        { "stage": "hook", "title": "\"Could you give me your order number?\" (again)", "summary": "Scout forgot something it was told ten minutes ago. Guess where it went." },
+        { "stage": "explainer", "title": "How agents remember, look up and plan", "summary": "Memory, context, retrieval, planning and the ReAct loop, in five short videos." },
+        { "stage": "worked", "title": "Watch Scout plan and run a three-step request", "summary": "A long chat kept on track, a policy answered from retrieved text, and a plan carried out." },
+        { "stage": "guided", "title": "Add memory, retrieval and a step limit to your agent", "summary": "Keep the chat in context, search a policy file, and run the loop safely." },
+        { "stage": "lab", "title": "What should Scout remember?", "summary": "Three situations about memory, retrieval and planning. Choose what the agent should do." },
+        { "stage": "review", "title": "Lock it in: memory, RAG and ReAct", "summary": "Short recall questions that come back after 3, 10 and 30 days." }
+      ],
+      "outcomes": [
+        "Tell short-term memory from long-term memory and choose what each should hold",
+        "Keep a long conversation inside the context window without losing what matters",
+        "Ground answers in your own documents with a simple retrieval step",
+        "Break a request into steps and run the think, act, observe loop with a safe limit"
+      ],
+      "skills": ["Agent memory", "Context management", "RAG", "Task planning", "ReAct loop"]
+    },
+    {
+      "module_id": "m5",
+      "title": "Build Your First Agent (Hands-on Project)",
+      "stages": ["hook", "explainer", "worked", "guided", "lab", "review"],
+      "state": "available",
+      "lite": false,
+      "pain": "Scout's first full test run: 38 of 60 answers right. Black Friday is three weeks away.",
+      "lead_in": "You have every part. Now you put them together: scope Scout properly, build it piece by piece, connect its tools and memory, then test and measure it until the numbers say it is ready.",
+      "lessons": [
+        { "id": "5.1", "title": "Project scoping and architecture design" },
+        { "id": "5.2", "title": "Building the agent step by step" },
+        { "id": "5.3", "title": "Adding tools and memory to the project" },
+        { "id": "5.4", "title": "Testing and debugging the agent" },
+        { "id": "5.5", "title": "Evaluating agent performance" }
+      ],
+      "topics": [
+        { "stage": "hook", "title": "38 out of 60", "summary": "Scout's first full test run failed one answer in three. Find the pattern behind the failures." },
+        { "stage": "explainer", "title": "From parts to a working agent", "summary": "Scoping, building, wiring tools and memory, testing and evaluation, in five short videos." },
+        { "stage": "worked", "title": "Watch Scout's failing run get debugged", "summary": "Read a trace, find the bad step, fix it, and see the score move." },
+        { "stage": "guided", "title": "Assemble Scout and write its first tests", "summary": "Put the project together, add test cases and run an evaluation." },
+        { "stage": "lab", "title": "Ship it or fix it?", "summary": "Three test reports. Decide what to fix first, or whether Scout is ready." },
+        { "stage": "review", "title": "Lock it in: build, test, evaluate", "summary": "Short recall questions that come back after 3, 10 and 30 days." }
+      ],
+      "outcomes": [
+        "Scope an agent to one job and draw its architecture before writing code",
+        "Build an agent step by step, adding one tool or feature at a time",
+        "Debug an agent by reading its trace of thoughts, tool calls and results",
+        "Measure an agent against a test set and decide when it is good enough to ship"
+      ],
+      "skills": ["Agent architecture", "Incremental building", "Tracing and debugging", "Test sets", "Evaluation"]
+    },
+    {
+      "module_id": "m6",
+      "title": "Deployment and Next Steps",
+      "stages": ["hook", "explainer", "worked", "guided", "lab", "review"],
+      "state": "available",
+      "lite": false,
+      "pain": "A test copy of Scout looped on a failing tool all weekend. On Monday, the bill was $1,800.",
+      "lead_in": "Scout works on your machine. The last step is making it safe, affordable and reachable: guardrails, limits and monitoring, a real endpoint, and a look at what comes after one agent.",
+      "lessons": [
+        { "id": "6.1", "title": "Safety, guardrails and responsible AI" },
+        { "id": "6.2", "title": "Cost, latency and monitoring" },
+        { "id": "6.3", "title": "Deploying the agent (web app or API)" },
+        { "id": "6.4", "title": "Intro to multi-agent systems and frameworks" },
+        { "id": "6.5", "title": "Course recap and next learning path" }
+      ],
+      "topics": [
+        { "stage": "hook", "title": "The $1,800 weekend", "summary": "A test agent ran unattended all weekend. Find the missing limit before you see the bill." },
+        { "stage": "explainer", "title": "Make it safe, affordable and live", "summary": "Guardrails, cost and monitoring, deployment, multi-agent systems and your next steps, in five short videos." },
+        { "stage": "worked", "title": "Watch guardrails stop three bad runs", "summary": "A runaway loop, a risky refund and a prompt injection, each caught in time." },
+        { "stage": "guided", "title": "Put Scout behind an API with limits and logs", "summary": "Wrap the agent in a web endpoint with a step limit, a cost limit and logging." },
+        { "stage": "lab", "title": "Launch-day decisions", "summary": "Three launch-week situations. Decide how Scout should be guarded, run and grown." },
+        { "stage": "review", "title": "Lock it in: safety, cost and deployment", "summary": "Short recall questions that come back after 3, 10 and 30 days." }
+      ],
+      "outcomes": [
+        "Add guardrails: limits, approvals for risky actions and checks on inputs and outputs",
+        "Track cost and latency per request and set alerts before a bill surprises you",
+        "Deploy an agent behind a web API with logging",
+        "Explain when several cooperating agents or a framework are worth it"
+      ],
+      "skills": ["Guardrails", "Responsible AI", "Cost control", "Monitoring", "Deployment", "Multi-agent systems"]
+    }
+  ],
+  "finale": {
+    "title": "After all modules",
+    "summary": "One mini project, one final assessment and a short reflection to finish the course.",
+    "steps": [
+      {
+        "id": "capstone",
+        "stage": "project",
+        "kicker": "Mini project",
+        "title": "Ship Scout: your first complete agent",
+        "summary": "Build Orbit's support agent end to end, with tools, memory, guardrails and a test report.",
+        "minutes": 120,
+        "outcomes": [
+          "Build a working support agent with three tools and conversation memory",
+          "Add a step limit, an approval step for refunds and clear error handling",
+          "Write at least ten test cases and report how many pass",
+          "Explain your design choices in a short README"
+        ]
+      },
+      {
+        "id": "final-check",
+        "stage": "gate",
+        "kicker": "Final assessment",
+        "title": "From the first module to the last",
+        "summary": "12 questions across all six modules. Score 80% to finish; retakes allowed.",
+        "minutes": 20,
+        "outcomes": [
+          "Show what you know across all six modules",
+          "Answer twelve questions: core ideas and real situations",
+          "Score 80%, with at least one correct answer per module",
+          "See exactly which modules to revisit if you miss the mark"
+        ]
+      },
+      {
+        "id": "wrap-up",
+        "stage": "reflection",
+        "kicker": "Reflection",
+        "title": "Look back, then look ahead",
+        "summary": "Reflect on what you built, see your progress and collect your credential.",
+        "minutes": 10,
+        "outcomes": [
+          "Look back on what worked and what you would build next",
+          "See everything you built across the course",
+          "Collect your shareable course credential",
+          "Keep ideas fresh with recall checks after 3, 10 and 30 days"
+        ]
+      }
+    ]
+  }
+}

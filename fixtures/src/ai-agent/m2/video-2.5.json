@@ -1,0 +1,237 @@
+{
+  "lesson": "2.5",
+  "title": "Structured outputs (JSON, schemas)",
+  "notes": [
+    "When code reads the answer, ask for JSON, not prose: a JSON schema fixes the fields, their types and the allowed values.",
+    "Pass the schema in output_config, or use Pydantic with messages.parse, and the reply comes back in that shape.",
+    "A valid shape is not a true answer: check the stop reason and the values, and route anything odd to a person."
+  ],
+  "quizAfter": 3,
+  "slides": [
+    {
+      "kind": "title",
+      "icon": "json",
+      "kicker": "Module 2 · Lesson 5",
+      "title": "Structured outputs (JSON, schemas)",
+      "sub": "Why agents need data, not prose, and how a schema makes the model answer in a shape your code can trust",
+      "sentences": [
+        "Scout can now answer customers clearly and within policy.",
+        "But an agent does more than talk: its code has to act on what the model says.",
+        "In this lesson you will get answers back as clean data, in a shape you define, that your code can trust."
+      ]
+    },
+    {
+      "kind": "compare",
+      "title": "Prose versus data",
+      "left": {
+        "label": "Prose reply",
+        "tone": "bad",
+        "cue": 1,
+        "points": [
+          "“Sounds like a return, maybe urgent…”",
+          "Different wording every run",
+          "Code has to guess what it means",
+          "One odd phrase breaks the program"
+        ]
+      },
+      "right": {
+        "label": "JSON reply",
+        "tone": "ok",
+        "cue": 4,
+        "points": [
+          "{\"intent\": \"return\", \"urgent\": false}",
+          "Same fields, every time",
+          "Code reads data[\"intent\"]",
+          "Easy to check, store and route"
+        ]
+      },
+      "sentences": [
+        "So far, Scout has replied in sentences, which is perfect for customers and awkward for code.",
+        "Imagine your program must send each email to the right queue.",
+        "If the model says it sounds like a return, maybe urgent, your code has to guess what that means, and the wording changes every run.",
+        "One unexpected phrase, and the program breaks.",
+        "Now imagine the model answers in JSON, a simple text format of named fields and values.",
+        "Your code reads the intent field directly, the same way, every time.",
+        "Whenever code will act on the answer, ask for data, not prose."
+      ]
+    },
+    {
+      "kind": "define",
+      "title": "What is a JSON schema?",
+      "term": "JSON schema",
+      "definition": "A description of the exact shape an answer must have: its fields, their types, and which ones are required.",
+      "parts": [
+        { "text": "Fields and their types", "cue": 1 },
+        { "text": "Allowed values, called an enum", "cue": 2 },
+        { "text": "Which fields are required", "cue": 3 },
+        { "text": "No extra fields allowed", "cue": 4 }
+      ],
+      "analogy": {
+        "label": "Think of it as",
+        "text": "A paper form with labelled boxes and tick-boxes: the model can only fill in what the form has room for."
+      },
+      "sentences": [
+        "To get reliable JSON, you describe the shape you want with a JSON schema.",
+        "A schema lists the fields, and the type of each one: text, a number, or true or false.",
+        "It can limit a field to a fixed list of allowed values, called an enum, such as return or exchange.",
+        "It says which fields are required, so none can go missing.",
+        "And it can forbid extra fields the model might like to add.",
+        "Think of a paper form with labelled boxes and tick-boxes: the model can only fill in what the form has room for."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "Scout's ticket schema",
+      "lead": "Four fields describe any customer email: intent, order_id, urgent and a one-line summary.",
+      "rows": [
+        { "code": "\"intent\": {\"type\": \"string\", \"enum\": [...]},", "out": "one of five labels", "cue": 1 },
+        { "code": "\"order_id\": {\"type\": [\"string\", \"null\"]},", "out": "an order number, or null if none", "cue": 2 },
+        { "code": "\"urgent\": {\"type\": \"boolean\"},", "out": "true or false", "cue": 3 },
+        { "code": "\"additionalProperties\": False", "out": "nothing extra; all four are required", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "help",
+        "label": "Null beats a guess",
+        "text": "Allowing null gives the model an honest way to say “no order number given” instead of inventing one.",
+        "cue": 5
+      },
+      "sentences": [
+        "Here is the schema you will build for Scout's ticket classifier.",
+        "Intent is text, but only one of five labels: where is order, return, exchange, product question or other.",
+        "Order ID is either text or null, which is JSON's word for nothing.",
+        "Urgent is a simple true or false, and summary is one line of text.",
+        "All four fields are required, and additional properties is set to false, so nothing extra sneaks in.",
+        "Allowing null matters: it gives the model an honest way to say there was no order number, instead of inventing one."
+      ]
+    },
+    {
+      "kind": "code",
+      "title": "Ask for it in the request",
+      "lead": "Add output_config with your schema. Then take the text block as usual and load it as JSON.",
+      "rows": [
+        { "code": "output_config={\"format\": {\"type\": \"json_schema\",", "out": "turn on structured output", "cue": 1 },
+        { "code": "    \"schema\": TICKET_SCHEMA}},", "out": "the shape the reply must match", "cue": 1 },
+        { "code": "data = json.loads(text)", "out": "an ordinary Python dict", "cue": 3 },
+        { "code": "data[\"intent\"], data[\"order_id\"]", "out": "('return', None)", "cue": 4 }
+      ],
+      "aside": {
+        "icon": "check",
+        "label": "Shape guaranteed",
+        "text": "The reply is constrained to the schema: no chatter around the JSON, no missing fields.",
+        "cue": 5
+      },
+      "sentences": [
+        "Now you pass that schema with the request.",
+        "Add an output config whose format is a JSON schema, and hand it your ticket schema.",
+        "The model's answer is then constrained to match that shape, field for field.",
+        "You take the text block as usual, and load it with Python's json module.",
+        "Now you have an ordinary Python dictionary, and its intent field might say return, with no order number beside it.",
+        "There is no chatter around the JSON and no missing field, so your code can read it directly."
+      ]
+    },
+    {
+      "kind": "cards",
+      "title": "Three ways to ask for structure",
+      "tags": ["How", "What you get", "Use it when"],
+      "cards": [
+        { "icon": "message", "title": "Ask in the prompt", "flow": ["“Reply in JSON, please”", "Usually JSON, sometimes chatter", "Quick experiments only"], "cue": 1 },
+        { "icon": "json", "title": "JSON schema", "flow": ["output_config format", "Text that matches the schema", "You want plain dicts"], "cue": 2 },
+        { "icon": "code", "title": "Pydantic class", "flow": ["client.messages.parse(...)", "response.parsed_output", "You like typed objects"], "cue": 3 }
+      ],
+      "sentences": [
+        "There are three ways to ask for structure, from weakest to strongest.",
+        "You can simply ask for JSON in the prompt, which usually works, but sometimes arrives wrapped in a friendly sentence.",
+        "You can pass a JSON schema in the output config, which guarantees the shape, and load the text yourself.",
+        "Or you can describe the ticket as a Python class with Pydantic, a popular library for checking data.",
+        "Then you call messages parse with that class as the output format, and the parsed output arrives as a ready-made object.",
+        "The last two do the same job, so pick whichever style your project already uses."
+      ]
+    },
+    {
+      "kind": "flow",
+      "title": "Validate anyway",
+      "run": true,
+      "nodes": [
+        { "kind": "llm", "icon": "brain", "label": "Model", "sub": "returns JSON", "cue": 1 },
+        { "kind": "data", "icon": "json", "label": "Parse", "sub": "json.loads → dict", "cue": 1 },
+        { "kind": "guard", "icon": "shield", "label": "Check", "sub": "stop reason, ID format", "cue": 2 },
+        { "kind": "logic", "icon": "split", "label": "Act or flag", "sub": "route it, or ask a person", "cue": 4 }
+      ],
+      "note": { "text": "A valid shape is not a true answer. The model gives structure; your code owns the decisions.", "cue": 5 },
+      "sentences": [
+        "One last habit: validate anyway.",
+        "The schema guarantees the shape of the answer, not that the answer is true.",
+        "So check what matters, such as whether the order number looks like a real Orbit order number.",
+        "Check the stop reason too, because a reply cut off at max tokens may not be complete JSON.",
+        "If a check fails, do not guess: send the ticket to a person, or ask the model again.",
+        "The model gives you structure, and your code still owns the decisions."
+      ]
+    },
+    {
+      "kind": "recap",
+      "title": "What to take away",
+      "points": [
+        { "text": "When code reads the answer, ask for JSON, not prose", "cue": 1 },
+        { "text": "A schema fixes the fields, their types, allowed values and required fields", "cue": 2 },
+        { "text": "Pass it in output_config, or use Pydantic with messages.parse", "cue": 3 },
+        { "text": "A valid shape is not a true answer: check, then act or hand over", "cue": 4 }
+      ],
+      "sentences": [
+        "Let us pull it together.",
+        "Whenever code will act on the answer, ask for JSON instead of prose.",
+        "A JSON schema fixes the fields, their types, the allowed values and which ones are required.",
+        "Pass it in the output config, or use a Pydantic class with messages parse.",
+        "And validate anyway, because a valid shape is not the same as a true answer.",
+        "In the guided practice, you will build exactly this: a classifier that turns Orbit's emails into clean JSON."
+      ]
+    }
+  ],
+  "midQuiz": [
+    {
+      "q": "Why do agents need JSON rather than a friendly sentence?",
+      "options": [
+        "JSON costs fewer tokens",
+        "Code acts on the answer, and JSON has fixed fields it can read the same way every time",
+        "Customers prefer reading JSON"
+      ],
+      "correct": 1,
+      "explain": "Prose changes wording every run; JSON fields stay put, so code can read and act on them reliably.",
+      "hint": "In an agent, who reads the answer first: a customer, or your program?"
+    },
+    {
+      "q": "In Scout's schema, why can order_id be null?",
+      "options": [
+        "So the model can say no order number was given, instead of inventing one",
+        "Because null takes fewer tokens than a string",
+        "Because Orbit's orders don't have numbers"
+      ],
+      "correct": 0,
+      "explain": "Without null, the field must hold a string, so the model has to put something there even when nothing was given.",
+      "hint": "Think back to the hook: what does a model do with a gap and no honest way to say so?"
+    }
+  ],
+  "endQuiz": [
+    {
+      "q": "The JSON matches the schema perfectly, but order_id is ORB-99999, which doesn't exist. What does this show?",
+      "options": [
+        "The schema is broken",
+        "A valid shape is not a true answer, so code still checks the facts",
+        "Structured outputs should be turned off"
+      ],
+      "correct": 1,
+      "explain": "The schema guarantees the shape, not the truth. Your code checks values before acting, and routes anything odd to a person.",
+      "hint": "What exactly does a schema promise?"
+    },
+    {
+      "q": "Which change turns \"please reply in JSON\" into a guarantee?",
+      "options": [
+        "Adding ONLY JSON in capitals to the prompt",
+        "Passing a JSON schema in output_config",
+        "Raising max_tokens"
+      ],
+      "correct": 1,
+      "explain": "A schema in output_config constrains the reply to that shape. A request in the prompt usually works, but not always.",
+      "hint": "One option changes the request itself, not just the wording of the prompt."
+    }
+  ]
+}
