@@ -128,6 +128,7 @@ export function FinalePlayer({
         checkId="final"
         remediationHref={remediationHref}
         preview={preview}
+        slides
         onGraded={(r) => {
           recordFinal(r.score, r.total, r.passed);
           if (enrolled)

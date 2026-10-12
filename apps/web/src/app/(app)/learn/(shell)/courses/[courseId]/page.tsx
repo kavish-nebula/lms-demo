@@ -12,7 +12,6 @@ import { SectionNav } from "@/components/course/section-nav";
 import { SetupPanel } from "@/components/course/setup-panel";
 import {
   AboutSection,
-  MethodSection,
   ModulesSection,
   OutcomesSection,
   ReviewsSection,
@@ -46,7 +45,6 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
 
   const sections = [
     { id: "about", label: t("navAbout") },
-    { id: "method", label: t("navMethod") },
     { id: "outcomes", label: t("navOutcomes") },
     { id: "modules", label: t("navModules") },
     { id: "reviews", label: t("navReviews") },
@@ -105,7 +103,6 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
 
       <div className="flex flex-col gap-16 pb-16">
         <AboutSection course={course} />
-        <MethodSection course={course} />
         <OutcomesSection course={course} />
         <ModulesSection course={course} outlines={outlines} />
         <ReviewsSection course={course} />
