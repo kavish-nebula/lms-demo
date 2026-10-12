@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { cn } from "cn";
+import { ReflectionReview, ReviewRecall } from "@/components/learning/reflection-review";
 import { useTranslations } from "next-intl";
 import { CalendarClock, HeartPulse } from "lucide-react";
 import { Surface } from "@/components/kit/surface";
@@ -12,7 +12,6 @@ import { ChoiceList, Feedback } from "@/components/player/items";
 import type { ReviewBlock, ReviewVariant } from "@/data/types";
 import type { StageProps } from "./types";
 
-type Rating = "got" | "not_yet";
 
 /**
  * Stage 9. "Workflow health checks": the same ideas in a new incident,
@@ -22,7 +21,6 @@ type Rating = "got" | "not_yet";
  */
 export function ReviewStage({ block, ...nav }: StageProps<ReviewBlock>) {
   const t = useTranslations("player");
-  const [ratings, setRatings] = React.useState<Record<string, Rating>>({});
   const [answered, setAnswered] = React.useState<Record<string, boolean>>({});
   const left = block.variants.filter((v) => !answered[v.id]).length;
   const days = block.schedule.map((s) => s.after_days);
@@ -39,6 +37,7 @@ export function ReviewStage({ block, ...nav }: StageProps<ReviewBlock>) {
       completeLabel={t("finishModule")}
       {...nav}
     >
+      <ReflectionReview />
       <Callout tone="review" label={t("scheduleLabel")} icon={<CalendarClock />}>
         <p className="text-sm">{t("scheduleBodyDays", { a: days[0] ?? 3, b: days[1] ?? 10, c: days[2] ?? 30 })}</p>
       </Callout>
@@ -47,8 +46,6 @@ export function ReviewStage({ block, ...nav }: StageProps<ReviewBlock>) {
         <ReviewCard
           key={v.id}
           variant={v}
-          rating={ratings[v.id]}
-          onRate={(r) => setRatings((s) => ({ ...s, [v.id]: r }))}
           onAnswered={(yes) => setAnswered((s) => ({ ...s, [v.id]: yes }))}
         />
       ))}
@@ -58,13 +55,9 @@ export function ReviewStage({ block, ...nav }: StageProps<ReviewBlock>) {
 
 function ReviewCard({
   variant,
-  rating,
-  onRate,
   onAnswered,
 }: {
   variant: ReviewVariant;
-  rating?: Rating;
-  onRate: (r: Rating) => void;
   onAnswered: (answered: boolean) => void;
 }) {
   const t = useTranslations("player");
@@ -75,7 +68,7 @@ function ReviewCard({
   const id = `review-${variant.id}`;
 
   return (
-    <Surface pad="md" className="flex flex-col gap-3">
+    <Surface id={`review-${variant.after_days}`} pad="md" className="flex scroll-mt-28 flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
         <Chip size="sm" tone="review" icon={<HeartPulse />}>
           {variant.title}
@@ -117,21 +110,7 @@ function ReviewCard({
           <Feedback ok={correct} title={correct ? t("correct") : t("notYet")}>
             {chosen?.rationale}
           </Feedback>
-          <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t("rateRecall")}>
-            <span className="text-sm text-ink-muted">{t("rateRecall")}</span>
-            <Button
-              size="sm"
-              variant={rating === "got" ? "default" : "outline"}
-              aria-pressed={rating === "got"}
-              onClick={() => onRate("got")}
-              className={cn(rating === "got" && "bg-ok text-on-ok hover:bg-ok/90")}
-            >
-              {t("gotIt")}
-            </Button>
-            <Button size="sm" variant={rating === "not_yet" ? "default" : "outline"} aria-pressed={rating === "not_yet"} onClick={() => onRate("not_yet")}>
-              {t("notYetRecall")}
-            </Button>
-          </div>
+          <ReviewRecall interval={variant.after_days} correct={correct} />
         </div>
       )}
     </Surface>

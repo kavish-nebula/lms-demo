@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
-import { ArrowRight, Check, ClipboardCheck, Clock, TriangleAlert, UserRound } from "lucide-react";
+import { ArrowRight, Check, ClipboardCheck, Clock, Rocket, TriangleAlert, UserRound, Zap } from "lucide-react";
 import { Surface } from "@/components/kit/surface";
 import { Chip } from "@/components/kit/chip";
 import { NumberTicker } from "@/components/kit/number-ticker";
@@ -53,6 +53,11 @@ function Brief({
 
   return (
     <StageShell stage="project" title={block.title} minutes={block.duration_min} hideFooter>
+      <Surface pad="md" spotlight className="flex flex-wrap items-center gap-3 border-stage-project-line bg-stage-project-soft">
+        <span className="flex size-11 items-center justify-center rounded-xl bg-stage-project text-white"><Rocket className="size-5" /></span>
+        <span className="min-w-0 flex-1"><span className="block text-[10px] font-bold tracking-widest text-stage-project">FINAL MISSION · LAUNCH DAY</span><strong className="block">Assemble, test and launch Scout</strong></span>
+        <Chip tone="project" icon={<Zap />}>150 XP</Chip>
+      </Surface>
       <Surface pad="lg" className="flex flex-col gap-5">
         <p className="text-lg leading-relaxed">{block.scene}</p>
         <div className="flex flex-wrap gap-2">
@@ -123,6 +128,10 @@ function Done({ block, onComplete }: { block: CapstoneBlock; onComplete: () => v
 
   return (
     <StageShell stage="project" title={block.title} minutes={block.duration_min} hideFooter done>
+      <Surface pad="md" tone="accent" spotlight className="flex items-center gap-3 border-ok-line">
+        <span className="flex size-11 items-center justify-center rounded-xl bg-ok text-on-ok"><Rocket className="size-5" /></span>
+        <span><span className="block text-[10px] font-bold tracking-widest text-ok">SCOUT UPGRADE INSTALLED</span><strong>Launch License earned · +150 XP</strong></span>
+      </Surface>
       <Surface pad="lg" className="flex flex-col gap-4 border-ok-line">
         <div className="flex flex-wrap items-center gap-2">
           <Chip tone="ok" icon={<Check />}>

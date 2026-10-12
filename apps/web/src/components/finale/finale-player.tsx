@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
+import { recordActivity, useLearning } from "@/lib/learning-state";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, ListOrdered, Lock } from "lucide-react";
+import { ChevronLeft, ListOrdered, Lock, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -47,6 +48,10 @@ export function FinalePlayer({
   const { adaptation } = useEnrollment(course.course_id);
   const [railOpen, setRailOpen] = React.useState(false);
   const courseHref = `/learn/courses/${course.course_id}`;
+  const { update: updateLearning } = useLearning(course.course_id);
+  React.useEffect(() => {
+    updateLearning((s) => ({ ...s, resume: { href: `${courseHref}/finale/${step}`, title: course.finale.title } }));
+  }, [courseHref, step, course.finale.title, updateLearning]);
 
   const steps = progress.finale;
   const i = steps.findIndex((f) => f.step.id === step);
@@ -54,6 +59,7 @@ export function FinalePlayer({
   const prev = steps[i - 1];
   const next = steps[i + 1];
   const preview = current.locked;
+  const reward = step === "capstone" ? 150 : step === "final-check" ? 100 : 25;
 
   const go = React.useCallback(
     (id: string) => {
@@ -109,7 +115,11 @@ export function FinalePlayer({
         roleLabel={adaptation.roleLabel}
         done={current.done}
         onComplete={() => {
-          if (!current.done) markDone("capstone", { capstoneAt: new Date().toISOString() });
+          if (!current.done) {
+            markDone("capstone", { capstoneAt: new Date().toISOString() });
+            recordActivity(course.course_id);
+            toast.success("Launch project accepted · +150 XP");
+          }
           if (next) go(next.step.id);
         }}
       />
@@ -122,7 +132,7 @@ export function FinalePlayer({
         checkId="final"
         remediationHref={remediationHref}
         preview={preview}
-        onGraded={(r) => recordFinal(r.score, r.total, r.passed)}
+        onGraded={(r) => { recordFinal(r.score, r.total, r.passed); recordActivity(course.course_id); }}
         onPrev={prev ? () => go(prev.step.id) : undefined}
         onComplete={() => next && go(next.step.id)}
         done={current.done}
@@ -139,6 +149,7 @@ export function FinalePlayer({
         onPrev={prev ? () => go(prev.step.id) : undefined}
         onComplete={() => {
           markDone("wrap-up", { completedAt: new Date().toISOString() });
+          recordActivity(course.course_id);
           toast.success(t("toastComplete", { course: course.title }));
           window.scrollTo({ top: 0, behavior: "smooth" });
         }}
@@ -164,6 +175,7 @@ export function FinalePlayer({
               {doneCount}/{steps.length}
             </span>
           </div>
+          <span className="hidden items-center gap-1 rounded-full border border-brand-line bg-brand-soft px-2 py-1 text-[10px] font-semibold text-brand-ink md:flex"><Zap className="size-3" />+{reward} XP</span>
           <Sheet open={railOpen} onOpenChange={setRailOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="sm" className="nav:hidden">

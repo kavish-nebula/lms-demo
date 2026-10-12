@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import { Globe2, Lightbulb } from "lucide-react";
-import { Surface } from "@/components/kit/surface";
 import { StageShell, Callout } from "@/components/player/stage-shell";
 import { VideoLesson } from "@/components/player/video/video-lesson";
 import { useWatchedVideos } from "@/components/player/video/watched";
@@ -40,6 +39,7 @@ export function VideoExplainer({
       minutes={videoMinutes(video)}
       bloom={block.bloom}
       completeLabel={nextTitle ? to("nextPart", { title: nextTitle }) : undefined}
+      separateCards
       {...nav}
       done={nav.done || watched.includes(video.id)}
     >
@@ -51,28 +51,34 @@ export function VideoExplainer({
         nextLabel={nextTitle ? to("nextPart", { title: nextTitle }) : t("finishTopic")}
       />
 
-      {world && adaptation.domain ? (
-        <Callout tone="worked" label={t("inYourWorld", { field: adaptation.domain.label })} icon={<Globe2 />}>
-          {world(adaptation.domain)}
-        </Callout>
-      ) : null}
+      <div className="concept-text-cards" aria-label="Lesson reading cards">
+        {adaptation.support === "extra" && <Callout className="concept-text-card" tone="worked" label="A little guidance before you begin" icon={<Lightbulb />}>
+          <p className="text-sm">{video.notes[0]} Pause whenever you need to, ask Pip about this slide, or try the experiment. Your place is saved.</p>
+        </Callout>}
 
-      {video.notes.length ? (
-        <Surface pad="md" className="flex flex-col gap-3">
-          <h2 className="flex items-center gap-2 font-semibold">
-            <Lightbulb className="size-4 text-brand-ink" aria-hidden />
-            {t("keyIdeas", { lesson: video.lesson })}
-          </h2>
-          <ul className="flex flex-col gap-2">
-            {video.notes.map((n) => (
-              <li key={n} className="flex gap-2.5 text-sm leading-relaxed">
-                <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-brand" />
-                {n}
-              </li>
-            ))}
-          </ul>
-        </Surface>
-      ) : null}
+        {world && adaptation.domain ? (
+          <Callout className="concept-text-card" tone="worked" label={t("inYourWorld", { field: adaptation.domain.label })} icon={<Globe2 />}>
+            {world(adaptation.domain)}
+          </Callout>
+        ) : null}
+
+        {video.notes.length ? (
+          <details key={`${video.id}:${adaptation.support}`} open={adaptation.support !== "light"} className="concept-text-card">
+            <summary className="flex cursor-pointer items-center gap-2 font-semibold">
+              <Lightbulb className="size-4 text-brand-ink" aria-hidden />
+              {t("keyIdeas", { lesson: video.lesson })}
+            </summary>
+            <ul className="mt-4 flex flex-col gap-2">
+              {video.notes.map((n) => (
+                <li key={n} className="flex gap-2.5 text-sm leading-relaxed">
+                  <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-brand" />
+                  {n}
+                </li>
+              ))}
+            </ul>
+          </details>
+        ) : null}
+      </div>
     </StageShell>
   );
 }

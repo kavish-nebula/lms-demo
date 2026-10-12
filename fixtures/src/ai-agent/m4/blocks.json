@@ -931,7 +931,35 @@
           }
         ],
         "check": "Your prompt starts with **(.venv)**, and **docs/policy.md** has six sections, each starting with `## `.",
-        "tip": "If Python later says it can't find the anthropic package, the virtual environment isn't active in this terminal. Run the activate command again."
+        "tip": "If Python later says it can't find the anthropic package, the virtual environment isn't active in this terminal. Run the activate command again.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "(.venv) is on and the policy has its six ## headings. the search tool you write next splits the file on exactly those"
+        },
+        "sim": {
+          "kind": "terminal",
+          "prompt": "PS C:\\scout>",
+          "lines": [
+            {
+              "cmd": ".venv\\Scripts\\activate",
+              "alt": [
+                "source .venv/bin/activate",
+                ".\\.venv\\Scripts\\activate",
+                ".venv\\Scripts\\Activate.ps1"
+              ],
+              "out": "",
+              "prompt": "(.venv) PS C:\\scout>"
+            },
+            {
+              "cmd": "dir",
+              "alt": [
+                "ls"
+              ],
+              "out": "    Directory: C:\\scout\n\nMode                LastWriteTime         Length Name\n----                -------------         ------ ----\nd-----         10/2/2026  9:12 AM                .venv\nd-----         10/8/2026  4:41 PM                __pycache__\nd-----         10/8/2026  3:05 PM                docs\n-a----         10/2/2026  9:31 AM             25 .gitignore\n-a----         10/8/2026  4:39 PM           2214 agent.py\n-a----         10/2/2026 10:02 AM            612 chat.py\n-a----         10/5/2026 11:47 AM           2873 classify.py\n-a----         10/2/2026  9:44 AM            389 hello.py\n-a----         10/5/2026 11:12 AM           1906 prompts.py\n-a----         10/8/2026  4:18 PM           3105 tools.py"
+            }
+          ]
+        }
       },
       {
         "title": "Create memory.py",
@@ -951,7 +979,56 @@
           }
         ],
         "check": "You see **3 messages kept**: the first turn was trimmed, yet the facts still list **ORB-10533** and **Ravi**.",
-        "tip": "Trimming cuts only where a customer turn starts. If you cut by message count instead, you could keep a tool result and drop the tool call it answers, and the API would reject the request. Scout also drops its old thinking blocks when a new turn starts: the API ties each one to the exact conversation it saw, and trimming or a new fact changes that conversation."
+        "tip": "Trimming cuts only where a customer turn starts. If you cut by message count instead, you could keep a tool result and drop the tool call it answers, and the API would reject the request. Scout also drops its old thinking blocks when a new turn starts: the API ties each one to the exact conversation it saw, and trimming or a new fact changes that conversation.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "first turn trimmed, ORB-10533 and Ravi still pinned. that's thursday's bug fixed, and we haven't called the model once"
+        },
+        "sim": {
+          "kind": "code",
+          "file": "memory.py",
+          "code": "    def add_user(self, text):\n        order = ORDER_ID.search(text)\n        if order:\n            self.facts[\"order_id\"] = order.group(0).upper()\n        # ...\n        self.drop_old_thinking()\n        self.messages.append({\"role\": \"user\", \"content\": text})\n        self.trim()\n    # ...\n    def drop_old_thinking(self):\n        # ...\n                kept = [b for b in m[\"content\"] if block_type(b) not in (\"thinking\", \"redacted_thinking\")]\n    # ...\n    def trim(self):\n        starts = [i for i, m in enumerate(self.messages)\n                  if m[\"role\"] == \"user\" and isinstance(m[\"content\"], str)]\n        if len(starts) > self.max_turns:\n            self.messages = self.messages[starts[-self.max_turns]:]",
+          "blanks": [
+            {
+              "token": "order.group(0).upper()",
+              "options": [
+                "text.upper()",
+                "order.group(0).upper()",
+                "order.group(0).lower()"
+              ]
+            },
+            {
+              "token": "(\"thinking\", \"redacted_thinking\")",
+              "options": [
+                "(\"text\", \"tool_use\")",
+                "(\"tool_use\", \"tool_result\")",
+                "(\"thinking\", \"redacted_thinking\")"
+              ]
+            },
+            {
+              "token": "isinstance(m[\"content\"], str)",
+              "options": [
+                "isinstance(m[\"content\"], str)",
+                "isinstance(m[\"content\"], list)",
+                "len(m[\"content\"]) > 0"
+              ]
+            },
+            {
+              "token": "starts[-self.max_turns]",
+              "options": [
+                "-self.max_turns",
+                "starts[0]",
+                "starts[-self.max_turns]",
+                "starts[self.max_turns]"
+              ]
+            }
+          ],
+          "run": {
+            "cmd": "python memory.py",
+            "out": "3 messages kept. Oldest: Can I return the foam mat?\nYou are Scout.\n\nFacts about this customer (always use them):\n- order_id: ORB-10533\n- name: Ravi"
+          }
+        }
       },
       {
         "title": "Add search_policy to tools.py",
@@ -975,7 +1052,47 @@
           }
         ],
         "check": "You see two sections: **## Return shipping** first, because it shares three words with the question (return, shipping, free), then **## Returns**.",
-        "tip": "FileNotFoundError means Python can't find the policy: **policy.md** must sit in a **docs** folder next to **tools.py**. If the sections come back in a different order, compare your policy.md with step 1 word for word."
+        "tip": "FileNotFoundError means Python can't find the policy: **policy.md** must sit in a **docs** folder next to **tools.py**. If the sections come back in a different order, compare your policy.md with step 1 word for word.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "return shipping on top, returns right behind. no embeddings, no vector store, just shared words, and it picked the right two"
+        },
+        "sim": {
+          "kind": "code",
+          "file": "tools.py",
+          "code": "def _words(text):\n    return {w for w in re.findall(r\"[a-z0-9]+\", text.lower()) if w not in STOPWORDS}\n# ...\ndef search_policy(query, top=2):\n    \"\"\"The top sections that share the most words with the query.\"\"\"\n    query_words = _words(query)\n    scored = []\n    for heading, text in load_sections():\n        score = len(query_words & _words(heading + \" \" + text))\n        scored.append((score, heading, text))\n    scored.sort(key=lambda s: s[0], reverse=True)\n    best = [s for s in scored[:top] if s[0] > 0]\n    if not best:\n        return \"No policy section matches that question.\"\n    return \"\\n\\n\".join(f\"## {heading}\\n{text}\" for score, heading, text in best)",
+          "blanks": [
+            {
+              "token": "top=2",
+              "options": [
+                "top=6",
+                "top=2",
+                "top=1"
+              ]
+            },
+            {
+              "token": "query_words & _words(heading + \" \" + text)",
+              "options": [
+                "_words(heading + \" \" + text)",
+                "query_words | _words(heading + \" \" + text)",
+                "query_words & _words(heading + \" \" + text)"
+              ]
+            },
+            {
+              "token": "s[0] > 0",
+              "options": [
+                "s[0] > 0",
+                "s[0] >= 0",
+                "s[0] > 2"
+              ]
+            }
+          ],
+          "run": {
+            "cmd": "python -c \"from tools import search_policy; print(search_policy('Is return shipping free?'))\"",
+            "out": "## Return shipping\nReturn shipping is free on orders over $75. Under $75, a $6.95 return label is taken off the refund.\n\n## Returns\nYou can return any unused item within 30 days of delivery for a full refund. Items must be unused and in their original packaging."
+          }
+        }
       },
       {
         "title": "Update agent.py: memory, a plan-first prompt and the step limit",
@@ -992,7 +1109,55 @@
           }
         ],
         "check": "You see **Scout is ready. Type quit to stop.**, and typing `quit` ends the program without an error.",
-        "tip": "ModuleNotFoundError for memory or tools means **agent.py** isn't in the same folder as **memory.py** and **tools.py**. An authentication error means **ANTHROPIC_API_KEY** isn't set in this terminal."
+        "tip": "ModuleNotFoundError for memory or tools means **agent.py** isn't in the same folder as **memory.py** and **tools.py**. An authentication error means **ANTHROPIC_API_KEY** isn't set in this terminal.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "scout is ready and quit exits clean, so memory.py and tools.py import fine. the real test is a conversation, and that's next"
+        },
+        "sim": {
+          "kind": "code",
+          "file": "agent.py",
+          "code": "MAX_STEPS = 6   # tool rounds allowed for each customer message\nMAX_TURNS = 4   # small on purpose, so you can watch trimming; use 10 or more for real\n# ...\nconvo = Conversation(max_turns=MAX_TURNS)\n\ndef answer(question):\n    convo.add_user(question)\n    for step in range(MAX_STEPS):  # always a step limit\n        response = client.messages.create(model=MODEL, max_tokens=16000,\n                                          system=convo.system_prompt(SYSTEM),\n                                          tools=TOOLS, messages=convo.messages)\n        convo.add_assistant(response.content)\n        if response.stop_reason != \"tool_use\":\n            return next(b.text for b in response.content if b.type == \"text\")\n        # ...\n        convo.add_tool_results(results)  # all results in one message\n    reply = \"This is taking me more steps than it should, so I'm passing it to a person on our team.\"",
+          "blanks": [
+            {
+              "token": "Conversation(max_turns=MAX_TURNS)",
+              "options": [
+                "Conversation()",
+                "Conversation(max_turns=MAX_STEPS)",
+                "Conversation(max_turns=MAX_TURNS)"
+              ]
+            },
+            {
+              "token": "range(MAX_STEPS)",
+              "options": [
+                "range(MAX_TURNS)",
+                "range(MAX_STEPS)",
+                "range(len(TOOLS))"
+              ]
+            },
+            {
+              "token": "convo.system_prompt(SYSTEM)",
+              "options": [
+                "convo.system_prompt(SYSTEM)",
+                "SYSTEM",
+                "str(convo.facts)"
+              ]
+            },
+            {
+              "token": "convo.add_tool_results(results)",
+              "options": [
+                "convo.add_user(results)",
+                "convo.add_assistant(results)",
+                "convo.add_tool_results(results)"
+              ]
+            }
+          ],
+          "run": {
+            "cmd": "python agent.py",
+            "out": "Scout is ready. Type quit to stop.\n\nYou: quit"
+          }
+        }
       },
       {
         "title": "Test memory: give your order number, then ask for it back",
@@ -1006,7 +1171,38 @@
           "`Thanks! What was my order number again?`"
         ],
         "check": "Scout answers **ORB-10533**. The memory line now shows the oldest kept message starting with **Can I return a sleeping bag**: your first message is gone, but **facts** still holds your order number and name.",
-        "tip": "If the oldest message is still your first one, count again: trimming starts on the fifth customer message."
+        "tip": "If the oldest message is still your first one, count again: trimming starts on the fifth customer message.",
+        "win": {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "your first message is gone and scout still said ORB-10533. ravi would have kept his patience. i'd have kept my afternoon"
+        },
+        "sim": {
+          "kind": "chat",
+          "start": {
+            "cmd": "python agent.py",
+            "out": "Scout is ready. Type quit to stop."
+          },
+          "turns": [
+            {
+              "you": "Hi, my name is Ravi and my order is ORB-10533.",
+              "trace": [],
+              "scout": "Hi Ravi, thanks! I've noted your order number, ORB-10533. How can I help today?"
+            },
+            {
+              "you": "Can I return a sleeping bag if I don't like it?",
+              "trace": [
+                "[tool] search_policy {'query': 'return sleeping bag'}"
+              ],
+              "scout": "Yes. You can return any unused item within 30 days of delivery for a full refund, so the sleeping bag just needs to be unused and in its original packaging."
+            },
+            {
+              "you": "Thanks! What was my order number again?",
+              "trace": [],
+              "scout": "Your order number is ORB-10533, Ravi. Anything else I can help with?"
+            }
+          ]
+        }
       },
       {
         "title": "Test retrieval: one answer from the policy, and one gap",
@@ -1017,7 +1213,35 @@
           "Watch the **[tool]** lines: each shows the query Scout sent to search_policy."
         ],
         "check": "For the boots, Scout calls search_policy and explains that returns are accepted within 30 days of delivery, so 40 days is too late. For price matching, the search finds no matching section, and Scout says the policy doesn't cover it and offers to pass the question to the team.",
-        "tip": "If Scout answers a policy question with no **[tool]** line, it answered from its own knowledge. Check that the SYSTEM prompt in **agent.py** still tells it to call search_policy."
+        "tip": "If Scout answers a policy question with no **[tool]** line, it answered from its own knowledge. Check that the SYSTEM prompt in **agent.py** still tells it to call search_policy.",
+        "win": {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "boots at 40 days: too late, per the policy. price match: not covered, ask the team. that's exactly how i'd answer both"
+        },
+        "sim": {
+          "kind": "chat",
+          "start": {
+            "cmd": "python agent.py",
+            "out": "Scout is ready. Type quit to stop."
+          },
+          "turns": [
+            {
+              "you": "Can I return boots that arrived 40 days ago?",
+              "trace": [
+                "[tool] search_policy {'query': 'return boots 40 days after delivery'}"
+              ],
+              "scout": "I'm sorry, I can't accept that return. Our policy takes back unused items within 30 days of delivery, and 40 days is past that window."
+            },
+            {
+              "you": "Do you price match if I find a tent cheaper elsewhere?",
+              "trace": [
+                "[tool] search_policy {'query': 'price match tent cheaper'}"
+              ],
+              "scout": "Our policy doesn't cover price matching, so I can't promise it. Would you like me to pass your question to our support team?"
+            }
+          ]
+        }
       },
       {
         "title": "Watch Scout plan a request with several parts",
@@ -1027,7 +1251,31 @@
           "Read the **[plan]** line, then follow the **[tool]** lines underneath it."
         ],
         "check": "Scout writes a short numbered plan, calls search_policy and calculate (40 - 6.95), and replies that you would get **$33.05** back, to your original payment method within 5 business days of the return arriving.",
-        "tip": "Scout may run two tools in one step, or word its plan differently. That's fine: what matters is a plan first, then tool calls that follow it."
+        "tip": "Scout may run two tools in one step, or word its plan differently. That's fine: what matters is a plan first, then tool calls that follow it.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "a plan, a policy lookup, then calculate on 40 - 6.95: $33.05. the model never did the math in its head. planning earning its keep"
+        },
+        "sim": {
+          "kind": "chat",
+          "start": {
+            "cmd": "python agent.py",
+            "out": "Scout is ready. Type quit to stop."
+          },
+          "turns": [
+            {
+              "you": "I want to return my foam mat. The order was $40. How much will I get back, and when?",
+              "trace": [
+                "[plan] 1. Check the return shipping rules. 2. Work out your refund. 3. Check when refunds arrive.",
+                "[tool] search_policy {'query': 'return shipping cost'}",
+                "[tool] calculate {'expression': '40 - 6.95'}",
+                "[tool] search_policy {'query': 'how long do refunds take'}"
+              ],
+              "scout": "You'll get $33.05 back: your order is under $75, so the $6.95 return label comes off your $40. The refund goes to your original payment method within 5 business days of the return arriving. Just keep the mat unused and in its original packaging."
+            }
+          ]
+        }
       },
       {
         "title": "Test the step limit",
@@ -1038,7 +1286,28 @@
           "Change it back to `MAX_STEPS = 6` and save."
         ],
         "check": "You see one **[tool] search_policy** line, then Scout says it is passing you to a person on the team instead of answering.",
-        "tip": "With one step, Scout can ask for a tool but never gets to read the result. That is exactly what happens when a real request runs out of steps."
+        "tip": "With one step, Scout can ask for a tool but never gets to read the result. That is exactly what happens when a real request runs out of steps.",
+        "win": {
+          "who": "Maya — founder",
+          "av": "M",
+          "text": "good. a request that runs out of steps goes to a person instead of quietly running up my bill. put it back to 6 though"
+        },
+        "sim": {
+          "kind": "chat",
+          "start": {
+            "cmd": "python agent.py",
+            "out": "Scout is ready. Type quit to stop."
+          },
+          "turns": [
+            {
+              "you": "Is return shipping free?",
+              "trace": [
+                "[tool] search_policy {'query': 'return shipping free'}"
+              ],
+              "scout": "This is taking me more steps than it should, so I'm passing it to a person on our team."
+            }
+          ]
+        }
       },
       {
         "title": "Break memory on purpose",
@@ -1049,7 +1318,38 @@
           "Change `if True:` back to `if not self.facts:` and save."
         ],
         "check": "On the last message, Scout no longer knows your order number and asks you for it, exactly as it did with Ravi.",
-        "tip": "If Scout still remembers, one of its recent replies probably repeated the number, so it stayed inside the last four turns. Ask one or two more unrelated questions, then try again."
+        "tip": "If Scout still remembers, one of its recent replies probably repeated the number, so it stayed inside the last four turns. Ask one or two more unrelated questions, then try again.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "and there's ravi's bug, on demand. a bug you can switch on and off is a bug you understand. now put if not self.facts: back"
+        },
+        "sim": {
+          "kind": "chat",
+          "start": {
+            "cmd": "python agent.py",
+            "out": "Scout is ready. Type quit to stop."
+          },
+          "turns": [
+            {
+              "you": "Hi, my name is Ravi and my order is ORB-10533.",
+              "trace": [],
+              "scout": "Hi Ravi, thanks for the order number, ORB-10533. How can I help today?"
+            },
+            {
+              "you": "How long does express shipping take?",
+              "trace": [
+                "[tool] search_policy {'query': 'express shipping time'}"
+              ],
+              "scout": "Express shipping takes 1 to 2 business days. Standard shipping takes 3 to 5."
+            },
+            {
+              "you": "Thanks! What was my order number again?",
+              "trace": [],
+              "scout": "I'm sorry, I don't have your order number in our chat. Could you send it to me again?"
+            }
+          ]
+        }
       }
     ],
     "finish": {
@@ -1061,6 +1361,44 @@
         "search_policy returns the top 2 policy sections with their headings",
         "Scout says when the policy doesn't cover a question",
         "MAX_STEPS stops the loop and hands off to a person"
+      ]
+    },
+    "mission": {
+      "codename": "Leave No Fact Behind",
+      "badge": "Trail Memory Keeper",
+      "mentor": {
+        "who": "Priya — developer",
+        "av": "P"
+      },
+      "brief": [
+        {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "quick recap for the new person: ravi gave scout ORB-10533 in message 2 and got asked for it again in message 22. any long chat can do this"
+        },
+        {
+          "who": "Maya — founder",
+          "av": "M",
+          "text": "slow we can forgive, ignored we can't. scout has to hold on to what customers tell it, and answer policy questions from our actual policy"
+        },
+        {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "your mission: a memory that trims the chat but pins the facts, a policy search, a plan-first prompt and a six-step limit. i'll walk you through it"
+        }
+      ],
+      "goal": "Scout still knows ORB-10533 after its first message is trimmed, answers policy questions from search_policy, and stops after six steps.",
+      "debrief": [
+        {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "you replayed ravi's chat and your scout still knew ORB-10533 after the first message was trimmed. that's the exact ticket i forwarded thursday"
+        },
+        {
+          "who": "Maya — founder",
+          "av": "M",
+          "text": "it remembers, answers from our policy, and hands off when it's stuck. next, give it real order tools so it can tell ravi when his bag ships"
+        }
       ]
     }
   },

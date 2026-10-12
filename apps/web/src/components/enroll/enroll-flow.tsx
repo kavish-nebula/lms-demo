@@ -1,6 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useCompanionStep } from "@/components/learning/course-companion";
+import { PipMascot } from "@/components/learning/pip-mascot";
+import { PHASE_GUIDANCE } from "@/lib/companion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "cn";
@@ -97,6 +100,7 @@ export function EnrollFlow({
 
   const adaptation = adaptationOf(answers, { precheck, override });
   const editing = enrolled && phase !== "build";
+  useCompanionStep({ title: phase ? t(`phase_${phase}`) : course.title, phase: phase ?? "profile", guidance: PHASE_GUIDANCE[phase ?? "profile"]! });
 
   let body: React.ReactNode = <CardSkeleton lines={6} />;
   if (phase === "profile")
@@ -243,7 +247,11 @@ export function EnrollFlow({
           </p>
         </div>
       ) : null}
-      <main className="mx-auto w-full max-w-6xl flex-1 page-pad py-8 lg:py-12">{body}</main>
+      <main className="mx-auto w-full max-w-6xl flex-1 page-pad py-8 lg:py-12 pb-28">
+        <div className="mb-7 flex items-center gap-3 rounded-2xl border border-brand-line bg-brand-soft px-4 py-3">
+          <PipMascot className="size-14" happy />
+          <div><p className="text-sm font-semibold">A course that starts with you.</p><p className="mt-1 text-xs text-ink-muted">{PHASE_GUIDANCE[phase ?? "profile"]}</p></div>
+        </div>{body}</main>
     </div>
   );
 }

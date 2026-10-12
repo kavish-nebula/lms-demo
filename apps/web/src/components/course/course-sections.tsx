@@ -37,7 +37,6 @@ import { FinaleArt, ModuleArt } from "@/components/course/module-art";
 import { LessonOrderPreview } from "@/components/enroll/lesson-order-preview";
 import { ModuleMap } from "@/components/player/module-map";
 import { useWatchedVideos } from "@/components/player/video/watched";
-import { DEMO_OPEN } from "@/lib/demo";
 import { useEnrollment } from "@/lib/enrollment";
 import { flatParts, type ModuleSection } from "@/lib/module-outline";
 import { useCourseProgress, type ModuleProgress } from "@/lib/course-progress";
@@ -676,6 +675,24 @@ function ModulePanel({
   const doneKeys = new Set(parts.filter((p) => (p.video ? watched.includes(p.video.id) || m.done.includes("explainer") : m.done.includes(p.stage))).map((p) => p.key));
   const nextKey = enrolled ? parts.find((p) => !doneKeys.has(p.key))?.key : undefined;
 
+  if (enrolled && m.liveState === "locked") {
+    const previous = course.modules[m.index - 2];
+    return (
+      <EmptyState
+        icon={<Lock />}
+        title={`${m.title} is locked`}
+        description={previous ? `Pass the ${previous.title} module quiz to unlock this module.` : "Pass the previous module quiz to continue."}
+        action={
+          previous ? (
+            <Button asChild variant="brand">
+              <Link href={`/learn/courses/${course.course_id}/${previous.module_id}/gate`}>Go to module quiz</Link>
+            </Button>
+          ) : undefined
+        }
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <Learn outcomes={m.outcomes} />
@@ -719,7 +736,7 @@ function ModulePanel({
               {m.liveState === "done" ? t("revisit") : m.done.length ? t("continueModule") : t("startModule")}
             </Link>
           </Button>
-        ) : m.index === 1 || DEMO_OPEN ? (
+        ) : m.index === 1 ? (
           <Button asChild variant="outline" className="w-fit bg-transparent">
             <Link href={href}>
               <Play data-icon="inline-start" />

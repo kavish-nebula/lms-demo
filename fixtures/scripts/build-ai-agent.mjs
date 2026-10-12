@@ -582,6 +582,84 @@ function checkFilm(film, where) {
   });
 }
 
+/* ------------------------------------------------------------------ guided practice simulator */
+
+/**
+ * Each guided step's hands-on challenge in the practice simulator (see
+ * GuideSim in apps/web/src/data/types.ts): type the commands into a terminal,
+ * fill the blanks in the key lines of a file and run it, chat with Scout, or
+ * make a decision.
+ */
+function checkSim(sim, w) {
+  const kind = sim?.kind;
+  const lines = (text) => String(text ?? "").split("\n").length;
+  const runOf = (r, wr) => {
+    allowedKeys(r, ["cmd", "out"], wr);
+    str(r, "cmd", wr, { max: 160 });
+    if (typeof r?.out !== "string") err(wr, `"out" must be a string (it can be empty)`);
+    else if (lines(r.out) > 14) warn(wr, `"out" has ${lines(r.out)} lines; keep it under 14`);
+  };
+  switch (kind) {
+    case "terminal": {
+      allowedKeys(sim, ["kind", "prompt", "lines"], w);
+      str(sim, "prompt", w, { max: 40 });
+      arr(sim, "lines", w, 1, 4).forEach((l, i) => {
+        const wl = `${w} line ${i}`;
+        allowedKeys(l, ["cmd", "out", "alt", "prompt"], wl);
+        str(l, "cmd", wl, { max: 160 });
+        if (typeof l?.out !== "string") err(wl, `"out" must be a string (it can be empty)`);
+        else if (lines(l.out) > 14) warn(wl, `"out" has ${lines(l.out)} lines; keep it under 14`);
+        if (l?.alt !== undefined && !(Array.isArray(l.alt) && l.alt.every(isStr))) err(wl, `"alt" must be an array of other accepted commands`);
+        if (l?.prompt !== undefined) str(l, "prompt", wl, { max: 40 });
+      });
+      break;
+    }
+    case "code": {
+      allowedKeys(sim, ["kind", "file", "code", "blanks", "run"], w);
+      str(sim, "file", w, { max: 40 });
+      str(sim, "code", w, { max: 1400 });
+      if (lines(sim.code) > 20) warn(w, `"code" has ${lines(sim.code)} lines; show only the key part (at most 20)`);
+      const tokens = new Set();
+      arr(sim, "blanks", w, 2, 4).forEach((b, i) => {
+        const wb = `${w} blank ${i}`;
+        allowedKeys(b, ["token", "options"], wb);
+        str(b, "token", wb, { max: 60 });
+        if (b?.token && !String(sim.code ?? "").includes(b.token)) err(wb, `token "${b.token}" does not appear in "code"`);
+        if (tokens.has(b?.token)) err(wb, `token "${b?.token}" is used twice`);
+        tokens.add(b?.token);
+        const opts = arr(b, "options", wb, 3, 4);
+        if (!opts.includes(b?.token)) err(wb, `"options" must include the token itself`);
+        if (new Set(opts).size !== opts.length) err(wb, `"options" has duplicates`);
+      });
+      if (sim.run !== undefined) runOf(sim.run, `${w} run`);
+      break;
+    }
+    case "chat": {
+      allowedKeys(sim, ["kind", "start", "turns"], w);
+      runOf(sim.start, `${w} start`);
+      arr(sim, "turns", w, 1, 3).forEach((tn, i) => {
+        const wt = `${w} turn ${i}`;
+        allowedKeys(tn, ["you", "trace", "scout"], wt);
+        str(tn, "you", wt, { max: 140 });
+        str(tn, "scout", wt, { max: 320 });
+        if (tn?.trace !== undefined) (Array.isArray(tn.trace) ? tn.trace : []).forEach((x, j) => str({ x }, "x", `${wt} trace ${j}`, { max: 120 }));
+      });
+      break;
+    }
+    case "choice": {
+      allowedKeys(sim, ["kind", "q", "options", "correct", "explain"], w);
+      str(sim, "q", w, { max: 220 });
+      const opts = arr(sim, "options", w, 3, 4);
+      opts.forEach((o, i) => (isStr(o) ? o.length > 130 && warn(`${w} option ${i}`, "keep it under 130 characters") : err(`${w} option ${i}`, "must be a string")));
+      if (!isInt(sim.correct) || sim.correct < 0 || sim.correct >= opts.length) err(w, `"correct" must be an option index`);
+      str(sim, "explain", w, { max: 260 });
+      break;
+    }
+    default:
+      err(w, `"kind" must be terminal, code, chat or choice`);
+  }
+}
+
 /* ------------------------------------------------------------------ module blocks */
 
 function buildModule(spine, mi) {
@@ -699,16 +777,56 @@ function buildModule(spine, mi) {
   const g = src.guided ?? {};
   const wg = `${where} guided`;
   if (!src.guided) err(where, "missing guided");
-  allowedKeys(g, ["title", "situation", "intro", "before", "steps", "finish"], wg);
+  allowedKeys(g, ["title", "situation", "intro", "before", "steps", "finish", "mission", "solved_case"], wg);
   for (const f of ["title", "situation", "intro"]) str(g, f, wg);
   if (g.title && g.title !== topic("guided")) warn(wg, `title differs from the topic title "${topic("guided")}"`);
   arr(g.before ?? {}, "items", `${wg} before`, 1, 6);
   if (g.before && !Array.isArray(g.before.downloads)) err(`${wg} before`, `"downloads" must be an array (it can be empty)`);
+  // the mission framing: who briefs the learner, the badge they earn, the team's reactions
+  const teamLine = (m, w, max) => {
+    allowedKeys(m, ["who", "av", "text"], w);
+    str(m, "who", w);
+    str(m, "av", w, { max: 2 });
+    str(m, "text", w, { max });
+  };
+  if (g.mission !== undefined) {
+    const mi = g.mission;
+    const wm = `${wg} mission`;
+    allowedKeys(mi, ["codename", "badge", "mentor", "brief", "goal", "debrief"], wm);
+    str(mi, "codename", wm, { max: 32 });
+    str(mi, "badge", wm, { max: 28 });
+    str(mi, "goal", wm, { max: 140 });
+    if (!mi?.mentor) err(wm, `missing "mentor" {who, av}`);
+    else {
+      allowedKeys(mi.mentor, ["who", "av"], `${wm} mentor`);
+      str(mi.mentor, "who", `${wm} mentor`);
+      str(mi.mentor, "av", `${wm} mentor`, { max: 2 });
+    }
+    arr(mi, "brief", wm, 2, 3).forEach((m, k) => teamLine(m, `${wm} brief ${k}`, 170));
+    arr(mi, "debrief", wm, 1, 2).forEach((m, k) => teamLine(m, `${wm} debrief ${k}`, 170));
+  }
+  if (g.solved_case !== undefined) {
+    const cs = g.solved_case;
+    const wc = `${wg} solved_case`;
+    allowedKeys(cs, ["label", "title", "source_label", "source_url", "source_note", "problem", "solution", "result", "evidence", "solution_steps"], wc);
+    for (const f of ["label", "title", "source_label", "source_url", "source_note", "problem", "solution", "result"]) str(cs, f, wc);
+    arr(cs, "evidence", wc, 2, 5).forEach((item, k) => isStr(item) || err(`${wc} evidence ${k}`, "must be a string"));
+    arr(cs, "solution_steps", wc, 3, 8).forEach((step, k) => {
+      const ws = `${wc} solution step ${k}`;
+      allowedKeys(step, ["title", "purpose", "explanation", "code", "result"], ws);
+      for (const f of ["title", "purpose", "explanation", "result"]) str(step, f, ws);
+      if (step?.code !== undefined) str(step, "code", ws);
+    });
+  }
   const gsteps = arr(g, "steps", wg, 4, 10);
   gsteps.forEach((s, k) => {
     const w = `${wg} step ${k}`;
-    allowedKeys(s, ["title", "body", "actions", "values", "check", "tip"], w);
+    allowedKeys(s, ["title", "body", "actions", "values", "check", "tip", "win", "sim"], w);
     for (const f of ["title", "body", "check"]) str(s, f, w);
+    if (s?.win !== undefined) teamLine(s.win, `${w} win`, 130);
+    else if (g.mission !== undefined) warn(w, `missing "win": a teammate's short reaction when the step works`);
+    if (s?.sim !== undefined) checkSim(s.sim, `${w} sim`);
+    else if (g.mission !== undefined) warn(w, `missing "sim": the hands-on challenge for this step`);
     arr(s, "actions", w, 1, 8).forEach((a, j) => isStr(a) || err(`${w} action ${j}`, "must be a string"));
     if (s?.values !== undefined)
       (Array.isArray(s.values) ? s.values : []).forEach((v, j) => {
@@ -729,6 +847,8 @@ function buildModule(spine, mi) {
     before: { items: g.before?.items ?? [], downloads: g.before?.downloads ?? [] },
     steps: gsteps.map((s, k) => ({ id: `s${k + 1}`, ...s })),
     finish: fin,
+    ...(g.mission ? { mission: g.mission } : {}),
+    ...(g.solved_case ? { solved_case: g.solved_case } : {}),
   };
 
   /* lab (scenarios) */

@@ -7,9 +7,16 @@ import { useEnrollments } from "@/lib/enrollment";
 import { adaptationOf } from "@/lib/setup";
 import { orderStages, topicOf } from "@/lib/topics";
 import type { Course, CourseModule, FinaleStep, ModuleState } from "@/data/types";
+import type { GateResult } from "@/data/mock-grader";
 import type { StageId } from "@/lib/stages";
 
 const PREFIX = "lms-progress:";
+const GATE_PREFIX = "lms-gate:v1:";
+
+/** The regular module journey. Review is a later scheduled return visit. */
+export function moduleFlowStages(stages: readonly StageId[]): StageId[] {
+  return stages.filter((stage) => stage !== "review" && stage !== "reflection");
+}
 
 export type ModuleProgress = CourseModule & {
   index: number;
@@ -50,9 +57,8 @@ export type CourseProgress = {
 };
 
 /**
- * Live course state from what the player has stored. Prototype: nothing is
- * locked. Every module and every finale step (capstone, final check,
- * wrap-up) can be opened at any time; modules are still listed first.
+ * Live course state from what the player has stored. A passed module quiz
+ * unlocks the next module. The finale then unlocks one step at a time.
  * `exampleFirst` follows the learner's setup, so "next" matches the player.
  */
 export function deriveProgress(
@@ -60,34 +66,45 @@ export function deriveProgress(
   stored: Record<string, StageId[]>,
   finaleState: FinaleState = EMPTY_FINALE,
   exampleFirst = false,
+  gatePassed: Record<string, boolean> = {},
 ): CourseProgress {
   const base = `/learn/courses/${course.course_id}`;
+  let pathUnlocked = true;
   const modules: ModuleProgress[] = course.modules.map((m, i) => {
     const done = (stored[m.module_id] ?? []).filter((s) => m.stages.includes(s));
-    const complete = m.stages.every((s) => done.includes(s));
-    const liveState: ModuleState = complete ? "done" : done.length ? "in_progress" : "available";
+    const flow = moduleFlowStages(m.stages);
+    const quizPassed = gatePassed[`${course.course_id}:${m.module_id}`] === true;
+    const complete = m.stages.includes("gate") ? quizPassed : flow.every((s) => done.includes(s));
+    const locked = !pathUnlocked;
+    const liveState: ModuleState = locked ? "locked" : complete ? "done" : done.length ? "in_progress" : "available";
     // the next topic that has content (Modules 2-5 have their concept videos so far)
-    const playable = orderStages(m.stages, exampleFirst).filter((s) => !m.authored || m.authored.includes(s));
-    const next = playable.find((s) => !done.includes(s));
+    const playable = orderStages(flow, exampleFirst).filter((s) => !m.authored || m.authored.includes(s));
+    const next = locked || complete ? undefined : playable.find((s) => !done.includes(s));
+    pathUnlocked = pathUnlocked && complete;
     return { ...m, index: i + 1, done, next, liveState };
   });
   const modulesDone = modules.filter((m) => m.liveState === "done").length;
   const allModulesDone = modulesDone === modules.length;
 
-  const finale: FinaleProgress[] = course.finale.steps.map((step) => ({
+  const finale: FinaleProgress[] = course.finale.steps.map((step, i) => ({
     step,
     done: finaleState.done.includes(step.id),
-    locked: false,
+    locked: !allModulesDone || (i > 0 && !finaleState.done.includes(course.finale.steps[i - 1]!.id)),
   }));
 
-  const topicsTotal = modules.reduce((n, m) => n + m.stages.length, 0) + finale.length;
-  const topicsDone = modules.reduce((n, m) => n + m.done.length, 0) + finale.filter((f) => f.done).length;
+  const topicsTotal = modules.reduce((n, m) => n + moduleFlowStages(m.stages).length, 0) + finale.length;
+  const topicsDone =
+    modules.reduce((n, m) => {
+      const flow = moduleFlowStages(m.stages);
+      return n + (m.liveState === "done" ? flow.length : m.done.filter((s) => flow.includes(s)).length);
+    }, 0) + finale.filter((f) => f.done).length;
 
   let resume: ResumePoint | undefined;
   const current = modules.find((m) => m.liveState === "in_progress") ?? modules.find((m) => m.liveState === "available");
   if (current?.next) {
     const at = topicOf(current, current.next);
-    const order = orderStages(current.stages, exampleFirst);
+    const order = orderStages(moduleFlowStages(current.stages), exampleFirst);
+    const doneInFlow = current.done.filter((s) => order.includes(s)).length;
     resume = {
       kind: "module",
       href: `${base}/${current.module_id}/${current.next}`,
@@ -97,7 +114,7 @@ export function deriveProgress(
       stage: current.next,
       n: order.indexOf(current.next) + 1,
       total: order.length,
-      minutesLeft: Math.max(1, Math.round(current.minutes * (1 - current.done.length / current.stages.length))),
+      minutesLeft: Math.max(1, Math.round(current.minutes * (1 - doneInFlow / order.length))),
     };
   } else {
     const i = finale.findIndex((f) => !f.done && !f.locked);
@@ -134,13 +151,21 @@ export function deriveProgress(
 function useStored() {
   const raw = useLocalPrefix<StageId[]>(PREFIX);
   const finales = useLocalPrefix<FinaleState>(FINALE_PREFIX);
+  const gateResults = useLocalPrefix<GateResult>(GATE_PREFIX);
   return React.useMemo(() => {
     const stored: Record<string, StageId[]> = {};
     for (const [k, v] of Object.entries(raw)) stored[k.slice(PREFIX.length)] = v;
     const finale: Record<string, FinaleState> = {};
     for (const [k, v] of Object.entries(finales)) finale[k.slice(FINALE_PREFIX.length)] = v;
-    return { stored, finale };
-  }, [raw, finales]);
+    const gates: Record<string, boolean> = {};
+    for (const [k, v] of Object.entries(gateResults)) {
+      const id = k.slice(GATE_PREFIX.length);
+      const divider = id.lastIndexOf(":gate-");
+      if (divider < 0) continue;
+      gates[`${id.slice(0, divider)}:${id.slice(divider + 6)}`] = v.passed === true;
+    }
+    return { stored, finale, gates };
+  }, [raw, finales, gateResults]);
 }
 
 function useExampleFirst() {
@@ -153,22 +178,22 @@ function useExampleFirst() {
 }
 
 export function useCourseProgress(course: Course): CourseProgress {
-  const { stored, finale } = useStored();
+  const { stored, finale, gates } = useStored();
   const exampleFirst = useExampleFirst();
   const id = course.course_id;
   return React.useMemo(
-    () => deriveProgress(course, stored, finale[id], exampleFirst[id]),
-    [course, stored, finale, exampleFirst, id],
+    () => deriveProgress(course, stored, finale[id], exampleFirst[id], gates),
+    [course, stored, finale, exampleFirst, gates, id],
   );
 }
 
 /** Progress for several courses at once (dashboard), keyed by course id. */
 export function useCoursesProgress(courses: Course[]): Record<string, CourseProgress> {
-  const { stored, finale } = useStored();
+  const { stored, finale, gates } = useStored();
   const exampleFirst = useExampleFirst();
   return React.useMemo(() => {
     const out: Record<string, CourseProgress> = {};
-    for (const c of courses) out[c.course_id] = deriveProgress(c, stored, finale[c.course_id], exampleFirst[c.course_id]);
+    for (const c of courses) out[c.course_id] = deriveProgress(c, stored, finale[c.course_id], exampleFirst[c.course_id], gates);
     return out;
-  }, [courses, stored, finale, exampleFirst]);
+  }, [courses, stored, finale, exampleFirst, gates]);
 }

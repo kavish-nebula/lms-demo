@@ -132,9 +132,9 @@ export const STAGE_META: Record<StageId, StageMeta> = {
 export type StageState = "done" | "current" | "todo" | "locked" | "absent" | "not_in_v1";
 
 /**
- * Stages a module may contain. Each module closes with its own check (gate)
- * before the spaced review; the project and the reflection happen once, in the
- * course finale, which also holds the final check.
+ * Stages a module may contain. The normal journey closes with its quiz (gate).
+ * Review remains routable for scheduled return visits; the project and course
+ * reflection happen once in the finale, which also holds the final check.
  */
 export const MODULE_STAGES: readonly StageId[] = ["hook", "explainer", "worked", "guided", "lab", "gate", "review"];
 

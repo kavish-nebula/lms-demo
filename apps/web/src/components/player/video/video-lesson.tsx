@@ -2,6 +2,7 @@
 
 import "./video.css";
 import * as React from "react";
+import { useCompanionStep, useLearningContext } from "@/components/learning/course-companion";
 import { cn } from "cn";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "motion/react";
@@ -24,7 +25,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useLocalString, writeLocal } from "@/lib/local-store";
+import { useLocalString, useLocalJson, useHydrated, writeLocal } from "@/lib/local-store";
 import { VideoSlideView } from "@/components/player/video/video-slide";
 import type { ConceptVideo, VideoQuiz } from "@/data/types";
 
@@ -59,6 +60,11 @@ export function VideoLesson({
   nextLabel?: string;
 }) {
   const t = useTranslations("video");
+  const learningContext = useLearningContext();
+  const resumeKey = `lms-video-position:v1:${learningContext?.courseId ?? "course"}:${video.id}`;
+  const storedPosition = useLocalJson<{ version: 1; slide: number; phase: Phase; mid: boolean; end: boolean; seen: number[] } | null>(resumeKey, null);
+  const hydrated = useHydrated();
+  const [restored, setRestored] = React.useState(false);
   const slides = video.slides;
   const last = slides.length - 1;
   const quizAfter = video.quizAfter ?? -1;
@@ -79,8 +85,28 @@ export function VideoLesson({
   const rate = (RATES as readonly number[]).includes(storedRate) ? storedRate : 1;
   const captionsOn = useLocalString("lms-video-cc") !== "off";
 
+  React.useEffect(() => {
+    if (!hydrated || restored) return;
+    if (storedPosition?.version === 1 && Number.isInteger(storedPosition.slide)) {
+      setIdx(Math.max(0, Math.min(last, storedPosition.slide)));
+      setPhase(["play", "mid", "end", "done"].includes(storedPosition.phase) ? storedPosition.phase : "play");
+      setMidPassed(!!storedPosition.mid || !video.midQuiz.length);
+      setEndPassed(!!storedPosition.end || !video.endQuiz.length);
+      setSeen(new Set(Array.isArray(storedPosition.seen) ? storedPosition.seen.filter((i) => Number.isInteger(i) && i >= 0 && i <= last) : []));
+    }
+    setRestored(true);
+  }, [hydrated, restored, storedPosition, last, video.midQuiz.length, video.endQuiz.length]);
+  React.useEffect(() => {
+    if (restored) writeLocal(resumeKey, JSON.stringify({ version: 1, slide: idx, phase, mid: midPassed, end: endPassed, seen: [...seen] }));
+  }, [restored, resumeKey, idx, phase, midPassed, endPassed, seen]);
+
   const wrap = React.useRef<HTMLDivElement>(null);
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
+  React.useEffect(() => {
+    const pauseForHelp = () => { audioRef.current?.pause(); setPlaying(false); };
+    window.addEventListener("pip:opened", pauseForHelp);
+    return () => window.removeEventListener("pip:opened", pauseForHelp);
+  }, []);
   const silent = React.useRef<Record<number, boolean>>({});
   const live = React.useRef({ idx, playing, midPassed, endPassed });
   React.useLayoutEffect(() => {
@@ -250,6 +276,7 @@ export function VideoLesson({
   };
 
   const slide = slides[idx]!;
+  useCompanionStep({ title: video.title === slide.title ? video.title : `${video.title} · ${slide.title}`, guidance: slide.narration, videoId: video.id, slideTitle: slide.title, phase: learningContext?.phase === "intro" ? "intro" : undefined });
   const sentences = React.useMemo(() => (slide.sentences.length ? slide.sentences : [slide.narration]), [slide]);
   // where in the narration (0-1) each sentence begins, by its share of the characters
   const starts = React.useMemo(() => {
@@ -283,11 +310,12 @@ export function VideoLesson({
     <div
       ref={wrap}
       onKeyDown={onKey}
-      className={cn("flex flex-col gap-3", full && "items-center justify-center bg-canvas p-6")}
+      className={cn("concept-video-shell flex flex-col gap-4", full && "items-center justify-center bg-canvas p-6")}
       aria-label={t("player", { title: video.title })}
       role="region"
     >
-      <div className={cn("vl-stage", full && "w-[min(100%,calc((100dvh-170px)*16/9))]")}>
+      <div className="concept-video-card">
+        <div className={cn("vl-stage", full && "w-[min(100%,calc((100dvh-170px)*16/9))]")}>
         {phase !== "done" ? <VideoSlideView key={idx} slide={slide} shown={shown} /> : null}
 
         <AnimatePresence>
@@ -354,19 +382,19 @@ export function VideoLesson({
             <Play className="size-8" aria-hidden />
           </button>
         ) : null}
-      </div>
+        </div>
 
-      {phase === "play" && captionsOn ? (
-        <p className={cn("min-h-[3.2em] w-full rounded-lg border-l-[3px] border-brand bg-panel-2 px-4 py-2.5 leading-relaxed", full && "max-w-[min(100%,calc((100dvh-170px)*16/9))]")}>
-          {untouched ? <span className="text-ink-muted">{t("pressPlay")}</span> : sentences[all && !playing ? sentences.length - 1 : sentenceNow]}
-        </p>
-      ) : null}
+        {phase === "play" && captionsOn ? (
+          <p className={cn("min-h-[3.2em] w-full rounded-lg border-l-[3px] border-brand bg-panel-2 px-4 py-2.5 leading-relaxed", full && "max-w-[min(100%,calc((100dvh-170px)*16/9))]")}>
+            {untouched ? <span className="text-ink-muted">{t("pressPlay")}</span> : sentences[all && !playing ? sentences.length - 1 : sentenceNow]}
+          </p>
+        ) : null}
 
-      <div
-        role="group"
-        aria-label={t("controls")}
-        className={cn("flex w-full flex-wrap items-center gap-1.5 rounded-card border border-line bg-panel-2 px-2.5 py-2", full && "max-w-[min(100%,calc((100dvh-170px)*16/9))]")}
-      >
+        <div
+          role="group"
+          aria-label={t("controls")}
+          className={cn("flex w-full flex-wrap items-center gap-1.5 rounded-card border border-line bg-panel-2 px-2.5 py-2", full && "max-w-[min(100%,calc((100dvh-170px)*16/9))]")}
+        >
         <CtrlButton label={t("prevSlide")} onClick={() => goTo(idx - 1)} disabled={idx === 0 || phase !== "play"}>
           <SkipBack />
         </CtrlButton>
@@ -464,10 +492,11 @@ export function VideoLesson({
         <CtrlButton label={full ? t("exitFullscreen") : t("fullscreen")} onClick={toggleFull}>
           {full ? <Minimize /> : <Maximize />}
         </CtrlButton>
+        </div>
       </div>
 
       {!full ? (
-        <div className="rounded-card border border-line">
+        <div className="concept-text-card concept-transcript-card">
           <button
             type="button"
             onClick={() => setTranscript((v) => !v)}
