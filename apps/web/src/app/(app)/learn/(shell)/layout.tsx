@@ -1,11 +1,15 @@
 import { AppShell } from "@/components/shell/app-shell";
 import { getCourses, getLearner } from "@/data";
+import { connection } from "next/server";
+import { engagementEnabled } from "@/server/engagement";
+import { EngagementProvider } from "@/components/engagement/provider";
 
 /** Learner app frame. Role comes from the session once auth exists. */
 export default async function LearnShellLayout({ children }: { children: React.ReactNode }) {
+  await connection();
   const [learner, courses] = await Promise.all([getLearner(), getCourses()]);
 
-  return (
+  const shell = (
     <AppShell
       role="learner"
       heldRoles={["learner"]}
@@ -25,4 +29,5 @@ export default async function LearnShellLayout({ children }: { children: React.R
       {children}
     </AppShell>
   );
+  return engagementEnabled() ? <EngagementProvider userId={learner.user.user_id} courses={courses}>{shell}</EngagementProvider> : shell;
 }

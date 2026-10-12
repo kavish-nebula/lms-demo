@@ -1,5 +1,7 @@
 # Nebula KnowLab — Backend System Plan
 
+Current implementation note (12 October 2026): platform engagement runs in the existing Next.js backend using Drizzle and PGlite/Postgres, behind `PLATFORM_ENGAGEMENT_ENABLED`. Its additive learner row, serialized award processing, API contracts and privacy limits are described in [Platform engagement](docs/platform-engagement.md). The earlier target backend design below remains a separate roadmap.
+
 > Production-ready backend for the Proofcraft LMS prototype (`lms-feature/`).
 > Stack: **Python (FastAPI) · PostgreSQL · cloud-native**. Scope: **full platform** —
 > auth, progress sync, adaptive engine, assessments, credentials, content pipeline,

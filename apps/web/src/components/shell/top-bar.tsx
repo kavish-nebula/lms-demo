@@ -17,6 +17,8 @@ import {
 import { CommandMenu, type CommandCourse } from "@/components/shell/command-menu";
 import { UserAvatar, type ShellUser } from "@/components/shell/user-badge";
 import type { Role } from "@/lib/nav";
+import { useEngagement } from "@/components/engagement/provider";
+import { EngagementNotifications } from "@/components/engagement/notifications";
 
 export type ShellNotification = { id: string; title: string; detail: string; href: string; unread?: boolean };
 
@@ -31,6 +33,7 @@ export type TopBarProps = {
 
 /** Sticky glass top bar: menu (mobile), search, notifications, account. */
 export function TopBar({ role, user, courses, notifications, onOpenMenu, settingsHref }: TopBarProps) {
+  const platform = useEngagement();
   const t = useTranslations("common");
   const ts = useTranslations("shell");
   const tn = useTranslations("nav");
@@ -52,7 +55,7 @@ export function TopBar({ role, user, courses, notifications, onOpenMenu, setting
         <CommandMenu role={role} courses={courses} />
 
         <div className="ml-auto flex shrink-0 items-center gap-1.5">
-          <Popover>
+          {platform ? <EngagementNotifications /> : <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
@@ -85,7 +88,7 @@ export function TopBar({ role, user, courses, notifications, onOpenMenu, setting
                 ))}
               </ul>
             </PopoverContent>
-          </Popover>
+          </Popover>}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

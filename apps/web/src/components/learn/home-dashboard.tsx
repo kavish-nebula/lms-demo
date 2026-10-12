@@ -23,6 +23,10 @@ import { useCoursesProgress, type CourseProgress } from "@/lib/course-progress";
 import { useLearnerReady } from "@/lib/api";
 import { QUESTIONS } from "@/lib/setup";
 import type { Course, Learner } from "@/data/types";
+import { WeeklyPanel } from "@/components/engagement/weekly-panel";
+import { TodaySessions } from "@/components/engagement/today-sessions";
+import { FocusTimer } from "@/components/engagement/focus-timer";
+import { useEngagement } from "@/components/engagement/provider";
 
 /**
  * S2 Learner home. Before enrolment: a spotlight on the course and how the
@@ -30,6 +34,10 @@ import type { Course, Learner } from "@/data/types";
  * the course card.
  */
 export function HomeDashboard({ learner, courses, today }: { learner: Learner; courses: Course[]; today: string }) {
+  const platform = useEngagement();
+  const reconcile = platform?.request;
+  React.useEffect(() => { if (reconcile) void reconcile("/api/v1/me/engagement/reconcile","POST").catch(() => {}); },[reconcile]);
+  today = platform?.data?.today ?? today;
   const hydrated = useLearnerReady();
   const enrollments = useEnrollments();
   const progress = useCoursesProgress(courses);
@@ -47,7 +55,7 @@ export function HomeDashboard({ learner, courses, today }: { learner: Learner; c
   return enrolled.length ? (
     <EnrolledHome learner={learner} courses={enrolled} progress={progress} today={today} />
   ) : (
-    <WelcomeHome course={courses[0]} />
+    <><WeeklyPanel courses={courses} /><FocusTimer /><WelcomeHome course={courses[0]} /></>
   );
 }
 
@@ -142,19 +150,23 @@ function EnrolledHome({
 }) {
   const t = useTranslations("home");
   const tc = useTranslations("common");
+  const te = useTranslations("engagement");
+  const platform = useEngagement();
   const all = courses.map((c) => progress[c.course_id]!);
   const modulesDone = all.reduce((n, p) => n + p.modulesDone, 0);
   const modulesTotal = all.reduce((n, p) => n + p.modules.length, 0);
   const topicsDone = all.reduce((n, p) => n + p.topicsDone, 0);
   const topicsTotal = all.reduce((n, p) => n + p.topicsTotal, 0);
-  const minutes = learner.daily_progress.reduce((n, d) => n + d.minutes, 0);
+  const minutes = platform ? platform.data?.loggedMinutes ?? 0 : learner.daily_progress.reduce((n, d) => n + d.minutes, 0);
   const current = courses.find((c) => progress[c.course_id]!.resume) ?? courses[0]!;
 
   return (
     <div className="flex flex-col gap-6 md:gap-8">
-      <UpNextTicker courses={courses} reviews={learner.due_reviews} assignments={[]} today={today} />
+      {!platform ? <UpNextTicker courses={courses} reviews={learner.due_reviews} assignments={[]} today={today} /> : null}
 
       <ResumeCard course={current} progress={progress[current.course_id]!} />
+      <WeeklyPanel courses={courses} />
+      {platform ? <div className="grid gap-4 lg:grid-cols-2"><TodaySessions courses={courses} /><FocusTimer /></div> : null}
 
       <Stagger className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
         <StaggerItem>
@@ -170,8 +182,8 @@ function EnrolledHome({
           <StatTile
             icon={<Clock3 />}
             value={minutes}
-            label={t("kpiMinutes")}
-            sparkline={minutes ? learner.daily_progress.map((d) => d.minutes) : undefined}
+            label={platform ? te("loggedMinutes") : t("kpiMinutes")}
+            sparkline={!platform && minutes ? learner.daily_progress.map((d) => d.minutes) : undefined}
           />
         </StaggerItem>
       </Stagger>

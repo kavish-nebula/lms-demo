@@ -2,6 +2,7 @@ import { integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid
 import type { LearnerPlan, PlanChangeT, PlanSource, PlanStatus, PlanVersion } from "@/lib/learner-plan";
 import type { PrecheckResult, SetupAnswers, SupportOverride } from "@/lib/setup";
 import type { ProjectReport } from "@/lib/project-grade";
+import type { EngagementState } from "@/lib/engagement";
 
 /**
  * Learner data. Profile answers drive the course plan; plans are append-only
@@ -11,6 +12,13 @@ import type { ProjectReport } from "@/lib/project-grade";
  */
 
 const created = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
+
+/** Versioned platform records share a learner lock; no course data is rewritten. */
+export const platformEngagement = pgTable("platform_engagement", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  state: jsonb("state").$type<EngagementState>().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 export const users = pgTable("users", {
   id: text("id").primaryKey(),

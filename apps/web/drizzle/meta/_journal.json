@@ -15,6 +15,13 @@
       "when": 1791540717328,
       "tag": "0001_project_work",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791799383573,
+      "tag": "0002_groovy_morbius",
+      "breakpoints": true
     }
   ]
 }

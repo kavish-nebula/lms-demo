@@ -14,6 +14,7 @@ import {
   BarChart3,
   ScrollText,
   Palette,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -51,6 +52,7 @@ export const NAV: Record<Role, NavSection[]> = {
     },
     {
       items: [
+        { key: "activity", href: "/learn/activity", icon: Sparkles },
         { key: "profile", href: "/learn/profile", icon: UserRound },
         { key: "settings", href: "/learn/settings", icon: Settings },
       ],

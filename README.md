@@ -18,6 +18,12 @@ node fixtures/scripts/check-project.mjs            # mini project: the starter m
 
 ## Run it
 
+### Optional platform motivation features
+
+Set `PLATFORM_ENGAGEMENT_ENABLED=true` in `apps/web/.env.local` and restart the server to enable weekly goals, study logs, private activity points, streaks, achievements, dashboard frames, saved-course search, notifications and the interactive planner. It is disabled by default. The AI agent course and its learning behavior remain unchanged. Activity uses the existing backend; the study schedule stays browser-local. Real authentication is still required before a private multi-user deployment.
+
+Implementation, API and validation details: [Platform engagement](docs/platform-engagement.md). Run its isolated tests with `node tests/backend/run.mjs engagement` from `apps/web`.
+
 Requires Node.js 20+ (installed: 24 LTS).
 
 ```bash

@@ -6,6 +6,9 @@ import { PageHeader } from "@/components/kit/page-header";
 import { ProgramCard } from "@/components/course/program-card";
 import { Stagger, StaggerItem } from "@/components/kit/stagger";
 import { EmptyState } from "@/components/kit/states";
+import { Suspense } from "react";
+import { engagementEnabled } from "@/server/engagement";
+import { CatalogExplorer } from "@/components/engagement/catalog";
 
 export const metadata: Metadata = { title: "Courses" };
 
@@ -16,7 +19,7 @@ export default async function CatalogPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("title")} description={t("subtitle")} />
-      {courses.length ? (
+      {engagementEnabled() ? <Suspense><CatalogExplorer courses={courses} /></Suspense> : courses.length ? (
         <Stagger className="flex flex-col gap-5">
           {courses.map((c) => (
             <StaggerItem key={c.course_id}>

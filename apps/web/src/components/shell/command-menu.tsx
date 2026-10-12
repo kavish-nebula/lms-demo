@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { GraduationCap, Search } from "lucide-react";
+import { Bookmark, CalendarDays, GraduationCap, Search, Timer } from "lucide-react";
 import {
   Command,
   CommandDialog,
@@ -17,6 +17,8 @@ import {
 import { Kbd } from "@/components/ui/kbd";
 import { NAV, type Role } from "@/lib/nav";
 import { cn } from "cn";
+import { useEngagement } from "@/components/engagement/provider";
+import { StudyLogDialog } from "@/components/engagement/study-log";
 
 export type CommandCourse = { id: string; title: string; href: string };
 
@@ -31,6 +33,9 @@ export function CommandMenu({
   className?: string;
 }) {
   const t = useTranslations("common");
+  const platform = useEngagement();
+  const te = useTranslations("engagement");
+  const [logOpen,setLogOpen] = React.useState(false);
   const tn = useTranslations("nav");
   const ts = useTranslations("shell");
   const router = useRouter();
@@ -75,9 +80,14 @@ export function CommandMenu({
           <CommandInput placeholder={t("searchPlaceholder")} />
           <CommandList>
             <CommandEmpty>{ts("noResults")}</CommandEmpty>
+            {platform ? <CommandGroup heading={te("quickActions")}>
+              <CommandItem disabled={!platform.data} className="min-h-11" value={te("logStudy")} onSelect={() => { setOpen(false); setLogOpen(true); }}><Timer aria-hidden />{te("logStudy")}</CommandItem>
+              <CommandItem className="min-h-11" value={te("todaySessions")} onSelect={() => go("/learn/plan?view=agenda")}><CalendarDays aria-hidden />{te("todaySessions")}</CommandItem>
+              <CommandItem className="min-h-11" value={te("savedCourses")} onSelect={() => go("/learn/courses?filter=saved")}><Bookmark aria-hidden />{te("savedCourses")}</CommandItem>
+            </CommandGroup> : null}
             <CommandGroup heading={ts("groupNavigate")}>
               {NAV[role].flatMap((s) =>
-                s.items.map((item) => {
+                s.items.filter((item) => platform || item.key !== "activity").map((item) => {
                   const Icon = item.icon;
                   const label = tn(item.key as Parameters<typeof tn>[0]);
                   return (
@@ -101,6 +111,7 @@ export function CommandMenu({
           </CommandList>
         </Command>
       </CommandDialog>
+      {platform && logOpen ? <StudyLogDialog courses={platform.courses} autoOpen onClose={() => setLogOpen(false)} /> : null}
     </>
   );
 }

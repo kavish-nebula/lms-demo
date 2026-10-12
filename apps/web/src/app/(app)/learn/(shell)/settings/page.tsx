@@ -4,6 +4,8 @@ import { getCourses } from "@/data";
 import { PageHeader } from "@/components/kit/page-header";
 import { SettingsForm } from "@/components/learn/settings-form";
 import { CourseSetupSettings } from "@/components/learn/course-setup-settings";
+import { engagementEnabled } from "@/server/engagement";
+import { EngagementSettings } from "@/components/engagement/settings";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -14,6 +16,7 @@ export default async function SettingsPage() {
     <div className="flex flex-col gap-6">
       <PageHeader title={t("title")} description={t("subtitle")} />
       <CourseSetupSettings courses={courses} />
+      {engagementEnabled() ? <EngagementSettings /> : null}
       <SettingsForm
         languages={[
           { code: "en", label: "English", available: true },

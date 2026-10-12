@@ -8,6 +8,8 @@ import { TopBar, type ShellNotification } from "@/components/shell/top-bar";
 import type { CommandCourse } from "@/components/shell/command-menu";
 import type { ShellUser } from "@/components/shell/user-badge";
 import type { Role } from "@/lib/nav";
+import { useEngagement } from "@/components/engagement/provider";
+import { MobileNavigation } from "@/components/engagement/mobile-nav";
 
 export type AppShellProps = {
   role: Role;
@@ -36,6 +38,7 @@ export function AppShell({
 }: AppShellProps) {
   const t = useTranslations("common");
   const ts = useTranslations("shell");
+  const platform = useEngagement();
   const [menuOpen, setMenuOpen] = React.useState(false);
 
   return (
@@ -74,10 +77,11 @@ export function AppShell({
           settingsHref={settingsHref}
           onOpenMenu={() => setMenuOpen(true)}
         />
-        <main id="main" tabIndex={-1} className="flex-1 page-pad py-6 outline-none md:py-8">
+        <main id="main" tabIndex={-1} className={`flex-1 page-pad py-6 outline-none md:py-8 ${platform ? "pb-24 nav:pb-8" : ""}`}>
           <div className="content-max">{children}</div>
         </main>
       </div>
+      <MobileNavigation />
     </div>
   );
 }
