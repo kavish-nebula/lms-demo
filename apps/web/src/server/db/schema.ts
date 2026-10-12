@@ -3,6 +3,7 @@ import type { LearnerPlan, PlanChangeT, PlanSource, PlanStatus, PlanVersion } fr
 import type { PrecheckResult, SetupAnswers, SupportOverride } from "@/lib/setup";
 import type { ProjectReport } from "@/lib/project-grade";
 import type { EngagementState } from "@/lib/engagement";
+import type { Workflow, WorkflowReport } from "@/lib/workflow-project";
 
 /**
  * Learner data. Profile answers drive the course plan; plans are append-only
@@ -117,5 +118,14 @@ export const projectWork = pgTable("project_work", {
     .references(() => enrollments.id, { onDelete: "cascade" }),
   files: jsonb("files").$type<Record<string, string>>().notNull(),
   report: jsonb("report").$type<ProjectReportRow>(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Separate architecture practice; never replaces Python files or its grade. */
+export const workflowProjects = pgTable("workflow_projects", {
+  enrollmentId: uuid("enrollment_id").primaryKey().references(() => enrollments.id, { onDelete: "cascade" }),
+  diagram: jsonb("diagram").$type<Workflow>().notNull(),
+  report: jsonb("report").$type<WorkflowReport>(),
+  revision: integer("revision").notNull().default(1),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

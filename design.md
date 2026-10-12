@@ -112,3 +112,6 @@ Defined once in `index.css`, reused everywhere:
 3. Add CSS to `index.css` under a commented section header (`/* ---------- xxx ---------- */`), matching file organization.
 4. Check both motion paths (normal + reduced), focus states, and the 900px breakpoint.
 5. Reusable? Promote to `ui/bits.jsx` rather than duplicating markup.
+# Workflow workspace
+
+The drawing mini project reuses theme tokens and React Flow in a scoped canvas. A step palette, branch connection form and details/checks panel accompany the canvas; all operations have button/select alternatives to dragging. See [workflow-mini-project.md](docs/workflow-mini-project.md).

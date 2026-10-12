@@ -208,6 +208,7 @@ type Workspace = { href: string; courseId: string; enrolled: boolean };
 /** Opens the in-browser workspace, with the last test run's result. */
 function WorkspaceCard({ workspace, preview }: { workspace: Workspace; preview: boolean }) {
   const t = useTranslations("finale");
+  const tw = useTranslations("workflow");
   const { work } = useProjectWork(workspace.courseId, workspace.enrolled);
   const report = work?.report;
   return (
@@ -227,6 +228,8 @@ function WorkspaceCard({ workspace, preview }: { workspace: Workspace; preview: 
           </span>
         ) : null}
       </div>
+      <div className="flex flex-wrap gap-2">
+      {workspace.courseId === "ai-agent" ? <Button asChild size="lg" variant="outline" disabled={preview}><Link href={preview ? "#" : workspace.href.replace(/\/workspace$/,"/diagram")} aria-disabled={preview}>{tw("open")}</Link></Button> : null}
       {preview ? (
         <Button size="lg" variant="brand" disabled>
           {t("openWorkspace")}
@@ -239,6 +242,7 @@ function WorkspaceCard({ workspace, preview }: { workspace: Workspace; preview: 
           </Link>
         </Button>
       )}
+      </div>
     </Surface>
   );
 }

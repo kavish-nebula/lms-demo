@@ -310,3 +310,6 @@ Total: roughly **11–16 weeks** for one backend engineer (2) + part-time fronte
 | Content updates breaking in-flight learners | Per-enrollment content version pinning; bundles immutable |
 | Event replay/duplication from offline client | `client_event_id` idempotency, monotonic first-completion semantics, server-side timestamps for truth |
 | Solo Postgres dependency (incl. vectors) | pgvector covers pilot scale; migration path to a dedicated vector store documented (Qdrant/OpenSearch) if >10M chunks or latency SLOs slip |
+# Workflow exercise storage
+
+The Next.js backend adds enrollment-scoped `workflow_projects` with revision-checked saves and server-side architecture checks. This independent practice does not write Python reports, course progress or adaptation signals. See [workflow-mini-project.md](docs/workflow-mini-project.md).

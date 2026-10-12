@@ -32,6 +32,7 @@ type Busy = null | "booting" | "running" | "testing";
  */
 export function ProjectWorkspace({ course, project, block, briefHref, finalHref }: { course: Course; project: ProjectContent; block: CapstoneBlock; briefHref: string; finalHref: string }) {
   const t = useTranslations("project");
+  const tw = useTranslations("workflow");
   const courseId = course.course_id;
   const { enrolled, ready } = useEnrollment(courseId);
   const { work, loading } = useProjectWork(courseId, enrolled);
@@ -165,6 +166,7 @@ export function ProjectWorkspace({ course, project, block, briefHref, finalHref 
           <span className="hidden text-xs text-ink-faint md:block" aria-live="polite">
             {t(`save_${saveState}`)}
           </span>
+          {courseId === "ai-agent" ? <Button asChild variant="outline" size="sm"><Link href={`${briefHref}/diagram`}>{tw("open")}</Link></Button> : null}
           <Button variant="outline" size="sm" onClick={() => void runSamples()} disabled={!files || !!busy} title={t("runHint")}>
             {busy === "running" || (busy === "booting" && tab === "samples") ? <Loader2 className="animate-spin motion-reduce:animate-none" data-icon="inline-start" /> : <Play data-icon="inline-start" />}
             {t("run")}

@@ -162,3 +162,6 @@ flowchart TB
 
 - `npm run dev` — Vite dev server (LAN-exposed, port 5173).
 - `npm run build` → static `dist/` (already present in the repo) — deployable to any static host/CDN. No server-side rendering, no API calls at runtime.
+# Workflow mini project
+
+The Next.js app includes a separately persisted workflow-diagram capstone exercise alongside Python. See [workflow-mini-project.md](docs/workflow-mini-project.md) for routes, storage, recovery and compatibility boundaries.
