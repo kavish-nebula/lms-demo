@@ -1,3 +1,4 @@
+import { courseLabel } from "./course-labels";
 import type { ConceptVideo, ModuleContent, StageBlock, Topic } from "@/data/types";
 import type { StageId } from "@/lib/stages";
 
@@ -73,6 +74,8 @@ function deliverableOf(block: StageBlock): Deliverable {
  */
 export function moduleOutline(module: ModuleContent, topics: Topic[], order: StageId[]): ModuleSection[] {
   const sections: ModuleSection[] = [];
+  const moduleHasQuiz = module.stages_included.includes("gate");
+  const reviewMinutes = module.blocks.find((block) => block.stage === "review")?.duration_min ?? 0;
   let n = 0;
   const add = (part: Omit<ModulePart, "n">) => {
     const id = SECTION_OF[part.stage];
@@ -87,6 +90,9 @@ export function moduleOutline(module: ModuleContent, topics: Topic[], order: Sta
 
   for (const stage of order) {
     if (!module.stages_included.includes(stage)) continue;
+    // Reflection and its spaced-review schedule live inside the passed quiz
+    // result. Later review visits still have their own direct route.
+    if (stage === "review" && moduleHasQuiz) continue;
     const block = module.blocks.find((b) => b.stage === stage);
     if (!block) continue;
     const title = topics.find((x) => x.stage === stage)?.title ?? module.title;
@@ -96,14 +102,21 @@ export function moduleOutline(module: ModuleContent, topics: Topic[], order: Sta
           key: `video:${v.id}`,
           stage,
           video: { id: v.id, lesson: v.lesson },
-          title: `${v.lesson} ${v.title}`,
+          title: courseLabel(module.course_id, "lessons", v.id, v.title),
           minutes: videoMinutes(v),
           deliverable: { key: "video", values: { checks: v.midQuiz.length + v.endQuiz.length } },
           path: `explainer?v=${v.id}`,
         });
       continue;
     }
-    add({ key: stage, stage, title, minutes: block.duration_min, deliverable: deliverableOf(block), path: stage });
+    add({
+      key: stage,
+      stage,
+      title: courseLabel(module.course_id, "stages", stage, title),
+      minutes: block.duration_min + (stage === "gate" ? reviewMinutes : 0),
+      deliverable: deliverableOf(block),
+      path: stage,
+    });
   }
   return sections;
 }

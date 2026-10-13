@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useCompanionStep } from "@/components/learning/course-companion";
 import { cn } from "cn";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "motion/react";
@@ -18,6 +19,7 @@ import type { PrecheckItem } from "@/data/types";
  */
 export function PrecheckStep({ items, courseTitle, onDone }: { items: PrecheckItem[]; courseTitle: string; onDone: (r: PrecheckResult) => void }) {
   const t = useTranslations("enroll");
+  useCompanionStep({ title: courseTitle,phase: "precheck",guidance: "Answer independently. Starting checks do not offer hints or answer explanations." });
   const [i, setI] = React.useState(-1);
   const [responses, setResponses] = React.useState<Record<string, string | null>>({});
   const lessons = [...new Set(items.map((x) => x.lesson))];

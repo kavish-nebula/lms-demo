@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { useLocalJson, writeLocal } from "@/lib/local-store";
+import { useLearningContext } from "@/components/learning/course-companion";
 import Link from "next/link";
 import { cn } from "cn";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ArrowRight, Check, Clock, EyeOff, Loader2, RotateCcw, ShieldCheck, Target, X } from "lucide-react";
+import { ArrowRight, Check, ChevronLeft, ChevronRight, Clock, EyeOff, Loader2, RotateCcw, ShieldCheck, Target, X } from "lucide-react";
 import { Surface } from "@/components/kit/surface";
 import { Chip } from "@/components/kit/chip";
 import { ProgressBar, ProgressRing } from "@/components/kit/progress-ring";
@@ -35,8 +36,8 @@ type Phase = "intro" | "running" | "submitting" | "result";
  * final check after the capstone. Pass/fail (ch13 T5): no feedback until
  * submit, 80% overall (the final check also wants one right per module),
  * links back to what to revisit, retakes allowed. Answers never appear in the
- * UI data; explanations show once it is passed. The demo lets a learner move
- * on without passing.
+ * UI data; explanations show once it is passed. Module quizzes always require
+ * a pass because their result is the key that unlocks the next module.
  */
 export function GateStage({
   block,
@@ -45,8 +46,8 @@ export function GateStage({
   remediationHref,
   preview,
   onGraded,
+  afterPass,
   scope = "course",
-  slides = false,
   ...nav
 }: StageProps<GateBlock> & {
   objectives: Objective[];
@@ -57,36 +58,39 @@ export function GateStage({
   /** locked: show what it covers, but it cannot be started */
   preview?: boolean;
   onGraded?: (result: GateResult) => void;
+  /** Reflection and review planning shown as part of a passed module quiz. */
+  afterPass?: React.ReactNode;
   /** a module's closing check, or the course's final check */
   scope?: "module" | "course";
-  /** final check only: one question per slide, answered → next, like a deck */
-  slides?: boolean;
 }) {
   const t = useTranslations("player");
   const forModule = scope === "module";
-  const [phase, setPhase] = React.useState<Phase>(nav.done ? "result" : "intro");
+  const context = useLearningContext();
+  const resultKey = `lms-gate:v1:${context?.courseId ?? "course"}:${checkId}`;
+  const savedResult = useLocalJson<GateResult | null>(resultKey, null);
+  const [phase, setPhase] = React.useState<Phase>("intro");
+  const [retrying, setRetrying] = React.useState(false);
   const [responses, setResponses] = React.useState<Record<string, GateResponse>>({});
+  const [questionIndex, setQuestionIndex] = React.useState(0);
   const [result, setResult] = React.useState<GateResult | null>(null);
   const [confirm, setConfirm] = React.useState(false);
   const tested = objectives.filter((o) => block.objectives_tested.includes(o.id));
-  const answeredCount = block.items.filter((i) => isAnswered(responses[i.id])).length;
+  const answeredCount = block.items.filter((i) => {
+    const r = responses[i.id];
+    return Array.isArray(r) ? r.length > 0 : !!r?.trim();
+  }).length;
 
   async function submit() {
     setConfirm(false);
     setPhase("submitting");
     const r = await gradeGate(checkId, block, responses);
+    writeLocal(resultKey, JSON.stringify(r));
     onGraded?.(r);
     setResult(r);
     setPhase("result");
   }
 
-  /** unanswered questions are caught by the confirm dialog before submitting */
-  function requestSubmit() {
-    if (answeredCount < block.items.length) setConfirm(true);
-    else void submit();
-  }
-
-  if (phase === "intro") {
+  if (phase === "intro" && (!savedResult || retrying)) {
     return (
       <StageShell stage="gate" title={t("gateIntroTitle")} minutes={block.duration_min} bloom={block.bloom} hideFooter>
         <Surface pad="lg" className="flex flex-col gap-5">
@@ -132,17 +136,20 @@ export function GateStage({
     );
   }
 
-  if (phase === "result" && (result || nav.done)) {
+  if ((phase === "result" && result) || (phase === "intro" && savedResult && !retrying)) {
     return (
       <GateResultView
         block={block}
         objectives={tested}
-        result={result}
+        result={result ?? savedResult}
         remediationHref={remediationHref}
         scope={scope}
+        afterPass={afterPass}
         onContinue={nav.onComplete}
         onRetry={() => {
+          setRetrying(true);
           setResponses({});
+          setQuestionIndex(0);
           setResult(null);
           setPhase("intro");
         }}
@@ -152,50 +159,45 @@ export function GateStage({
 
   return (
     <StageShell stage="gate" title={t("gateIntroTitle")} minutes={block.duration_min} hideFooter>
-      {slides ? (
-        <GateSlides
-          block={block}
-          responses={responses}
-          submitting={phase === "submitting"}
-          onChange={(id, v) => setResponses((r) => ({ ...r, [id]: v }))}
-          onRequestSubmit={requestSubmit}
-        />
-      ) : (
-        <>
-          <div className="sticky top-(--nav-h) z-10 -mx-1 flex items-center gap-3 rounded-lg bg-canvas/90 px-1 py-2 backdrop-blur-sm">
-            <ProgressBar value={answeredCount / block.items.length} tone="ink" size="sm" aria-label={t("answeredOf", { done: answeredCount, total: block.items.length })} />
-            <span className="shrink-0 text-sm text-ink-muted tabular-nums">
-              {t("answeredOf", { done: answeredCount, total: block.items.length })}
-            </span>
-          </div>
+      <div className="flex items-center gap-3 rounded-lg bg-panel-2 px-3 py-2">
+        <ProgressBar value={answeredCount / block.items.length} tone="ink" size="sm" aria-label={t("answeredOf", { done: answeredCount, total: block.items.length })} />
+        <span className="shrink-0 text-sm text-ink-muted tabular-nums">
+          {t("answeredOf", { done: answeredCount, total: block.items.length })}
+        </span>
+      </div>
 
-          <ol className="flex flex-col gap-4">
-            {block.items.map((item, i) => (
-              <li key={item.id}>
-                <GateQuestion
-                  item={item}
-                  index={i}
-                  value={responses[item.id]}
-                  disabled={phase === "submitting"}
-                  onChange={(v) => setResponses((r) => ({ ...r, [item.id]: v }))}
-                />
-              </li>
-            ))}
-          </ol>
+      <nav aria-label="Quiz questions" className="flex flex-wrap items-center gap-2">
+        {block.items.map((item, i) => {
+          const response = responses[item.id];
+          const answered = Array.isArray(response) ? response.length > 0 : !!response?.trim();
+          return <button key={item.id} type="button" onClick={() => setQuestionIndex(i)} aria-current={i === questionIndex ? "step" : undefined} aria-label={`Question ${i + 1}${answered ? ", answered" : ""}`} className={cn("flex size-8 items-center justify-center rounded-full border text-xs font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring/60", i === questionIndex ? "border-stage-gate bg-stage-gate text-on-stage" : answered ? "border-ok-line bg-ok-soft text-ok" : "border-line bg-panel text-ink-muted")}>{answered ? <Check className="size-3.5" /> : i + 1}</button>;
+        })}
+      </nav>
 
-          <div className="flex justify-end">
-            <Button
-              size="lg"
-              variant="brand"
-              disabled={phase === "submitting" || answeredCount === 0}
-              onClick={requestSubmit}
-            >
-              {phase === "submitting" ? <Loader2 className="animate-spin" data-icon="inline-start" /> : null}
-              {phase === "submitting" ? t("gateGrading") : t("gateSubmit")}
-            </Button>
-          </div>
-        </>
-      )}
+      <GateQuestion
+        key={block.items[questionIndex]!.id}
+        item={block.items[questionIndex]!}
+        index={questionIndex}
+        value={responses[block.items[questionIndex]!.id]}
+        disabled={phase === "submitting"}
+        onChange={(v) => setResponses((r) => ({ ...r, [block.items[questionIndex]!.id]: v }))}
+      />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Button variant="ghost" disabled={questionIndex === 0 || phase === "submitting"} onClick={() => setQuestionIndex((i) => Math.max(0, i - 1))}>
+          <ChevronLeft data-icon="inline-start" />Previous
+        </Button>
+        {questionIndex < block.items.length - 1 ? (
+          <Button variant="brand" onClick={() => setQuestionIndex((i) => Math.min(block.items.length - 1, i + 1))}>
+            Next question<ChevronRight data-icon="inline-end" />
+          </Button>
+        ) : (
+          <Button size="lg" variant="brand" disabled={phase === "submitting" || answeredCount === 0} onClick={() => (answeredCount < block.items.length ? setConfirm(true) : submit())}>
+            {phase === "submitting" ? <Loader2 className="animate-spin" data-icon="inline-start" /> : null}
+            {phase === "submitting" ? t("gateGrading") : t("gateSubmit")}
+          </Button>
+        )}
+      </div>
 
       <Dialog open={confirm} onOpenChange={setConfirm}>
         <DialogContent>
@@ -217,177 +219,6 @@ export function GateStage({
   );
 }
 
-/** A response counts as answered when it has content: picks, or a trimmed string. */
-function isAnswered(v: GateResponse | undefined): boolean {
-  return Array.isArray(v) ? v.length > 0 : !!v?.trim();
-}
-
-/**
- * The final check as a deck: one question per slide, so a twelve-question exam
- * reads like a presentation instead of a scrolling form. Answering a
- * single-choice question turns the slide on its own (multi-select and fill-in
- * need a deliberate Next, since their answers are more than one gesture).
- * Previous and the dot rail allow revising anything before submitting — still
- * no correctness feedback until then, by gate rule. The dots only ever show
- * which questions have an answer, never whether it is right.
- */
-function GateSlides({
-  block,
-  responses,
-  submitting,
-  onChange,
-  onRequestSubmit,
-}: {
-  block: GateBlock;
-  responses: Record<string, GateResponse>;
-  submitting: boolean;
-  onChange: (id: string, v: GateResponse) => void;
-  onRequestSubmit: () => void;
-}) {
-  const t = useTranslations("player");
-  const items = block.items;
-  const [index, setIndex] = React.useState(0);
-  const [dir, setDir] = React.useState(1);
-  const timer = React.useRef<number | null>(null);
-  const slideEl = React.useRef<HTMLDivElement | null>(null);
-  const firstRender = React.useRef(true);
-  const answeredCount = items.filter((i) => isAnswered(responses[i.id])).length;
-  const last = index === items.length - 1;
-  const item = items[index]!;
-
-  React.useEffect(() => () => {
-    if (timer.current) window.clearTimeout(timer.current);
-  }, []);
-
-  // popLayout keeps the entering slide in the tree at once, so focus can move
-  // as soon as the index changes instead of waiting an animation out.
-  React.useEffect(() => {
-    if (firstRender.current) {
-      // when the gate opens, the player has already focused the stage
-      firstRender.current = false;
-      return;
-    }
-    slideEl.current?.focus({ preventScroll: true });
-  }, [index]);
-
-  function clearTimer() {
-    if (timer.current) {
-      window.clearTimeout(timer.current);
-      timer.current = null;
-    }
-  }
-
-  function go(n: number) {
-    const next = Math.max(0, Math.min(items.length - 1, n));
-    if (next === index) return;
-    clearTimer();
-    setDir(next > index ? 1 : -1);
-    setIndex(next);
-  }
-
-  function answer(next: GateItem, v: GateResponse) {
-    // auto-advance only on a first answer: revisiting a slide means the learner
-    // is revising it, and the deck should not pull them forward mid-thought
-    const first = !isAnswered(responses[next.id]);
-    onChange(next.id, v);
-    if (first && next.kind === "mc" && !last && !submitting) {
-      clearTimer();
-      // let the picked option's highlight land before the slide turns
-      timer.current = window.setTimeout(() => go(index + 1), 300);
-    }
-  }
-
-  return (
-    <>
-      <div className="sticky top-(--nav-h) z-10 -mx-1 flex flex-col gap-2 rounded-lg bg-canvas/90 px-1 py-2 backdrop-blur-sm">
-        <div className="flex items-center gap-3">
-          <ProgressBar
-            value={(index + 1) / items.length}
-            tone="ink"
-            size="sm"
-            aria-label={t("gateQuestionOf", { n: index + 1, total: items.length })}
-          />
-          <span className="shrink-0 text-sm text-ink-muted tabular-nums">
-            {t("gateQuestionOf", { n: index + 1, total: items.length })}
-          </span>
-        </div>
-        <div role="group" aria-label={t("gateDotsLabel")} className="flex flex-wrap items-center gap-1.5">
-          {items.map((it, i) => {
-            const answered = isAnswered(responses[it.id]);
-            return (
-              <button
-                key={it.id}
-                type="button"
-                onClick={() => go(i)}
-                disabled={submitting}
-                aria-current={i === index ? "step" : undefined}
-                aria-label={`${t("gateQuestionN", { n: i + 1 })}${answered ? `, ${t("gateDotAnswered")}` : ""}`}
-                className={cn(
-                  "size-2.5 rounded-full border transition-colors duration-(--dur-1)",
-                  i === index
-                    ? "border-brand bg-brand"
-                    : answered
-                      ? "border-brand/40 bg-brand/50"
-                      : "border-line bg-transparent hover:border-brand-line",
-                )}
-              />
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="relative min-h-[16rem]">
-        <AnimatePresence mode="popLayout" initial={false} custom={dir}>
-          <motion.div
-            key={item.id}
-            custom={dir}
-            ref={slideEl}
-            role="group"
-            tabIndex={-1}
-            aria-label={t("gateQuestionOf", { n: index + 1, total: items.length })}
-            initial={{ opacity: 0, x: 28 * dir }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -28 * dir }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-            className="outline-none"
-          >
-            <GateQuestion
-              item={item}
-              index={index}
-              value={responses[item.id]}
-              disabled={submitting}
-              onChange={(v) => answer(item, v)}
-              onEnterPress={last ? onRequestSubmit : () => go(index + 1)}
-            />
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        {index > 0 ? (
-          <Button variant="ghost" onClick={() => go(index - 1)} disabled={submitting}>
-            <ArrowLeft data-icon="inline-start" />
-            {t("gatePrev")}
-          </Button>
-        ) : (
-          <span />
-        )}
-        {last ? (
-          <Button size="lg" variant="brand" disabled={submitting || answeredCount === 0} onClick={onRequestSubmit}>
-            {submitting ? <Loader2 className="animate-spin" data-icon="inline-start" /> : null}
-            {submitting ? t("gateGrading") : t("gateSubmit")}
-          </Button>
-        ) : (
-          <Button size="lg" variant="brand" onClick={() => go(index + 1)} disabled={submitting}>
-            {t("gateNext")}
-            <ArrowRight data-icon="inline-end" />
-          </Button>
-        )}
-      </div>
-    </>
-  );
-}
-
 function Rule({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <li className="flex items-start gap-2.5 rounded-lg border border-line bg-panel-2/60 p-3 text-sm">
@@ -403,15 +234,12 @@ function GateQuestion({
   value,
   disabled,
   onChange,
-  onEnterPress,
 }: {
   item: GateItem;
   index: number;
   value: GateResponse;
   disabled?: boolean;
   onChange: (v: GateResponse) => void;
-  /** slide mode: Enter in a fill-in turns the slide instead of a button click */
-  onEnterPress?: () => void;
 }) {
   const t = useTranslations("player");
   const id = `gate-${item.id}`;
@@ -435,12 +263,6 @@ function GateQuestion({
             placeholder={item.placeholder}
             disabled={disabled}
             onChange={(e) => onChange(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && onEnterPress) {
-                e.preventDefault();
-                onEnterPress();
-              }
-            }}
             className="max-w-xs font-mono"
             autoComplete="off"
           />
@@ -471,6 +293,7 @@ function GateResultView({
   result,
   remediationHref,
   scope,
+  afterPass,
   onContinue,
   onRetry,
 }: {
@@ -479,13 +302,14 @@ function GateResultView({
   result: GateResult | null;
   remediationHref: (stepId: string) => string;
   scope: "module" | "course";
+  afterPass?: React.ReactNode;
   onContinue: () => void;
   onRetry: () => void;
 }) {
   const t = useTranslations("player");
   const forModule = scope === "module";
   // Revisiting a passed gate: no stored attempt in the UI phase, show the pass state only.
-  const passed = result ? result.passed : true;
+  const passed = result?.passed ?? false;
 
   return (
     <StageShell stage="gate" title={passed ? t("gatePassed") : t("gateFailed")} hideFooter done={passed}>
@@ -596,6 +420,8 @@ function GateResultView({
         </Surface>
       ) : null}
 
+      {passed && forModule ? afterPass : null}
+
       <div className="flex flex-wrap justify-end gap-3">
         {!passed ? (
           <Button variant="outline" onClick={onRetry}>
@@ -605,7 +431,7 @@ function GateResultView({
         ) : null}
         {passed || DEMO_OPEN ? (
           <Button size="lg" variant={passed ? "brand" : "outline"} onClick={onContinue}>
-            {passed ? t("completeContinue") : t("continueAnyway")}
+            {passed ? (forModule ? t("gateUnlockNext") : t("completeContinue")) : t("continueAnyway")}
             <ArrowRight data-icon="inline-end" />
           </Button>
         ) : null}

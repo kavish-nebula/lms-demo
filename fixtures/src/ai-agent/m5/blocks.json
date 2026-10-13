@@ -798,7 +798,12 @@
           }
         ],
         "check": "In the **scout** folder, run `python -c \"import json; print(len(json.load(open('data/orders.json'))))\"`. It prints `5`.",
-        "tip": "A JSONDecodeError means a bracket or comma got lost while pasting. Copy the whole value again: JSON allows no comma after the last item in a list."
+        "tip": "A JSONDecodeError means a bracket or comma got lost while pasting. Copy the whole value again: JSON allows no comma after the last item in a list.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "five orders, zero real customers harmed. with fake data you can make a late return or a stuck parcel happen whenever you want"
+        }
       },
       {
         "title": "Write Scout's six tools",
@@ -817,7 +822,12 @@
           }
         ],
         "check": "The first command prints Grace's order, ORB-10517, found by her email. The second ends with `TimeoutError: ParcelPath did not answer within 10 seconds...`. That error is there on purpose.",
-        "tip": "ModuleNotFoundError: No module named 'tools' means the terminal isn't in the **scout** folder. Use `cd` to move into it, then run the command again."
+        "tip": "ModuleNotFoundError: No module named 'tools' means the terminal isn't in the **scout** folder. Use `cd` to move into it, then run the command again.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "grace found by email, and parcelpath timing out right on cue. that timeout is a gift: now you can test how scout handles failure"
+        }
       },
       {
         "title": "Upgrade memory with pinned facts",
@@ -833,7 +843,12 @@
           }
         ],
         "check": "It prints `{'order_id': 'ORB-10482', 'email': 'ana@example.com', 'name': 'Ana'}`: three facts pinned from one message, with the order ID in capitals.",
-        "tip": "If your Module 4 file had extra helpers you like, you can keep them, but the class must still be called `Conversation` and have `add_user`, `add_assistant`, `pin` and `system_prompt`. agent.py uses all four."
+        "tip": "If your Module 4 file had extra helpers you like, you can keep them, but the class must still be called `Conversation` and have `add_user`, `add_assistant`, `pin` and `system_prompt`. agent.py uses all four.",
+        "win": {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "name, email and ORB-10482 pinned from one message. no more customers typing their order number three times in one chat"
+        }
       },
       {
         "title": "Give Scout its project prompt",
@@ -849,7 +864,12 @@
           }
         ],
         "check": "`python -c \"from prompts import SCOUT_SYSTEM; print(SCOUT_SYSTEM[:40])\"` prints `You are Scout, the support assistant for`.",
-        "tip": "Keep the tool names in the prompt exactly as they appear in **tools.py**. If you ever rename a tool, rename it in both places."
+        "tip": "Keep the tool names in the prompt exactly as they appear in **tools.py**. If you ever rename a tool, rename it in both places.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "every line in that prompt came out of scoping. \"never guess after a tool error\" is the one i'd tattoo on scout if i could"
+        }
       },
       {
         "title": "Assemble the loop with a trace",
@@ -866,7 +886,12 @@
           }
         ],
         "check": "Two trace steps appear, `[1] get_order` with ORB-10482 and `[2] track_parcel` with PP-88213, each followed by a `->` result line. Then Scout says Ana's tent is on its way and should arrive Thursday. The wording varies from run to run; the facts shouldn't.",
-        "tip": "AuthenticationError means the API key isn't set in this terminal. Set **ANTHROPIC_API_KEY** again as in Module 1, then rerun."
+        "tip": "AuthenticationError means the API key isn't set in this terminal. Set **ANTHROPIC_API_KEY** again as in Module 1, then rerun.",
+        "win": {
+          "who": "Maya — founder",
+          "av": "M",
+          "text": "wait, i can watch it work? get_order, then track_parcel, then thursday. first time scout hasn't felt like a black box to me"
+        }
       },
       {
         "title": "Try the hard cases and read the traces",
@@ -878,7 +903,12 @@
           "Then ask `What's my order number again?`"
         ],
         "check": "Rope: `track_parcel` returns `Error: ParcelPath did not answer...` and Scout says it can't check tracking right now, with no invented date. Refund: `request_refund` returns `pending_approval` and Scout says a member of the support team will review it. Grace: `get_order` is called with her email, Scout explains the 30-day window has passed, and the next answer gives ORB-10517 from the pinned facts, usually with no tool call at all.",
-        "tip": "If Scout gives the rope a delivery date anyway, that's an ignored error. Check that the `except` branch in **agent.py** sends `\"is_error\": True` and that the tool-error line is still in **prompts.py**."
+        "tip": "If Scout gives the rope a delivery date anyway, that's an ignored error. Check that the `except` branch in **agent.py** sends `\"is_error\": True` and that the tool-error line is still in **prompts.py**.",
+        "win": {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "no made-up date for elena's rope, no fake approval for owen's refund, grace's order number from memory. my queue, done right"
+        }
       },
       {
         "title": "Write your first test cases",
@@ -895,7 +925,12 @@
           }
         ],
         "check": "`python -c \"import json; print(len(json.load(open('tests/cases.json'))))\"` prints `12`.",
-        "tip": "Keep must_include words short and certain. `2 business days` matches both 1 to 2 business days and 1-2 business days; a whole sentence would fail on harmless wording."
+        "tip": "Keep must_include words short and certain. `2 business days` matches both 1 to 2 business days and 1-2 business days; a whole sentence would fail on harmless wording.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "twelve cases, each one a promise written down. and yes, the poem counts: what scout refuses matters as much as what it answers"
+        }
       },
       {
         "title": "Write evaluate.py and get your first score",
@@ -912,7 +947,12 @@
           }
         ],
         "check": "Twelve PASS or FAIL lines appear, then a summary such as `11 of 12 passed (92%)`. **tests/scores.txt** now has one line with the date, the score and your note. Your score may differ by a case or so from run to run.",
-        "tip": "A failure isn't always Scout's fault. If the reply is right but worded differently, for example Thu instead of Thursday, fix the check. If the facts are wrong, it's a real bug."
+        "tip": "A failure isn't always Scout's fault. If the reply is right but worded differently, for example Thu instead of Thursday, fix the check. If the facts are wrong, it's a real bug.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "first real score, saved with a note. for each fail, read the reply, then the trace: sometimes it's scout, sometimes it's the check"
+        }
       },
       {
         "title": "Break it on purpose, then measure again",
@@ -930,7 +970,12 @@
           }
         ],
         "check": "With email lookup gone, track-email should fail: Scout can't find Ana's order from her email, so Thursday never reaches the reply. After the undo, the score comes back, and **scores.txt** shows the dip and the recovery. If track-email still passes, run its question in `python agent.py` and read the trace to see how Scout got around the change.",
-        "tip": "Always write a short note with each run. A week from now, the notes in scores.txt are how you'll know which change moved the score."
+        "tip": "Always write a short note with each run. A week from now, the notes in scores.txt are how you'll know which change moved the score.",
+        "win": {
+          "who": "Maya — founder",
+          "av": "M",
+          "text": "you broke it, the score caught it, you fixed it. that dip and recovery in scores.txt is the proof i wanted before black friday"
+        }
       }
     ],
     "finish": {
@@ -942,6 +987,44 @@
         "Scout answers a follow-up question from its pinned facts",
         "tests/cases.json has at least 10 cases, and evaluate.py prints a pass rate",
         "tests/scores.txt shows the dip when you broke email lookup, and the recovery"
+      ]
+    },
+    "mission": {
+      "codename": "Base Camp Before Black Friday",
+      "badge": "Trail-Tested Builder",
+      "mentor": {
+        "who": "Priya — developer",
+        "av": "P"
+      },
+      "brief": [
+        {
+          "who": "Maya — founder",
+          "av": "M",
+          "text": "after that 38 out of 60 i don't trust demos anymore. black friday is three weeks out and i need a straight answer: is scout ready or not?"
+        },
+        {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "every question scout can't handle lands in my queue, and on black friday that queue is already on fire. a wrong refund promise is worse than no answer"
+        },
+        {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "my answer: not until scout lives in one folder and has a test set we trust. your mission: assemble it, write its first tests and get a real score"
+        }
+      ],
+      "goal": "Scout runs from one scout folder with six tools, a trace and pinned memory, and evaluate.py scores it on twelve test cases.",
+      "debrief": [
+        {
+          "who": "Maya — founder",
+          "av": "M",
+          "text": "so next time someone asks if scout is ready, i get a number, not a vibe. plus a score history that shows what every change did. that's what i needed"
+        },
+        {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "and the tests caught the email bug the second you brought it back. next stop: guardrails and an API, so scout can face real customers before black friday"
+        }
       ]
     }
   },

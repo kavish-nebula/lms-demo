@@ -3,6 +3,33 @@
   the prototype (src/index.css .vl-*) onto the app's tokens. Every size is in
   container units (cqw) so a slide looks the same at any width.
 */
+.concept-video-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--r-lg) + 4px);
+  background: var(--panel2);
+  box-shadow: var(--shadow-sm);
+}
+.concept-text-cards { display: flex; flex-direction: column; gap: 12px; }
+.concept-text-card {
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
+}
+.concept-transcript-card { padding: 0; overflow: hidden; }
+.concept-video-shell:fullscreen .concept-video-card {
+  width: 100%;
+  max-width: min(100%, calc((100dvh - 120px) * 16 / 9));
+  border: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
 .vl-stage {
   position: relative;
   container-type: inline-size;
@@ -173,6 +200,9 @@
 
 /* phones: the slide grows to fit its content instead of scaling down */
 @media (max-width: 760px) {
+  .concept-video-card { padding: 8px; }
+  .concept-text-card { padding: 15px; }
+  .concept-transcript-card { padding: 0; }
   .vl-stage { aspect-ratio: auto; min-height: 520px; }
   .vl-cols, .vl-define, .vl-split, .vl-cards { grid-template-columns: 1fr; }
   .vl-flow { flex-direction: column; }

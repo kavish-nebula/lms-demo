@@ -12,7 +12,7 @@ import type { ModulePart, ModuleSection } from "@/lib/module-outline";
 /**
  * A module laid out under side headings (The problem, Learn the ideas, See it
  * work, Build it, Apply it, Check yourself, Make it stick), each part numbered,
- * with what the learner does in it and how long it takes. Every part is a
+ * with a short title and duration. Every part is a
  * link: nothing is locked. "rail" is the player's sidebar; "page" is the
  * roomier list on the course page.
  */
@@ -142,7 +142,6 @@ function PartLink({
             </Chip>
           ) : null}
         </span>
-        <span className="mt-0.5 block text-xs leading-snug font-normal text-ink-faint">{t(`does_${part.deliverable.key}`, part.deliverable.values)}</span>
       </span>
       {part.minutes != null ? <span className="pt-0.5 text-xs text-ink-faint tabular-nums">{page ? tc("minutes", { count: part.minutes }) : `${part.minutes}m`}</span> : null}
     </Link>

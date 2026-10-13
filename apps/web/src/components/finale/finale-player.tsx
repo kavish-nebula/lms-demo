@@ -128,7 +128,7 @@ export function FinalePlayer({
         checkId="final"
         remediationHref={remediationHref}
         preview={preview}
-        slides
+        scope="course"
         onGraded={(r) => {
           recordFinal(r.score, r.total, r.passed);
           if (enrolled)

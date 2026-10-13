@@ -1,18 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { cn } from "cn";
 import { useTranslations } from "next-intl";
-import { ChevronDown, Globe2, Lightbulb } from "lucide-react";
-import { Surface } from "@/components/kit/surface";
+import { Globe2, Lightbulb } from "lucide-react";
 import { StageShell, Callout } from "@/components/player/stage-shell";
 import { VideoLesson } from "@/components/player/video/video-lesson";
 import { useWatchedVideos } from "@/components/player/video/watched";
 import { videoMinutes } from "@/lib/module-outline";
 import { WORLD } from "@/lib/world";
-import { planLesson } from "@/lib/learner-plan";
-import { supportFor } from "@/lib/setup";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { Adaptation } from "@/lib/setup";
 import type { ExplainerBlock } from "@/data/types";
 import type { StageProps } from "@/components/player/stages/types";
@@ -35,11 +30,7 @@ export function VideoExplainer({
   const videos = block.videos!;
   const video = videos.find((v) => v.id === videoId) ?? videos[0]!;
   const { watched, markWatched } = useWatchedVideos();
-  // the learner's plan writes an example for every lesson; without one, the field's template (when the lesson has one)
-  const fromPlan = planLesson(adaptation.plan, video.lesson);
-  const template = adaptation.domain && WORLD[video.lesson] ? WORLD[video.lesson]!(adaptation.domain) : "";
-  const world = fromPlan?.inYourWorld.body ? fromPlan.inYourWorld : template ? { title: "", body: template } : null;
-  const light = supportFor(adaptation, video.lesson) === "light";
+  const world = adaptation.domain ? WORLD[video.lesson] : undefined;
 
   return (
     <StageShell
@@ -48,6 +39,7 @@ export function VideoExplainer({
       minutes={videoMinutes(video)}
       bloom={block.bloom}
       completeLabel={nextTitle ? to("nextPart", { title: nextTitle }) : undefined}
+      separateCards
       {...nav}
       done={nav.done || watched.includes(video.id)}
     >
@@ -59,44 +51,34 @@ export function VideoExplainer({
         nextLabel={nextTitle ? to("nextPart", { title: nextTitle }) : t("finishTopic")}
       />
 
-      {world ? (
-        <Callout
-          tone="worked"
-          label={world.title || (adaptation.domain ? t("inYourWorld", { field: adaptation.domain.label }) : t("inYourWorldPlain"))}
-          icon={<Globe2 />}
-        >
-          {world.body}
-        </Callout>
-      ) : null}
+      <div className="concept-text-cards" aria-label="Lesson reading cards">
+        {adaptation.support === "extra" && <Callout className="concept-text-card" tone="worked" label="A little guidance before you begin" icon={<Lightbulb />}>
+          <p className="text-sm">{video.notes[0]} Pause whenever you need to, ask Pip about this slide, or try the experiment. Your place is saved.</p>
+        </Callout>}
 
-      {video.notes.length ? <KeyIdeas key={`ideas-${video.id}`} lesson={video.lesson} notes={video.notes} defaultOpen={!light} /> : null}
+        {world && adaptation.domain ? (
+          <Callout className="concept-text-card" tone="worked" label={t("inYourWorld", { field: adaptation.domain.label })} icon={<Globe2 />}>
+            {world(adaptation.domain)}
+          </Callout>
+        ) : null}
+
+        {video.notes.length ? (
+          <details key={`${video.id}:${adaptation.support}`} open={adaptation.support !== "light"} className="concept-text-card">
+            <summary className="flex cursor-pointer items-center gap-2 font-semibold">
+              <Lightbulb className="size-4 text-brand-ink" aria-hidden />
+              {t("keyIdeas", { lesson: video.lesson })}
+            </summary>
+            <ul className="mt-4 flex flex-col gap-2">
+              {video.notes.map((n) => (
+                <li key={n} className="flex gap-2.5 text-sm leading-relaxed">
+                  <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-brand" />
+                  {n}
+                </li>
+              ))}
+            </ul>
+          </details>
+        ) : null}
+      </div>
     </StageShell>
-  );
-}
-
-/** The lesson's key ideas: open, or folded away when the plan gives this lesson a light touch. */
-function KeyIdeas({ lesson, notes, defaultOpen }: { lesson: string; notes: string[]; defaultOpen: boolean }) {
-  const t = useTranslations("video");
-  const [open, setOpen] = React.useState(defaultOpen);
-  return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      <Surface pad="md" className="flex flex-col gap-3">
-        <CollapsibleTrigger className="flex items-center gap-2 rounded text-left font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring/60">
-          <Lightbulb className="size-4 text-brand-ink" aria-hidden />
-          <span className="flex-1">{t("keyIdeas", { lesson })}</span>
-          <ChevronDown className={cn("size-4 text-ink-faint transition-transform", open && "rotate-180")} aria-hidden />
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <ul className="flex flex-col gap-2">
-            {notes.map((n) => (
-              <li key={n} className="flex gap-2.5 text-sm leading-relaxed">
-                <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-brand" />
-                {n}
-              </li>
-            ))}
-          </ul>
-        </CollapsibleContent>
-      </Surface>
-    </Collapsible>
   );
 }

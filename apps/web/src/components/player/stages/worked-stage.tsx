@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useCompanionStep } from "@/components/learning/course-companion";
 import { cn } from "cn";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotionConfig } from "motion/react";
@@ -11,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { StageShell } from "@/components/player/stage-shell";
 import { McQuestion } from "@/components/player/items";
-import { DEMO_OPEN } from "@/lib/demo";
 import type { WorkedBlock, WorkedExample } from "@/data/types";
 import type { StageProps } from "./types";
 
@@ -84,13 +84,13 @@ function ExampleView({
   const t = useTranslations("player");
   const reduce = useReducedMotionConfig() ?? false;
   const [predicted, setPredicted] = React.useState(!example.predict);
-  // predicting first is asked for, not required: the demo lets the run start straight away
-  const canRun = predicted || DEMO_OPEN;
+  const canRun = predicted;
   const [frame, setFrame] = React.useState(-1);
   const [playing, setPlaying] = React.useState(false);
   const frames = example.frames;
   const lastFrame = frames.length - 1;
   const current = frame >= 0 ? frames[frame]! : null;
+  useCompanionStep({ title: example.title, phase: "worked", guidance: current?.caption ?? example.intro, hint: example.narration });
 
   React.useEffect(() => {
     if (!playing || frame >= lastFrame) return;
