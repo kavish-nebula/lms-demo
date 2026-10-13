@@ -20,6 +20,8 @@ import {
 import { UserBadge, type ShellUser } from "@/components/shell/user-badge";
 import { useEngagement } from "@/components/engagement/provider";
 
+const hiddenLearnerItems = new Set(["reviews", "credentials", "history"]);
+
 export type SidebarProps = {
   role: Role;
   /** roles this user actually holds; others are listed as unavailable */
@@ -67,7 +69,7 @@ export function Sidebar({ role, heldRoles, user, badges = {}, onNavigate, classN
       <nav aria-label={t("dashboard")} className="flex flex-1 flex-col gap-5 overflow-y-auto">
         {NAV[role].map((section, si) => (
           <ul key={si} className={cn("isolate flex flex-col gap-0.5", si > 0 && "border-t border-line pt-4")}>
-            {section.items.filter((item) => platform || item.key !== "activity").map((item) => {
+            {section.items.filter((item) => (platform || item.key !== "activity") && (role !== "learner" || !hiddenLearnerItems.has(item.key))).map((item) => {
               const active = isActive(item.href);
               const Icon = item.icon;
               const badge = badges[item.key];

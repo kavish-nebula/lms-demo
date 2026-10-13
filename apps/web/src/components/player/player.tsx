@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, ListOrdered, Zap } from "lucide-react";
+import { ChevronLeft, ListOrdered, PanelLeftClose, PanelLeftOpen, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -34,6 +34,7 @@ import { useEnrollment } from "@/lib/enrollment";
 import { currentPart, flatParts, moduleOutline, type ModulePart } from "@/lib/module-outline";
 import { stageFromStepId, type StageId } from "@/lib/stages";
 import { orderStages } from "@/lib/topics";
+import { useLocalString,writeLocal } from "@/lib/local-store";
 import { planTopicOrder } from "@/lib/learner-plan";
 import type { ModuleContent, ScenarioBlock, Topic } from "@/data/types";
 
@@ -72,6 +73,8 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
   const support = choice === "auto" ? startingAdaptation.override ?? recommendedSupport(learning.attempts, module.module_id, baseline) : choice;
   const adaptation = React.useMemo(() => ({ ...startingAdaptation, support, override: support }), [startingAdaptation, support]);
   const [railOpen, setRailOpen] = React.useState(false);
+  const outlineKey = `lms-outline:v1:${module.course_id}`;
+  const outlineHidden = useLocalString(outlineKey) === "hidden";
   const moduleHref = `${courseHref}/${module.module_id}`;
   const setupHref = `${courseHref}/enroll`;
 
@@ -247,6 +250,10 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
             </span>
           </div>
           <span className="hidden items-center gap-1 rounded-full border border-brand-line bg-brand-soft px-2 py-1 text-[10px] font-semibold text-brand-ink md:flex"><Zap className="size-3" />+{rewardFor(stage, !!part?.video)} XP</span>
+          <Button variant="outline" size="sm" className="hidden min-h-11 nav:inline-flex" aria-expanded={!outlineHidden} aria-controls="module-outline" onClick={() => writeLocal(outlineKey,outlineHidden ? "visible" : "hidden")}>
+            {outlineHidden ? <PanelLeftOpen data-icon="inline-start" /> : <PanelLeftClose data-icon="inline-start" />}
+            {to(outlineHidden ? "showOutline" : "hideOutline")}
+          </Button>
           <Sheet open={railOpen} onOpenChange={setRailOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="sm" className="nav:hidden">
@@ -264,7 +271,7 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
       </header>
 
       <div className="flex flex-1 gap-8 page-pad py-4 md:py-5">
-        <aside data-map-scroll className="sticky top-[calc(var(--nav-h)+24px)] hidden max-h-[calc(100dvh-var(--nav-h)-48px)] w-72 shrink-0 overflow-y-auto pr-1 nav:block">
+        <aside id="module-outline" data-map-scroll className={`sticky top-[calc(var(--nav-h)+24px)] hidden max-h-[calc(100dvh-var(--nav-h)-48px)] w-72 shrink-0 overflow-y-auto pr-1 ${outlineHidden ? "" : "nav:block"}`}>
           <div className="mb-3 px-2.5 text-xs font-semibold tracking-wide text-ink-faint uppercase">{to("label")}</div>
           {map}
         </aside>

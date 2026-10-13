@@ -1,5 +1,13 @@
 # Learning experience UI
 
+The shared Nebula mark uses the supplied logo image at `public/brand/nebula-mark.png`, including the sidebar and course branding. The existing wordmark remains alongside it.
+
+The course details page omits the How it works section and its section-navigation link.
+
+The learner sidebar omits Reviews, Credentials and History on desktop and in the mobile menu. Their routes and search entries remain available.
+
+The lesson header offers Show/Hide outline on desktop. Collapsing the current module sidebar gives the lesson more room; the display preference is stored per course in this browser and survives navigation. Narrow screens keep the existing outline drawer.
+
 The updated course page leads with a mission, an Orbit Outdoor support-desk scene, and a six-chapter journey. Each chapter shows existing progress; the final course mini-project is shown once, before the final assessment. Original course details remain below this journey.
 
 The lesson workspace adds a compact phase rail, a visible support explanation, and learner-controlled guidance. Concept and worked-example pages offer Lesson and Experiment views. Switching views stops the unmounted video; returning restores its saved slide. Extra guidance opens a lesson introduction and key ideas; lighter support collapses the key ideas. Guided practice follows the selected module support.
