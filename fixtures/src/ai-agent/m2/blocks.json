@@ -710,7 +710,38 @@
           }
         ],
         "check": "Your prompt starts with (.venv), pip reports anthropic as installed or upgraded, and hello.py prints a reply from the model.",
-        "tip": "An authentication error means the key isn't set in this terminal window. Set ANTHROPIC_API_KEY again as you did in Module 1 (in PowerShell: $env:ANTHROPIC_API_KEY = \"sk-ant-...\"), then rerun."
+        "tip": "An authentication error means the key isn't set in this terminal window. Set ANTHROPIC_API_KEY again as you did in Module 1 (in PowerShell: $env:ANTHROPIC_API_KEY = \"sk-ant-...\"), then rerun.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "(.venv) in your prompt and hello.py still talking back. fresh SDK, so structured outputs are on the table now"
+        },
+        "sim": {
+          "kind": "terminal",
+          "prompt": "PS C:\\scout>",
+          "lines": [
+            {
+              "cmd": ".venv\\Scripts\\activate",
+              "alt": [
+                ".venv\\Scripts\\Activate.ps1",
+                "source .venv/bin/activate"
+              ],
+              "out": "",
+              "prompt": "(.venv) PS C:\\scout>"
+            },
+            {
+              "cmd": "pip install --upgrade anthropic",
+              "out": "Requirement already satisfied: anthropic in c:\\scout\\.venv\\lib\\site-packages (0.75.0)\nCollecting anthropic\n  Downloading anthropic-0.83.0-py3-none-any.whl.metadata (29 kB)\nDownloading anthropic-0.83.0-py3-none-any.whl (351 kB)\nInstalling collected packages: anthropic\n  Attempting uninstall: anthropic\n    Found existing installation: anthropic 0.75.0\n    Uninstalling anthropic-0.75.0:\n      Successfully uninstalled anthropic-0.75.0\nSuccessfully installed anthropic-0.83.0"
+            },
+            {
+              "cmd": "python hello.py",
+              "alt": [
+                "python3 hello.py"
+              ],
+              "out": "An AI agent is a program that uses a language model to decide what to do next, takes actions with tools, and keeps going until it reaches a goal.\nTokens used: 18 in, 33 out"
+            }
+          ]
+        }
       },
       {
         "title": "Write Scout's system prompt",
@@ -726,7 +757,56 @@
           }
         ],
         "check": "Scout answers Grace in two to four sentences: returns are accepted within 30 days of delivery, so boots from two months ago are outside the window, and it offers to pass her question to the team. No 90 days, no promise.",
-        "tip": "The wording changes from run to run; that's sampling. The facts must not change: 30 days and no promise. If it still invents a policy, check that the call includes system=SCOUT_SYSTEM."
+        "tip": "The wording changes from run to run; that's sampling. The facts must not change: 30 days and no promise. If it still invents a policy, check that the call includes system=SCOUT_SYSTEM.",
+        "win": {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "30 days, outside the window, offer to pass it to us. that's the answer i'd have given grace myself. no $165 surprise"
+        },
+        "sim": {
+          "kind": "code",
+          "file": "prompts.py",
+          "code": "SCOUT_SYSTEM = \"\"\"You are Scout, the customer support assistant for Orbit Outdoor, a small online shop for hiking, camping and climbing gear.\n# ...\nRules:\n- Only state policy that appears in the policy below. Never promise a refund, discount, date or exception that it does not state.\n- Refunds over $200 need approval from a member of the support team, so never promise one yourself.\n- Never invent order details. If you need an order number, ask for it.\n- If you are unsure, or the policy does not cover the question, say so and offer to pass the question to the team.\n# ...\nOrbit Outdoor policy:\n- Returns: You can return any unused item within 30 days of delivery for a full refund. Items must be unused and in their original packaging.\n# ...\n\"\"\"\n# ...\n    response = client.messages.create(\n        model=\"claude-opus-5-5\",\n        max_tokens=16000,\n        system=SCOUT_SYSTEM,\n        messages=[{\"role\": \"user\", \"content\": question}],",
+          "blanks": [
+            {
+              "token": "30 days",
+              "options": [
+                "90 days",
+                "30 days",
+                "60 days"
+              ]
+            },
+            {
+              "token": "$200",
+              "options": [
+                "$75",
+                "$165",
+                "$200"
+              ]
+            },
+            {
+              "token": "ask for it",
+              "options": [
+                "ask for it",
+                "look up the latest order",
+                "guess it from the email"
+              ]
+            },
+            {
+              "token": "system",
+              "options": [
+                "context",
+                "system",
+                "instructions",
+                "prompt"
+              ]
+            }
+          ],
+          "run": {
+            "cmd": "python prompts.py",
+            "out": "Hi Grace, thanks for getting in touch. We accept returns within 30 days of delivery, so boots that arrived about two months ago are outside our return window. If you'd like, I can pass your question to our support team so they can take a look."
+          }
+        }
       },
       {
         "title": "Add the classifier's instructions",
@@ -743,7 +823,47 @@
           }
         ],
         "check": "The terminal prints the first 40 characters of the new prompt: You sort incoming customer emails for Or",
-        "tip": "An ImportError means Python can't see CLASSIFY_SYSTEM at the top level of the file. Make sure it isn't indented under the if __name__ block, and that the file is saved."
+        "tip": "An ImportError means Python can't see CLASSIFY_SYSTEM at the top level of the file. Make sure it isn't indented under the if __name__ block, and that the file is saved.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "it imports, so it sits at the top level where it belongs. separate jobs, separate prompts: the sorter never replies"
+        },
+        "sim": {
+          "kind": "code",
+          "file": "prompts.py",
+          "code": "CLASSIFY_SYSTEM = \"\"\"You sort incoming customer emails for Orbit Outdoor's support team. You do not reply to the customer.\n\nFor each email, fill in the ticket fields:\n- intent: what the customer mainly wants. If none of the labels fit, use \"other\".\n- order_id: the order number exactly as written in the email, like ORB-10482. If the email has no order number, use null. Never guess or invent one.\n- urgent: true only if the item arrived damaged, the customer needs it within the next few days, or they are very upset. Otherwise false.\n- summary: one short sentence the support team can read at a glance.\n\"\"\"",
+          "blanks": [
+            {
+              "token": "You do not reply to the customer",
+              "options": [
+                "Draft a friendly reply to the customer",
+                "You do not reply to the customer",
+                "Reply only if the email is urgent"
+              ]
+            },
+            {
+              "token": "\"other\"",
+              "options": [
+                "\"unknown\"",
+                "\"return\"",
+                "\"other\""
+              ]
+            },
+            {
+              "token": "null",
+              "options": [
+                "null",
+                "the latest order number",
+                "ORB-00000"
+              ]
+            }
+          ],
+          "run": {
+            "cmd": "python -c \"from prompts import CLASSIFY_SYSTEM; print(CLASSIFY_SYSTEM[:40])\"",
+            "out": "You sort incoming customer emails for Or"
+          }
+        }
       },
       {
         "title": "Turn three emails into JSON",
@@ -759,7 +879,52 @@
           }
         ],
         "check": "Three JSON objects, one per email. Ana's has intent where_is_order and order_id ORB-10482; Owen's is exchange with ORB-10588; Tom's is product_question with order_id null. Each one also has urgent and a one-line summary.",
-        "tip": "TypeError: unexpected keyword argument 'output_config' means your SDK is too old for structured outputs: run pip install --upgrade anthropic. ModuleNotFoundError: No module named 'prompts' means you're not running from the scout folder."
+        "tip": "TypeError: unexpected keyword argument 'output_config' means your SDK is too old for structured outputs: run pip install --upgrade anthropic. ModuleNotFoundError: No module named 'prompts' means you're not running from the scout folder.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "three messy emails in, three dicts out, same four fields every time. that's data your code can trust, not prose to untangle"
+        },
+        "sim": {
+          "kind": "code",
+          "file": "classify.py",
+          "code": "TICKET_SCHEMA = {\n    \"type\": \"object\",\n    \"properties\": {\n        \"intent\": {\n            \"type\": \"string\",\n            \"enum\": [\"where_is_order\", \"return\", \"exchange\", \"product_question\", \"other\"],\n        },\n        \"order_id\": {\"type\": [\"string\", \"null\"]},\n        \"urgent\": {\"type\": \"boolean\"},\n        \"summary\": {\"type\": \"string\"},\n    },\n    \"required\": [\"intent\", \"order_id\", \"urgent\", \"summary\"],\n    \"additionalProperties\": False,\n}\n# ...\n        output_config={\"format\": {\"type\": \"json_schema\", \"schema\": TICKET_SCHEMA}},\n    # ...\n    return json.loads(text)",
+          "blanks": [
+            {
+              "token": "enum",
+              "options": [
+                "examples",
+                "enum",
+                "default",
+                "pattern"
+              ]
+            },
+            {
+              "token": "[\"string\", \"null\"]",
+              "options": [
+                "\"string\"",
+                "[\"string\", \"number\"]",
+                "[\"string\", \"null\"]"
+              ]
+            },
+            {
+              "token": "output_config",
+              "options": [
+                "output_config",
+                "tools",
+                "metadata"
+              ]
+            },
+            {
+              "token": "json.loads",
+              "options": [
+                "json.dumps",
+                "str",
+                "json.loads"
+              ]
+            }
+          ]
+        }
       },
       {
         "title": "Try an email with no order number",
@@ -775,7 +940,48 @@
           }
         ],
         "check": "The JSON shows intent return and \"order_id\": null, and the last line reads: OK: the email has no order number, so order_id is null.",
-        "tip": "If the assert fails, check two things: order_id's type in TICKET_SCHEMA is [\"string\", \"null\"], and CLASSIFY_SYSTEM still says to use null and never guess."
+        "tip": "If the assert fails, check two things: order_id's type in TICKET_SCHEMA is [\"string\", \"null\"], and CLASSIFY_SYSTEM still says to use null and never guess.",
+        "win": {
+          "who": "Maya — founder",
+          "av": "M",
+          "text": "null instead of a made-up order number. when it doesn't know, it says so. that's exactly the habit i wanted after the refund mess"
+        },
+        "sim": {
+          "kind": "code",
+          "file": "classify.py",
+          "code": "if __name__ == \"__main__\":\n    email = \"Hi, I'd like to return the boots I bought from you last month. They pinch at the toes. Could you send me a return label?\"\n    ticket = classify(email)\n    print(json.dumps(ticket, indent=2))\n    assert ticket[\"order_id\"] is None, \"Scout invented an order number!\"\n    print(\"OK: the email has no order number, so order_id is null.\")",
+          "blanks": [
+            {
+              "token": "assert",
+              "options": [
+                "print",
+                "assert",
+                "return"
+              ]
+            },
+            {
+              "token": "ticket[\"order_id\"]",
+              "options": [
+                "ticket[\"intent\"]",
+                "ticket[\"urgent\"]",
+                "ticket[\"order_id\"]"
+              ]
+            },
+            {
+              "token": "is None",
+              "options": [
+                "is None",
+                "== \"null\"",
+                "== \"\"",
+                "is not None"
+              ]
+            }
+          ],
+          "run": {
+            "cmd": "python classify.py",
+            "out": "{\n  \"intent\": \"return\",\n  \"order_id\": null,\n  \"urgent\": false,\n  \"summary\": \"Customer wants to return boots bought last month because they pinch at the toes, and asks for a return label.\"\n}\nOK: the email has no order number, so order_id is null."
+          }
+        }
       },
       {
         "title": "Print the queue as a table",
@@ -791,7 +997,48 @@
           }
         ],
         "check": "A header and three rows, something like: 1 where_is_order ORB-10482 yes, 2 exchange ORB-10588 no, 3 product_question - no, each followed by its summary. The summaries are worded differently each run; the fields stay the same.",
-        "tip": "Each row is one API call, so the table appears over a few seconds. If an email raises ValueError, the message shows its stop_reason."
+        "tip": "Each row is one API call, so the table appears over a few seconds. If an email raises ValueError, the message shows its stop_reason.",
+        "win": {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "ok, this i can scan. ana's tent order is flagged urgent before her friday trip, and tom's question can wait. that's my triage"
+        },
+        "sim": {
+          "kind": "code",
+          "file": "classify.py",
+          "code": "if __name__ == \"__main__\":\n    print(f\"{'#':<3}{'intent':<18}{'order_id':<11}{'urgent':<8}summary\")\n    for number, email in enumerate(EMAILS, start=1):\n        ticket = classify(email)\n        order_id = ticket[\"order_id\"] or \"-\"\n        urgent = \"yes\" if ticket[\"urgent\"] else \"no\"\n        print(f\"{number:<3}{ticket['intent']:<18}{order_id:<11}{urgent:<8}{ticket['summary']}\")",
+          "blanks": [
+            {
+              "token": "enumerate",
+              "options": [
+                "range",
+                "zip",
+                "enumerate",
+                "sorted"
+              ]
+            },
+            {
+              "token": "ticket[\"urgent\"]",
+              "options": [
+                "ticket[\"urgent\"]",
+                "ticket[\"intent\"]",
+                "ticket[\"summary\"]"
+              ]
+            },
+            {
+              "token": "\"-\"",
+              "options": [
+                "\"ORB-00000\"",
+                "\"-\"",
+                "\"ORB-10482\""
+              ]
+            }
+          ],
+          "run": {
+            "cmd": "python classify.py",
+            "out": "#  intent            order_id   urgent  summary\n1  where_is_order    ORB-10482  yes     Ana's tent order hasn't moved in three days and she leaves for a camping trip on Friday.\n2  exchange          ORB-10588  no      Owen wants to swap his Storm shell jacket from size L to M.\n3  product_question  -          no      Tom asks if the Summit sleeping bag is warm enough just below freezing."
+          }
+        }
       },
       {
         "title": "Add an email of your own",
@@ -807,7 +1054,39 @@
           }
         ],
         "check": "A fourth row appears for Elena with ORB-10560. Her email asks two things, so the model picks the one it judges main, but the intent is always one of your five labels, never a new one.",
-        "tip": "Each email is a string in quotes followed by a comma. Miss a comma and Python silently joins two emails into one, so you'd see three rows instead of four."
+        "tip": "Each email is a string in quotes followed by a comma. Miss a comma and Python silently joins two emails into one, so you'd see three rows instead of four.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "elena asked two things and the enum still kept her inside your five labels. messy inbox, tidy data. the schema earns its keep"
+        },
+        "sim": {
+          "kind": "code",
+          "file": "classify.py",
+          "code": "EMAILS = [\n    # ...\n    \"Is the Summit sleeping bag warm enough for a night just below freezing? I'm thinking of buying one for a trip in March. Tom\",\n    \"My climbing rope, order ORB-10560, still hasn't arrived. Honestly, once it does I'd like to send it back. Elena\",\n]",
+          "blanks": [
+            {
+              "token": "EMAILS",
+              "options": [
+                "TICKET_SCHEMA",
+                "EMAILS",
+                "CLASSIFY_SYSTEM"
+              ]
+            },
+            {
+              "token": "Elena\",",
+              "options": [
+                "Elena\"",
+                "Elena\",",
+                "Elena\"."
+              ]
+            }
+          ],
+          "run": {
+            "cmd": "python classify.py",
+            "out": "#  intent            order_id   urgent  summary\n1  where_is_order    ORB-10482  yes     Ana's Trailhead tent hasn't moved in three days and she leaves on Friday.\n2  exchange          ORB-10588  no      Owen wants to exchange his Storm shell jacket for a size M.\n3  product_question  -          no      Tom asks whether the Summit sleeping bag is warm enough just below freezing.\n4  where_is_order    ORB-10560  no      Elena's climbing rope hasn't arrived yet, and she wants to return it once it does."
+          }
+        }
       }
     ],
     "finish": {
@@ -819,6 +1098,44 @@
         "classify.py returns intent, order_id, urgent and summary for every email",
         "An email with no order number gives order_id null",
         "The table prints one row per email in EMAILS"
+      ]
+    },
+    "mission": {
+      "codename": "Operation Trail Triage",
+      "badge": "Inbox Pathfinder",
+      "mentor": {
+        "who": "Priya — developer",
+        "av": "P"
+      },
+      "brief": [
+        {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "400 emails a day hit my queue and someone reads every one just to decide where it goes. most days that someone is me, before i've answered a single customer"
+        },
+        {
+          "who": "Maya — founder",
+          "av": "M",
+          "text": "and that 90-day promise nearly cost us $165. scout gets our real policy before it drafts another word, and it has to understand an email before acting on it"
+        },
+        {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "your mission: give scout a real system prompt in prompts.py, then build classify.py so every email comes out as JSON leo can route. i'll hand you the steps one by one"
+        }
+      ],
+      "goal": "prompts.py gives Scout Orbit's real policy, and classify.py turns every customer email into JSON with intent, order_id, urgent and summary.",
+      "debrief": [
+        {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "four emails just became a table i can scan in seconds: urgent ones flagged, no invented order numbers. that's the first hour of my morning back"
+        },
+        {
+          "who": "Maya — founder",
+          "av": "M",
+          "text": "and scout says 30 days now, not 90. next it gets tools, so it can actually look up the orders it just learned to spot. good work"
+        }
       ]
     }
   },

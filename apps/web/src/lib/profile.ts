@@ -1,17 +1,18 @@
 "use client";
 
 import * as React from "react";
-import { api, storeProfile, useProfileData, type ProfileView } from "@/lib/api";
-import { writeLocal } from "@/lib/local-store";
+import { useLocalJson, writeLocal } from "@/lib/local-store";
 import { PREFS_KEY } from "@/lib/prefs";
 import type { SetupAnswers } from "@/lib/setup";
 
 /**
  * The learner profile: answered once, at the first enrolment, and reused for
- * every course after that. Editable on the Profile page. Stored on the server
- * (PUT /api/v1/profile); the comfort answers also set this browser's display.
+ * every course after that. Editable on the Profile page. Kept locally until
+ * PUT /v1/me/profile exists.
  */
 export type Profile = { answers: SetupAnswers; needs: string[]; at: string; version: 1 };
+
+const KEY = "lms-profile";
 
 /** Comfort answers become the app's display settings (text size, motion). */
 export function applyComfort(needs: string[]) {
@@ -28,16 +29,13 @@ export function applyComfort(needs: string[]) {
 }
 
 export function useProfile() {
-  const { profile: stored, ready } = useProfileData();
-  const profile: Profile | null = React.useMemo(() => (stored ? { ...stored, version: 1 } : null), [stored]);
+  const profile = useLocalJson<Profile | null>(KEY, null);
 
-  const save = React.useCallback(async (answers: SetupAnswers, needs: string[]) => {
-    // optimistic, then the server's copy
-    await storeProfile({ answers, needs, at: new Date().toISOString() });
-    const res = await api<{ profile: ProfileView }>("/api/v1/profile", { method: "PUT", body: { answers, needs } });
-    await storeProfile(res.profile);
+  const save = React.useCallback((answers: SetupAnswers, needs: string[]) => {
+    const next: Profile = { answers, needs, at: new Date().toISOString(), version: 1 };
+    writeLocal(KEY, JSON.stringify(next));
     if (needs.length) applyComfort(needs.includes("none") ? [] : needs);
   }, []);
 
-  return { profile, ready, save };
+  return { profile, save };
 }

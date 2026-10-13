@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
+import { recordActivity, useLearning } from "@/lib/learning-state";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, ListOrdered, Lock } from "lucide-react";
+import { ChevronLeft, ListOrdered, Lock, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -18,8 +19,7 @@ import { WrapUpStage } from "@/components/finale/wrap-up-stage";
 import { useCourseProgress } from "@/lib/course-progress";
 import { useEnrollment } from "@/lib/enrollment";
 import { useFinale } from "@/lib/finale";
-import { useLearnerReady } from "@/lib/api";
-import { queueSignal } from "@/lib/signals";
+import { useHydrated } from "@/lib/local-store";
 import type { Course, FinaleContent, FinaleStepId } from "@/data/types";
 
 /**
@@ -32,25 +32,26 @@ export function FinalePlayer({
   finale,
   step,
   authoredModules,
-  hasProject = false,
 }: {
   course: Course;
   finale: FinaleContent;
   step: FinaleStepId;
   /** modules with lesson content, so "revisit" links can open the lesson itself */
   authoredModules: string[];
-  /** the mini project is built in the browser, in its workspace */
-  hasProject?: boolean;
 }) {
   const t = useTranslations("finale");
   const tp = useTranslations("player");
   const router = useRouter();
-  const hydrated = useLearnerReady();
+  const hydrated = useHydrated();
   const progress = useCourseProgress(course);
   const { state, markDone, recordFinal } = useFinale(course.course_id);
-  const { adaptation, enrolled } = useEnrollment(course.course_id);
+  const { adaptation } = useEnrollment(course.course_id);
   const [railOpen, setRailOpen] = React.useState(false);
   const courseHref = `/learn/courses/${course.course_id}`;
+  const { update: updateLearning } = useLearning(course.course_id);
+  React.useEffect(() => {
+    updateLearning((s) => ({ ...s, resume: { href: `${courseHref}/finale/${step}`, title: course.finale.title } }));
+  }, [courseHref, step, course.finale.title, updateLearning]);
 
   const steps = progress.finale;
   const i = steps.findIndex((f) => f.step.id === step);
@@ -58,6 +59,7 @@ export function FinalePlayer({
   const prev = steps[i - 1];
   const next = steps[i + 1];
   const preview = current.locked;
+  const reward = step === "capstone" ? 150 : step === "final-check" ? 100 : 25;
 
   const go = React.useCallback(
     (id: string) => {
@@ -111,11 +113,13 @@ export function FinalePlayer({
         preview={preview}
         roleKey={adaptation.roleKey}
         roleLabel={adaptation.roleLabel}
-        planBrief={adaptation.plan?.capstoneBrief ?? null}
-        workspace={hasProject ? { href: `/learn/courses/${course.course_id}/finale/capstone/workspace`, courseId: course.course_id, enrolled } : null}
         done={current.done}
         onComplete={() => {
-          if (!current.done) markDone("capstone", { capstoneAt: new Date().toISOString() });
+          if (!current.done) {
+            markDone("capstone", { capstoneAt: new Date().toISOString() });
+            recordActivity(course.course_id);
+            toast.success("Launch project accepted · +150 XP");
+          }
           if (next) go(next.step.id);
         }}
       />
@@ -128,21 +132,7 @@ export function FinalePlayer({
         checkId="final"
         remediationHref={remediationHref}
         preview={preview}
-        slides
-        onGraded={(r) => {
-          recordFinal(r.score, r.total, r.passed);
-          if (enrolled)
-            queueSignal(course.course_id, {
-              kind: "final_check",
-              // each missed area names its lesson, or its module number when the check covers a whole module
-              payload: {
-                score: r.score,
-                total: r.total,
-                passed: r.passed,
-                missedLessons: r.failedObjectives.map((id) => finale.objectives.find((o) => o.id === id)?.lesson ?? id.replace(/^obj-/, "")),
-              },
-            });
-        }}
+        onGraded={(r) => { recordFinal(r.score, r.total, r.passed); recordActivity(course.course_id); }}
         onPrev={prev ? () => go(prev.step.id) : undefined}
         onComplete={() => next && go(next.step.id)}
         done={current.done}
@@ -159,6 +149,7 @@ export function FinalePlayer({
         onPrev={prev ? () => go(prev.step.id) : undefined}
         onComplete={() => {
           markDone("wrap-up", { completedAt: new Date().toISOString() });
+          recordActivity(course.course_id);
           toast.success(t("toastComplete", { course: course.title }));
           window.scrollTo({ top: 0, behavior: "smooth" });
         }}
@@ -184,6 +175,7 @@ export function FinalePlayer({
               {doneCount}/{steps.length}
             </span>
           </div>
+          <span className="hidden items-center gap-1 rounded-full border border-brand-line bg-brand-soft px-2 py-1 text-[10px] font-semibold text-brand-ink md:flex"><Zap className="size-3" />+{reward} XP</span>
           <Sheet open={railOpen} onOpenChange={setRailOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="sm" className="nav:hidden">

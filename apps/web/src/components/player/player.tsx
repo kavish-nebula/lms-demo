@@ -4,14 +4,20 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, ListOrdered } from "lucide-react";
+import { ChevronLeft, ListOrdered, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ProgressBar } from "@/components/kit/progress-ring";
 import { TopicContext } from "@/components/player/topic-context";
 import { useModuleProgress } from "@/components/player/progress";
-import { TutorDock } from "@/components/player/tutor-dock";
+import { LearningWorkspace } from "@/components/learning/learning-workspace";
+import { LearningFocusDock } from "@/components/learning/learning-focus-dock";
+import { ReflectionReview } from "@/components/learning/reflection-review";
+import { recommendedSupport } from "@/lib/learning-rules";
+import { recordActivity, recordLearning, ensureReviews, useLearning } from "@/lib/learning-state";
+import { rewardFor } from "@/lib/gamification";
+import { supportFor } from "@/lib/setup";
 import { HookCinema } from "@/components/player/hook/hook-cinema";
 import { ModuleMap } from "@/components/player/module-map";
 import { useWatchedVideos } from "@/components/player/video/watched";
@@ -27,8 +33,6 @@ import { useEnrollment } from "@/lib/enrollment";
 import { currentPart, flatParts, moduleOutline, type ModulePart } from "@/lib/module-outline";
 import { stageFromStepId, type StageId } from "@/lib/stages";
 import { orderStages } from "@/lib/topics";
-import { planTopicOrder } from "@/lib/learner-plan";
-import { SignalProvider, queueSignal } from "@/lib/signals";
 import type { ModuleContent, ScenarioBlock, Topic } from "@/data/types";
 
 export type PlayerProps = {
@@ -57,21 +61,24 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
   const t = useTranslations("player");
   const to = useTranslations("outline");
   const router = useRouter();
-  const { done, complete } = useModuleProgress(module.course_id, module.module_id, initialDone);
+  const { done, complete } = useModuleProgress(module.module_id, initialDone);
   const { watched, markWatched } = useWatchedVideos();
-  const { enrolled, adaptation } = useEnrollment(module.course_id);
+  const { enrolled, adaptation: startingAdaptation } = useEnrollment(module.course_id);
+  const { state: learning, update: updateLearning } = useLearning(module.course_id);
+  const baseline = supportFor(startingAdaptation, String(moduleIndex));
+  const choice = learning.support[module.module_id] ?? "auto";
+  const support = choice === "auto" ? startingAdaptation.override ?? recommendedSupport(learning.attempts, module.module_id, baseline) : choice;
+  const adaptation = React.useMemo(() => ({ ...startingAdaptation, support, override: support }), [startingAdaptation, support]);
   const [railOpen, setRailOpen] = React.useState(false);
   const moduleHref = `${courseHref}/${module.module_id}`;
   const setupHref = `${courseHref}/enroll`;
 
-  // every topic of the module, in the order the learner's plan sets (without a
-  // plan, "see a full example first" puts the watch-it-run topic before the
-  // explanation), split into parts
+  // every topic of the module, in the learner's order ("see a full example first"
+  // puts the watch-it-run topic before the explanation), split into parts
   const sections = React.useMemo(() => {
     const all = topics.length ? topics.map((x) => x.stage) : module.stages_included;
-    const order = planTopicOrder(adaptation.plan, module.module_id, all) ?? orderStages(all, adaptation.order[0] === "example");
-    return moduleOutline(module, topics, order);
-  }, [module, topics, adaptation.plan, adaptation.order]);
+    return moduleOutline(module, topics, orderStages(all, adaptation.order[0] === "example"));
+  }, [module, topics, adaptation.order]);
   const parts = flatParts(sections);
   const part = currentPart(parts, stage, video);
   const at = part ? parts.indexOf(part) : -1;
@@ -92,18 +99,23 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
   );
 
   const onComplete = React.useCallback(() => {
+    const newReward = part ? !isDone(part) : !done.includes(stage);
     if (part?.video) {
       markWatched(part.video.id);
       // the concept topic is done once its last unwatched video is
       const videos = parts.filter((p) => p.video);
       if (videos.every((p) => p.key === part.key || watched.includes(p.video!.id))) complete("explainer");
     } else complete(stage);
+    if (newReward) {
+      recordActivity(module.course_id);
+      toast.success(`${nextPart ? "Mission complete" : module.title + " complete"} · +${rewardFor(stage, !!part?.video)} XP`);
+    }
     if (nextPart) go(nextPart);
     else {
-      toast.success(t("moduleComplete", { next: after.title }));
+      if (!newReward) toast.success(t("moduleComplete", { next: after.title }));
       router.push(after.href);
     }
-  }, [part, parts, watched, markWatched, complete, stage, nextPart, go, router, after, t]);
+  }, [part, parts, watched, markWatched, complete, stage, nextPart, go, router, after, t, isDone, done, module.course_id, module.title]);
 
   React.useEffect(() => {
     window.scrollTo({ top: 0 });
@@ -125,6 +137,9 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
   const nav = { onPrev: prevPart ? () => go(prevPart) : undefined, onComplete, done: part ? isDone(part) : false };
   const objectives = module.metadata.objectives;
   const nextTitle = nextPart?.title ?? after.title;
+  React.useEffect(() => {
+    updateLearning((s) => ({ ...s, resume: { href: `${moduleHref}/${part?.path ?? stage}`, title } }));
+  }, [moduleHref, part?.path, stage, title, updateLearning]);
 
   // a missed lesson in the module check points back to its own video
   const remediationHref = (stepId: string) => {
@@ -166,31 +181,29 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
       body = <GuidedStage block={getBlock(module, "guided")!} adaptation={adaptation} {...nav} />;
       break;
     case "lab":
-      body = <ScenarioStage block={getBlock(module, "lab") as ScenarioBlock} moduleId={module.module_id} {...nav} />;
+      body = <ScenarioStage block={getBlock(module, "lab") as ScenarioBlock} support={support} {...nav} />;
       break;
-    case "gate":
+    case "gate": {
+      const gateBlock = getBlock(module, "gate")!;
+      const reviewMinutes = getBlock(module, "review")?.duration_min ?? 0;
       body = (
         <GateStage
           key={module.module_id}
-          block={getBlock(module, "gate")!}
+          block={{ ...gateBlock, duration_min: gateBlock.duration_min + reviewMinutes }}
           objectives={objectives}
           checkId={`gate-${module.module_id}`}
           scope="module"
-          remediationHref={remediationHref}
+          afterPass={<ReflectionReview />}
           onGraded={(r) => {
-            if (!enrolled) return;
-            // each missed area names its lesson, so the plan can add help where it was needed
-            const lessonOf = (id: string) => objectives.find((o) => o.id === id)?.lesson ?? id.replace(/^obj-/, "");
-            queueSignal(module.course_id, {
-              kind: "module_check",
-              moduleId: module.module_id,
-              payload: { score: r.score, total: r.total, passed: r.passed, missedLessons: r.failedObjectives.map(lessonOf) },
-            });
+            recordLearning(module.course_id, { id: `gate:${module.module_id}`, moduleId: module.module_id, correct: r.passed, helped: false });
+            ensureReviews(module.course_id, module.module_id);
           }}
+          remediationHref={remediationHref}
           {...nav}
         />
       );
       break;
+    }
     case "review":
       body = <ReviewStage block={getBlock(module, "review")!} {...nav} />;
       break;
@@ -226,6 +239,7 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
               {doneKeys.size}/{parts.length}
             </span>
           </div>
+          <span className="hidden items-center gap-1 rounded-full border border-brand-line bg-brand-soft px-2 py-1 text-[10px] font-semibold text-brand-ink md:flex"><Zap className="size-3" />+{rewardFor(stage, !!part?.video)} XP</span>
           <Sheet open={railOpen} onOpenChange={setRailOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="sm" className="nav:hidden">
@@ -242,20 +256,35 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
         </div>
       </header>
 
-      <div className="flex flex-1 gap-8 page-pad py-6 md:py-10">
+      <div className="flex flex-1 gap-8 page-pad py-4 md:py-5">
         <aside data-map-scroll className="sticky top-[calc(var(--nav-h)+24px)] hidden max-h-[calc(100dvh-var(--nav-h)-48px)] w-72 shrink-0 overflow-y-auto pr-1 nav:block">
           <div className="mb-3 px-2.5 text-xs font-semibold tracking-wide text-ink-faint uppercase">{to("label")}</div>
           {map}
         </aside>
-        <main id="stage-main" tabIndex={-1} className="min-w-0 flex-1 pb-24 outline-none">
-          <AdaptedStrip stage={stage} moduleId={module.module_id} adaptation={adaptation} enrolled={enrolled} setupHref={setupHref} />
-          <SignalProvider courseId={module.course_id} enabled={enrolled}>
-            <TopicContext.Provider value={header}>{body}</TopicContext.Provider>
-          </SignalProvider>
+        <main id="stage-main" tabIndex={-1} className="min-w-0 flex-1 pb-6 outline-none">
+          <AdaptedStrip stage={stage} adaptation={adaptation} enrolled={enrolled} setupHref={setupHref} />
+          <div className="learning-stage-layout">
+            <LearningWorkspace key={`${module.module_id}:${stage}:${video ?? ""}`} courseId={module.course_id} moduleId={module.module_id} stage={stage} support={support} done={done} startWithExperiment={adaptation.order[0] === "try"}>
+              <TopicContext.Provider value={header}>{body}</TopicContext.Provider>
+            </LearningWorkspace>
+            <LearningFocusDock
+              courseId={module.course_id}
+              moduleTitle={module.title}
+              stage={stage}
+              currentTitle={title}
+              nextTitle={nextTitle}
+              part={Math.max(1, at + 1)}
+              total={parts.length}
+              completed={doneKeys.size}
+              reward={rewardFor(stage, !!part?.video)}
+              support={support}
+              experimentAvailable={module.course_id === "ai-agent" && ["explainer", "worked"].includes(stage)}
+            />
+          </div>
         </main>
       </div>
 
-      <TutorDock module={module} topics={topics} locked={false} />
+
     </div>
   );
 }

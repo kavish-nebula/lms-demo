@@ -1,0 +1,186 @@
+.pip-mascot { flex-shrink: 0; }
+.pip-dock { position: fixed; bottom: 20px; right: 24px; z-index: 45; }
+.pip-dock[data-phase="hook"] { bottom: 100px; z-index: 85; }
+.pip-launcher:focus-visible, .pip-tab:focus-visible, .pip-suggestion:focus-visible, .pip-notes:focus-visible, .journey-stop:focus-visible, .journey-phase-strip a:focus-visible, .focus-lengths button:focus-visible, .focus-tool-grid button:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 3px; }
+.pip-launcher { position: relative; display: grid; width: 88px; height: 88px; place-items: center; border: 1px solid var(--accent-line); border-radius: 50%; padding: 5px; background: color-mix(in srgb, var(--panel) 92%, transparent); box-shadow: var(--shadow-md); cursor: pointer; transition: transform 180ms, border-color 180ms; }
+.pip-launcher:hover { transform: translateY(-3px); }
+.pip-launcher:hover { border-color: var(--accent-ink); }
+.pip-launcher-mascot { width: 76px; height: 76px; }
+.pip-panel { z-index: 90; width: min(400px, calc(100vw - 24px)); max-height: min(720px, var(--radix-popover-content-available-height, calc(100dvh - 110px))); display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--accent-line); border-radius: 24px; background: var(--panel); box-shadow: var(--shadow-md); }
+.pip-header { display: flex; gap: 8px; align-items: center; padding: 12px 12px 4px; }
+.pip-context { display: flex; align-items: center; gap: 7px; padding: 8px 18px 12px; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.pip-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); flex-shrink: 0; }
+.pip-tab { display: flex; align-items: center; gap: 7px; padding: 8px 10px; border-radius: 8px; color: var(--muted); font-size: 12px; cursor: pointer; }
+.pip-tab[aria-pressed=true] { background: var(--accent-soft); color: var(--accent-ink); }
+.pip-tab:disabled { opacity: .45; cursor: default; }
+.pip-messages { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding: 16px; min-height: 160px; max-height: 360px; }
+.pip-bubble { background: var(--panel2); border: 1px solid var(--line); border-radius: 15px 15px 15px 4px; padding: 12px; font-size: 13px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.pip-user { margin-left: 30px; background: var(--accent-soft); border-color: var(--accent-line); border-radius: 15px 15px 4px 15px; }
+.pip-suggestion { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--accent-line); border-radius: 999px; padding: 6px 9px; color: var(--accent-ink); font-size: 11px; cursor: pointer; }
+.pip-input { margin: 0 12px 8px; display: flex; align-items: center; gap: 6px; padding: 7px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel2); }
+.pip-input input { min-width: 0; flex: 1; background: transparent; padding: 4px; font-size: 13px; outline: none; }
+.pip-input:focus-within { outline: 2px solid var(--accent-ink); }
+.pip-notes { width: 100%; resize: vertical; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel2); font-size: 14px; }
+.journey-hero { position: relative; isolation: isolate; display: grid; grid-template-columns: 1.15fr 1fr; gap: 36px; overflow: hidden; padding: 40px; border: 1px solid var(--accent-line); border-radius: 28px; background: linear-gradient(120deg, var(--panel), var(--accent-soft)); }
+.journey-kicker { display: flex; align-items: center; gap: 8px; color: var(--accent-ink); text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: .14em; }
+.journey-hero h1 { margin: 18px 0; font-size: clamp(30px, 3.4vw, 50px); font-weight: 650; line-height: 1.13; letter-spacing: -.045em; max-width: 580px; }
+.journey-world { min-height: 285px; position: relative; display: flex; flex-direction: column; justify-content: center; padding: 22px; border-radius: 22px; border: 1px solid var(--line); background: var(--panel); box-shadow: var(--shadow-sm); }
+.journey-world::before { position: absolute; inset: 0; z-index: -1; border-radius: inherit; content: ''; background-image: radial-gradient(var(--line) 1px, transparent 1px); background-size: 18px 18px; }
+.journey-message { align-self: flex-end; margin: 18px 0; max-width: 85%; background: var(--panel2); border: 1px solid var(--line); padding: 13px 16px; font-size: 13px; line-height: 1.6; border-radius: 15px 15px 3px 15px; }
+.journey-answer { display: flex; gap: 12px; align-items: flex-start; }
+.journey-answer p { font-size: 13px; line-height: 1.7; }
+.journey-capabilities { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+.journey-capabilities span { font-size: 10px; padding: 5px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.journey-capabilities span[data-earned=true] { color: var(--ok); background: var(--ok-soft); border-color: var(--ok-line); }
+.journey-section { border: 1px solid var(--line); padding: 24px; border-radius: 22px; background: var(--panel); }
+.journey-trail { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.journey-stop { display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--line); border-radius: 17px; padding: 18px; background: var(--panel2); transition: border-color 180ms, transform 180ms; }
+.journey-stop:hover { border-color: var(--accent-ink); transform: translateY(-2px); }
+.journey-stop[data-current=true] { border-color: var(--accent-ink); background: var(--accent-soft); }
+.journey-number { display: flex; justify-content: center; align-items: center; width: 32px; height: 32px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); color: var(--accent-ink); font-size: 12px; }
+.game-status { display: grid; grid-template-columns: 1.4fr repeat(3, .75fr); gap: 8px; margin-top: 22px; max-width: 620px; }
+.game-rank, .game-stat { min-width: 0; display: flex; align-items: center; gap: 9px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); }
+.game-level { display: grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; border-radius: 11px; background: var(--accent-deep); color: var(--on-accent); font-weight: 750; }
+.game-rank small, .game-rank strong, .game-stat small, .game-stat strong { display: block; }
+.game-rank small, .game-stat small { margin-top: 1px; color: var(--muted); font-size: 8px; font-weight: 700; letter-spacing: .08em; }
+.game-rank strong, .game-stat strong { font-size: 12px; line-height: 1.2; }
+.game-stat svg { width: 17px; height: 17px; color: var(--accent-ink); }
+.game-rank-progress { grid-column: 1 / -1; padding: 2px 4px 0; }
+.daily-mission { display: flex; align-items: center; gap: 16px; padding: 20px 22px; border: 1px solid var(--accent-line); border-radius: 20px; background: linear-gradient(100deg, var(--accent-soft), var(--panel)); }
+.daily-mission-icon { display: grid; place-items: center; width: 48px; height: 48px; flex-shrink: 0; border-radius: 15px; background: var(--accent-deep); color: var(--on-accent); box-shadow: var(--shadow-sm); }
+.daily-mission-icon svg { width: 23px; }
+.daily-mission h2 { margin-top: 4px; font-size: 17px; font-weight: 650; }
+.daily-mission p { margin-top: 3px; color: var(--muted); font-size: 12px; }
+.daily-reward { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; border: 1px solid var(--accent-line); border-radius: 999px; padding: 6px 9px; color: var(--accent-ink); background: var(--panel); font-size: 11px; font-weight: 700; }
+.daily-reward svg { width: 13px; height: 13px; }
+.game-complete { display: inline-flex; align-items: center; gap: 4px; padding: 4px 7px; border-radius: 999px; background: var(--ok-soft); color: var(--ok); font-size: 9px; font-weight: 700; }
+.game-complete svg { width: 11px; height: 11px; }
+.capability-rack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+.capability-rack > div { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 8px; border: 1px solid var(--line); border-radius: 11px; color: var(--muted); background: var(--panel2); }
+.capability-rack > div[data-earned=true] { border-color: var(--ok-line); color: var(--ok); background: var(--ok-soft); }
+.capability-rack small, .capability-rack strong { display: block; }
+.capability-rack small { font-size: 7px; letter-spacing: .1em; font-weight: 800; }
+.capability-rack strong { overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.capability-icon { display: grid; place-items: center; width: 25px; height: 25px; flex-shrink: 0; border-radius: 8px; border: 1px solid currentColor; font-size: 12px; }
+.capability-icon svg { width: 12px; }
+.game-upgrade { display: flex; align-items: center; gap: 7px; color: var(--accent-ink); font-size: 11px; font-weight: 650; }
+.game-upgrade > span:first-child { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 8px; border: 1px solid var(--accent-line); background: var(--panel); }
+.game-upgrade small { display: block; color: var(--muted); font-size: 7px; line-height: 1.2; letter-spacing: .09em; }
+.mastery-stars { display: flex; gap: 3px; color: var(--line); }
+.mastery-stars svg { width: 13px; height: 13px; fill: transparent; }
+.mastery-stars svg[data-earned=true] { color: var(--warn); fill: var(--warn); }
+.journey-stop[data-state=done] { border-color: var(--ok-line); }
+.journey-stop[data-state=done] .journey-number { border-color: var(--ok-line); color: var(--ok); background: var(--ok-soft); }
+.journey-stop[data-state=locked] { cursor: not-allowed; opacity: .62; }
+.journey-stop[data-state=locked]:hover { border-color: var(--line); transform: none; }
+.final-mission { display: flex; flex-wrap: wrap; align-items: center; gap: 13px; margin-top: 16px; padding: 16px; border: 1px dashed var(--accent-line); border-radius: 15px; background: var(--accent-soft); font-size: 13px; }
+.final-mission small, .final-mission strong, .final-mission span span { display: block; }
+.final-mission small { color: var(--accent-ink); font-size: 8px; font-weight: 800; letter-spacing: .12em; }
+.final-mission strong { margin: 2px 0; }
+.final-mission span span { color: var(--muted); font-size: 11px; }
+.badge-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; margin-top: 18px; }
+.game-badge { min-width: 0; display: flex; align-items: center; gap: 9px; padding: 11px; border: 1px solid var(--line); border-radius: 13px; color: var(--muted); background: var(--panel2); opacity: .65; }
+.game-badge[data-earned=true] { border-color: var(--accent-line); color: var(--accent-ink); background: var(--accent-soft); opacity: 1; }
+.game-badge > span { display: grid; place-items: center; width: 30px; height: 30px; flex-shrink: 0; border-radius: 9px; border: 1px solid currentColor; }
+.game-badge svg { width: 14px; }
+.game-badge strong, .game-badge small { display: block; }
+.game-badge strong { font-size: 11px; }
+.game-badge small { margin-top: 2px; color: var(--muted); font-size: 8px; line-height: 1.25; }
+.journey-phase-strip { display: flex; overflow-x: auto; gap: 7px; padding: 4px 0 12px; scrollbar-width: thin; }
+.journey-phase-strip a { white-space: nowrap; display: flex; gap: 5px; align-items: center; padding: 8px 10px; border-radius: 999px; border: 1px solid var(--line); font-size: 11px; color: var(--muted); }
+.journey-phase-strip a[aria-current=step] { color: var(--accent-ink); background: var(--accent-soft); border-color: var(--accent-line); }
+.learning-stage-layout { display: grid; min-width: 0; align-items: start; }
+.learning-workspace { min-width: 0; }
+.learning-toolbar { position: sticky; top: calc(var(--nav-h) + 8px); z-index: 20; width: 100%; max-width: 1040px; margin: 0 auto 16px; border: 1px solid var(--line); border-radius: 18px; padding: 10px 14px; background: color-mix(in srgb, var(--panel) 94%, transparent); box-shadow: var(--shadow-sm); backdrop-filter: blur(14px); }
+.learning-toolbar select { padding: 7px 9px; font-size: 12px; background: var(--panel2); border: 1px solid var(--line); border-radius: 9px; }
+.learning-focus-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; border-top: 1px solid var(--line); padding-top: 8px; }
+.adaptive-pulse { display: flex; min-width: 0; align-items: center; gap: 7px; color: var(--accent-ink); }
+.adaptive-pulse span, .adaptive-pulse strong, .adaptive-pulse small { display: block; }
+.adaptive-pulse strong { font-size: 11px; line-height: 1.1; }
+.adaptive-pulse small { margin-top: 2px; color: var(--muted); font-size: 9px; line-height: 1.1; }
+.stage-focus-shell { max-width: 1040px; scroll-margin-top: 180px; }
+.stage-separated-shell { gap: 14px; }
+.stage-primary-card, .stage-related-card { overflow: hidden; border: 1px solid var(--line); border-radius: 22px; background: var(--panel); box-shadow: var(--shadow-sm); }
+.stage-separated-shell .stage-focus-header { padding: 18px 22px 14px; border-bottom: 1px solid var(--line); }
+.stage-separated-shell .stage-primary-body { padding: 18px 22px 22px; }
+.stage-related-card { padding: 20px 22px; }
+.stage-separated-shell > .stage-focus-footer { margin: 0; border: 1px solid var(--line); border-radius: 18px; padding: 12px 16px; background: var(--panel); box-shadow: var(--shadow-sm); }
+.stage-primary-card .concept-video-card { border: 0; border-radius: 0; padding: 0; background: transparent; box-shadow: none; }
+.stage-related-card .concept-text-cards > .concept-text-card { border-width: 0 0 1px; border-radius: 0; padding: 0 0 18px; background: transparent; box-shadow: none; }
+.stage-related-card .concept-text-cards > .concept-text-card + .concept-text-card { padding-top: 18px; }
+.stage-related-card .concept-text-cards > .concept-text-card:last-child { border-bottom: 0; padding-bottom: 0; }
+.focus-split { display: grid; grid-template-columns: minmax(0,.9fr) minmax(0,1.1fr); gap: 18px; align-items: start; }
+.focus-pane { min-width: 0; }
+.focus-pane-scroll { max-height: 390px; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.learning-focus-dock { display: none; min-width: 0; flex-direction: column; gap: 12px; padding-bottom: 88px; }
+.focus-dock-card { border: 1px solid var(--line); border-radius: 18px; padding: 15px; background: var(--panel); box-shadow: var(--shadow-sm); }
+.focus-dock-heading { display: flex; align-items: center; gap: 9px; }
+.focus-dock-heading > div, .focus-dock-heading span, .focus-dock-heading small { min-width: 0; display: block; }
+.focus-dock-heading > div > span { font-size: 12px; font-weight: 700; }
+.focus-dock-heading small { margin-top: 1px; overflow: hidden; color: var(--muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.focus-dock-icon { display: grid !important; width: 31px; height: 31px; flex-shrink: 0; place-items: center; border: 1px solid var(--accent-line); border-radius: 10px; color: var(--accent-ink); background: var(--accent-soft); }
+.focus-dock-icon svg { width: 15px; height: 15px; }
+.focus-time { margin-top: 14px; font-family: var(--mono); font-size: 29px; font-weight: 650; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
+.focus-meter { height: 5px; overflow: hidden; border-radius: 999px; background: var(--line); }
+.focus-meter > span { display: block; height: 100%; border-radius: inherit; background: var(--accent-deep); transition: width 240ms var(--ease-out); }
+.focus-finished { display: flex; align-items: flex-start; gap: 5px; margin-top: 8px; color: var(--ok); font-size: 9px; font-weight: 700; }
+.focus-finished svg { width: 12px; height: 12px; flex-shrink: 0; }
+.focus-lengths { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; }
+.focus-lengths button { border: 1px solid var(--line); border-radius: 8px; padding: 5px; color: var(--muted); font-size: 10px; }
+.focus-lengths button[aria-pressed=true] { border-color: var(--accent-line); color: var(--accent-ink); background: var(--accent-soft); }
+.focus-lengths button:disabled { cursor: default; opacity: .55; }
+.focus-session-actions { display: flex; align-items: center; gap: 5px; margin-top: 10px; }
+.focus-session-actions > button:first-child { flex: 1; }
+.focus-mission-kicker { margin-top: 14px; color: var(--accent-ink); font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.focus-dock-card h2 { margin-top: 4px; font-size: 16px; line-height: 1.25; }
+.focus-reward { display: inline-flex; align-items: center; gap: 4px; margin-top: 9px; border-radius: 999px; padding: 4px 7px; color: var(--accent-ink); background: var(--accent-soft); font-size: 9px; font-weight: 700; }
+.focus-reward svg { width: 11px; height: 11px; }
+.focus-course-progress { margin-top: 14px; }
+.focus-course-progress > div:first-child { display: flex; justify-content: space-between; margin-bottom: 6px; color: var(--muted); font-size: 9px; }
+.focus-course-progress strong { color: var(--text); }
+.focus-next { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 7px; margin-top: 12px; border-top: 1px solid var(--line); padding-top: 11px; }
+.focus-next span { color: var(--muted); font-size: 9px; font-weight: 700; text-transform: uppercase; }
+.focus-next p { overflow: hidden; font-size: 11px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.focus-next svg { width: 13px; color: var(--muted); }
+.focus-tool-grid { display: grid; gap: 6px; margin-top: 12px; }
+.focus-tool-grid button { display: flex; align-items: center; gap: 9px; border: 1px solid var(--line); border-radius: 11px; padding: 9px; text-align: left; background: var(--panel2); }
+.focus-tool-grid button:hover { border-color: var(--accent-line); background: var(--accent-soft); }
+.focus-tool-grid button > svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--accent-ink); }
+.focus-tool-grid span, .focus-tool-grid strong, .focus-tool-grid small { display: block; }
+.focus-tool-grid strong { font-size: 11px; }
+.focus-tool-grid small { color: var(--muted); font-size: 8px; }
+@media (min-width: 1500px) {
+  .learning-stage-layout { grid-template-columns: minmax(0,1fr) 270px; gap: 16px; }
+  .learning-stage-layout .learning-toolbar, .learning-stage-layout .stage-focus-shell { max-width: none; }
+  .learning-focus-dock { position: sticky; top: calc(var(--nav-h) + 20px); display: flex; max-height: calc(100dvh - var(--nav-h) - 28px); overflow-y: auto; scrollbar-width: thin; }
+}
+@media (min-width: 1024px) and (min-height: 720px) {
+  #stage-main .stage-focus-shell { height: calc(100dvh - var(--nav-h) - 215px); min-height: 460px; max-height: 680px; gap: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 22px; background: var(--panel); box-shadow: var(--shadow-sm); }
+  #stage-main .stage-focus-header { flex-shrink: 0; padding: 18px 22px 14px; border-bottom: 1px solid var(--line); }
+  #stage-main .stage-focus-header h1 { font-size: 1.35rem; }
+  #stage-main .stage-focus-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 18px 22px; scrollbar-width: thin; }
+  #stage-main .stage-focus-footer { flex-shrink: 0; margin: 0; padding: 14px 22px; background: var(--panel); }
+  #stage-main .stage-focus-shell.stage-separated-shell { display: flex; height: calc(100dvh - var(--nav-h) - 215px); max-height: 680px; gap: 14px; overflow-y: auto; border: 0; background: transparent; box-shadow: none; scrollbar-width: thin; }
+  #stage-main .stage-separated-shell .stage-primary-card { flex-shrink: 0; }
+  #stage-main .stage-separated-shell .stage-primary-body { display: block; overflow: visible; padding: 18px 22px 22px; }
+  #stage-main .stage-separated-shell .stage-related-card { flex-shrink: 0; }
+  #stage-main .stage-separated-shell > .stage-focus-footer { position: sticky; bottom: 0; z-index: 3; flex-shrink: 0; border: 1px solid var(--line); border-radius: 18px; padding: 12px 16px; }
+}
+.experiment { border: 1px solid var(--accent-line); border-radius: 22px; overflow: hidden; background: var(--panel); }
+.experiment-head { padding: 20px 24px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; border-bottom: 1px solid var(--line); }
+.experiment-grid { display: grid; grid-template-columns: 1fr 1fr; }
+.experiment-controls { padding: 24px; background: var(--panel2); border-right: 1px solid var(--line); }
+.experiment-result { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+.experiment-choice { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px; border: 1px solid var(--line); border-radius: 12px; margin-top: 8px; font-size: 13px; background: var(--panel); }
+.experiment-choice:has(input:checked) { border-color: var(--accent-ink); background: var(--accent-soft); }
+.experiment-trace { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.experiment-trace span { border: 1px solid var(--line); padding: 5px 8px; border-radius: 8px; font-family: var(--mono); font-size: 10px; }
+.experiment-result blockquote { padding: 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel2); font-size: 14px; line-height: 1.7; }
+.learning-reflection { padding: 22px; border: 1px solid var(--stage-reflect-line); border-radius: 18px; background: var(--stage-reflect-soft); }
+.learning-reflection textarea { width: 100%; margin-top: 12px; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; font-size: 14px; }
+@media (max-width: 1000px) { .journey-hero { padding: 28px; gap: 24px; } .journey-trail { grid-template-columns: repeat(2, minmax(0,1fr)); } .badge-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width: 700px) { .journey-hero { grid-template-columns: minmax(0,1fr); padding: 22px; } .journey-world { min-height: 230px; } .journey-section { padding: 18px; } .daily-mission { align-items: flex-start; flex-wrap: wrap; } .daily-mission .min-w-0 { min-width: calc(100% - 70px); } .game-status { grid-template-columns: repeat(3, minmax(0, 1fr)); } .game-rank { grid-column: 1 / -1; } .experiment-grid, .focus-split { grid-template-columns: minmax(0,1fr); } .experiment-controls { border-right: 0; border-bottom: 1px solid var(--line); } .pip-dock { right: 12px; bottom: 12px; } .pip-launcher { width: 70px; height: 70px; padding: 4px; } .pip-launcher-mascot { width: 60px; height: 60px; } .learning-toolbar { position: static; } }
+@media (max-width: 430px) { .journey-trail, .badge-grid { grid-template-columns: minmax(0,1fr); } .capability-rack { grid-template-columns: minmax(0,1fr); } .daily-mission > a { width: 100%; } .daily-reward { margin-left: 64px; } }
+@media (prefers-reduced-motion: reduce) { .pip-launcher, .journey-stop { transition: none; transform: none !important; } .focus-meter > span { transition: none; } }
+.reduce-motion .pip-launcher, .reduce-motion .journey-stop { transition: none; transform: none !important; }
+.reduce-motion .focus-meter > span { transition: none; }

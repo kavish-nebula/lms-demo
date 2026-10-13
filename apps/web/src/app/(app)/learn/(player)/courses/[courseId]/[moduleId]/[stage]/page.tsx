@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { ChevronLeft, FileQuestion } from "lucide-react";
 import { getCourse, getModule } from "@/data";
 import { Player } from "@/components/player/player";
+import { ModuleLock } from "@/components/player/module-lock";
 import { EmptyState } from "@/components/kit/states";
 import { Button } from "@/components/ui/button";
 import { isModuleStage } from "@/lib/stages";
@@ -68,6 +69,7 @@ export default async function PlayerPage({ params, searchParams }: { params: Pro
   const moduleIndex = course.modules.findIndex((m) => m.module_id === moduleId) + 1;
   // finishing a module opens the next one at its first written topic; after the last, the capstone
   const following = course.modules[moduleIndex];
+  const previous = course.modules[moduleIndex - 2];
   const after = following
     ? {
         href: `${courseHref}/${following.module_id}/${following.stages.find((s) => following.authored?.includes(s)) ?? following.stages[0]}`,
@@ -75,15 +77,21 @@ export default async function PlayerPage({ params, searchParams }: { params: Pro
       }
     : { href: `${courseHref}/finale/${course.finale.steps[0]!.id}`, title: course.finale.steps[0]!.title };
   return (
-    <Player
-      module={mod}
-      moduleIndex={moduleIndex}
-      stage={stage}
-      courseHref={courseHref}
-      initialDone={[]}
-      topics={outline.topics}
-      video={stage === "explainer" ? v : undefined}
-      after={after}
-    />
+    <ModuleLock
+      courseId={courseId}
+      moduleTitle={outline.title}
+      previous={previous ? { moduleId: previous.module_id, title: previous.title } : undefined}
+    >
+      <Player
+        module={mod}
+        moduleIndex={moduleIndex}
+        stage={stage}
+        courseHref={courseHref}
+        initialDone={[]}
+        topics={outline.topics}
+        video={stage === "explainer" ? v : undefined}
+        after={after}
+      />
+    </ModuleLock>
   );
 }

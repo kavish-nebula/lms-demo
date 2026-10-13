@@ -97,26 +97,15 @@ export function useVoice(on: boolean): Voice {
     settle.current = null;
   }, []);
 
-  // switched off mid-line: clear what is on screen now (the audio itself stops in the effect below)
-  const [wasOn, setWasOn] = React.useState(on);
-  if (wasOn !== on) {
-    setWasOn(on);
-    if (!on) {
-      setProgress(null);
-      setBlocked(false);
-    }
-  }
-
   // read through a ref so `say` never changes: switching sound on must not replay the line
   const enabled = React.useRef(on);
   React.useEffect(() => {
     enabled.current = on;
     if (!on) {
-      audio.current?.pause();
-      settle.current?.(false);
-      settle.current = null;
+      stop(); // switched off mid-line
+      setBlocked(false);
     }
-  }, [on]);
+  }, [on, stop]);
 
   const say = React.useCallback(
     (src: string) => {

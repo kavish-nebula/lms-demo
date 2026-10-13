@@ -2,6 +2,7 @@
 
 import "./hook-cinema.css";
 import * as React from "react";
+import { useCompanionStep, useLearningContext } from "@/components/learning/course-companion";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotionConfig } from "motion/react";
 import { ArrowRight, Play, RotateCcw, Volume2, VolumeX, X } from "lucide-react";
@@ -10,7 +11,6 @@ import { NumberTicker } from "@/components/kit/number-ticker";
 import { DEMO_OPEN } from "@/lib/demo";
 import { useLocalString, writeLocal } from "@/lib/local-store";
 import { ROLE_HOOK } from "@/lib/world";
-import { planModule } from "@/lib/learner-plan";
 import { FilmPlayer } from "./film";
 import { Replay } from "./replay";
 import { parseStake } from "./shots";
@@ -73,16 +73,16 @@ function useClip(src: string) {
 
 /** Milliseconds since the current scene started. */
 function useSceneClock(scene: Scene) {
-  // the reading belongs to the scene it was taken in, so a new scene starts at 0
-  const [tick, setTick] = React.useState({ scene, ms: 0 });
+  const [ms, setMs] = React.useState(0);
   React.useEffect(() => {
+    setMs(0);
     // only the text opening runs on this clock; the film and the replay keep their own pace
     if (scene !== "open" && scene !== "messages" && scene !== "stakes") return;
     const t0 = performance.now();
-    const id = window.setInterval(() => setTick({ scene, ms: performance.now() - t0 }), 100);
+    const id = window.setInterval(() => setMs(performance.now() - t0), 100);
     return () => window.clearInterval(id);
   }, [scene]);
-  return tick.scene === scene ? tick.ms : 0;
+  return ms;
 }
 
 /**
@@ -123,6 +123,8 @@ export function HookCinema({
   const [scene, setScene] = React.useState<Scene>("start");
   const [guess, setGuess] = React.useState<string | null>(null);
   const [sure, setSure] = React.useState<Confidence | null>(null);
+  const learningContext = useLearningContext();
+  useCompanionStep({ title: block.title, phase: "hook", guidance: scene === "call" ? `${block.prompt} Choose your prediction and how confident you feel. It is fine to be unsure.` : scene === "verdict" ? block.wrap_point : `Explore this problem: ${block.why} Use the scene controls to interact, then continue when ready.` });
   const soundOn = useLocalString(SOUND_KEY) !== "off";
   // the text opening (for a hook without a film) is one clip; the film and the replay speak line by line
   const openClip = useClip(`/audio/hook-${moduleId}-open.mp3`);
@@ -179,6 +181,7 @@ export function HookCinema({
   }, [stopAll]);
 
   function lockIn() {
+    if (guess && learningContext) writeLocal(`lms-prediction:v1:${learningContext.courseId}:${moduleId}`, JSON.stringify({ label: block.hunches.find((h) => h.id === guess)?.label ?? guess, confidence: sure }));
     stopAll();
     unlock();
     setScene("replay");
@@ -209,14 +212,12 @@ export function HookCinema({
     writeLocal(SOUND_KEY, soundOn ? "off" : "on");
   }
 
-  // the text opening runs by itself: each of its scenes moves on once its time is up
+  // the text opening runs by itself
   React.useEffect(() => {
-    if (scene !== "open" && scene !== "messages" && scene !== "stakes") return;
-    const id = window.setTimeout(advance, Math.max(0, dur(scene) - clock));
-    return () => window.clearTimeout(id);
-    // dur() only depends on values already listed; the clock is read when the scene or its length changes
+    if ((scene === "open" || scene === "messages" || scene === "stakes") && clock >= dur(scene)) advance();
+    // dur() only depends on values already listed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scene, stretch, advance]);
+  }, [clock, scene, stretch, advance]);
 
   // nothing else on the page while the film is open
   React.useEffect(() => {
@@ -440,10 +441,7 @@ export function HookCinema({
   } else if (scene === "replay") {
     body = <Replay block={block} moduleId={moduleId} voice={voice} guessed={block.hunches.find((h) => h.id === guess)?.label} reduce={reduce} onDone={toVerdict} />;
   } else {
-    // the learner's plan retells why this module matters for them; without one, the role's standard line
-    const roleText =
-      planModule(adaptation.plan, moduleId)?.hookScene ||
-      (adaptation.roleKey ? ROLE_HOOK[moduleIndex]?.[adaptation.roleKey as keyof (typeof ROLE_HOOK)[1]] : undefined);
+    const roleText = adaptation.roleKey ? ROLE_HOOK[moduleIndex]?.[adaptation.roleKey as keyof (typeof ROLE_HOOK)[1]] : undefined;
     const line = correct ? (sure === "certain" ? t("winSure") : t("win")) : sure === "certain" ? t("missSure") : t("miss");
     body = (
       <div className="hc-scene hc-verdict-grid">
@@ -456,7 +454,7 @@ export function HookCinema({
           </motion.p>
           {roleText ? (
             <motion.p {...appear(0.4)} className="hc-role">
-              <b>{adaptation.roleLabel ? t("forYou", { role: adaptation.roleLabel }) : t("forYouPlain")}</b> {roleText}
+              <b>{t("forYou", { role: adaptation.roleLabel ?? "" })}</b> {roleText}
             </motion.p>
           ) : null}
         </div>

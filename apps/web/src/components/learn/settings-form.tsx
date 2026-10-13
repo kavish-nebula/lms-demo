@@ -4,7 +4,6 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { clearLocal, useLocalJson, writeLocal } from "@/lib/local-store";
-import { api, refreshEnrollments, storeProfile } from "@/lib/api";
 import { Surface } from "@/components/kit/surface";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -146,16 +145,9 @@ export function SettingsForm({ languages }: { languages: { code: string; label: 
               <DialogClose asChild>
                 <Button
                   variant="destructive"
-                  onClick={async () => {
-                    try {
-                      await api("/api/v1/me/data", { method: "DELETE" });
-                    } catch {
-                      toast.error(t("resetFailed"));
-                      return;
-                    }
+                  onClick={() => {
                     clearLocal("lms-");
                     save(DEFAULTS);
-                    await Promise.all([refreshEnrollments(), storeProfile(null)]);
                     toast.success(t("resetDone"));
                   }}
                 >

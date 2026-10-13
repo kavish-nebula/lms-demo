@@ -38,63 +38,62 @@
     "step_id": "finale.capstone",
     "duration_min": 120,
     "kicker": "Mini project",
-    "title": "Build Scout's prompt engine",
-    "project_name": "Scout's prompt engine, in Python",
-    "scene": "Black Friday is ten days away and Orbit's inbox is filling up. Before Scout answers anyone, every email goes through one Python file: the prompt engine. It asks the model for a structured answer, checks it, and decides what Scout does: reply, ask for the order number, or hand the email to Leo's team. You'll build it right here in the browser, try it on four sample emails, then run it against ten hidden ones.",
+    "title": "Ship Scout: your first complete agent",
+    "project_name": "Scout v1, Orbit's support agent",
+    "scene": "Black Friday is ten days away. Leo forwards you sixty real tickets from last year and asks one question: can Scout handle the order, return and exchange questions, so his team can focus on the hard ones? Your job is to ship Scout version 1, end to end, on your own.",
     "requirements": [
       {
         "id": "r1",
-        "text": "Every email comes back as the five fields Scout needs (intent, order number, email, reply, action), with an intent from the list."
+        "text": "Scout answers order, return and exchange questions using at least three tools, for example get_order, track_parcel and search_policy."
       },
       {
         "id": "r2",
-        "text": "Scout recognises what each email is about: an order, a return, an exchange, a policy question, or something else."
+        "text": "It keeps the conversation across turns and never asks again for an order number it has already been given."
       },
       {
         "id": "r3",
-        "text": "It picks out the order number, or the customer's email when there isn't one, and never mixes the two up."
+        "text": "Every policy answer comes from Orbit's policy text, and Scout says so when the policy doesn't cover a question."
       },
       {
         "id": "r4",
-        "text": "Policy answers come from Orbit's policy, and when the policy doesn't cover a question Scout says so instead of guessing."
+        "text": "Tool errors go back to the model marked as errors, and Scout tells the customer honestly or hands off to a person."
       },
       {
         "id": "r5",
-        "text": "Each email is routed the right way: answered, a request for the order number, or handed to the team (refunds over $200, anything off-topic, and any email that tries to change Scout's rules)."
+        "text": "A step limit and a spend limit stop every request, and refunds over $200 wait for a person's approval."
       },
       {
         "id": "r6",
-        "text": "Run twice, the same email gets the same decision."
+        "text": "At least ten test cases run with one command and print a pass rate of 80% or more."
       },
       {
         "id": "r7",
-        "text": "Replies sound like Scout, Orbit's support agent, never like a generic AI."
+        "text": "A short README explains Scout's scope, its tools, its guardrails and what you would improve next."
       }
     ],
     "edge_cases": [
       "A customer gives an email address instead of an order number",
-      "No order number and no email at all",
-      "Boots delivered 62 days ago, sent for a return",
-      "A $310 refund",
-      "A question the policy doesn't cover, like a student discount",
-      "An email that tries to switch Scout into \"admin mode\""
+      "The tracking API times out",
+      "A customer asks to return boots delivered 62 days ago",
+      "A message tries to make Scout ignore its rules",
+      "Someone asks about something Scout doesn't cover, like a product review"
     ],
-    "closing": "Run tries the four sample emails and shows every step: the messages you send, the model's raw reply, what you parsed, and Scout's decision. Run tests plays ten hidden emails twice. You pass at 80%, and the email that tries to change Scout's rules must be handed off.",
+    "closing": "Use everything from the guided practice in Modules 3 to 6. When every requirement holds and your test report shows 80% or more, mark the project as done.",
     "reactions": [
       {
         "who": "Leo — support lead",
         "av": "L",
-        "text": "ran last year's tickets through it. every one came back as clean JSON, and the $310 refund landed with us. that's black friday sorted"
+        "text": "ran last year's 60 tickets through it. 51 handled, 9 handed to us with a summary. that's black friday saved"
       },
       {
         "who": "Maya — founder",
         "av": "M",
-        "text": "and it didn't fall for the \"admin mode\" email. good. ship it."
+        "text": "and the $310 refund waited for one of us to approve it. good. ship it."
       },
       {
         "who": "Priya — developer",
         "av": "P",
-        "text": "your parse_reply is more defensive than mine. stealing it."
+        "text": "your README is better than mine. annoying."
       }
     ]
   },

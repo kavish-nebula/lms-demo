@@ -2,15 +2,13 @@
 
 import { useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
-import Link from "next/link";
-import { ArrowRight, Check, ClipboardCheck, Clock, Code2, TriangleAlert, UserRound } from "lucide-react";
+import { ArrowRight, Check, ClipboardCheck, Clock, Rocket, TriangleAlert, UserRound, Zap } from "lucide-react";
 import { Surface } from "@/components/kit/surface";
 import { Chip } from "@/components/kit/chip";
 import { NumberTicker } from "@/components/kit/number-ticker";
 import { Button } from "@/components/ui/button";
 import { StageShell, Callout } from "@/components/player/stage-shell";
 import { ROLE_BRIEF } from "@/lib/world";
-import { useProjectWork } from "@/lib/project";
 import type { CapstoneBlock } from "@/data/types";
 
 /**
@@ -23,8 +21,6 @@ export function CapstoneStage({
   preview,
   roleKey,
   roleLabel,
-  planBrief,
-  workspace = null,
   done,
   onComplete,
 }: {
@@ -32,15 +28,11 @@ export function CapstoneStage({
   preview: boolean;
   roleKey: string | null;
   roleLabel: string | null;
-  /** the learner's plan frames the capstone for their role */
-  planBrief: string | null;
-  /** where the project is built and tested, for a course whose project runs in the browser */
-  workspace?: Workspace | null;
   done: boolean;
   onComplete: () => void;
 }) {
-  if (done) return <Done block={block} workspace={workspace} onComplete={onComplete} />;
-  return <Brief block={block} preview={preview} roleKey={roleKey} roleLabel={roleLabel} planBrief={planBrief} workspace={workspace} onComplete={onComplete} />;
+  if (done) return <Done block={block} onComplete={onComplete} />;
+  return <Brief block={block} preview={preview} roleKey={roleKey} roleLabel={roleLabel} onComplete={onComplete} />;
 }
 
 function Brief({
@@ -48,24 +40,24 @@ function Brief({
   preview,
   roleKey,
   roleLabel,
-  planBrief,
-  workspace,
   onComplete,
 }: {
   block: CapstoneBlock;
   preview: boolean;
   roleKey: string | null;
   roleLabel: string | null;
-  planBrief: string | null;
-  workspace: Workspace | null;
   onComplete: () => void;
 }) {
   const t = useTranslations("finale");
-  // the learner's plan frames the project for their role; without one, the role's standard brief
-  const brief = planBrief || (roleKey ? ROLE_BRIEF[roleKey as keyof typeof ROLE_BRIEF] : undefined);
+  const brief = roleKey ? ROLE_BRIEF[roleKey as keyof typeof ROLE_BRIEF] : undefined;
 
   return (
     <StageShell stage="project" title={block.title} minutes={block.duration_min} hideFooter>
+      <Surface pad="md" spotlight className="flex flex-wrap items-center gap-3 border-stage-project-line bg-stage-project-soft">
+        <span className="flex size-11 items-center justify-center rounded-xl bg-stage-project text-white"><Rocket className="size-5" /></span>
+        <span className="min-w-0 flex-1"><span className="block text-[10px] font-bold tracking-widest text-stage-project">FINAL MISSION · LAUNCH DAY</span><strong className="block">Assemble, test and launch Scout</strong></span>
+        <Chip tone="project" icon={<Zap />}>150 XP</Chip>
+      </Surface>
       <Surface pad="lg" className="flex flex-col gap-5">
         <p className="text-lg leading-relaxed">{block.scene}</p>
         <div className="flex flex-wrap gap-2">
@@ -109,14 +101,12 @@ function Brief({
       ) : null}
 
       {brief ? (
-        <Callout tone="hook" label={roleLabel ? t("forYou", { role: roleLabel }) : t("forYouPlain")} icon={<UserRound />}>
+        <Callout tone="hook" label={t("forYou", { role: roleLabel ?? "" })} icon={<UserRound />}>
           {brief}
         </Callout>
       ) : null}
 
       {block.closing ? <p className="leading-relaxed text-ink-muted">{block.closing}</p> : null}
-
-      {workspace ? <WorkspaceCard workspace={workspace} preview={preview} /> : null}
 
       <Surface pad="md" className="flex flex-wrap items-center justify-between gap-4 border-stage-project-line">
         <div className="flex min-w-0 flex-col gap-1">
@@ -132,12 +122,16 @@ function Brief({
   );
 }
 
-function Done({ block, workspace, onComplete }: { block: CapstoneBlock; workspace: Workspace | null; onComplete: () => void }) {
+function Done({ block, onComplete }: { block: CapstoneBlock; onComplete: () => void }) {
   const t = useTranslations("finale");
   const reduce = useReducedMotion();
 
   return (
     <StageShell stage="project" title={block.title} minutes={block.duration_min} hideFooter done>
+      <Surface pad="md" tone="accent" spotlight className="flex items-center gap-3 border-ok-line">
+        <span className="flex size-11 items-center justify-center rounded-xl bg-ok text-on-ok"><Rocket className="size-5" /></span>
+        <span><span className="block text-[10px] font-bold tracking-widest text-ok">SCOUT UPGRADE INSTALLED</span><strong>Launch License earned · +150 XP</strong></span>
+      </Surface>
       <Surface pad="lg" className="flex flex-col gap-4 border-ok-line">
         <div className="flex flex-wrap items-center gap-2">
           <Chip tone="ok" icon={<Check />}>
@@ -162,8 +156,6 @@ function Done({ block, workspace, onComplete }: { block: CapstoneBlock; workspac
           ))}
         </ul>
       </Surface>
-
-      {workspace ? <WorkspaceCard workspace={workspace} preview={false} /> : null}
 
       {block.hours_saved != null ? (
         <Surface pad="md" className="flex flex-col gap-1">
@@ -200,45 +192,5 @@ function Done({ block, workspace, onComplete }: { block: CapstoneBlock; workspac
         </Button>
       </div>
     </StageShell>
-  );
-}
-
-type Workspace = { href: string; courseId: string; enrolled: boolean };
-
-/** Opens the in-browser workspace, with the last test run's result. */
-function WorkspaceCard({ workspace, preview }: { workspace: Workspace; preview: boolean }) {
-  const t = useTranslations("finale");
-  const { work } = useProjectWork(workspace.courseId, workspace.enrolled);
-  const report = work?.report;
-  return (
-    <Surface pad="md" className="flex flex-wrap items-center justify-between gap-4 border-brand-line">
-      <div className="flex min-w-0 flex-col gap-1.5">
-        <span className="flex items-center gap-2 font-semibold">
-          <Code2 className="size-4 text-brand-ink" aria-hidden />
-          {t("workspaceTitle")}
-        </span>
-        <span className="text-sm text-ink-muted">{t("workspaceBody")}</span>
-        {report ? (
-          <span className="flex flex-wrap items-center gap-2 text-sm">
-            <Chip size="sm" tone={report.passed ? "ok" : "warn"}>
-              {report.passed ? t("reportPassed") : t("reportNotPassed")}
-            </Chip>
-            <span className="text-ink-muted tabular-nums">{t("reportLine", { score: report.score, total: report.total, percent: Math.round(report.ratio * 100) })}</span>
-          </span>
-        ) : null}
-      </div>
-      {preview ? (
-        <Button size="lg" variant="brand" disabled>
-          {t("openWorkspace")}
-        </Button>
-      ) : (
-        <Button asChild size="lg" variant="brand">
-          <Link href={workspace.href}>
-            {t("openWorkspace")}
-            <ArrowRight data-icon="inline-end" />
-          </Link>
-        </Button>
-      )}
-    </Surface>
   );
 }

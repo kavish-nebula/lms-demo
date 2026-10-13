@@ -3,7 +3,6 @@
  * (ARCHITECTURE.pdf section 6) and data model (section 5) closely enough
  * that swapping fixtures for API calls is a change to src/data only.
  */
-import type { ProjectTicket, TicketExpect } from "@/lib/project-grade";
 import type { StageId } from "@/lib/stages";
 
 export type Bloom = "remember" | "understand" | "apply" | "analyze" | "evaluate" | "create";
@@ -198,6 +197,63 @@ export type GuideStep = {
   check: string;
   /** "Stuck?" */
   tip?: string;
+  /** a teammate's reaction the moment the step works */
+  win?: HookMessage;
+  /** the hands-on challenge for this step in the practice simulator */
+  sim?: GuideSim;
+};
+
+/** A command and what the terminal prints back. */
+export type SimRun = { cmd: string; out: string };
+
+/**
+ * One step's challenge in the practice simulator: type the commands into a
+ * terminal, fill the blanks in the key lines of a file and run it, chat with
+ * Scout and watch its tool calls, or make a decision.
+ */
+export type GuideSim =
+  | { kind: "terminal"; prompt: string; lines: (SimRun & { alt?: string[]; prompt?: string })[] }
+  | { kind: "code"; file: string; code: string; blanks: { token: string; options: string[] }[]; run?: SimRun }
+  | { kind: "chat"; start: SimRun; turns: { you: string; trace?: string[]; scout: string }[] }
+  | { kind: "choice"; q: string; options: string[]; correct: number; explain: string };
+
+/**
+ * The guided practice played as a mission: the team briefs the learner on a
+ * real problem at Orbit, a mentor hands over each step, teammates react as
+ * steps work, and the team celebrates the badge at the end.
+ */
+export type GuidedMission = {
+  codename: string;
+  /** earned when every step is done */
+  badge: string;
+  /** who hands over each step */
+  mentor: { who: string; av: string };
+  brief: HookMessage[];
+  /** what will be true when the mission is done */
+  goal: string;
+  debrief: HookMessage[];
+};
+
+/** A published implementation taught as a solved case, with evidence and source attribution. */
+export type SolvedCaseStep = {
+  title: string;
+  purpose: string;
+  explanation: string;
+  code?: string;
+  result: string;
+};
+
+export type SolvedCaseStudy = {
+  label: string;
+  title: string;
+  source_label: string;
+  source_url: string;
+  source_note: string;
+  problem: string;
+  solution: string;
+  result: string;
+  evidence: string[];
+  solution_steps: SolvedCaseStep[];
 };
 
 export type GuidedBlock = BlockBase & {
@@ -208,6 +264,8 @@ export type GuidedBlock = BlockBase & {
   before: { items: string[]; downloads: { label: string; href: string; note: string }[] };
   steps: GuideStep[];
   finish: { title: string; body: string; checklist: string[] };
+  mission?: GuidedMission;
+  solved_case?: SolvedCaseStudy;
 };
 
 /* ---------------------------------------------------------------- scenarios */
@@ -457,17 +515,4 @@ export type Learner = {
   daily_progress: { day: string; minutes: number }[];
   credentials: Credential[];
   history: HistoryEntry[];
-};
-
-/* ---------------------------------------------------------------- mini project workspace */
-
-/** A file in the mini project: the learner edits `editable` ones; `hidden` ones (harness, practice model) never show. */
-export type ProjectFile = { path: string; content: string; editable?: boolean; hidden?: boolean };
-
-/** The mini project's workspace (fixtures/project-*.json): its files, the file to open first, and sample tickets with what Scout should do. */
-export type ProjectContent = {
-  course_id: string;
-  entry: string;
-  files: ProjectFile[];
-  samples: (ProjectTicket & { expect: TicketExpect })[];
 };

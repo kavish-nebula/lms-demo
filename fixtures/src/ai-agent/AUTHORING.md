@@ -427,6 +427,31 @@ Numbered steps the learner does on their own machine, with exact code to copy.
 - `values[].value` is copied as-is (multi-line is fine, use `\n`). Code must be complete and runnable at that step. Build on the previous module's files where it makes sense (`agent.py`, `tools.py`).
 - Every step has `check`. Give a `tip` on any step with a likely mistake.
 
+#### It plays as a mission
+
+The learner meets the guided practice as a mission on a trail:
+
+1. **Briefing.** The team briefs them on the real problem in chat. They tick off their gear and press "Accept the mission".
+2. **Waypoints.** Each step is a waypoint. The mentor hands it over as a message (`body`). The learner ticks the `actions` off, then answers the checkpoint (`check`): "Yes, I see it" or "Not quite". "Not quite" brings the mentor's `tip`.
+3. **Score.** A step that works earns 100 XP, plus 50 more when no help was used, and keeps the streak going. A teammate then reacts (`win`).
+4. **Summit.** The summit shows the badge, 1 to 3 stars (fewer the more help was used), the team's `debrief` and the `finish` checklist.
+
+Add the mission layer to `guided`, and a `win` to every step:
+
+```json
+"mission": {
+  "codename": "Operation Multitool (at most 32 characters)",
+  "badge": "Tool Loop Trailblazer (at most 28 characters)",
+  "mentor": {"who": "Priya — developer", "av": "P"},
+  "brief": [{"who": "Leo — support lead", "av": "L", "text": "the existing problem at Orbit, with stakes (at most 170)"}, ...2 or 3, the last one from the mentor handing over the mission],
+  "goal": "What will be true when the mission is done (at most 140).",
+  "debrief": [{"who": "Maya — founder", "av": "M", "text": "why what they built matters (at most 170)"}]
+},
+"steps": [{ ..., "win": {"who": "Priya — developer", "av": "P", "text": "a specific reaction when this step works (at most 130)"} }]
+```
+
+Write team lines in the chat voice of the hook messages, specific to what just worked. Speakers are `Maya — founder` (M), `Leo — support lead` (L) and `Priya — developer` (P).
+
 ### `lab` (phase 5: scenarios)
 
 Three realistic situations the learner has not seen yet. Each asks for a decision and explains it. Tie each to a lesson; cover at least two different lessons.
@@ -483,24 +508,3 @@ Three short questions that return after 3, 10 and 30 days, each a little harder 
   ]
 }
 ```
-
----
-
-## 6. The mini project: `project/`
-
-The course finale's mini project, "Build Scout's prompt engine", is built and tested in the browser (`/learn/courses/ai-agent/finale/capstone/workspace`). The brief (title, scene, requirements, edge cases, reactions) is `finale.json` `capstone` as before; the workspace is `project/`:
-
-| File | What it is |
-|---|---|
-| `prompt_engine.py` | The starter the learner edits. Three functions: `ask_model(ticket)`, `parse_reply(text)`, `decide(result, ticket)`. Keep it short and working, but failing. |
-| `docs/policy.md` | Orbit's policy, word for word from section 1. Shown read-only; `orbit.POLICY` reads it. |
-| `orbit/model.py` | The practice model, hidden from the learner. `client.messages.create(model=MODEL, max_tokens=..., system=..., messages=..., output_config=...)` with the real API's shape and errors (no `temperature`, no `system` role in `messages`). Deterministic: it reads emails well and follows only what the prompt clearly says; each gap produces one realistic mistake (see its docstring). An output schema makes its reply valid JSON with only the schema's fields and enum values. |
-| `run.py` | The harness the workspace runs (hidden). Do not change its output shape without changing `apps/web/src/components/project`. |
-| `tickets.json` | `samples` (shown, with what Scout should do) and `hidden` (the tests; their `expect` stays on the server). Use the shared data from section 1: customers, order numbers, products. |
-| `solution/prompt_engine.py` | The reference solution. Never shipped. |
-
-Rules:
-
-- The seven `requirements` in `finale.json` are graded as r1 to r7 in that order (`apps/web/src/lib/project-grade.ts`): fields, intent, order number or email, policy, routing, same answer twice, voice. Reword them freely; keep the order and the meaning.
-- Every `hidden` ticket's `expect` gives `intent` (or a list), `order_id`, `email`, `action` (`reply`, `ask_for_order` or `handoff`), and optionally `include`/`exclude` phrases for the reply and `critical: true` (failing it fails the project).
-- After any change, run `node fixtures/scripts/check-project.mjs` (needs Python 3.10+): the starter must fail and the reference solution must score 100%, on the samples too. Then `node fixtures/scripts/build-ai-agent.mjs` writes `fixtures/project-ai-agent.json` (the browser's copy, no hidden answers) and `fixtures/project-ai-agent-tests.json` (server only).

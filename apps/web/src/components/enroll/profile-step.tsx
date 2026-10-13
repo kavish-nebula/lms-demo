@@ -79,7 +79,7 @@ export function ProfileStep({
   React.useEffect(() => {
     if (summary) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.metaKey || e.ctrlKey || e.altKey) return;
+      if ((e.target instanceof HTMLElement && (e.target.matches("input, textarea, select") || e.target.isContentEditable)) || e.metaKey || e.ctrlKey || e.altKey) return;
       const opt = q.options[Number(e.key) - 1];
       if (!opt) return;
       e.preventDefault();

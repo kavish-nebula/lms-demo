@@ -1,42 +1,30 @@
 "use client";
 
 import * as React from "react";
-import { api, refreshEnrollments, storeEnrollment, useLearnerData } from "@/lib/api";
 import { useLocalJson, useLocalString, writeLocal } from "@/lib/local-store";
-import type { EnrollmentView } from "@/lib/learner-plan";
 import type { StageId } from "@/lib/stages";
 
 /**
- * Topics done in one module, by stable step ID (agents.md hard rule 1).
- * Enrolled learners' progress lives on the server (finishing a module tells
- * the planner); a preview before enrolling stays in this browser and moves
- * to the server on enrolment.
+ * Per-module stage completion for the UI phase. Keys are stable step IDs
+ * (agents.md hard rule 1), stored locally until POST /v1/enrollments/{id}/events
+ * exists. Before anything is stored, the course outline's state is used.
  */
 const key = (moduleId: string) => `lms-progress:${moduleId}`;
 
-export function useModuleProgress(courseId: string, moduleId: string, initialDone: StageId[]) {
-  const { enrollments } = useLearnerData();
-  const enrollment = enrollments[courseId];
-  const local = useLocalJson<StageId[]>(key(moduleId), initialDone);
-  const serverDone = enrollment?.progress[moduleId];
-  const done = React.useMemo(() => (enrollment ? ((serverDone ?? []) as StageId[]) : local), [enrollment, serverDone, local]);
+export function useModuleProgress(moduleId: string, initialDone: StageId[]) {
+  const done = useLocalJson<StageId[]>(key(moduleId), initialDone);
 
   const complete = React.useCallback(
-    async (stage: StageId) => {
+    (stage: StageId) => {
       if (done.includes(stage)) return;
-      if (!enrollment) {
-        writeLocal(key(moduleId), JSON.stringify([...done, stage]));
-        return;
-      }
-      await storeEnrollment({ ...enrollment, progress: { ...enrollment.progress, [moduleId]: [...done, stage] } });
-      const res = await api<{ enrollment: EnrollmentView }>(`/api/v1/enrollments/${courseId}/progress`, { method: "POST", body: { moduleId, stage } }).catch(() => null);
-      if (res) await storeEnrollment(res.enrollment);
-      else await refreshEnrollments();
+      writeLocal(key(moduleId), JSON.stringify([...done, stage]));
     },
-    [courseId, done, enrollment, moduleId],
+    [done, moduleId],
   );
 
-  return { done, complete };
+  const reset = React.useCallback(() => writeLocal(key(moduleId), null), [moduleId]);
+
+  return { done, complete, reset };
 }
 
 /** Draft text for reflection answers; a per-viewer convenience only. */
