@@ -12,7 +12,6 @@ import {
   AboutSection,
   ModulesSection,
   OutcomesSection,
-  ReviewsSection,
 } from "@/components/course/course-sections";
 
 type Params = { courseId: string };
@@ -44,7 +43,6 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
     { id: "about", label: t("navAbout") },
     { id: "outcomes", label: t("navOutcomes") },
     { id: "modules", label: t("navModules") },
-    { id: "reviews", label: t("navReviews") },
   ];
 
   return (
@@ -77,7 +75,6 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
         <AboutSection course={course} />
         <OutcomesSection course={course} />
         <ModulesSection course={course} outlines={outlines} />
-        <ReviewsSection course={course} />
       </div>
     </div>
   );
