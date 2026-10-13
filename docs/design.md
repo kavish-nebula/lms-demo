@@ -54,3 +54,7 @@ On desktop displays at least 1500 px wide, the course player uses a two-column l
 The focus sprint is voluntary and offers 10, 15, and 25 minute choices. It does not force full screen, record tab changes, or penalize stopping. Progress and rewards describe real course actions. Course tools open existing Pip, notebook, and experiment surfaces rather than duplicating them.
 
 Concept lessons use two sibling surfaces instead of one enclosing lesson card. The first box contains the lesson heading and complete media experience: slide, caption, progress, playback controls, and transcript. The second box contains adaptive guidance, field-specific examples, and key ideas. A separate action bar follows both boxes. This keeps the video and related reading visually independent while preserving a natural top-to-bottom order on every screen size.
+
+Visual Story mode turns authored concept slides into focused scenes with touch, keyboard, swipe, and marker navigation. It retains lesson audio, captions, checks, saved position, and completion rules.
+
+Pip uses the updated illustrated mascot and gives brief, phase-aware nudges and reactions to learner actions. Reactions respect reduced-motion preferences.
