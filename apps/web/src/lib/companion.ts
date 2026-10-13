@@ -4,6 +4,33 @@ export type CoursePassage = { text: string; title: string; href: string; moduleI
 export type CompanionCourse = { course: Course; passages: CoursePassage[] };
 export type CompanionStep = { title: string; guidance: string; hint?: string; phase?: string; videoId?: string; slideTitle?: string };
 
+export function companionNudge(context: { phase: string; moduleTitle?: string; stepTitle?: string }): string {
+  const moduleTitle = context.moduleTitle?.trim();
+  const stepTitle = context.stepTitle?.split(" · ")[0]?.trim();
+  const modulePrefix = moduleTitle ? `${moduleTitle}: ` : "";
+
+  switch (context.phase) {
+    case "profile": return "Choose what fits you so the course can adapt.";
+    case "intro": return "Watch the preview, then continue to the quick check.";
+    case "precheck": return "Answer independently so the course can match your starting level.";
+    case "customize": return "Choose the support and pace that feel right today.";
+    case "build": return "Your learning path is ready. Open the first module.";
+    case "hook": return `${modulePrefix}make a prediction, then reveal what happened.`;
+    case "explainer": return stepTitle
+      ? `Play “${stepTitle}” and catch the key idea before the quick check.`
+      : `${modulePrefix}play the concept, then try the quick check.`;
+    case "worked": return `${modulePrefix}predict each move before revealing the solution.`;
+    case "guided": return `${modulePrefix}complete the current checkpoint. Use a hint if you get stuck.`;
+    case "lab": return `${modulePrefix}make one choice, inspect the result, then adjust.`;
+    case "gate": return moduleTitle ? `Complete the ${moduleTitle} quiz independently.` : "Complete this module quiz independently.";
+    case "review": return `${modulePrefix}recall one idea before checking your notes.`;
+    case "capstone": return "Build one part of your final project, test it, then save the evidence.";
+    case "final-check": return "Complete the final assessment independently.";
+    case "wrap-up": return "Capture one thing you can now explain or build.";
+    default: return "Continue from your current step when you are ready.";
+  }
+}
+
 /** Only teaching passages: assessment items, keys, and scenario solutions are excluded. */
 export function coursePassages(course: Course, modules: ModuleContent[]): CoursePassage[] {
   const passages: CoursePassage[] = [];
@@ -61,11 +88,12 @@ export function findPassage(query: string, passages: CoursePassage[], moduleId?:
   return ranked[0]?.p;
 }
 
-export function companionReply(query: string, context: { phase: string; guidance: string; hint?: string; courseTitle: string; moduleId?: string; videoId?: string; slideTitle?: string; passages: CoursePassage[] }): { text: string; source?: Pick<CoursePassage, "title" | "href"> } {
+export function companionReply(query: string, context: { phase: string; guidance: string; nextStep?: string; hint?: string; courseTitle: string; moduleId?: string; videoId?: string; slideTitle?: string; passages: CoursePassage[] }): { text: string; source?: Pick<CoursePassage, "title" | "href"> } {
   if (["gate", "final-check", "precheck"].includes(context.phase)) return { text: PHASE_GUIDANCE[context.phase]! };
-  if (/^(what should i do here|help me with this step|give me a hint|explain this(?: step| slide)?|how does this work|what does this mean)[?.!]?$/i.test(query.trim())) {
-    return { text: /hint/i.test(query) ? context.hint || context.guidance : context.guidance };
-  }
+  const prompt = query.trim();
+  if (/^(hint|give me a hint)[?.!]?$/i.test(prompt)) return { text: context.hint || context.nextStep || context.guidance };
+  if (/^(next step|what should i do here|help me with this step|how does this work)[?.!]?$/i.test(prompt)) return { text: context.nextStep || context.guidance };
+  if (/^(explain this(?: step| slide)?|what does this mean)[?.!]?$/i.test(prompt)) return { text: context.guidance };
   const hit = findPassage(query, context.passages, context.moduleId, context.videoId, context.slideTitle);
   return hit ? { text: hit.text, source: { title: hit.title, href: hit.href } } : { text: `I couldn’t find a reliable match in ${context.courseTitle}. Try naming the course concept or ask “What should I do here?” I can help with this course only.` };
 }
