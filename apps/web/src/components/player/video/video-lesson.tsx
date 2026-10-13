@@ -2,7 +2,7 @@
 
 import "./video.css";
 import * as React from "react";
-import { useCompanionStep, useLearningContext } from "@/components/learning/course-companion";
+import { reactPip, useCompanionStep, useLearningContext } from "@/components/learning/course-companion";
 import { cn } from "cn";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "motion/react";
@@ -10,6 +10,8 @@ import {
   ArrowRight,
   Captions,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   ChevronDown,
   ListVideo,
   Maximize,
@@ -18,10 +20,12 @@ import {
   Play,
   Rewind,
   RotateCcw,
+  Sparkles,
   SkipBack,
   SkipForward,
   Volume2,
   VolumeX,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -81,6 +85,8 @@ export function VideoLesson({
   const [lengths, setLengths] = React.useState(() => slides.map((s) => estimate(s.narration)));
   const [full, setFull] = React.useState(false);
   const [transcript, setTranscript] = React.useState(false);
+  const [storyMode, setStoryMode] = React.useState(false);
+  const swipeStart = React.useRef<number | null>(null);
   const storedRate = Number(useLocalString("lms-video-rate") ?? "1");
   const rate = (RATES as readonly number[]).includes(storedRate) ? storedRate : 1;
   const captionsOn = useLocalString("lms-video-cc") !== "off";
@@ -88,8 +94,6 @@ export function VideoLesson({
   React.useEffect(() => {
     if (!hydrated || restored) return;
     if (storedPosition?.version === 1 && Number.isInteger(storedPosition.slide)) {
-      // Hydrate the persisted playback checkpoint once browser storage is ready.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIdx(Math.max(0, Math.min(last, storedPosition.slide)));
       setPhase(["play", "mid", "end", "done"].includes(storedPosition.phase) ? storedPosition.phase : "play");
       setMidPassed(!!storedPosition.mid || !video.midQuiz.length);
@@ -266,6 +270,23 @@ export function VideoLesson({
     }
   }, [phase, onComplete]);
 
+  React.useEffect(() => {
+    if (!storyMode) return;
+    const oldOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = oldOverflow; };
+  }, [storyMode]);
+
+  React.useEffect(() => {
+    if (!storyMode || phase !== "play") return;
+    reactPip(idx === last ? "celebrate" : idx === 0 ? "wave" : "point", idx === last ? "Last scene—nice work!" : `Scene ${idx + 1} of ${slides.length}`);
+  }, [idx, last, phase, slides.length, storyMode]);
+
+  React.useEffect(() => {
+    if (phase === "mid" || phase === "end") reactPip("think", "Quick check—take your best guess.");
+    if (phase === "done") reactPip("celebrate", "Lesson complete!");
+  }, [phase]);
+
   // fullscreen follows the browser (Esc leaves it too)
   React.useEffect(() => {
     const on = () => setFull(document.fullscreenElement === wrap.current);
@@ -275,6 +296,11 @@ export function VideoLesson({
   const toggleFull = () => {
     if (document.fullscreenElement) void document.exitFullscreen();
     else void wrap.current?.requestFullscreen?.();
+  };
+  const toggleStory = () => {
+    const nextStoryMode = !storyMode;
+    setStoryMode(nextStoryMode);
+    reactPip(nextStoryMode ? "wave" : "idle", nextStoryMode ? "Swipe or tap to move through the story." : "Your place is saved.");
   };
 
   const slide = slides[idx]!;
@@ -295,6 +321,11 @@ export function VideoLesson({
 
   function onKey(e: React.KeyboardEvent) {
     const tag = (e.target as HTMLElement).tagName;
+    if (e.key === "Escape" && storyMode) {
+      e.preventDefault();
+      setStoryMode(false);
+      return;
+    }
     if (phase !== "play" || e.metaKey || e.ctrlKey || e.altKey) return;
     const key = e.key.toLowerCase();
     if ((key === " " || key === "k") && tag !== "BUTTON" && tag !== "INPUT") {
@@ -312,13 +343,38 @@ export function VideoLesson({
     <div
       ref={wrap}
       onKeyDown={onKey}
-      className={cn("concept-video-shell flex flex-col gap-4", full && "items-center justify-center bg-canvas p-6")}
+      className={cn("concept-video-shell flex flex-col gap-4", full && "items-center justify-center bg-canvas p-6", storyMode && "story-mode-shell")}
       aria-label={t("player", { title: video.title })}
       role="region"
     >
-      <div className="concept-video-card">
-        <div className={cn("vl-stage", full && "w-[min(100%,calc((100dvh-170px)*16/9))]")}>
-        {phase !== "done" ? <VideoSlideView key={idx} slide={slide} shown={shown} /> : null}
+      {storyMode ? <div className="story-mode-topbar">
+        <div className="story-mode-heading">
+          <span><Sparkles aria-hidden />Visual Story</span>
+          <strong>{slide.title}</strong>
+        </div>
+        <div className="story-scene-dots" aria-label={`Scene ${idx + 1} of ${slides.length}`}>
+          {slides.map((storySlide, storyIndex) => <button key={storySlide.title} type="button" onClick={() => goTo(storyIndex)} aria-label={`Open scene ${storyIndex + 1}: ${storySlide.title}`} aria-current={storyIndex === idx ? "step" : undefined} />)}
+        </div>
+        <button type="button" className="story-mode-close" onClick={toggleStory} aria-label="Exit Visual Story"><X aria-hidden /></button>
+      </div> : null}
+      <div className={cn("concept-video-card", storyMode && "story-mode-card")}>
+        <div
+          className={cn("vl-stage", full && "w-[min(100%,calc((100dvh-170px)*16/9))]", storyMode && "story-mode-stage")}
+          onPointerDown={(event) => { if (storyMode) swipeStart.current = event.clientX; }}
+          onPointerUp={(event) => {
+            if (!storyMode || swipeStart.current === null || phase !== "play") return;
+            const distance = event.clientX - swipeStart.current;
+            swipeStart.current = null;
+            if (Math.abs(distance) < 56) return;
+            if (distance < 0) next(); else goTo(idx - 1);
+          }}
+        >
+        {phase !== "done" ? <VideoSlideView key={idx} slide={slide} shown={storyMode ? () => true : shown} /> : null}
+
+        {storyMode && phase === "play" ? <>
+          <button type="button" className="story-scene-nav story-scene-prev" onClick={() => goTo(idx - 1)} disabled={idx === 0} aria-label="Previous story scene"><ChevronLeft aria-hidden /></button>
+          <button type="button" className="story-scene-nav story-scene-next" onClick={next} aria-label="Next story scene"><ChevronRight aria-hidden /></button>
+        </> : null}
 
         <AnimatePresence>
           {phase === "mid" ? (
@@ -491,13 +547,16 @@ export function VideoLesson({
         <CtrlButton label={muted ? t("unmute") : t("mute")} pressed={muted} onClick={() => setMuted((m) => !m)}>
           {muted ? <VolumeX /> : <Volume2 />}
         </CtrlButton>
+        <CtrlButton label={storyMode ? "Exit Visual Story" : "Open Visual Story"} pressed={storyMode} onClick={toggleStory}>
+          <Sparkles />
+        </CtrlButton>
         <CtrlButton label={full ? t("exitFullscreen") : t("fullscreen")} onClick={toggleFull}>
           {full ? <Minimize /> : <Maximize />}
         </CtrlButton>
         </div>
       </div>
 
-      {!full ? (
+      {!full && !storyMode ? (
         <div className="concept-text-card concept-transcript-card">
           <button
             type="button"
