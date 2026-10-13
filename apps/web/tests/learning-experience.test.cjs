@@ -314,7 +314,7 @@ test('course journey server-renders the real module trail and single final proje
   const html = renderToString(React.createElement(CourseJourney, { course }));
   assert.ok(html.includes('Make this course mine'));
   assert.ok(html.includes('/finale/capstone'));
-  assert.equal((html.match(/class="journey-stop"/g) ?? []).length, 6);
+  assert.equal((html.match(/class="stair-step"/g) ?? []).length, 6);
   assert.equal((html.match(/data-state="locked"/g) ?? []).length, 0);
   assert.ok(html.includes('Say hello to Pip'));
   assert.ok(html.includes('FIRST MISSION'));

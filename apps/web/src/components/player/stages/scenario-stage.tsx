@@ -29,16 +29,7 @@ export function ScenarioStage({ block, support, ...nav }: StageProps<ScenarioBlo
   const [view, setView] = React.useState<"roleplay" | "cases">(block.roleplay ? "roleplay" : "cases");
   const [index, setIndex] = React.useState(0);
   const s = block.scenarios[index]!;
-  const left = block.scenarios.filter((s) => !decisions[s.id]?.committed).length;
-  useCompanionStep({ title: s.title, phase: "lab", guidance: `${s.situation} Inspect the evidence, choose an action, and compare its consequence with your expectation.`, hint: s.question.hints[0] });
-  return <StageShell stage="lab" title={block.title} intro={block.intro} minutes={block.duration_min} bloom={block.bloom} canComplete={left === 0 || nav.done} completeHint={t("scenariosLeft", { count: left })} {...nav}>
-    <nav className="flex flex-wrap gap-2" aria-label="Scenario cases">{block.scenarios.map((item, i) => <Button key={item.id} size="sm" variant={index === i ? "brand" : "outline"} onClick={() => setIndex(i)} aria-current={index === i ? "step" : undefined}>{decisions[item.id]?.committed ? <Check /> : <Compass />}Case {i + 1}</Button>)}</nav>
-    <ScenarioCard key={s.id} scenario={s} n={index + 1} total={block.scenarios.length} support={support} saved={decisions[s.id]} onSave={(choice, committed, helped) => {
-      writeLocal(key, JSON.stringify({ ...decisions, [s.id]: { choice, committed } }));
-      if (committed && context) recordLearning(context.courseId, { id: s.question.step_id, moduleId: context.moduleId, correct: !!s.question.options.find((o) => o.id === choice)?.correct, helped });
-      if (committed && !decisions[s.id]?.committed) signal({ kind: "scenario_answer",moduleId: context?.moduleId ?? block.step_id.split(".")[0],lesson: s.lesson,payload: { stepId: s.question.step_id,correct: !!s.question.options.find((o) => o.id === choice)?.correct } });
-    }} />
-    <div className="flex justify-between gap-3"><Button variant="ghost" disabled={index === 0} onClick={() => setIndex(index - 1)}><ArrowLeft />Previous case</Button><Button variant="outline" disabled={index === block.scenarios.length - 1 || !decisions[s.id]?.committed} onClick={() => setIndex(index + 1)}>Next case<ArrowRight /></Button></div>
+  const left = block.scenarios.filter((item) => !decisions[item.id]?.committed).length;
   const roleplayDone = !block.roleplay || (roleplaySave?.missionId === block.roleplay.id && roleplaySave.complete);
   useCompanionStep(view === "roleplay" && block.roleplay
     ? { title: block.roleplay.title, phase: "lab", guidance: block.roleplay.brief, hint: "Gather facts first, respect Scout's limits, and protect the customer." }
