@@ -133,9 +133,15 @@ test('assessment boundaries override both course retrieval and contextual hints'
   }
 });
 test('contextual help uses the current step and a distinct authored hint', () => {
-  const ctx = { phase: 'guided', guidance: 'Run the test command.', hint: 'Check the order ID format.', courseTitle: course.title, passages };
-  assert.equal(companion.companionReply('What should I do here?', ctx).text, ctx.guidance);
+  const ctx = { phase: 'guided', guidance: 'Run the test command.', nextStep: 'Complete the current checkpoint.', hint: 'Check the order ID format.', courseTitle: course.title, passages };
+  assert.equal(companion.companionReply('What should I do here?', ctx).text, ctx.nextStep);
+  assert.equal(companion.companionReply('Next step', ctx).text, ctx.nextStep);
   assert.equal(companion.companionReply('Give me a hint', ctx).text, ctx.hint);
+  assert.equal(companion.companionReply('Hint', ctx).text, ctx.hint);
+});
+test('Pip nudges follow the current learning phase instead of repeating narration', () => {
+  assert.equal(companion.companionNudge({ phase: 'explainer', moduleTitle: 'Agent basics', stepTitle: 'What is an agent? · Same question, two very different answers' }), 'Play “What is an agent?” and catch the key idea before the quick check.');
+  assert.equal(companion.companionNudge({ phase: 'guided', moduleTitle: 'Agent basics' }), 'Agent basics: complete the current checkpoint. Use a hint if you get stuck.');
 });
 test('all six experiments have distinct normal and unexpected outcomes', () => {
   assert.equal(Object.keys(EXPERIMENTS).length, 6);
@@ -291,14 +297,14 @@ test('scenario delivery shows one two-pane case and adapts when extra guidance i
   assert.ok(extra.includes(lab.scenarios[0].id));
   assert.ok(!extra.includes(lab.scenarios[1].id));
 });
-test('course journey server-renders the real module trail and single final project', () => {
+test('course journey server-renders the real module staircase and single final project', () => {
   const React = require('react');
   const { renderToString } = require('react-dom/server');
   const { CourseJourney } = load('apps/web/src/components/learning/course-journey.tsx');
   const html = renderToString(React.createElement(CourseJourney, { course }));
   assert.ok(html.includes('Make this course mine'));
   assert.ok(html.includes('/finale/capstone'));
-  assert.equal((html.match(/class="journey-stop"/g) ?? []).length, 6);
+  assert.equal((html.match(/class="stair-step"/g) ?? []).length, 6);
   assert.equal((html.match(/data-state="locked"/g) ?? []).length, 5);
   assert.ok(html.includes('Say hello to Pip'));
   assert.ok(html.includes('FIRST MISSION'));
