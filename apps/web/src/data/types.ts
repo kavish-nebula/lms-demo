@@ -286,8 +286,41 @@ export type Scenario = {
   debrief: string;
 };
 
+export type RoleplayMeterId = "goal" | "trust" | "safety";
+export type RoleplayVisual = "incoming" | "tool" | "evidence" | "twist" | "send";
+export type RoleplayChoice = {
+  id: string;
+  text: string;
+  feedback: string;
+  best?: boolean;
+  effects: Record<RoleplayMeterId, number>;
+};
+export type RoleplayScene = {
+  id: string;
+  visual: RoleplayVisual;
+  label: string;
+  title: string;
+  line: string;
+  /** Short voiceover used by the scene's cinematic audio control. */
+  narration: string;
+  prompt: string;
+  hint: string;
+  choices: RoleplayChoice[];
+};
+export type RoleplayMission = {
+  id: string;
+  eyebrow: string;
+  title: string;
+  brief: string;
+  learner_role: string;
+  customer: { name: string; role: string; initials: string };
+  start: Record<RoleplayMeterId, number>;
+  scenes: RoleplayScene[];
+  debrief: string;
+};
+
 /** Stage 5 (stored as "lab"): scenarios that apply the module to new situations. */
-export type ScenarioBlock = BlockBase & { stage: "lab"; title: string; intro: string; scenarios: Scenario[] };
+export type ScenarioBlock = BlockBase & { stage: "lab"; title: string; intro: string; scenarios: Scenario[]; roleplay?: RoleplayMission };
 
 export type PlaceholderBlock = BlockBase & { stage: "project" };
 

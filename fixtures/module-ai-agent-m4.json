@@ -3377,19 +3377,19 @@
           "options": [
             {
               "id": "a",
-              "text": "Move the chat to a model with an even larger window, so it never gets close to the limit"
+              "text": "Keep recent turns word for word, condense older ones into a short note, and pin key facts"
             },
             {
               "id": "b",
-              "text": "Start a fresh chat every ten turns, so each request stays small and every reply is fast"
+              "text": "Move the chat to a model with an even larger window, so it never gets close to the limit"
             },
             {
               "id": "c",
-              "text": "Agree: the chat is far below the window, so speed and cost stay the same as turn one"
+              "text": "Start a fresh chat every ten turns, so each request stays small and every reply is fast"
             },
             {
               "id": "d",
-              "text": "Keep recent turns word for word, condense older ones into a short note, and pin key facts"
+              "text": "Agree: the chat is far below the window, so speed and cost stay the same as turn one"
             }
           ],
           "lessons": [
@@ -3404,15 +3404,15 @@
           "options": [
             {
               "id": "a",
-              "text": "Switch from keyword scoring to embeddings, so the right chunk gets a higher score"
+              "text": "Split at the guide's headings, so each chunk is a passage that makes sense on its own"
             },
             {
               "id": "b",
-              "text": "Paste the whole care guide into the system prompt, so no instruction is ever cut off"
+              "text": "Switch from keyword scoring to embeddings, so the right chunk gets a higher score"
             },
             {
               "id": "c",
-              "text": "Split at the guide's headings, so each chunk is a passage that makes sense on its own"
+              "text": "Paste the whole care guide into the system prompt, so no instruction is ever cut off"
             },
             {
               "id": "d",
@@ -3431,11 +3431,11 @@
           "options": [
             {
               "id": "a",
-              "text": "Drop step 2, since the return rules are simple enough for Scout to answer from memory"
+              "text": "Steps 3 and 4: a refund over $200 needs a person to approve it, so Scout can't promise it"
             },
             {
               "id": "b",
-              "text": "Steps 3 and 4: a refund over $200 needs a person to approve it, so Scout can't promise it"
+              "text": "Drop step 2, since the return rules are simple enough for Scout to answer from memory"
             },
             {
               "id": "c",
@@ -3485,19 +3485,19 @@
           "options": [
             {
               "id": "a",
-              "text": "Answer all three, saying small dogs are usually welcome, as they are at most guesthouses"
+              "text": "Answer check-in and parking from the guide, say pets aren't covered, and offer the owner"
             },
             {
               "id": "b",
-              "text": "Answer check-in and parking from the guide, and leave the dog out so nothing is guessed"
+              "text": "Answer all three, saying small dogs are usually welcome, as they are at most guesthouses"
             },
             {
               "id": "c",
-              "text": "Pass the whole request to the owner, since one of its three parts isn't in the guide"
+              "text": "Answer check-in and parking from the guide, and leave the dog out so nothing is guessed"
             },
             {
               "id": "d",
-              "text": "Answer check-in and parking from the guide, say pets aren't covered, and offer the owner"
+              "text": "Pass the whole request to the owner, since one of its three parts isn't in the guide"
             }
           ],
           "lessons": [

@@ -174,6 +174,17 @@ test('a passed module quiz is the only key that unlocks the next module', () => 
   assert.equal(failedQuiz.modules[1].liveState, 'locked');
 });
 
+test('every demo module quiz keeps its correct answer in option A', () => {
+  const keys = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/mock-gate-keys.json'), 'utf8'));
+  for (const mod of course.modules) {
+    const gate = modules.find((item) => item.module_id === mod.module_id).blocks.find((block) => block.stage === 'gate');
+    assert.ok(gate, `${mod.module_id} is missing its module quiz`);
+    assert.equal(gate.items.length, Object.keys(keys[`gate-${mod.module_id}`]).length);
+    assert.ok(Object.values(keys[`gate-${mod.module_id}`]).every((answer) => answer === 'a'), `${mod.module_id} has a correct answer outside option A`);
+    assert.ok(gate.items.every((item) => item.options[0].id === 'a'));
+  }
+});
+
 test('the finale unlocks only after every module quiz is passed', () => {
   const gates = Object.fromEntries(course.modules.map((m) => [`ai-agent:${m.module_id}`, true]));
   const progress = progressRules.deriveProgress(course, {}, { done: [] }, false, gates);
@@ -278,22 +289,36 @@ test('module one guided practice opens as a source-backed solved implementation'
   assert.ok(!html.includes('Accept the mission'));
 });
 
-test('scenario delivery shows one two-pane case and adapts when extra guidance is active', () => {
+test('scenario delivery opens with the roleplay and retains adaptive bonus cases', () => {
   const React = require('react');
   const { renderToString } = require('react-dom/server');
   const { NextIntlClientProvider } = require('next-intl');
   const { ScenarioStage } = load('apps/web/src/components/player/stages/scenario-stage.tsx');
   const messages = JSON.parse(fs.readFileSync(path.join(root, 'packages/i18n/en.json'), 'utf8'));
   const lab = modules[0].blocks.find((block) => block.stage === 'lab');
-  const render = (support) => renderToString(React.createElement(NextIntlClientProvider, { locale: 'en', messages, timeZone: 'UTC' }, React.createElement(ScenarioStage, { block: lab, support, done: false, onComplete() {} })));
-  const extra = render('extra');
-  const light = render('light');
+  const render = (block, support) => renderToString(React.createElement(NextIntlClientProvider, { locale: 'en', messages, timeZone: 'UTC' }, React.createElement(ScenarioStage, { block, support, done: false, onComplete() {} })));
+  const roleplay = render(lab, 'extra');
+  assert.ok(roleplay.includes('roleplay-brief'));
+  assert.ok(roleplay.includes('The address switch'));
+  assert.ok(roleplay.includes('Enter the roleplay'));
+  assert.ok(roleplay.includes('Voice + captions'));
+  assert.ok(roleplay.includes('Live roleplay'));
+  assert.ok(roleplay.includes('Bonus cases'));
+  assert.ok(lab.roleplay.scenes.every((scene) => /\b(I|I'm|my|me)\b/i.test(scene.narration)), 'Nia should narrate every scene in first person');
+  for (const asset of ['nia-3d.webp', 'scout-3d.webp']) {
+    const file = path.join(root, 'apps/web/public/images/roleplay', asset);
+    assert.ok(fs.existsSync(file), `${asset} is missing`);
+    assert.ok(fs.statSync(file).size > 50000, `${asset} is not a production 3D asset`);
+  }
+  const casesOnly = { ...lab, roleplay: undefined };
+  const extra = render(casesOnly, 'extra');
+  const light = render(casesOnly, 'light');
   const hintLead = lab.scenarios[0].question.hints[0].split(' ').slice(0, 4).join(' ');
   assert.ok(extra.includes('stage-focus-shell'));
   assert.ok(extra.includes('focus-split'));
   assert.ok(extra.includes(hintLead));
   assert.ok(!light.includes(hintLead));
-  assert.ok(extra.includes('aria-label="Scenario cases"'));
+  assert.ok(extra.includes('aria-label="Bonus scenario cases"'));
   assert.ok(extra.includes(lab.scenarios[0].id));
   assert.ok(!extra.includes(lab.scenarios[1].id));
 });

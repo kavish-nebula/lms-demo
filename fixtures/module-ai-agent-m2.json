@@ -2793,15 +2793,15 @@
           "options": [
             {
               "id": "a",
-              "text": "Swap it for one short line telling Scout to follow Orbit's policy; the model fills in the rest"
+              "text": "Keep it: the model keeps nothing between requests, so the policy must be sent every time"
             },
             {
               "id": "b",
-              "text": "Cut it: a week of test chats taught the model Orbit's rules, the same way it learned language"
+              "text": "Swap it for one short line telling Scout to follow Orbit's policy; the model fills in the rest"
             },
             {
               "id": "c",
-              "text": "Keep it: the model keeps nothing between requests, so the policy must be sent every time"
+              "text": "Cut it: a week of test chats taught the model Orbit's rules, the same way it learned language"
             },
             {
               "id": "d",
@@ -2820,11 +2820,11 @@
           "options": [
             {
               "id": "a",
-              "text": "The shorter prompt: 300 words removed is more than 200, and the price is per word either way"
+              "text": "Shorter replies: output tokens cost five times as much as input, so 200 fewer words saves more"
             },
             {
               "id": "b",
-              "text": "Shorter replies: output tokens cost five times as much as input, so 200 fewer words saves more"
+              "text": "The shorter prompt: 300 words removed is more than 200, and the price is per word either way"
             },
             {
               "id": "c",
@@ -2874,19 +2874,19 @@
           "options": [
             {
               "id": "a",
-              "text": "Move the refund rule out of the system prompt and into each customer message, next to the question"
+              "text": "Rewrite it calmly with a reason: promise only what the policy states, since Orbit must keep it"
             },
             {
               "id": "b",
-              "text": "Add \"BUT ALWAYS HELP WITH RETURNS.\" in capitals, so the two rules balance each other out"
+              "text": "Move the refund rule out of the system prompt and into each customer message, next to the question"
             },
             {
               "id": "c",
-              "text": "Delete the rule and rely on the policy facts already in the prompt to keep Scout accurate"
+              "text": "Add \"BUT ALWAYS HELP WITH RETURNS.\" in capitals, so the two rules balance each other out"
             },
             {
               "id": "d",
-              "text": "Rewrite it calmly with a reason: promise only what the policy states, since Orbit must keep it"
+              "text": "Delete the rule and rely on the policy facts already in the prompt to keep Scout accurate"
             }
           ],
           "lessons": [
@@ -2901,15 +2901,15 @@
           "options": [
             {
               "id": "a",
-              "text": "List the five labels in the prompt and ask the model to stick to them, with a reminder"
+              "text": "Give intent an enum of the five labels, so every answer must be one of your queues"
             },
             {
               "id": "b",
-              "text": "Map each new label to a queue in code as it shows up, adding a branch every time"
+              "text": "List the five labels in the prompt and ask the model to stick to them, with a reminder"
             },
             {
               "id": "c",
-              "text": "Give intent an enum of the five labels, so every answer must be one of your queues"
+              "text": "Map each new label to a queue in code as it shows up, adding a branch every time"
             },
             {
               "id": "d",
@@ -2928,11 +2928,11 @@
           "options": [
             {
               "id": "a",
-              "text": "Ask the model to double-check refund_amount against the order total before it answers"
+              "text": "Have code check refund_amount against the real order total, and send anything odd to a person"
             },
             {
               "id": "b",
-              "text": "Have code check refund_amount against the real order total, and send anything odd to a person"
+              "text": "Ask the model to double-check refund_amount against the order total before it answers"
             },
             {
               "id": "c",

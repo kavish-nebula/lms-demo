@@ -855,7 +855,7 @@ function buildModule(spine, mi) {
   const lb = src.lab ?? {};
   const wl = `${where} lab`;
   if (!src.lab) err(where, "missing lab");
-  allowedKeys(lb, ["title", "intro", "scenarios"], wl);
+  allowedKeys(lb, ["title", "intro", "scenarios", "roleplay"], wl);
   str(lb, "title", wl);
   str(lb, "intro", wl);
   if (lb.title && lb.title !== topic("lab")) warn(wl, `title differs from the topic title "${topic("lab")}"`);
@@ -889,7 +889,41 @@ function buildModule(spine, mi) {
     };
   });
   if (scen.length && scenLessons.size < 2) warn(wl, "all scenarios use one lesson; cover at least two");
-  const lab = { ...base("lab", "lab", scen.length * 3 + 1, "analyze"), title: lb.title, intro: lb.intro, scenarios };
+  let roleplay;
+  if (lb.roleplay) {
+    const rp = lb.roleplay;
+    const wr = `${wl} roleplay`;
+    allowedKeys(rp, ["id", "eyebrow", "title", "brief", "learner_role", "customer", "start", "scenes", "debrief"], wr);
+    for (const key of ["id", "eyebrow", "title", "brief", "learner_role", "debrief"]) str(rp, key, wr);
+    allowedKeys(rp.customer, ["name", "role", "initials"], `${wr} customer`);
+    for (const key of ["name", "role", "initials"]) str(rp.customer, key, `${wr} customer`);
+    allowedKeys(rp.start, ["goal", "trust", "safety"], `${wr} start`);
+    for (const key of ["goal", "trust", "safety"]) {
+      if (typeof rp.start?.[key] !== "number" || rp.start[key] < 0 || rp.start[key] > 100) err(`${wr} start`, `"${key}" must be a number from 0 to 100`);
+    }
+    const scenes = arr(rp, "scenes", wr, 5, 5);
+    const visuals = new Set(["incoming", "tool", "evidence", "twist", "send"]);
+    const usedVisuals = new Set();
+    scenes.forEach((scene, sceneIndex) => {
+      const ws = `${wr} scene ${sceneIndex + 1}`;
+      allowedKeys(scene, ["id", "visual", "label", "title", "line", "narration", "prompt", "hint", "choices"], ws);
+      for (const key of ["id", "visual", "label", "title", "line", "narration", "prompt", "hint"]) str(scene, key, ws);
+      if (!visuals.has(scene?.visual)) err(ws, `"visual" must be incoming, tool, evidence, twist or send`);
+      if (usedVisuals.has(scene?.visual)) err(ws, `visual "${scene?.visual}" repeats; every roleplay scene needs its own visual treatment`);
+      usedVisuals.add(scene?.visual);
+      const choices = arr(scene, "choices", ws, 3, 3);
+      choices.forEach((choice, choiceIndex) => {
+        const wc = `${ws} choice ${choiceIndex + 1}`;
+        allowedKeys(choice, ["id", "text", "feedback", "best", "effects"], wc);
+        for (const key of ["id", "text", "feedback"]) str(choice, key, wc);
+        allowedKeys(choice.effects, ["goal", "trust", "safety"], `${wc} effects`);
+        for (const key of ["goal", "trust", "safety"]) if (typeof choice.effects?.[key] !== "number") err(`${wc} effects`, `"${key}" must be a number`);
+      });
+      if (choices.filter((choice) => choice?.best).length !== 1) err(ws, "exactly one choice must have best: true");
+    });
+    roleplay = rp;
+  }
+  const lab = { ...base("lab", "lab", scen.length * 3 + (roleplay ? 6 : 1), "analyze"), title: lb.title, intro: lb.intro, scenarios, ...(roleplay ? { roleplay } : {}) };
 
   /* review */
   const rv = src.review ?? {};
@@ -972,11 +1006,12 @@ function buildModuleCheck(mod, mid, dir, lessonIds, base) {
     opts.forEach((o, j) => (isStr(o) ? o.length > 120 && warn(`${w} option ${j}`, `is ${o.length} characters; keep it under 120`) : err(`${w} option ${j}`, "must be a string")));
     if (!isInt(it?.correct) || it.correct < 0 || it.correct > 3) err(w, `"correct" must be 0 to 3`);
     str(it, "explain", w, { max: 300 });
-    // authors tend to put the right answer in the same place, and a shuffle of six can still bunch:
-    // rotate the right answer through every position (a d c b a d…, offset per module), the rest shuffled
+    // Demo-review mode keeps the authored correct option first for every module
+    // quiz. Distractors are still shuffled so their order remains varied.
     const tagged = opts.map((text, j) => ({ text, right: j === it?.correct }));
-    const order = shuffled(tagged.filter((o) => !o.right), `${mid}.gate.${k + 1}`);
-    order.splice((k * 3 + Number(mid.replace(/\D/g, "") || 0)) % 4, 0, ...tagged.filter((o) => o.right));
+    const right = tagged.find((o) => o.right);
+    const wrong = shuffled(tagged.filter((o) => !o.right), `${mid}.gate.${k + 1}`);
+    const order = right ? [right, ...wrong] : wrong;
     const id = `q${k + 1}`;
     keys[id] = letters[Math.max(0, order.findIndex((o) => o.right))];
     explain[id] = it?.explain;

@@ -10,7 +10,9 @@ Pip has one launcher in the bottom-right corner. It is the character itself, wit
 
 Guidance uses a source-linked chat and current-step shortcuts. The notebook is course-specific and saved in this browser. Assessment screens show a clear independent-work message and process guidance while hiding explanatory history and notes.
 
-Scenarios now show one case at a time: inspect evidence, choose, commit, see the consequence, compare reasoning, and optionally retry. Choices persist. Experiments show controls beside a result, with a warning when settings differ from the last run. The mobile layout stacks these areas.
+Module 1 opens its Scenarios phase with one flagship roleplay, **The address switch**. The learner supervises Scout through five short scenes: an incoming request, tool selection, evidence scan, privacy twist, and final handoff. Nia and Scout are polished 3D characters inside one widescreen stage. Nia speaks every scene in first person with her own voice; Scout, the scene props, and both characters move and react around her dialogue. When Nia finishes, the learner directs the next moment by choosing between three miniature acted-scene previews instead of reading a conventional list of answer options. The selected outcome plays in the same frame. Goal, Trust, and Safety respond to each decision; the ending reflects the learner's actual path and supports replay. The activity uses a fresh customer problem rather than repeating the hook, worked example, or guided-practice case. Existing scenarios remain available as optional bonus cases.
+
+Other scenarios show one case at a time: inspect evidence, choose, commit, see the consequence, compare reasoning, and optionally retry. Choices persist. Experiments show controls beside a result, with a warning when settings differ from the last run. The mobile layout stacks these areas.
 
 Rewards recognize completed practice. Asking for hints never reduces XP or stars. Existing mission progress is retained. The journey celebrates chapters practised, reflections saved, and reviews recalled, rather than displaying invented activity.
 
@@ -28,6 +30,7 @@ New styles live in `components/learning/learning.css`. Colours come from shared 
 4. Open Pip, ask a course question, follow its reference, save an explanation, and reopen the notebook after a reload. Ask an unrelated question and verify the scope response.
 5. Change guidance, visit guided practice, and request a hint. Confirm the completed checkpoint earns the same XP.
 6. Commit and revise scenario decisions; reload and confirm the chosen decision persists.
+6a. Enter Module 1's roleplay, play and stop every acted scene, and confirm that Nia and Scout speak, gesture, and change expression. Make one decision in each scene and confirm that the incoming message, tool orbit, evidence scan, privacy alert, and handoff animations are distinct. Reload midway and confirm that the scene, signals, and revealed consequence persist. Complete, replay, and open the bonus cases. With reduced motion enabled, confirm that every roleplay animation stops.
 7. Fail a module quiz: the retry and remediation remain available, while the next module stays locked in the map, course outline, and direct URL. Retry and pass; the next module should unlock.
 8. In the passed-quiz result, write a reflection and inspect the scheduled return visits. Practise a future review; its future date must remain scheduled. Request tomorrow's practice and confirm the updated date on the Reviews page.
 9. On a desktop-height viewport, open a concept, guided practice, scenario and module quiz. Confirm the course header stays visible, the activity remains inside one focused workspace, and the page does not grow by one screen per action.

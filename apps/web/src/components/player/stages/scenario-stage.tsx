@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, ArrowRight, Check, Compass, RotateCcw, ScrollText } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Compass, MessageCircleMore, RotateCcw, ScrollText } from "lucide-react";
 import { Surface } from "@/components/kit/surface";
 import { Chip } from "@/components/kit/chip";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { useLocalJson, writeLocal } from "@/lib/local-store";
 import type { Support } from "@/lib/setup";
 import type { Scenario, ScenarioBlock } from "@/data/types";
 import type { StageProps } from "./types";
+import { RoleplayMission, type RoleplaySave } from "./roleplay-mission";
 
 type Decisions = Record<string, { choice: string; committed: boolean }>;
 /** One situation at a time, with a visible consequence and a deliberate retry loop. */
@@ -21,17 +22,33 @@ export function ScenarioStage({ block, support, ...nav }: StageProps<ScenarioBlo
   const context = useLearningContext();
   const key = `lms-decisions:v1:${context?.courseId ?? "course"}:${block.step_id}`;
   const decisions = useLocalJson<Decisions>(key, {});
+  const roleplayKey = `lms-roleplay:v1:${context?.courseId ?? "course"}:${block.step_id}:${block.roleplay?.id ?? "none"}`;
+  const roleplaySave = useLocalJson<RoleplaySave | null>(roleplayKey, null);
+  const [view, setView] = React.useState<"roleplay" | "cases">(block.roleplay ? "roleplay" : "cases");
   const [index, setIndex] = React.useState(0);
   const s = block.scenarios[index]!;
   const left = block.scenarios.filter((s) => !decisions[s.id]?.committed).length;
-  useCompanionStep({ title: s.title, phase: "lab", guidance: `${s.situation} Inspect the evidence, choose an action, and compare its consequence with your expectation.`, hint: s.question.hints[0] });
-  return <StageShell stage="lab" title={block.title} intro={block.intro} minutes={block.duration_min} bloom={block.bloom} canComplete={left === 0 || nav.done} completeHint={t("scenariosLeft", { count: left })} {...nav}>
-    <nav className="flex flex-wrap gap-2" aria-label="Scenario cases">{block.scenarios.map((item, i) => <Button key={item.id} size="sm" variant={index === i ? "brand" : "outline"} onClick={() => setIndex(i)} aria-current={index === i ? "step" : undefined}>{decisions[item.id]?.committed ? <Check /> : <Compass />}Case {i + 1}</Button>)}</nav>
-    <ScenarioCard key={s.id} scenario={s} n={index + 1} total={block.scenarios.length} support={support} saved={decisions[s.id]} onSave={(choice, committed, helped) => {
-      writeLocal(key, JSON.stringify({ ...decisions, [s.id]: { choice, committed } }));
-      if (committed && context) recordLearning(context.courseId, { id: s.question.step_id, moduleId: context.moduleId, correct: !!s.question.options.find((o) => o.id === choice)?.correct, helped });
-    }} />
-    <div className="flex justify-between gap-3"><Button variant="ghost" disabled={index === 0} onClick={() => setIndex(index - 1)}><ArrowLeft />Previous case</Button><Button variant="outline" disabled={index === block.scenarios.length - 1 || !decisions[s.id]?.committed} onClick={() => setIndex(index + 1)}>Next case<ArrowRight /></Button></div>
+  const roleplayDone = !block.roleplay || (roleplaySave?.missionId === block.roleplay.id && roleplaySave.complete);
+  useCompanionStep(view === "roleplay" && block.roleplay
+    ? { title: block.roleplay.title, phase: "lab", guidance: block.roleplay.brief, hint: "Gather facts first, respect Scout's limits, and protect the customer." }
+    : { title: s.title, phase: "lab", guidance: `${s.situation} Inspect the evidence, choose an action, and compare its consequence with your expectation.`, hint: s.question.hints[0] });
+  return <StageShell stage="lab" title={view === "roleplay" && block.roleplay ? block.roleplay.title : block.title} intro={view === "roleplay" && block.roleplay ? "Take the supervisor's seat. Every decision changes the customer's outcome." : block.intro} minutes={block.duration_min} bloom={block.bloom} canComplete={roleplayDone || nav.done} completeHint={block.roleplay ? "Finish the roleplay to continue" : t("scenariosLeft", { count: left })} {...nav}>
+    {block.roleplay ? <nav className="flex flex-wrap gap-2" aria-label="Scenario activities">
+      <Button size="sm" variant={view === "roleplay" ? "brand" : "outline"} onClick={() => setView("roleplay")} aria-current={view === "roleplay" ? "page" : undefined}>{roleplayDone ? <Check /> : <MessageCircleMore />}Live roleplay</Button>
+      <Button size="sm" variant={view === "cases" ? "brand" : "outline"} onClick={() => setView("cases")} aria-current={view === "cases" ? "page" : undefined}><Compass />Bonus cases</Button>
+    </nav> : null}
+    {view === "roleplay" && block.roleplay ? <RoleplayMission mission={block.roleplay} support={support} storageKey={roleplayKey} onExploreCases={() => setView("cases")} onFinished={(save) => {
+      if (!context) return;
+      const strong = save.meters.goal >= 65 && save.meters.trust >= 65 && save.meters.safety >= 65;
+      recordLearning(context.courseId, { id: `${block.step_id}.roleplay`, moduleId: context.moduleId, correct: strong, helped: save.helped });
+    }} /> : <>
+      <nav className="flex flex-wrap gap-2" aria-label="Bonus scenario cases">{block.scenarios.map((item, i) => <Button key={item.id} size="sm" variant={index === i ? "brand" : "outline"} onClick={() => setIndex(i)} aria-current={index === i ? "step" : undefined}>{decisions[item.id]?.committed ? <Check /> : <Compass />}Case {i + 1}</Button>)}</nav>
+      <ScenarioCard key={s.id} scenario={s} n={index + 1} total={block.scenarios.length} support={support} saved={decisions[s.id]} onSave={(choice, committed, helped) => {
+        writeLocal(key, JSON.stringify({ ...decisions, [s.id]: { choice, committed } }));
+        if (committed && context) recordLearning(context.courseId, { id: s.question.step_id, moduleId: context.moduleId, correct: !!s.question.options.find((o) => o.id === choice)?.correct, helped });
+      }} />
+      <div className="flex justify-between gap-3"><Button variant="ghost" disabled={index === 0} onClick={() => setIndex(index - 1)}><ArrowLeft />Previous case</Button><Button variant="outline" disabled={index === block.scenarios.length - 1 || !decisions[s.id]?.committed} onClick={() => setIndex(index + 1)}>Next case<ArrowRight /></Button></div>
+    </>}
   </StageShell>;
 }
 

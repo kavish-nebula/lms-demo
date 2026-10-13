@@ -3167,11 +3167,11 @@
           "options": [
             {
               "id": "a",
-              "text": "In scope: add an update_address tool now, since it is an order question like the rest"
+              "text": "Out of scope for launch: Scout hands these chats to a person with a short summary"
             },
             {
               "id": "b",
-              "text": "Out of scope for launch: Scout hands these chats to a person with a short summary"
+              "text": "In scope: add an update_address tool now, since it is an order question like the rest"
             },
             {
               "id": "c",
@@ -3221,19 +3221,19 @@
           "options": [
             {
               "id": "a",
-              "text": "The policy trace: a repeated search means the policy chunks are wrong, so the reply will be too"
+              "text": "The refund trace: request_refund acts, so a repeat could start a second refund for one jacket"
             },
             {
               "id": "b",
-              "text": "Both equally: any repeated call is a loop, and the step limit treats every tool the same way"
+              "text": "The policy trace: a repeated search means the policy chunks are wrong, so the reply will be too"
             },
             {
               "id": "c",
-              "text": "Neither: both tools give the same answer the second time, so a repeat only costs one more step"
+              "text": "Both equally: any repeated call is a loop, and the step limit treats every tool the same way"
             },
             {
               "id": "d",
-              "text": "The refund trace: request_refund acts, so a repeat could start a second refund for one jacket"
+              "text": "Neither: both tools give the same answer the second time, so a repeat only costs one more step"
             }
           ],
           "lessons": [
@@ -3248,15 +3248,15 @@
           "options": [
             {
               "id": "a",
-              "text": "Step 1: wrong tool, since a where-is-my-parcel question should go straight to track_parcel"
+              "text": "Step 2: the order ID went where the tracking number belonged, so sharpen track_parcel's description"
             },
             {
               "id": "b",
-              "text": "Nothing yet: PP-90417 always times out in the fake data, so this case is meant to fail"
+              "text": "Step 1: wrong tool, since a where-is-my-parcel question should go straight to track_parcel"
             },
             {
               "id": "c",
-              "text": "Step 2: the order ID went where the tracking number belonged, so sharpen track_parcel's description"
+              "text": "Nothing yet: PP-90417 always times out in the fake data, so this case is meant to fail"
             },
             {
               "id": "d",
@@ -3275,11 +3275,11 @@
           "options": [
             {
               "id": "a",
-              "text": "Keep it, and add more wording cases so the next run shows the improvement in the total"
+              "text": "Don't keep it as is: it traded two harmless failures for two unsafe refund failures"
             },
             {
               "id": "b",
-              "text": "Don't keep it as is: it traded two harmless failures for two unsafe refund failures"
+              "text": "Keep it, and add more wording cases so the next run shows the improvement in the total"
             },
             {
               "id": "c",
