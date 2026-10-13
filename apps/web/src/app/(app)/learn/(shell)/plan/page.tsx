@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { engagementEnabled } from "@/server/engagement";
 import { PlatformPlan } from "@/components/engagement/platform-plan";
 import { PageHeader } from "@/components/kit/page-header";
+import { CardSkeleton } from "@/components/kit/states";
 import { PlanGate } from "@/components/plan/plan-gate";
 
 export const metadata: Metadata = { title: "Learning plan" };
@@ -23,7 +24,7 @@ export default async function PlanPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("subtitle")} />
-      {enabled ? <Suspense><PlatformPlan courses={courses} durations={durations} /></Suspense> : <PlanGate
+      {enabled ? <Suspense fallback={<div role="status" aria-label={t("title")}><CardSkeleton lines={5} /></div>}><PlatformPlan courses={courses} durations={durations} /></Suspense> : <PlanGate
         courses={courses}
         reviews={learner.due_reviews}
         history={learner.history}

@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
-import { BookOpenCheck, Clock3, GraduationCap, Layers3, ListChecks, Sparkles, Wand2 } from "lucide-react";
+import { BookOpenCheck, Clock3, GraduationCap, Layers3, Sparkles } from "lucide-react";
 import { StatTile } from "@/components/kit/stat-tile";
 import { Stagger, StaggerItem } from "@/components/kit/stagger";
 import { SectionHeader } from "@/components/kit/page-header";
@@ -21,7 +21,6 @@ import { Button } from "@/components/ui/button";
 import { useEnrollments } from "@/lib/enrollment";
 import { useCoursesProgress, type CourseProgress } from "@/lib/course-progress";
 import { useLearnerReady } from "@/lib/api";
-import { QUESTIONS } from "@/lib/setup";
 import type { Course, Learner } from "@/data/types";
 import { WeeklyPanel } from "@/components/engagement/weekly-panel";
 import { useEngagement } from "@/components/engagement/provider";
@@ -53,7 +52,7 @@ export function HomeDashboard({ learner, courses, today }: { learner: Learner; c
   return enrolled.length ? (
     <EnrolledHome learner={learner} courses={enrolled} progress={progress} today={today} />
   ) : (
-    <><WeeklyPanel courses={courses} /><WelcomeHome course={courses[0]} /></>
+    <><WelcomeHome course={courses[0]} /><WeeklyPanel courses={courses} /></>
   );
 }
 
@@ -63,11 +62,6 @@ function WelcomeHome({ course }: { course: Course | undefined }) {
   const t = useTranslations("home");
   const tc = useTranslations("course");
   if (!course) return <EmptyState icon={<GraduationCap />} title={t("noCoursesTitle")} description={t("noCoursesBody")} />;
-  const steps = [
-    { icon: <ListChecks />, title: t("welcomeStep1"), body: t("welcomeStep1Body", { count: QUESTIONS.length }) },
-    { icon: <Wand2 />, title: t("welcomeStep2"), body: t("welcomeStep2Body") },
-    { icon: <Layers3 />, title: t("welcomeStep3"), body: t("welcomeStep3Body") },
-  ];
   return (
     <div className="flex min-w-0 flex-col gap-6">
       <Surface pad="lg" spotlight className="relative isolate overflow-hidden">
@@ -111,24 +105,6 @@ function WelcomeHome({ course }: { course: Course | undefined }) {
           </div>
         </div>
       </Surface>
-
-      <section aria-labelledby="how-it-starts" className="flex flex-col gap-4">
-        <SectionHeader title={<span id="how-it-starts">{t("howItStarts")}</span>} />
-        <Stagger inView className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {steps.map((s, i) => (
-            <StaggerItem key={s.title} className="h-full">
-              <Surface pad="md" className="flex h-full flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="flex size-9 items-center justify-center rounded-lg bg-brand-soft text-brand-ink [&_svg]:size-4">{s.icon}</span>
-                  <span className="font-mono text-xs text-ink-faint">0{i + 1}</span>
-                </div>
-                <div className="font-semibold">{s.title}</div>
-                <p className="text-sm text-ink-muted">{s.body}</p>
-              </Surface>
-            </StaggerItem>
-          ))}
-        </Stagger>
-      </section>
     </div>
   );
 }
