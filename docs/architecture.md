@@ -24,6 +24,7 @@ New state is separate from the existing stores:
 - `lms-video-position:v1:{courseId}:{videoId}`: slide, playback/check phase, completed checks, and seen slides. Videos resume paused at the saved slide.
 - `lms-prediction:v1:{courseId}:{moduleId}`: initial hook prediction, revisited during reflection.
 - `lms-decisions:v1:{courseId}:{stepId}`: scenario decisions.
+- `lms-roleplay:v1:{courseId}:{stepId}:{missionId}`: roleplay scene, committed decisions, Goal/Trust/Safety signals, hint use, and completion.
 - `lms-gate:v1:{courseId}:{checkId}`: a local copy of the graded outcome for review. It does not replace backend progress. Demo module and finale access remains open; persisted stage identifiers, server-plan order and completion records are preserved. A passed quiz exposes the reflection UI, while the course keeps its existing completion semantics.
 
 Review tickets start at 3, 10, and 30 days. Scheduling is idempotent. A difficult review can return tomorrow. Early successful practice leaves the future ticket scheduled. The course page and Reviews page display these tickets. No background notifications or server scheduler were introduced.

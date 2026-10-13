@@ -3600,15 +3600,15 @@
           "options": [
             {
               "id": "a",
-              "text": "Add \"refund\" to the input check's phrase list, so these chats are flagged for review"
+              "text": "Add a check in code that blocks any refund above the order total, and log each block"
             },
             {
               "id": "b",
-              "text": "Nothing new: the approval guard already holds risky refunds until a person checks them"
+              "text": "Add \"refund\" to the input check's phrase list, so these chats are flagged for review"
             },
             {
               "id": "c",
-              "text": "Add a check in code that blocks any refund above the order total, and log each block"
+              "text": "Nothing new: the approval guard already holds risky refunds until a person checks them"
             },
             {
               "id": "d",
@@ -3627,11 +3627,11 @@
           "options": [
             {
               "id": "a",
-              "text": "Keep Opus 5.5 on every step, since only the largest model answers support questions well"
+              "text": "Make one change at a time and re-run the Module 5 tests after each, keeping what holds quality"
             },
             {
               "id": "b",
-              "text": "Make one change at a time and re-run the Module 5 tests after each, keeping what holds quality"
+              "text": "Keep Opus 5.5 on every step, since only the largest model answers support questions well"
             },
             {
               "id": "c",
@@ -3681,19 +3681,19 @@
           "options": [
             {
               "id": "a",
-              "text": "Split it: three focused prompts will be more accurate than one agent with six tools"
+              "text": "Keep one agent and fix the timeout handling; splitting adds calls and cost, not fixes"
             },
             {
               "id": "b",
-              "text": "Split it, and pass the full conversation between agents so no detail gets lost"
+              "text": "Split it: three focused prompts will be more accurate than one agent with six tools"
             },
             {
               "id": "c",
-              "text": "Split off just a tracking agent, since that is where every failing test comes from"
+              "text": "Split it, and pass the full conversation between agents so no detail gets lost"
             },
             {
               "id": "d",
-              "text": "Keep one agent and fix the timeout handling; splitting adds calls and cost, not fixes"
+              "text": "Split off just a tracking agent, since that is where every failing test comes from"
             }
           ],
           "lessons": [
@@ -3708,15 +3708,15 @@
           "options": [
             {
               "id": "a",
-              "text": "Retrieval with embeddings, so Scout finds the right policy text by meaning, not words"
+              "text": "Evaluations at scale: hundreds of cases, with a model grading answers that vary in wording"
             },
             {
               "id": "b",
-              "text": "Multi-agent systems, so a second agent can double-check every reply before it goes out"
+              "text": "Retrieval with embeddings, so Scout finds the right policy text by meaning, not words"
             },
             {
               "id": "c",
-              "text": "Evaluations at scale: hundreds of cases, with a model grading answers that vary in wording"
+              "text": "Multi-agent systems, so a second agent can double-check every reply before it goes out"
             },
             {
               "id": "d",
@@ -3735,11 +3735,11 @@
           "options": [
             {
               "id": "a",
-              "text": "Add a step limit and a spend limit to the agent code in the page, and keep the same key"
+              "text": "Revoke the key, move model calls to a server that holds a new key, and set a spend alert"
             },
             {
               "id": "b",
-              "text": "Revoke the key, move model calls to a server that holds a new key, and set a spend alert"
+              "text": "Add a step limit and a spend limit to the agent code in the page, and keep the same key"
             },
             {
               "id": "c",

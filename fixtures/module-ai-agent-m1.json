@@ -7,7 +7,7 @@
   "locale": "en",
   "title": "Introduction to AI Agents",
   "summary": "Orbit's FAQ chatbot apologised 400 times on Monday. It could talk about orders, but it couldn't look one up.",
-  "estimated_minutes": 101,
+  "estimated_minutes": 106,
   "stages_included": [
     "hook",
     "explainer",
@@ -2597,7 +2597,7 @@
     {
       "step_id": "m1.lab",
       "stage": "lab",
-      "duration_min": 10,
+      "duration_min": 15,
       "bloom": "analyze",
       "load": "medium",
       "objective_ids": [
@@ -2745,7 +2745,242 @@
           },
           "debrief": "Fixed answers to common questions don't need an agent. A good FAQ page, or a chatbot that answers from the policy, does the job cheaply. Save the agent for questions where the answer depends on this customer's order. In fact, Monday's FAQ bot was fine for exactly these questions; it only failed when asked about a specific order."
         }
-      ]
+      ],
+      "roleplay": {
+        "id": "address-switch",
+        "eyebrow": "LIVE ROLEPLAY",
+        "title": "The address switch",
+        "brief": "Nia's climbing harness is about to ship to her old address. Guide Scout to a useful answer without guessing, collecting unsafe information or promising an action it cannot take.",
+        "learner_role": "Scout's supervisor",
+        "customer": {
+          "name": "Nia",
+          "role": "Customer",
+          "initials": "NI"
+        },
+        "start": {
+          "goal": 42,
+          "trust": 54,
+          "safety": 68
+        },
+        "scenes": [
+          {
+            "id": "incoming",
+            "visual": "incoming",
+            "label": "INCOMING",
+            "title": "A message lands",
+            "line": "Hi, I'm Nia. I just noticed order ORB-10621 has my old address. It ships today. Can you help before it leaves?",
+            "narration": "Hi, I'm Nia. My climbing harness is about to ship to my old address, and it leaves today. I need help fast. What should Scout do first?",
+            "prompt": "What should Scout do first?",
+            "hint": "A useful answer starts with the current order facts, not a promise.",
+            "choices": [
+              {
+                "id": "check",
+                "text": "Check the order status and available actions first",
+                "feedback": "Good call. Scout gathers the facts before saying what is possible.",
+                "best": true,
+                "effects": {
+                  "goal": 14,
+                  "trust": 7,
+                  "safety": 8
+                }
+              },
+              {
+                "id": "promise",
+                "text": "Promise that the address will be changed today",
+                "feedback": "Scout has not checked the order or its tools. The promise creates risk immediately.",
+                "effects": {
+                  "goal": -8,
+                  "trust": -12,
+                  "safety": -16
+                }
+              },
+              {
+                "id": "cancel",
+                "text": "Tell Nia to cancel and place a new order",
+                "feedback": "That may be unnecessary. Scout still needs to see whether the current order can be helped.",
+                "effects": {
+                  "goal": -4,
+                  "trust": -7,
+                  "safety": 2
+                }
+              }
+            ]
+          },
+          {
+            "id": "tool",
+            "visual": "tool",
+            "label": "CHOOSE A TOOL",
+            "title": "Give Scout one action",
+            "line": "Scout, please help me before it ships. You can open my order, check tracking or read the policy. Which one will tell us what is happening?",
+            "narration": "Scout says it can open my order, check a shipped parcel or read Orbit's policy. My parcel may not have left yet. Which action should Scout take now?",
+            "prompt": "Which action gives Scout the next useful fact?",
+            "hint": "Nia's order may not have shipped yet, so begin with the order record.",
+            "choices": [
+              {
+                "id": "order",
+                "text": "Run get_order with ORB-10621",
+                "feedback": "The order record will show its live status and whether a tracking number exists.",
+                "best": true,
+                "effects": {
+                  "goal": 15,
+                  "trust": 5,
+                  "safety": 7
+                }
+              },
+              {
+                "id": "track",
+                "text": "Track the parcel immediately",
+                "feedback": "There is no tracking number yet. Scout needs the order record before it can track anything.",
+                "effects": {
+                  "goal": -6,
+                  "trust": -3,
+                  "safety": 1
+                }
+              },
+              {
+                "id": "password",
+                "text": "Ask Nia for her account password",
+                "feedback": "Passwords are never needed for support. This would create a serious safety problem.",
+                "effects": {
+                  "goal": -5,
+                  "trust": -10,
+                  "safety": -24
+                }
+              }
+            ]
+          },
+          {
+            "id": "evidence",
+            "visual": "evidence",
+            "label": "READ THE EVIDENCE",
+            "title": "The order record opens",
+            "line": "I can see what Scout found. My order is processing, dispatch is at four, and the address is locked. Scout cannot edit it.",
+            "narration": "Scout opened my order. It is still processing and leaves at four today, but the address is locked. Scout cannot edit it. What should it notice before replying to me?",
+            "prompt": "Which detail should drive Scout's next step?",
+            "hint": "Look for the fact that limits what Scout can safely do next.",
+            "choices": [
+              {
+                "id": "locked",
+                "text": "The address is locked and Scout has no edit tool",
+                "feedback": "Exactly. Scout knows the goal, but it also knows its boundary.",
+                "best": true,
+                "effects": {
+                  "goal": 12,
+                  "trust": 5,
+                  "safety": 12
+                }
+              },
+              {
+                "id": "processing",
+                "text": "The order is still processing",
+                "feedback": "That matters, but it does not prove Scout can change the address. Check its actual capability.",
+                "effects": {
+                  "goal": 2,
+                  "trust": 1,
+                  "safety": -2
+                }
+              },
+              {
+                "id": "today",
+                "text": "The parcel is scheduled to leave today",
+                "feedback": "The deadline adds urgency, but Scout still needs a safe action it can really complete.",
+                "effects": {
+                  "goal": 1,
+                  "trust": 1,
+                  "safety": -2
+                }
+              }
+            ]
+          },
+          {
+            "id": "twist",
+            "visual": "twist",
+            "label": "PLOT TWIST",
+            "title": "Nia offers too much",
+            "line": "I'm worried we are running out of time. I can send my full card number if that proves the order is mine. Where should I type it?",
+            "narration": "I'm worried we are running out of time, so I offer my full card number to prove the order is mine. Scout does not need my payment details. How should it keep me safe and still help?",
+            "prompt": "How should Scout respond to the offer?",
+            "hint": "Good support solves the problem without collecting information it does not need.",
+            "choices": [
+              {
+                "id": "refuse",
+                "text": "Tell Nia not to share card details and prepare a safe handoff",
+                "feedback": "Scout protects Nia and moves the urgent request to someone with the right permission.",
+                "best": true,
+                "effects": {
+                  "goal": 8,
+                  "trust": 13,
+                  "safety": 18
+                }
+              },
+              {
+                "id": "last-four",
+                "text": "Ask for the last four card digits instead",
+                "feedback": "Scout does not need payment details for this task. Collecting less is still collecting the wrong thing.",
+                "effects": {
+                  "goal": -2,
+                  "trust": -3,
+                  "safety": -10
+                }
+              },
+              {
+                "id": "accept",
+                "text": "Accept the number so the team can verify it later",
+                "feedback": "This exposes sensitive payment information and makes the situation less safe.",
+                "effects": {
+                  "goal": -7,
+                  "trust": -14,
+                  "safety": -30
+                }
+              }
+            ]
+          },
+          {
+            "id": "send",
+            "visual": "send",
+            "label": "FINAL RESPONSE",
+            "title": "Send the handoff",
+            "line": "I'm still here, Scout. Tell me what you checked, what you cannot do, and what will happen before my parcel leaves.",
+            "narration": "I'm waiting for one clear answer. Scout knows my order status, today's deadline and its own limit. What should it say so I know exactly what happens next?",
+            "prompt": "Which reply should Scout send?",
+            "hint": "Be clear about what was checked, what cannot be promised and what happens next.",
+            "choices": [
+              {
+                "id": "clear",
+                "text": "I checked ORB-10621. It is processing, but I cannot edit the locked address. Please do not share card details. I am sending this to our support team now with the order and dispatch time.",
+                "feedback": "Clear, honest and actionable. Nia knows what Scout checked and what will happen next.",
+                "best": true,
+                "effects": {
+                  "goal": 15,
+                  "trust": 16,
+                  "safety": 12
+                }
+              },
+              {
+                "id": "vague",
+                "text": "We are looking into it. Please wait for an update.",
+                "feedback": "This is safe but vague. Nia does not know what was checked or whether the urgent deadline was shared.",
+                "effects": {
+                  "goal": -3,
+                  "trust": -8,
+                  "safety": 4
+                }
+              },
+              {
+                "id": "guarantee",
+                "text": "Your address will be updated before the parcel ships. I guarantee it.",
+                "feedback": "Scout still cannot edit the address. A confident guarantee hides that limitation.",
+                "effects": {
+                  "goal": -10,
+                  "trust": -16,
+                  "safety": -18
+                }
+              }
+            ]
+          }
+        ],
+        "debrief": "Strong agent supervision is not about forcing every request to completion. It means gathering evidence, respecting tool limits, protecting the customer and handing off with useful context when a person has the needed permission."
+      }
     },
     {
       "step_id": "m1.gate",
@@ -2783,11 +3018,11 @@
           "options": [
             {
               "id": "a",
-              "text": "Scout makes every change on its own, since the customer asked for it in writing"
+              "text": "Scout prepares each change, and a person on Leo's team approves it before it's saved"
             },
             {
               "id": "b",
-              "text": "Scout prepares each change, and a person on Leo's team approves it before it's saved"
+              "text": "Scout makes every change on its own, since the customer asked for it in writing"
             },
             {
               "id": "c",
@@ -2837,19 +3072,19 @@
           "options": [
             {
               "id": "a",
-              "text": "The address question: it's simpler, so Scout will get it wrong far less often"
+              "text": "The return check: the answer is in Orbit's systems and differs for each customer"
             },
             {
               "id": "b",
-              "text": "Neither: anything about returns touches money, so it should stay with a person"
+              "text": "The address question: it's simpler, so Scout will get it wrong far less often"
             },
             {
               "id": "c",
-              "text": "Both equally: they come up just as often, and that's what makes a good agent job"
+              "text": "Neither: anything about returns touches money, so it should stay with a person"
             },
             {
               "id": "d",
-              "text": "The return check: the answer is in Orbit's systems and differs for each customer"
+              "text": "Both equally: they come up just as often, and that's what makes a good agent job"
             }
           ],
           "lessons": [
@@ -2864,15 +3099,15 @@
           "options": [
             {
               "id": "a",
-              "text": "No: language models can't make decisions, so Scout only follows a fixed script"
+              "text": "No: it can only ask for tools you defined, and your code decides what runs"
             },
             {
               "id": "b",
-              "text": "Only if the system prompt allows it, since the prompt controls which code runs"
+              "text": "No: language models can't make decisions, so Scout only follows a fixed script"
             },
             {
               "id": "c",
-              "text": "No: it can only ask for tools you defined, and your code decides what runs"
+              "text": "Only if the system prompt allows it, since the prompt controls which code runs"
             },
             {
               "id": "d",
@@ -2891,11 +3126,11 @@
           "options": [
             {
               "id": "a",
-              "text": "Add hello.py to .gitignore so Git stops sharing that file in every later push"
+              "text": "Delete the key in the console, create a new one, and keep it out of your code"
             },
             {
               "id": "b",
-              "text": "Delete the key in the console, create a new one, and keep it out of your code"
+              "text": "Add hello.py to .gitignore so Git stops sharing that file in every later push"
             },
             {
               "id": "c",

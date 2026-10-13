@@ -3230,19 +3230,19 @@
           "options": [
             {
               "id": "a",
-              "text": "Permission for Scout to run its own Python, so it can call the payment system directly"
+              "text": "A request_refund tool Scout can ask for, which your code runs, because the model only writes text"
             },
             {
               "id": "b",
-              "text": "A larger model that is able to reach Orbit's payment system and send the refund itself"
+              "text": "Permission for Scout to run its own Python, so it can call the payment system directly"
             },
             {
               "id": "c",
-              "text": "A firmer rule in the system prompt, so Scout treats the refund as a step it must carry out"
+              "text": "A larger model that is able to reach Orbit's payment system and send the refund itself"
             },
             {
               "id": "d",
-              "text": "A request_refund tool Scout can ask for, which your code runs, because the model only writes text"
+              "text": "A firmer rule in the system prompt, so Scout treats the refund as a step it must carry out"
             }
           ],
           "lessons": [
@@ -3257,15 +3257,15 @@
           "options": [
             {
               "id": "a",
-              "text": "Writing a clearer description, since the model can't tell when track_parcel fits"
+              "text": "Adding track_parcel to FUNCTIONS, so run_tool can map the name to the function"
             },
             {
               "id": "b",
-              "text": "Listing tracking_number under required, so the model always sends that argument"
+              "text": "Writing a clearer description, since the model can't tell when track_parcel fits"
             },
             {
               "id": "c",
-              "text": "Adding track_parcel to FUNCTIONS, so run_tool can map the name to the function"
+              "text": "Listing tracking_number under required, so the model always sends that argument"
             },
             {
               "id": "d",
@@ -3284,11 +3284,11 @@
           "options": [
             {
               "id": "a",
-              "text": "Tell Scout in the system prompt to check every sum twice before it replies"
+              "text": "Have Scout pass the sum to calculate, as 58 - 6.95, and quote the result"
             },
             {
               "id": "b",
-              "text": "Have Scout pass the sum to calculate, as 58 - 6.95, and quote the result"
+              "text": "Tell Scout in the system prompt to check every sum twice before it replies"
             },
             {
               "id": "c",
@@ -3338,19 +3338,19 @@
           "options": [
             {
               "id": "a",
-              "text": "Retry a few times with backoff, in case ParcelPath is only having a brief problem"
+              "text": "Report it at once as is_error saying not found, so Scout asks Tom to check the number"
             },
             {
               "id": "b",
-              "text": "Hand Tom straight to a person, since a failed tool means Scout can't help him"
+              "text": "Retry a few times with backoff, in case ParcelPath is only having a brief problem"
             },
             {
               "id": "c",
-              "text": "Return an empty result, so Scout can tell Tom there is no tracking news yet"
+              "text": "Hand Tom straight to a person, since a failed tool means Scout can't help him"
             },
             {
               "id": "d",
-              "text": "Report it at once as is_error saying not found, so Scout asks Tom to check the number"
+              "text": "Return an empty result, so Scout can tell Tom there is no tracking news yet"
             }
           ],
           "lessons": [
@@ -3365,15 +3365,15 @@
           "options": [
             {
               "id": "a",
-              "text": "When the API fails, return the shop's usual Saturday slots so people can still book"
+              "text": "Retry the timeout briefly, then return is_error so the assistant says it can't check"
             },
             {
               "id": "b",
-              "text": "Add a prompt rule: only say a day is full when the assistant is certain that it is"
+              "text": "When the API fails, return the shop's usual Saturday slots so people can still book"
             },
             {
               "id": "c",
-              "text": "Retry the timeout briefly, then return is_error so the assistant says it can't check"
+              "text": "Add a prompt rule: only say a day is full when the assistant is certain that it is"
             },
             {
               "id": "d",

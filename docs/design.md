@@ -24,7 +24,9 @@ Pip has one launcher in the bottom-right corner. It is the character itself, wit
 
 Guidance uses a source-linked chat and current-step shortcuts. The notebook is course-specific and saved in this browser. Assessment screens show a clear independent-work message and process guidance while hiding explanatory history and notes.
 
-Scenarios now show one case at a time: inspect evidence, choose, commit, see the consequence, compare reasoning, and optionally retry. Choices persist. Experiments show controls beside a result, with a warning when settings differ from the last run. The mobile layout stacks these areas.
+Module 1 opens its Scenarios phase with the animated “The address switch” roleplay. Learners supervise Scout through five scenes with voiced first-person narration, acted choice previews, and visible Goal, Trust, and Safety consequences. Progress persists locally; existing scenario cases remain available as optional bonus practice. The roleplay and its media work offline and honor reduced-motion preferences.
+
+Scenarios show one case at a time: inspect evidence, choose, commit, see the consequence, compare reasoning, and optionally retry. Choices persist. Experiments show controls beside a result, with a warning when settings differ from the last run. The mobile layout stacks these areas.
 
 Rewards recognize completed practice. Asking for hints never reduces XP or stars. Existing mission progress is retained. The journey celebrates chapters practised, reflections saved, and reviews recalled, rather than displaying invented activity.
 
