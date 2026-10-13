@@ -7,7 +7,6 @@ import { getCourse, getModule } from "@/data";
 import { moduleOutline } from "@/lib/module-outline";
 import { Surface } from "@/components/kit/surface";
 import { SectionNav } from "@/components/course/section-nav";
-import { SetupPanel } from "@/components/course/setup-panel";
 import {
   AboutSection,
   ModulesSection,
@@ -15,7 +14,6 @@ import {
 } from "@/components/course/course-sections";
 
 type Params = { courseId: string };
-type Search = { ready?: string };
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { courseId } = await params;
@@ -24,8 +22,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 }
 
 /** S3 Course details (Coursera layout): hero, stats strip, sticky section nav, sections. */
-export default async function CoursePage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<Search> }) {
-  const [{ courseId }, { ready }] = await Promise.all([params, searchParams]);
+export default async function CoursePage({ params }: { params: Promise<Params> }) {
+  const { courseId } = await params;
   const course = await getCourse(courseId);
   if (!course) notFound();
   const t = await getTranslations("course");
@@ -48,8 +46,6 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
   return (
     <div className="flex flex-col gap-10">
       <CourseJourney course={course} />
-
-      <SetupPanel course={course} ready={ready === "1"} />
 
       {/* ---------------- stats strip ---------------- */}
       <Surface pad="none" className="grid grid-cols-1 divide-y divide-line sm:grid-cols-2 sm:divide-y-0 xl:grid-cols-4 xl:divide-x">

@@ -197,7 +197,7 @@ export function EnrollFlow({
         onRetry={() => void commit()}
         onGo={() => {
           toast.success(t("toastEnrolled", { course: course.title }));
-          router.push(`${courseHref}?ready=1`);
+          router.push(courseHref);
         }}
       />
     );
