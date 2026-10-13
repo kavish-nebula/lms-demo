@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, Check, Flag, FlaskConical, LockKeyhole, MessageCircle, Route, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import { ArrowRight, Check, Flag, FlaskConical, LockKeyhole, MessageCircle, Route, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ProgressBar } from "@/components/kit/progress-ring";
@@ -19,17 +19,14 @@ import { BadgeCabinet, CapabilityRack, DailyMission, GameStatus, MasteryStars } 
 
 export function CourseJourney({ course }: { course: Course }) {
   const progress = useCourseProgress(course);
-  const { enrolled, adaptation } = useEnrollment(course.course_id);
+  const { enrolled } = useEnrollment(course.course_id);
   const { state } = useLearning(course.course_id);
   const { watched } = useWatchedVideos();
   const hydrated = useHydrated();
   const [preview, setPreview] = React.useState(false);
   const base = `/learn/courses/${course.course_id}`;
   const resume = state.resume?.href.startsWith(`${base}/`) ? state.resume : progress.resume;
-  const reviewed = state.reviews.filter((r) => r.completedAt).length;
   const due = hydrated ? state.reviews.filter((r) => !r.completedAt && new Date(r.due) <= new Date()) : [];
-  const practice = new Set(state.attempts.filter((a) => a.correct).map((a) => a.moduleId)).size;
-  const reflected = Object.values(state.reflections).filter((x) => x.trim().length > 10).length;
   const game = deriveGameProgress(course, progress, state, watched, due.length, new Date(), enrolled);
   const mission = enrolled ? game.quest : { eyebrow: "FIRST MISSION", title: "Create your learner profile", detail: "Tell us your goal, preview the course and take the starting check.", href: `${base}/enroll`, xp: 25, dailyDone: false };
   const stairSteps = progress.modules.map((module, index) => ({ module, index })).reverse();
@@ -80,10 +77,6 @@ export function CourseJourney({ course }: { course: Course }) {
       </div>
     </section>
     <BadgeCabinet badges={game.badges} />
-    <div className="grid gap-4 md:grid-cols-2">
-      <section className="journey-section"><p className="journey-kicker"><Sparkles className="size-4" />Small wins that matter</p><h2 className="mt-2 font-semibold">Build. Explain. Remember.</h2><div className="mt-4 grid grid-cols-3 gap-3">{[{ n: practice, label: "Chapters practised", icon: FlaskConical }, { n: reflected, label: "Reflections saved", icon: BookOpen }, { n: reviewed, label: "Reviews recalled", icon: Check }].map((x) => <div key={x.label} className="rounded-xl bg-panel-2 p-3"><x.icon className="mb-2 size-4 text-brand-ink" /><strong className="block text-2xl">{x.n}</strong><span className="text-[11px] text-ink-muted">{x.label}</span></div>)}</div><p className="mt-3 text-xs text-ink-muted">Practise, revise, and ask for help. Each is part of learning.</p></section>
-      <section className="journey-section"><p className="journey-kicker"><ShieldCheck className="size-4" />Made for your next step</p><h2 className="mt-2 font-semibold">{due.length ? `${due.length} review${due.length === 1 ? "" : "s"} ready for you` : enrolled ? "A starting plan that can grow with you" : "Your experience starts with you"}</h2><p className="mt-3 text-sm leading-relaxed text-ink-muted">{due.length ? "A short return visit helps you put an earlier idea to work again." : enrolled ? `${adaptation.support === "extra" ? "Extra guidance" : adaptation.support === "light" ? "A lighter touch" : "Balanced guidance"} to start. Your practice and choices adjust support as you go.` : "Tell us your goal, watch the preview, and try a low-pressure knowledge check. We’ll shape your starting support."}</p><Button asChild variant="outline" size="sm" className="mt-4"><Link href={due[0] ? `${base}/${due[0].moduleId}/review` : `${base}/enroll`}>{due.length ? "Start a review" : enrolled ? "View my plan" : "Set up my journey"}<ArrowRight /></Link></Button><Button size="sm" variant="ghost" className="mt-4" onClick={() => askPip()}><MessageCircle />Ask Pip</Button></section>
-    </div>
     <Dialog open={preview} onOpenChange={setPreview}><DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-4xl"><DialogTitle>Try a little of what you’ll learn</DialogTitle><DialogDescription>Change Scout’s behaviour and see the consequences. Your course progress stays where it is.</DialogDescription><ExperimentLab courseId={course.course_id} moduleId="m1" /></DialogContent></Dialog>
   </>;
 }

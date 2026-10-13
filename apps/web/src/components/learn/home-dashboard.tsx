@@ -25,7 +25,6 @@ import { QUESTIONS } from "@/lib/setup";
 import type { Course, Learner } from "@/data/types";
 import { WeeklyPanel } from "@/components/engagement/weekly-panel";
 import { TodaySessions } from "@/components/engagement/today-sessions";
-import { FocusTimer } from "@/components/engagement/focus-timer";
 import { useEngagement } from "@/components/engagement/provider";
 
 /**
@@ -55,7 +54,7 @@ export function HomeDashboard({ learner, courses, today }: { learner: Learner; c
   return enrolled.length ? (
     <EnrolledHome learner={learner} courses={enrolled} progress={progress} today={today} />
   ) : (
-    <><WeeklyPanel courses={courses} /><FocusTimer /><WelcomeHome course={courses[0]} /></>
+    <><WeeklyPanel courses={courses} /><WelcomeHome course={courses[0]} /></>
   );
 }
 
@@ -166,7 +165,7 @@ function EnrolledHome({
 
       <ResumeCard course={current} progress={progress[current.course_id]!} />
       <WeeklyPanel courses={courses} />
-      {platform ? <div className="grid gap-4 lg:grid-cols-2"><TodaySessions courses={courses} /><FocusTimer /></div> : null}
+      {platform ? <TodaySessions courses={courses} /> : null}
 
       <Stagger className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
         <StaggerItem>
