@@ -4,7 +4,7 @@ The shared Nebula mark uses the supplied logo image at `public/brand/nebula-mark
 
 The course details page omits the How it works section and its section-navigation link.
 
-The course journey omits the Small wins that matter and Made for your next step panels. The dashboard omits the Focus Session timer; the optional focus sprint remains available inside the course player.
+The course journey omits the Small wins that matter and Made for your next step panels. The dashboard omits Focus Session and Today’s study sessions; the optional focus sprint remains available inside the course player.
 
 The learner sidebar omits Reviews, Credentials and History on desktop and in the mobile menu. Their routes and search entries remain available.
 

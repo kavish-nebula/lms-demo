@@ -24,7 +24,6 @@ import { useLearnerReady } from "@/lib/api";
 import { QUESTIONS } from "@/lib/setup";
 import type { Course, Learner } from "@/data/types";
 import { WeeklyPanel } from "@/components/engagement/weekly-panel";
-import { TodaySessions } from "@/components/engagement/today-sessions";
 import { useEngagement } from "@/components/engagement/provider";
 
 /**
@@ -165,7 +164,6 @@ function EnrolledHome({
 
       <ResumeCard course={current} progress={progress[current.course_id]!} />
       <WeeklyPanel courses={courses} />
-      {platform ? <TodaySessions courses={courses} /> : null}
 
       <Stagger className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
         <StaggerItem>
