@@ -129,4 +129,3 @@ function Section({ icon, title, body, children }: { icon: React.ReactNode; title
     </Surface>
   );
 }
-
