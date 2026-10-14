@@ -6,8 +6,8 @@
  * removed, which stops the worker, and the next run starts a fresh one.
  */
 
-/** Pyodide 0.29.5 (Python 3.13), loaded from jsdelivr once and then cached by the browser. */
-export const PYODIDE_URL = "https://cdn.jsdelivr.net/pyodide/v0.29.5/full/";
+/** Pyodide 0.29.5 (Python 3.13), served locally so the learner sandbox works offline. */
+export const PYODIDE_URL = "/pyodide/";
 
 const BOOT_MS = 90_000;
 export const RUN_MS = 20_000;
@@ -132,7 +132,11 @@ export class PythonSandbox {
     frame.setAttribute("aria-hidden", "true");
     frame.tabIndex = -1;
     frame.style.cssText = "position:absolute;width:0;height:0;border:0;visibility:hidden";
-    frame.srcdoc = FRAME;
+    // Workers created by a sandboxed srcdoc have an opaque origin. Resolve
+    // runtime assets against the host app explicitly instead of the blob URL.
+    const runtimeUrl = new URL(PYODIDE_URL, window.location.href).href;
+    const worker = WORKER.replaceAll(PYODIDE_URL, runtimeUrl);
+    frame.srcdoc = FRAME.replace(JSON.stringify(WORKER), JSON.stringify(worker));
     window.addEventListener("message", this.listen);
     this.frame = frame;
     this.booted = new Promise<void>((resolve, reject) => {

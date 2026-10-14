@@ -1,6 +1,6 @@
 # Learning experience UI
 
-The shared Nebula mark uses the supplied logo image at `public/brand/nebula-mark.png`, including the sidebar and course branding. The existing wordmark remains alongside it.
+The shared Nebula mark uses the supplied logo image at `public/brand/nebula-mark.png`, including the sidebar and course branding. The adjacent wordmark uses the foreground ink for “Nebula” and the theme-aware, text-safe brand accent for “KnowLab”; full wordmarks use a 34px mark and compact marks remain 28px.
 
 The course details page omits the How it works section and its section-navigation link.
 
