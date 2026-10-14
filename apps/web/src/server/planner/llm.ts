@@ -219,7 +219,7 @@ function describe(e: SignalNote): string {
     case "final_check":
       return `final check: ${p.score}/${p.total}, ${p.passed ? "passed" : "not passed"}${Array.isArray(p.missedLessons) && p.missedLessons.length ? `; weak on ${p.missedLessons.map((k: string) => (k.includes(".") ? `lesson ${k}` : `module ${k}`)).join(", ")}` : ""}`;
     case "capstone_check":
-      return `capstone check: ${p.passed}/${p.total} requirements met${Array.isArray(p.failing) && p.failing.length ? `; failing: ${p.failing.join(", ")}` : ""}`;
+      return `mini project tests: ${p.score}/${p.total} checks, ${p.passed ? "passed" : "not passed"}${Array.isArray(p.missedLessons) && p.missedLessons.length ? `; weak on lessons ${p.missedLessons.join(", ")}` : ""}${p.criticalFailed ? "; did not hand off an email that tried to change its rules" : ""}`;
     default:
       return `${e.kind} (${where}) ${JSON.stringify(p)}`;
   }

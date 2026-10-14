@@ -1,5 +1,10 @@
 "use client";
 
+/** Review remains a scheduled return visit, while all saved stage IDs survive. */
+export function moduleFlowStages(stages: readonly StageId[]): StageId[] {
+  return stages.filter((stage) => stage !== "review" && stage !== "reflection");
+}
+
 import * as React from "react";
 import { useLocalPrefix } from "@/lib/local-store";
 import { EMPTY_FINALE, FINALE_PREFIX, type FinaleState } from "@/lib/finale";

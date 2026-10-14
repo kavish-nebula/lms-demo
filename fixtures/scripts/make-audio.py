@@ -36,6 +36,7 @@ OUT = ROOT / "apps" / "web" / "public" / "audio"
 MANIFEST = SRC / "audio-manifest.json"
 
 VOICE = "en-US-AndrewMultilingualNeural"
+ROLEPLAY_VOICE = "en-US-AriaNeural"
 RATE = "+0%"
 CONCURRENCY = 6
 RETRIES = 4
@@ -80,28 +81,35 @@ def load_clips():
             if data := read(path):
                 clips += [(f"video-{m}-{k}-s{i}.mp3", m, narration(s)) for i, s in enumerate(data.get("slides", []))]
         blocks = mod_dir / "blocks.json"
-        if blocks.exists() and (data := read(blocks)) and data.get("hook"):
-            hook = data["hook"]
-            clips.append((f"hook-{m}-open.mp3", m, hook.get("narration", "").strip()))
-            for i, shot in enumerate(hook.get("film", {}).get("shots", [])):
-                clips.append((f"hook-{m}-s{i}.mp3", m, shot.get("say", "").strip()))
-                if shot.get("then"):
-                    clips.append((f"hook-{m}-s{i}-then.mp3", m, shot["then"].strip()))
-            for k, step in enumerate(hook.get("reveal", {}).get("steps", [])):
-                clips.append((f"hook-{m}-r{k}.mp3", m, spoken(step.get("caption", "")).strip()))
+        if blocks.exists() and (data := read(blocks)):
+            if hook := data.get("hook"):
+                clips.append((f"hook-{m}-open.mp3", m, hook.get("narration", "").strip()))
+                for i, shot in enumerate(hook.get("film", {}).get("shots", [])):
+                    clips.append((f"hook-{m}-s{i}.mp3", m, shot.get("say", "").strip()))
+                    if shot.get("then"):
+                        clips.append((f"hook-{m}-s{i}-then.mp3", m, shot["then"].strip()))
+                for k, step in enumerate(hook.get("reveal", {}).get("steps", [])):
+                    clips.append((f"hook-{m}-r{k}.mp3", m, spoken(step.get("caption", "")).strip()))
+            if roleplay := data.get("lab", {}).get("roleplay"):
+                for i, scene in enumerate(roleplay.get("scenes", [])):
+                    clips.append((f"roleplay-{roleplay['id']}-s{i}.mp3", m, spoken(scene.get("narration", "")).strip()))
     return clips
 
 
-def clip_hash(text: str) -> str:
-    return hashlib.sha1(f"{VOICE}|{RATE}|{text}".encode("utf-8")).hexdigest()
+def voice_for(name: str) -> str:
+    return ROLEPLAY_VOICE if name.startswith("roleplay-") else VOICE
 
 
-async def synth(text: str, dest: Path, sem: asyncio.Semaphore) -> None:
+def clip_hash(text: str, voice: str) -> str:
+    return hashlib.sha1(f"{voice}|{RATE}|{text}".encode("utf-8")).hexdigest()
+
+
+async def synth(text: str, dest: Path, sem: asyncio.Semaphore, voice: str) -> None:
     async with sem:
         for attempt in range(1, RETRIES + 1):
             try:
                 tmp = dest.with_suffix(".part")
-                await edge_tts.Communicate(text, VOICE, rate=RATE).save(str(tmp))
+                await edge_tts.Communicate(text, voice, rate=RATE).save(str(tmp))
                 if tmp.stat().st_size < 1000:
                     raise RuntimeError("audio file came back nearly empty")
                 tmp.replace(dest)
@@ -127,11 +135,12 @@ async def main() -> None:
         if (args.only and module != args.only) or not text:
             continue
         dest = OUT / name
-        h = clip_hash(text)
+        voice = voice_for(name)
+        h = clip_hash(text, voice)
         if args.force or not dest.exists() or manifest.get(name) != h:
-            jobs.append((name, text, dest, h))
+            jobs.append((name, text, dest, h, voice))
 
-    print(f"{len(jobs)} clip(s) to create, voice {VOICE}", flush=True)
+    print(f"{len(jobs)} clip(s) to create", flush=True)
     if args.dry_run or not jobs:
         for name, *_ in jobs:
             print("  ", name)
@@ -144,9 +153,9 @@ async def main() -> None:
 
     async def run(job):
         nonlocal done
-        name, text, dest, h = job
+        name, text, dest, h, voice = job
         try:
-            await synth(text, dest, sem)
+            await synth(text, dest, sem, voice)
             made[name] = h
         except Exception as err:
             failed.append(str(err))

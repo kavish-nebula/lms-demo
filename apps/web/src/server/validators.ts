@@ -87,3 +87,26 @@ export const ImportBody = z.object({
     .default([]),
   progress: z.record(z.string().max(20), z.array(z.string().max(20)).max(20)).default({}),
 });
+
+/** The learner's project files: a few text files, each a reasonable size. */
+const ProjectFiles = z
+  .record(z.string().min(1).max(80), z.string().max(60_000))
+  .refine((f) => Object.keys(f).length <= 10, "Too many files.");
+
+export const ProjectSaveBody = z.object({ files: ProjectFiles });
+
+export const ProjectCheckBody = z.object({
+  files: ProjectFiles,
+  records: z
+    .array(
+      z.object({
+        ticket: z.string().min(1).max(20),
+        seed: z.number().int(),
+        step: z.string().max(30),
+        decision: z.unknown().optional(),
+        error: z.string().max(2000).optional(),
+        where: z.string().max(200).nullish(),
+      }),
+    )
+    .max(100),
+});

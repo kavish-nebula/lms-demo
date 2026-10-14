@@ -1,6 +1,9 @@
 import { integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import type { LearnerPlan, PlanChangeT, PlanSource, PlanStatus, PlanVersion } from "@/lib/learner-plan";
 import type { PrecheckResult, SetupAnswers, SupportOverride } from "@/lib/setup";
+import type { ProjectReport } from "@/lib/project-grade";
+import type { EngagementState } from "@/lib/engagement";
+import type { Workflow, WorkflowReport } from "@/lib/workflow-project";
 
 /**
  * Learner data. Profile answers drive the course plan; plans are append-only
@@ -10,6 +13,13 @@ import type { PrecheckResult, SetupAnswers, SupportOverride } from "@/lib/setup"
  */
 
 const created = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
+
+/** Versioned platform records share a learner lock; no course data is rewritten. */
+export const platformEngagement = pgTable("platform_engagement", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  state: jsonb("state").$type<EngagementState>().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
@@ -97,3 +107,25 @@ export const stepProgress = pgTable(
   },
   (t) => [primaryKey({ columns: [t.enrollmentId, t.moduleId, t.stage] })],
 );
+
+/** The mini project's report: the score from the hidden tickets, kept with the work it graded. */
+export type ProjectReportRow = ProjectReport & { at: string };
+
+/** A learner's mini project: their files as they last left them, and the last test report. */
+export const projectWork = pgTable("project_work", {
+  enrollmentId: uuid("enrollment_id")
+    .primaryKey()
+    .references(() => enrollments.id, { onDelete: "cascade" }),
+  files: jsonb("files").$type<Record<string, string>>().notNull(),
+  report: jsonb("report").$type<ProjectReportRow>(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Separate architecture practice; never replaces Python files or its grade. */
+export const workflowProjects = pgTable("workflow_projects", {
+  enrollmentId: uuid("enrollment_id").primaryKey().references(() => enrollments.id, { onDelete: "cascade" }),
+  diagram: jsonb("diagram").$type<Workflow>().notNull(),
+  report: jsonb("report").$type<WorkflowReport>(),
+  revision: integer("revision").notNull().default(1),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

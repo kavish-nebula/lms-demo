@@ -2,6 +2,9 @@ import {
   LayoutDashboard,
   GraduationCap,
   CalendarDays,
+  RotateCcw,
+  Award,
+  History,
   Settings,
   UserRound,
   Users,
@@ -14,6 +17,7 @@ import {
   BarChart3,
   ScrollText,
   Palette,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -47,10 +51,14 @@ export const NAV: Record<Role, NavSection[]> = {
         { key: "dashboard", href: "/learn", icon: LayoutDashboard },
         { key: "courses", href: "/learn/courses", icon: GraduationCap },
         { key: "plan", href: "/learn/plan", icon: CalendarDays },
+        { key: "reviews", href: "/learn/reviews", icon: RotateCcw },
+        { key: "credentials", href: "/learn/credentials", icon: Award },
+        { key: "history", href: "/learn/history", icon: History },
       ],
     },
     {
       items: [
+        { key: "activity", href: "/learn/activity", icon: Sparkles },
         { key: "profile", href: "/learn/profile", icon: UserRound },
         { key: "settings", href: "/learn/settings", icon: Settings },
       ],

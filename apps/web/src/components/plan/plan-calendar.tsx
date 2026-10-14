@@ -23,6 +23,7 @@ export type PlanCalendarProps = {
   suggestion?: PlanUnit;
   onPlanHere: (key: string) => void;
   onRemove: (sessionId: string) => void;
+  onSessionDetails?: (sessionId: string) => void;
   playerHref: (u: PlanUnit) => string;
 };
 
@@ -40,6 +41,7 @@ export function PlanCalendar({
   suggestion,
   onPlanHere,
   onRemove,
+  onSessionDetails,
   playerHref,
 }: PlanCalendarProps) {
   const t = useTranslations("plan");
@@ -210,6 +212,7 @@ export function PlanCalendar({
                   nextUp={nextUp}
                   playerHref={playerHref}
                   onRemove={onRemove}
+                  onSessionDetails={onSessionDetails}
                   minutesLabel={(n) => tc("minutes", { count: n })}
                 />
               </motion.li>
@@ -235,12 +238,14 @@ function DayItemRow({
   playerHref,
   onRemove,
   minutesLabel,
+  onSessionDetails,
 }: {
   item: DayItem;
   nextUp?: PlanUnit;
   playerHref: (u: PlanUnit) => string;
   onRemove: (id: string) => void;
   minutesLabel: (n: number) => string;
+  onSessionDetails?: (id: string) => void;
 }) {
   const t = useTranslations("plan");
 
@@ -268,10 +273,11 @@ function DayItemRow({
           </Button>
         ) : null}
         {!item.done ? (
-          <Button variant="ghost" size="icon-xs" onClick={() => onRemove(item.sessionId)} aria-label={`${t("remove")}: ${u.label}`}>
+          <Button className={onSessionDetails ? "min-h-11 min-w-11" : undefined} variant="ghost" size="icon-xs" onClick={() => onRemove(item.sessionId)} aria-label={`${t("remove")}: ${u.label}`}>
             <X />
           </Button>
         ) : null}
+        {onSessionDetails ? <Button className="min-h-11" variant="outline" onClick={() => onSessionDetails(item.sessionId)}>{t("sessionDetails")}</Button> : null}
       </>
     );
   }
@@ -288,6 +294,11 @@ function DayItemRow({
             {item.label} · {minutesLabel(item.minutes)}
           </span>
         </span>
+        {item.dueToday ? (
+          <Button asChild size="xs" variant="outline">
+            <Link href="/learn/reviews">{t("open")}</Link>
+          </Button>
+        ) : null}
       </>
     );
   }

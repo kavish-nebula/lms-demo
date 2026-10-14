@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
-import { BookOpenCheck, Clock3, GraduationCap, Layers3, ListChecks, Sparkles, Wand2 } from "lucide-react";
+import { BookOpenCheck, Clock3, GraduationCap, Layers3, Sparkles } from "lucide-react";
 import { StatTile } from "@/components/kit/stat-tile";
 import { Stagger, StaggerItem } from "@/components/kit/stagger";
 import { SectionHeader } from "@/components/kit/page-header";
@@ -21,8 +21,9 @@ import { Button } from "@/components/ui/button";
 import { useEnrollments } from "@/lib/enrollment";
 import { useCoursesProgress, type CourseProgress } from "@/lib/course-progress";
 import { useLearnerReady } from "@/lib/api";
-import { QUESTIONS } from "@/lib/setup";
 import type { Course, Learner } from "@/data/types";
+import { WeeklyPanel } from "@/components/engagement/weekly-panel";
+import { useEngagement } from "@/components/engagement/provider";
 
 /**
  * S2 Learner home. Before enrolment: a spotlight on the course and how the
@@ -30,6 +31,10 @@ import type { Course, Learner } from "@/data/types";
  * the course card.
  */
 export function HomeDashboard({ learner, courses, today }: { learner: Learner; courses: Course[]; today: string }) {
+  const platform = useEngagement();
+  const reconcile = platform?.request;
+  React.useEffect(() => { if (reconcile) void reconcile("/api/v1/me/engagement/reconcile","POST").catch(() => {}); },[reconcile]);
+  today = platform?.data?.today ?? today;
   const hydrated = useLearnerReady();
   const enrollments = useEnrollments();
   const progress = useCoursesProgress(courses);
@@ -47,7 +52,7 @@ export function HomeDashboard({ learner, courses, today }: { learner: Learner; c
   return enrolled.length ? (
     <EnrolledHome learner={learner} courses={enrolled} progress={progress} today={today} />
   ) : (
-    <WelcomeHome course={courses[0]} />
+    <><WelcomeHome course={courses[0]} /><WeeklyPanel courses={courses} /></>
   );
 }
 
@@ -57,11 +62,6 @@ function WelcomeHome({ course }: { course: Course | undefined }) {
   const t = useTranslations("home");
   const tc = useTranslations("course");
   if (!course) return <EmptyState icon={<GraduationCap />} title={t("noCoursesTitle")} description={t("noCoursesBody")} />;
-  const steps = [
-    { icon: <ListChecks />, title: t("welcomeStep1"), body: t("welcomeStep1Body", { count: QUESTIONS.length }) },
-    { icon: <Wand2 />, title: t("welcomeStep2"), body: t("welcomeStep2Body") },
-    { icon: <Layers3 />, title: t("welcomeStep3"), body: t("welcomeStep3Body") },
-  ];
   return (
     <div className="flex min-w-0 flex-col gap-6">
       <Surface pad="lg" spotlight className="relative isolate overflow-hidden">
@@ -105,24 +105,6 @@ function WelcomeHome({ course }: { course: Course | undefined }) {
           </div>
         </div>
       </Surface>
-
-      <section aria-labelledby="how-it-starts" className="flex flex-col gap-4">
-        <SectionHeader title={<span id="how-it-starts">{t("howItStarts")}</span>} />
-        <Stagger inView className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {steps.map((s, i) => (
-            <StaggerItem key={s.title} className="h-full">
-              <Surface pad="md" className="flex h-full flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="flex size-9 items-center justify-center rounded-lg bg-brand-soft text-brand-ink [&_svg]:size-4">{s.icon}</span>
-                  <span className="font-mono text-xs text-ink-faint">0{i + 1}</span>
-                </div>
-                <div className="font-semibold">{s.title}</div>
-                <p className="text-sm text-ink-muted">{s.body}</p>
-              </Surface>
-            </StaggerItem>
-          ))}
-        </Stagger>
-      </section>
     </div>
   );
 }
@@ -142,19 +124,22 @@ function EnrolledHome({
 }) {
   const t = useTranslations("home");
   const tc = useTranslations("common");
+  const te = useTranslations("engagement");
+  const platform = useEngagement();
   const all = courses.map((c) => progress[c.course_id]!);
   const modulesDone = all.reduce((n, p) => n + p.modulesDone, 0);
   const modulesTotal = all.reduce((n, p) => n + p.modules.length, 0);
   const topicsDone = all.reduce((n, p) => n + p.topicsDone, 0);
   const topicsTotal = all.reduce((n, p) => n + p.topicsTotal, 0);
-  const minutes = learner.daily_progress.reduce((n, d) => n + d.minutes, 0);
+  const minutes = platform ? platform.data?.loggedMinutes ?? 0 : learner.daily_progress.reduce((n, d) => n + d.minutes, 0);
   const current = courses.find((c) => progress[c.course_id]!.resume) ?? courses[0]!;
 
   return (
     <div className="flex flex-col gap-6 md:gap-8">
-      <UpNextTicker courses={courses} reviews={learner.due_reviews} assignments={[]} today={today} />
+      {!platform ? <UpNextTicker courses={courses} reviews={learner.due_reviews} assignments={[]} today={today} /> : null}
 
       <ResumeCard course={current} progress={progress[current.course_id]!} />
+      <WeeklyPanel courses={courses} />
 
       <Stagger className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
         <StaggerItem>
@@ -170,8 +155,8 @@ function EnrolledHome({
           <StatTile
             icon={<Clock3 />}
             value={minutes}
-            label={t("kpiMinutes")}
-            sparkline={minutes ? learner.daily_progress.map((d) => d.minutes) : undefined}
+            label={platform ? te("loggedMinutes") : t("kpiMinutes")}
+            sparkline={!platform && minutes ? learner.daily_progress.map((d) => d.minutes) : undefined}
           />
         </StaggerItem>
       </Stagger>

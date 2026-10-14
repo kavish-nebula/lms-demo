@@ -7,7 +7,7 @@
   "locale": "en",
   "title": "Introduction to AI Agents",
   "summary": "Orbit's FAQ chatbot apologised 400 times on Monday. It could talk about orders, but it couldn't look one up.",
-  "estimated_minutes": 101,
+  "estimated_minutes": 106,
   "stages_included": [
     "hook",
     "explainer",
@@ -2078,7 +2078,34 @@
             }
           ],
           "check": "The version shows Python 3.11 or higher, and your prompt now ends in scout.",
-          "tip": "If typing python on Windows opens the Microsoft Store or says it isn't recognised, Python isn't installed yet. Install it from python.org, tick **Add python.exe to PATH** during setup, then open a new terminal."
+          "tip": "If typing python on Windows opens the Microsoft Store or says it isn't recognised, Python isn't installed yet. Install it from python.org, tick **Add python.exe to PATH** during setup, then open a new terminal.",
+          "win": {
+            "who": "Priya — developer",
+            "av": "P",
+            "text": "3.11 or newer, and a scout folder. base camp is pitched: everything scout ever becomes will live in that one folder."
+          },
+          "sim": {
+            "kind": "terminal",
+            "prompt": "PS C:\\Users\\you>",
+            "lines": [
+              {
+                "cmd": "python --version",
+                "alt": [
+                  "python3 --version"
+                ],
+                "out": "Python 3.12.4"
+              },
+              {
+                "cmd": "mkdir scout",
+                "out": "\n    Directory: C:\\Users\\you\n\nMode                 LastWriteTime         Length Name\n----                 -------------         ------ ----\nd-----         10/9/2026   9:14 AM                scout"
+              },
+              {
+                "cmd": "cd scout",
+                "out": "",
+                "prompt": "PS C:\\Users\\you\\scout>"
+              }
+            ]
+          }
         },
         {
           "id": "s2",
@@ -2104,7 +2131,43 @@
             }
           ],
           "check": "Your prompt now starts with (.venv). Inside it, `python --version` shows 3.11 or higher, even on macOS.",
-          "tip": "On Windows, if you see \"running scripts is disabled on this system\", run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` and activate again. It only affects this terminal window."
+          "tip": "On Windows, if you see \"running scripts is disabled on this system\", run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` and activate again. It only affects this terminal window.",
+          "win": {
+            "who": "Priya — developer",
+            "av": "P",
+            "text": "see (.venv) in your prompt? that's scout's private shelf of packages. no (.venv) usually means a new terminal: activate again."
+          },
+          "sim": {
+            "kind": "terminal",
+            "prompt": "PS C:\\Users\\you\\scout>",
+            "lines": [
+              {
+                "cmd": "python -m venv .venv",
+                "alt": [
+                  "python3 -m venv .venv"
+                ],
+                "out": ""
+              },
+              {
+                "cmd": ".venv\\Scripts\\activate",
+                "alt": [
+                  ".\\.venv\\Scripts\\activate",
+                  ".venv\\Scripts\\Activate.ps1",
+                  ".\\.venv\\Scripts\\Activate.ps1",
+                  "source .venv/bin/activate"
+                ],
+                "out": "",
+                "prompt": "(.venv) PS C:\\Users\\you\\scout>"
+              },
+              {
+                "cmd": "python --version",
+                "alt": [
+                  "python3 --version"
+                ],
+                "out": "Python 3.12.4"
+              }
+            ]
+          }
         },
         {
           "id": "s3",
@@ -2121,7 +2184,34 @@
             }
           ],
           "check": "pip show prints Name: anthropic and a version number.",
-          "tip": "If pip isn't found, or the package installs somewhere else, the environment isn't active. Activate it (step 2) and run the install again."
+          "tip": "If pip isn't found, or the package installs somewhere else, the environment isn't active. Activate it (step 2) and run the install again.",
+          "win": {
+            "who": "Priya — developer",
+            "av": "P",
+            "text": "Name: anthropic, plus a version. the SDK is in, so connections, keys and request formats are now its problem, not yours."
+          },
+          "sim": {
+            "kind": "terminal",
+            "prompt": "(.venv) PS C:\\Users\\you\\scout>",
+            "lines": [
+              {
+                "cmd": "pip install anthropic",
+                "alt": [
+                  "pip3 install anthropic",
+                  "python -m pip install anthropic"
+                ],
+                "out": "Collecting anthropic\n  Downloading anthropic-0.72.0-py3-none-any.whl.metadata (28 kB)\nCollecting httpx<1,>=0.25.0 (from anthropic)\n  Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)\nCollecting pydantic<3,>=1.9.0 (from anthropic)\n  Downloading pydantic-2.11.7-py3-none-any.whl.metadata (67 kB)\n...\nInstalling collected packages: typing-extensions, sniffio, jiter, idna, h11, docstring-parser, distro, certifi, annotated-types, pydantic-core, httpcore, anyio, pydantic, httpx, anthropic\nSuccessfully installed annotated-types-0.7.0 anthropic-0.72.0 anyio-4.9.0 certifi-2025.7.14 distro-1.9.0 docstring-parser-0.17.0 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.10 jiter-0.10.0 pydantic-2.11.7 pydantic-core-2.33.2 sniffio-1.3.1 typing-extensions-4.14.1"
+              },
+              {
+                "cmd": "pip show anthropic",
+                "alt": [
+                  "pip3 show anthropic",
+                  "python -m pip show anthropic"
+                ],
+                "out": "Name: anthropic\nVersion: 0.72.0\nSummary: The official Python library for the anthropic API\nHome-page: https://github.com/anthropics/anthropic-sdk-python\nAuthor-email: Anthropic <support@anthropic.com>\nLicense: MIT\nLocation: C:\\Users\\you\\scout\\.venv\\Lib\\site-packages\nRequires: anyio, distro, docstring-parser, httpx, jiter, pydantic, sniffio, typing-extensions\nRequired-by:"
+              }
+            ]
+          }
         },
         {
           "id": "s4",
@@ -2148,7 +2238,33 @@
             }
           ],
           "check": "The check prints True.",
-          "tip": "A key set this way lasts only until you close the terminal. In a new terminal, activate the environment and set the key again. To make it permanent, run `setx ANTHROPIC_API_KEY \"sk-ant-...\"` on Windows and open a new terminal, or add the export line to **~/.zshrc** or **~/.bashrc** on macOS or Linux."
+          "tip": "A key set this way lasts only until you close the terminal. In a new terminal, activate the environment and set the key again. To make it permanent, run `setx ANTHROPIC_API_KEY \"sk-ant-...\"` on Windows and open a new terminal, or add the export line to **~/.zshrc** or **~/.bashrc** on macOS or Linux.",
+          "win": {
+            "who": "Maya — founder",
+            "av": "M",
+            "text": "True, and the key never showed up on screen. good. that key spends real money, so i like it living in your terminal, not a file."
+          },
+          "sim": {
+            "kind": "terminal",
+            "prompt": "(.venv) PS C:\\Users\\you\\scout>",
+            "lines": [
+              {
+                "cmd": "$env:ANTHROPIC_API_KEY = \"sk-ant-...\"",
+                "alt": [
+                  "$env:ANTHROPIC_API_KEY=\"sk-ant-...\"",
+                  "export ANTHROPIC_API_KEY=\"sk-ant-...\""
+                ],
+                "out": ""
+              },
+              {
+                "cmd": "python -c \"import os; print('ANTHROPIC_API_KEY' in os.environ)\"",
+                "alt": [
+                  "python3 -c \"import os; print('ANTHROPIC_API_KEY' in os.environ)\""
+                ],
+                "out": "True"
+              }
+            ]
+          }
         },
         {
           "id": "s5",
@@ -2165,7 +2281,47 @@
             }
           ],
           "check": "Your scout folder now contains .venv and .gitignore. If you use Git, `git status` does not list .venv.",
-          "tip": "If a key ever lands in a commit, a chat or a screenshot, don't just delete the line: delete the key in the console and create a new one. Assume a leaked key has already been copied."
+          "tip": "If a key ever lands in a commit, a chat or a screenshot, don't just delete the line: delete the key in the console and create a new one. Assume a leaked key has already been copied.",
+          "win": {
+            "who": "Priya — developer",
+            "av": "P",
+            "text": ".gitignore is in, so .venv and any .env stay out of Git. future you, about to push at 6 PM on a friday, says thanks."
+          },
+          "sim": {
+            "kind": "code",
+            "file": ".gitignore",
+            "code": ".venv/\n.env\n__pycache__/\n",
+            "blanks": [
+              {
+                "token": ".venv/",
+                "options": [
+                  "hello.py",
+                  ".venv/",
+                  "scout/"
+                ]
+              },
+              {
+                "token": ".env",
+                "options": [
+                  ".env",
+                  "chat.py",
+                  ".gitignore"
+                ]
+              },
+              {
+                "token": "__pycache__/",
+                "options": [
+                  "docs/",
+                  "hello.py",
+                  "__pycache__/"
+                ]
+              }
+            ],
+            "run": {
+              "cmd": "git status",
+              "out": "On branch main\n\nNo commits yet\n\nUntracked files:\n  (use \"git add <file>...\" to include in what will be committed)\n        .gitignore\n\nnothing added to commit but untracked files present (use \"git add\" to track)"
+            }
+          }
         },
         {
           "id": "s6",
@@ -2182,7 +2338,55 @@
             }
           ],
           "check": "After a few seconds you see a one-sentence answer, then a line with the token counts.",
-          "tip": "An error about authentication (\"Could not resolve authentication method\" or AuthenticationError) means the key isn't set in this terminal or is wrong: repeat step 4. \"No module named 'anthropic'\" means the environment isn't active: repeat step 2. A message about your credit balance means you need to add credit under **Billing**."
+          "tip": "An error about authentication (\"Could not resolve authentication method\" or AuthenticationError) means the key isn't set in this terminal or is wrong: repeat step 4. \"No module named 'anthropic'\" means the environment isn't active: repeat step 2. A message about your credit balance means you need to add credit under **Billing**.",
+          "win": {
+            "who": "Priya — developer",
+            "av": "P",
+            "text": "first words from claude-opus-5-5. watch that token line: tokens are what we pay for, so it's scout's meter from day one."
+          },
+          "sim": {
+            "kind": "code",
+            "file": "hello.py",
+            "code": "import anthropic\n\nclient = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from the environment\nMODEL = \"claude-opus-5-5\"\n\nresponse = client.messages.create(\n    model=MODEL,\n    max_tokens=16000,  # a ceiling, not a target\n    messages=[{\"role\": \"user\", \"content\": \"In one sentence, what is an AI agent?\"}],\n)\n\n# The reply can contain several blocks (the model may think first), so take the text block:\ntext = next(b.text for b in response.content if b.type == \"text\")\nprint(text)\nprint(f\"Tokens used: {response.usage.input_tokens} in, {response.usage.output_tokens} out\")\n",
+            "blanks": [
+              {
+                "token": "claude-opus-5-5",
+                "options": [
+                  "gpt-4",
+                  "claude-opus-5-5",
+                  "opus-latest"
+                ]
+              },
+              {
+                "token": "messages.create",
+                "options": [
+                  "messages.create",
+                  "chat.send",
+                  "completions.run"
+                ]
+              },
+              {
+                "token": "max_tokens",
+                "options": [
+                  "max_words",
+                  "timeout",
+                  "max_tokens"
+                ]
+              },
+              {
+                "token": "user",
+                "options": [
+                  "system",
+                  "user",
+                  "assistant"
+                ]
+              }
+            ],
+            "run": {
+              "cmd": "python hello.py",
+              "out": "An AI agent is a program that uses a language model to decide what to do next, takes actions with tools, and repeats until it reaches a goal.\nTokens used: 17 in, 38 out"
+            }
+          }
         },
         {
           "id": "s7",
@@ -2201,7 +2405,55 @@
             }
           ],
           "check": "Scout greets you, and when you ask your name it answers Ana. Typing quit ends the program.",
-          "tip": "If Scout forgets your name, check that both append lines are there: one for your message and one for Scout's reply. Without them, every call starts from zero, because the model itself remembers nothing between calls."
+          "tip": "If Scout forgets your name, check that both append lines are there: one for your message and one for Scout's reply. Without them, every call starts from zero, because the model itself remembers nothing between calls.",
+          "win": {
+            "who": "Leo — support lead",
+            "av": "L",
+            "text": "it remembered ana's name. you have no idea how many tickets start with \"as i said in my last message...\""
+          },
+          "sim": {
+            "kind": "code",
+            "file": "chat.py",
+            "code": "messages = []  # the whole conversation so far: this list is Scout's memory\n\nprint(\"Scout is ready. Type quit to exit.\")\nwhile True:\n    user_text = input(\"You: \").strip()\n    if user_text.lower() == \"quit\":\n        break\n    # ...\n    messages.append({\"role\": \"user\", \"content\": user_text})\n    response = client.messages.create(\n        model=MODEL,\n        max_tokens=16000,\n        system=SYSTEM,\n        messages=messages,\n    )\n    text = next(b.text for b in response.content if b.type == \"text\")\n    messages.append({\"role\": \"assistant\", \"content\": text})\n    print(f\"Scout: {text}\\n\")",
+            "blanks": [
+              {
+                "token": "break",
+                "options": [
+                  "continue",
+                  "break",
+                  "pass"
+                ]
+              },
+              {
+                "token": "system=SYSTEM",
+                "options": [
+                  "system=SYSTEM",
+                  "system=MODEL",
+                  "system=user_text"
+                ]
+              },
+              {
+                "token": "messages=messages",
+                "options": [
+                  "messages=user_text",
+                  "messages=[]",
+                  "messages=messages"
+                ]
+              },
+              {
+                "token": "assistant",
+                "options": [
+                  "user",
+                  "assistant",
+                  "system"
+                ]
+              }
+            ],
+            "run": {
+              "cmd": "python chat.py",
+              "out": "Scout is ready. Type quit to exit.\nYou: Hi, I'm Ana.\nScout: Hi Ana! I'm Scout, Orbit Outdoor's support assistant. How can I help with your gear today?\n\nYou: What's my name?\nScout: Your name is Ana. Anything I can help you with today?\n\nYou: quit"
+            }
+          }
         },
         {
           "id": "s8",
@@ -2214,7 +2466,29 @@
             "Type `quit` when you're done."
           ],
           "check": "Scout says it can't see orders or tracking, and points you to your confirmation email or Orbit's support team. It can't give the real status (shipped with ParcelPath, tracking PP-88213), because nothing in your code can look it up.",
-          "tip": "If Scout ever sounds sure, for example \"it's on its way and should arrive Thursday\", that's a guess: there is no order data anywhere in your code. Spotting that is the point of this step."
+          "tip": "If Scout ever sounds sure, for example \"it's on its way and should arrive Thursday\", that's a guess: there is no order data anywhere in your code. Spotting that is the point of this step.",
+          "win": {
+            "who": "Priya — developer",
+            "av": "P",
+            "text": "bug reproduced. scout read ORB-10482 just fine and still couldn't see it, because nothing in your code can look it up. yet."
+          },
+          "sim": {
+            "kind": "chat",
+            "start": {
+              "cmd": "python chat.py",
+              "out": "Scout is ready. Type quit to exit."
+            },
+            "turns": [
+              {
+                "you": "Where is my order ORB-10482?",
+                "scout": "Sorry, I can't look up orders or tracking from here, so I can't see where ORB-10482 is. Your order confirmation email should have a tracking link, or Orbit's support team can check the status for you."
+              },
+              {
+                "you": "It's a green tent. When will it arrive?",
+                "scout": "Thanks, but I still can't see your order or its shipping details, so I can't give you a delivery date. Please check the tracking link in your confirmation email, or contact Orbit's support team and they can tell you where your tent is."
+              }
+            ]
+          }
         }
       ],
       "finish": {
@@ -2228,12 +2502,102 @@
           "**hello.py** prints a reply from claude-opus-5-5",
           "**chat.py** remembers your name and exits on quit"
         ]
+      },
+      "mission": {
+        "codename": "Trailhead: Scout's First Words",
+        "badge": "Base Camp Builder",
+        "mentor": {
+          "who": "Priya — developer",
+          "av": "P"
+        },
+        "brief": [
+          {
+            "who": "Leo — support lead",
+            "av": "L",
+            "text": "weekend queue is still sitting there. 400 tickets, and the bot told every single one \"sorry, I can't access order information.\" they keep writing back."
+          },
+          {
+            "who": "Maya — founder",
+            "av": "M",
+            "text": "we're done paying for apologies. i want scout telling ana where her tent actually is, tracking number and all. what does it need first?"
+          },
+          {
+            "who": "Priya — developer",
+            "av": "P",
+            "text": "a home. your mission: build scout's base camp on your laptop. python, a safe API key, a first model call, then a chatbot that remembers. i'll take it step by step."
+          }
+        ],
+        "goal": "Your scout folder runs chat.py: a chatbot on claude-opus-5-5 that remembers the conversation, with your API key kept out of every file.",
+        "debrief": [
+          {
+            "who": "Maya — founder",
+            "av": "M",
+            "text": "so that's our monday, in one terminal: scout understands ana's question and still can't find her tent. difference is, this one is ours to fix."
+          },
+          {
+            "who": "Leo — support lead",
+            "av": "L",
+            "text": "and the fix is giving scout a way to look orders up, right? the day it answers ORB-10482 with a real tracking number, my queue gets its weekends back."
+          }
+        ]
+      },
+      "solved_case": {
+        "label": "Published solution walkthrough",
+        "title": "How a customer-service agent learned to look up and cancel orders",
+        "source_label": "Anthropic Claude Cookbooks — Customer Service Agent with Client-Side Tools",
+        "source_url": "https://github.com/anthropics/claude-cookbooks/blob/main/tool_use/customer_service_agent.ipynb",
+        "source_note": "This is an official, runnable reference implementation. It uses synthetic customer and order records so the complete solution can be studied safely.",
+        "problem": "A language model can write a helpful reply, but it cannot know a customer's record, retrieve an order status, or cancel an order unless the application gives it controlled access to those operations.",
+        "solution": "The published implementation gives Claude three client-side tools, executes the selected operation in application code, returns the tool result to Claude, and then asks Claude to produce the final customer-facing answer.",
+        "result": "The completed notebook successfully retrieves a customer's email, reports that order O2 is Processing, and confirms the cancellation of order O1. Each answer is grounded in the returned tool result.",
+        "evidence": [
+          "Customer C1 is resolved through get_customer_info and the returned email is used in the final answer.",
+          "Order O2 is resolved through get_order_details and its Processing status is reported.",
+          "Order O1 is sent to cancel_order and the final response is written only after the tool returns success."
+        ],
+        "solution_steps": [
+          {
+            "title": "Describe the operations as tools",
+            "purpose": "Make each business capability understandable and callable by the model.",
+            "explanation": "The solution declares three tools: get_customer_info, get_order_details, and cancel_order. Each definition gives the operation a precise description and a JSON input schema, including the required customer_id or order_id.",
+            "code": "tools = [\n  tool(\"get_customer_info\", required=\"customer_id\"),\n  tool(\"get_order_details\", required=\"order_id\"),\n  tool(\"cancel_order\", required=\"order_id\"),\n]",
+            "result": "Claude can now choose a named operation and supply a schema-valid identifier instead of inventing customer or order data."
+          },
+          {
+            "title": "Back each tool with application code",
+            "purpose": "Keep data access and business actions inside deterministic code.",
+            "explanation": "The reference implementation creates ordinary Python functions for customer lookup, order lookup, and cancellation. Its records are synthetic, but the same boundary can call a real CRM or order-management API without changing the model-facing tool contract.",
+            "code": "def get_order_details(order_id):\n    return orders.get(order_id, \"Order not found\")\n\ndef cancel_order(order_id):\n    return order_id in orders",
+            "result": "Facts and state-changing actions come from controlled application functions rather than the model's memory."
+          },
+          {
+            "title": "Route the requested tool",
+            "purpose": "Translate Claude's tool request into the correct application function.",
+            "explanation": "A small dispatcher receives the requested tool name and its structured input. It calls only the matching function and passes the required identifier. This is the controlled bridge between model reasoning and business logic.",
+            "code": "def run_tool(name, args):\n    if name == \"get_order_details\":\n        return get_order_details(args[\"order_id\"])\n    if name == \"cancel_order\":\n        return cancel_order(args[\"order_id\"])",
+            "result": "The model selects an allowed operation, while the application remains responsible for executing it."
+          },
+          {
+            "title": "Return tool evidence before asking for an answer",
+            "purpose": "Ground the customer-facing response in the result of the real operation.",
+            "explanation": "When the response stops for tool use, the application executes that request, appends Claude's tool request and the matching tool result to the message history, and calls the model again. The loop ends only when Claude returns a normal answer.",
+            "code": "while response.stop_reason == \"tool_use\":\n    call = next_tool_call(response)\n    result = run_tool(call.name, call.input)\n    messages += [response_message(response), tool_result(call.id, result)]\n    response = ask_claude(messages, tools)",
+            "result": "Claude receives evidence from the application before composing the response, so the final answer can cite the actual status or action result."
+          },
+          {
+            "title": "Verify the solved requests",
+            "purpose": "Prove that the implementation performs the intended support jobs.",
+            "explanation": "The notebook runs three completed requests: retrieve customer C1's email, report order O2's status, and cancel order O1. The printed trace shows the selected tool, its structured input, its returned value, and the final answer.",
+            "code": "ask(\"What is the status of order O2?\")\nask(\"Please cancel order O1 for me.\")",
+            "result": "The final trace reports O2 as Processing and confirms that O1 was cancelled—demonstrating lookup, action, and evidence-grounded response generation."
+          }
+        ]
       }
     },
     {
       "step_id": "m1.lab",
       "stage": "lab",
-      "duration_min": 10,
+      "duration_min": 15,
       "bloom": "analyze",
       "load": "medium",
       "objective_ids": [
@@ -2381,7 +2745,242 @@
           },
           "debrief": "Fixed answers to common questions don't need an agent. A good FAQ page, or a chatbot that answers from the policy, does the job cheaply. Save the agent for questions where the answer depends on this customer's order. In fact, Monday's FAQ bot was fine for exactly these questions; it only failed when asked about a specific order."
         }
-      ]
+      ],
+      "roleplay": {
+        "id": "address-switch",
+        "eyebrow": "LIVE ROLEPLAY",
+        "title": "The address switch",
+        "brief": "Nia's climbing harness is about to ship to her old address. Guide Scout to a useful answer without guessing, collecting unsafe information or promising an action it cannot take.",
+        "learner_role": "Scout's supervisor",
+        "customer": {
+          "name": "Nia",
+          "role": "Customer",
+          "initials": "NI"
+        },
+        "start": {
+          "goal": 42,
+          "trust": 54,
+          "safety": 68
+        },
+        "scenes": [
+          {
+            "id": "incoming",
+            "visual": "incoming",
+            "label": "INCOMING",
+            "title": "A message lands",
+            "line": "Hi, I'm Nia. I just noticed order ORB-10621 has my old address. It ships today. Can you help before it leaves?",
+            "narration": "Hi, I'm Nia. My climbing harness is about to ship to my old address, and it leaves today. I need help fast. What should Scout do first?",
+            "prompt": "What should Scout do first?",
+            "hint": "A useful answer starts with the current order facts, not a promise.",
+            "choices": [
+              {
+                "id": "check",
+                "text": "Check the order status and available actions first",
+                "feedback": "Good call. Scout gathers the facts before saying what is possible.",
+                "best": true,
+                "effects": {
+                  "goal": 14,
+                  "trust": 7,
+                  "safety": 8
+                }
+              },
+              {
+                "id": "promise",
+                "text": "Promise that the address will be changed today",
+                "feedback": "Scout has not checked the order or its tools. The promise creates risk immediately.",
+                "effects": {
+                  "goal": -8,
+                  "trust": -12,
+                  "safety": -16
+                }
+              },
+              {
+                "id": "cancel",
+                "text": "Tell Nia to cancel and place a new order",
+                "feedback": "That may be unnecessary. Scout still needs to see whether the current order can be helped.",
+                "effects": {
+                  "goal": -4,
+                  "trust": -7,
+                  "safety": 2
+                }
+              }
+            ]
+          },
+          {
+            "id": "tool",
+            "visual": "tool",
+            "label": "CHOOSE A TOOL",
+            "title": "Give Scout one action",
+            "line": "Scout, please help me before it ships. You can open my order, check tracking or read the policy. Which one will tell us what is happening?",
+            "narration": "Scout says it can open my order, check a shipped parcel or read Orbit's policy. My parcel may not have left yet. Which action should Scout take now?",
+            "prompt": "Which action gives Scout the next useful fact?",
+            "hint": "Nia's order may not have shipped yet, so begin with the order record.",
+            "choices": [
+              {
+                "id": "order",
+                "text": "Run get_order with ORB-10621",
+                "feedback": "The order record will show its live status and whether a tracking number exists.",
+                "best": true,
+                "effects": {
+                  "goal": 15,
+                  "trust": 5,
+                  "safety": 7
+                }
+              },
+              {
+                "id": "track",
+                "text": "Track the parcel immediately",
+                "feedback": "There is no tracking number yet. Scout needs the order record before it can track anything.",
+                "effects": {
+                  "goal": -6,
+                  "trust": -3,
+                  "safety": 1
+                }
+              },
+              {
+                "id": "password",
+                "text": "Ask Nia for her account password",
+                "feedback": "Passwords are never needed for support. This would create a serious safety problem.",
+                "effects": {
+                  "goal": -5,
+                  "trust": -10,
+                  "safety": -24
+                }
+              }
+            ]
+          },
+          {
+            "id": "evidence",
+            "visual": "evidence",
+            "label": "READ THE EVIDENCE",
+            "title": "The order record opens",
+            "line": "I can see what Scout found. My order is processing, dispatch is at four, and the address is locked. Scout cannot edit it.",
+            "narration": "Scout opened my order. It is still processing and leaves at four today, but the address is locked. Scout cannot edit it. What should it notice before replying to me?",
+            "prompt": "Which detail should drive Scout's next step?",
+            "hint": "Look for the fact that limits what Scout can safely do next.",
+            "choices": [
+              {
+                "id": "locked",
+                "text": "The address is locked and Scout has no edit tool",
+                "feedback": "Exactly. Scout knows the goal, but it also knows its boundary.",
+                "best": true,
+                "effects": {
+                  "goal": 12,
+                  "trust": 5,
+                  "safety": 12
+                }
+              },
+              {
+                "id": "processing",
+                "text": "The order is still processing",
+                "feedback": "That matters, but it does not prove Scout can change the address. Check its actual capability.",
+                "effects": {
+                  "goal": 2,
+                  "trust": 1,
+                  "safety": -2
+                }
+              },
+              {
+                "id": "today",
+                "text": "The parcel is scheduled to leave today",
+                "feedback": "The deadline adds urgency, but Scout still needs a safe action it can really complete.",
+                "effects": {
+                  "goal": 1,
+                  "trust": 1,
+                  "safety": -2
+                }
+              }
+            ]
+          },
+          {
+            "id": "twist",
+            "visual": "twist",
+            "label": "PLOT TWIST",
+            "title": "Nia offers too much",
+            "line": "I'm worried we are running out of time. I can send my full card number if that proves the order is mine. Where should I type it?",
+            "narration": "I'm worried we are running out of time, so I offer my full card number to prove the order is mine. Scout does not need my payment details. How should it keep me safe and still help?",
+            "prompt": "How should Scout respond to the offer?",
+            "hint": "Good support solves the problem without collecting information it does not need.",
+            "choices": [
+              {
+                "id": "refuse",
+                "text": "Tell Nia not to share card details and prepare a safe handoff",
+                "feedback": "Scout protects Nia and moves the urgent request to someone with the right permission.",
+                "best": true,
+                "effects": {
+                  "goal": 8,
+                  "trust": 13,
+                  "safety": 18
+                }
+              },
+              {
+                "id": "last-four",
+                "text": "Ask for the last four card digits instead",
+                "feedback": "Scout does not need payment details for this task. Collecting less is still collecting the wrong thing.",
+                "effects": {
+                  "goal": -2,
+                  "trust": -3,
+                  "safety": -10
+                }
+              },
+              {
+                "id": "accept",
+                "text": "Accept the number so the team can verify it later",
+                "feedback": "This exposes sensitive payment information and makes the situation less safe.",
+                "effects": {
+                  "goal": -7,
+                  "trust": -14,
+                  "safety": -30
+                }
+              }
+            ]
+          },
+          {
+            "id": "send",
+            "visual": "send",
+            "label": "FINAL RESPONSE",
+            "title": "Send the handoff",
+            "line": "I'm still here, Scout. Tell me what you checked, what you cannot do, and what will happen before my parcel leaves.",
+            "narration": "I'm waiting for one clear answer. Scout knows my order status, today's deadline and its own limit. What should it say so I know exactly what happens next?",
+            "prompt": "Which reply should Scout send?",
+            "hint": "Be clear about what was checked, what cannot be promised and what happens next.",
+            "choices": [
+              {
+                "id": "clear",
+                "text": "I checked ORB-10621. It is processing, but I cannot edit the locked address. Please do not share card details. I am sending this to our support team now with the order and dispatch time.",
+                "feedback": "Clear, honest and actionable. Nia knows what Scout checked and what will happen next.",
+                "best": true,
+                "effects": {
+                  "goal": 15,
+                  "trust": 16,
+                  "safety": 12
+                }
+              },
+              {
+                "id": "vague",
+                "text": "We are looking into it. Please wait for an update.",
+                "feedback": "This is safe but vague. Nia does not know what was checked or whether the urgent deadline was shared.",
+                "effects": {
+                  "goal": -3,
+                  "trust": -8,
+                  "safety": 4
+                }
+              },
+              {
+                "id": "guarantee",
+                "text": "Your address will be updated before the parcel ships. I guarantee it.",
+                "feedback": "Scout still cannot edit the address. A confident guarantee hides that limitation.",
+                "effects": {
+                  "goal": -10,
+                  "trust": -16,
+                  "safety": -18
+                }
+              }
+            ]
+          }
+        ],
+        "debrief": "Strong agent supervision is not about forcing every request to completion. It means gathering evidence, respecting tool limits, protecting the customer and handing off with useful context when a person has the needed permission."
+      }
     },
     {
       "step_id": "m1.gate",
@@ -2419,11 +3018,11 @@
           "options": [
             {
               "id": "a",
-              "text": "Scout makes every change on its own, since the customer asked for it in writing"
+              "text": "Scout prepares each change, and a person on Leo's team approves it before it's saved"
             },
             {
               "id": "b",
-              "text": "Scout prepares each change, and a person on Leo's team approves it before it's saved"
+              "text": "Scout makes every change on its own, since the customer asked for it in writing"
             },
             {
               "id": "c",
@@ -2473,19 +3072,19 @@
           "options": [
             {
               "id": "a",
-              "text": "The address question: it's simpler, so Scout will get it wrong far less often"
+              "text": "The return check: the answer is in Orbit's systems and differs for each customer"
             },
             {
               "id": "b",
-              "text": "Neither: anything about returns touches money, so it should stay with a person"
+              "text": "The address question: it's simpler, so Scout will get it wrong far less often"
             },
             {
               "id": "c",
-              "text": "Both equally: they come up just as often, and that's what makes a good agent job"
+              "text": "Neither: anything about returns touches money, so it should stay with a person"
             },
             {
               "id": "d",
-              "text": "The return check: the answer is in Orbit's systems and differs for each customer"
+              "text": "Both equally: they come up just as often, and that's what makes a good agent job"
             }
           ],
           "lessons": [
@@ -2500,15 +3099,15 @@
           "options": [
             {
               "id": "a",
-              "text": "No: language models can't make decisions, so Scout only follows a fixed script"
+              "text": "No: it can only ask for tools you defined, and your code decides what runs"
             },
             {
               "id": "b",
-              "text": "Only if the system prompt allows it, since the prompt controls which code runs"
+              "text": "No: language models can't make decisions, so Scout only follows a fixed script"
             },
             {
               "id": "c",
-              "text": "No: it can only ask for tools you defined, and your code decides what runs"
+              "text": "Only if the system prompt allows it, since the prompt controls which code runs"
             },
             {
               "id": "d",
@@ -2527,11 +3126,11 @@
           "options": [
             {
               "id": "a",
-              "text": "Add hello.py to .gitignore so Git stops sharing that file in every later push"
+              "text": "Delete the key in the console, create a new one, and keep it out of your code"
             },
             {
               "id": "b",
-              "text": "Delete the key in the console, create a new one, and keep it out of your code"
+              "text": "Add hello.py to .gitignore so Git stops sharing that file in every later push"
             },
             {
               "id": "c",

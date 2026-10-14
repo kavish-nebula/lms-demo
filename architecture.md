@@ -1,6 +1,6 @@
 # architecture.md — Frontend architecture
 
-How the Nebula KnowLab SPA is put together today: single-page React 19 + Vite 6 app, no backend, all state in the browser.
+The sections below describe the earlier React/Vite prototype. The current app is Next.js in `apps/web`; its platform activity implementation is documented in [Platform engagement](docs/platform-engagement.md).
 
 > System-level design (including the planned backend/cloud evolution) lives in [`Systemdesign.md`](./Systemdesign.md). Coding conventions for agents: [`agents.md`](./agents.md).
 
@@ -162,3 +162,6 @@ flowchart TB
 
 - `npm run dev` — Vite dev server (LAN-exposed, port 5173).
 - `npm run build` → static `dist/` (already present in the repo) — deployable to any static host/CDN. No server-side rendering, no API calls at runtime.
+# Workflow mini project
+
+The Next.js app includes a separately persisted workflow-diagram capstone exercise alongside Python. See [workflow-mini-project.md](docs/workflow-mini-project.md) for routes, storage, recovery and compatibility boundaries.

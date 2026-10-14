@@ -814,7 +814,29 @@
           }
         ],
         "check": "From the **scout** folder, `python -c \"print(open('docs/policy.md').read()[:24])\"` prints `# Orbit Outdoor policies`.",
-        "tip": "On Windows, make sure the file is called policy.md and not policy.md.txt. Turn on **File name extensions** in File Explorer's **View** menu to check."
+        "tip": "On Windows, make sure the file is called policy.md and not policy.md.txt. Turn on **File name extensions** in File Explorer's **View** menu to check.",
+        "win": {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "that's our actual policy, word for word. now scout can quote it instead of improvising one"
+        },
+        "sim": {
+          "kind": "terminal",
+          "prompt": "(.venv) PS C:\\scout>",
+          "lines": [
+            {
+              "cmd": "mkdir docs",
+              "out": "    Directory: C:\\scout\n\nMode                 LastWriteTime         Length Name\n----                 -------------         ------ ----\nd-----         10/9/2026   9:12 AM                docs"
+            },
+            {
+              "cmd": "python -c \"print(open('docs/policy.md').read()[:24])\"",
+              "alt": [
+                "python3 -c \"print(open('docs/policy.md').read()[:24])\""
+              ],
+              "out": "# Orbit Outdoor policies"
+            }
+          ]
+        }
       },
       {
         "title": "Build a safe calculator",
@@ -832,7 +854,49 @@
           }
         ],
         "check": "The first command prints `204.0`. The second ends with `ValueError: only numbers, + - * / ** and parentheses are allowed`: a function call was refused, not run.",
-        "tip": "`ModuleNotFoundError: No module named 'tools'` means you're not in the scout folder. `cd` into it and run the command again."
+        "tip": "`ModuleNotFoundError: No module named 'tools'` means you're not in the scout folder. `cd` into it and run the command again.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "204.0, and open(1) was refused before it ever ran. no eval anywhere, so a \"sum\" can never smuggle in code"
+        },
+        "sim": {
+          "kind": "code",
+          "file": "tools.py",
+          "code": "# ...\ndef _evaluate(node):\n    if isinstance(node, ast.Constant) and type(node.value) in (int, float):\n        return node.value\n    if isinstance(node, ast.BinOp) and type(node.op) in OPERATORS:\n        left, right = _evaluate(node.left), _evaluate(node.right)\n        if isinstance(node.op, ast.Pow) and abs(right) > 100:\n            raise ValueError(\"exponent too large\")\n        return OPERATORS[type(node.op)](left, right)\n    if isinstance(node, ast.UnaryOp) and type(node.op) in OPERATORS:\n        return OPERATORS[type(node.op)](_evaluate(node.operand))\n    raise ValueError(\"only numbers, + - * / ** and parentheses are allowed\")\n\n\ndef calculate(expression):\n    tree = ast.parse(expression, mode=\"eval\")  # text -> tree; nothing is run\n    result = _evaluate(tree.body)\n    return str(round(result, 6))  # trims float noise like 0.30000000000000004",
+          "blanks": [
+            {
+              "token": "ast.Constant",
+              "options": [
+                "ast.Name",
+                "ast.Constant",
+                "ast.Call",
+                "ast.Attribute"
+              ]
+            },
+            {
+              "token": "ast.BinOp",
+              "options": [
+                "ast.Call",
+                "ast.Lambda",
+                "ast.BinOp"
+              ]
+            },
+            {
+              "token": "ast.parse",
+              "options": [
+                "eval",
+                "exec",
+                "ast.parse",
+                "compile"
+              ]
+            }
+          ],
+          "run": {
+            "cmd": "python -c \"from tools import calculate; print(calculate('240 * 0.85'))\"",
+            "out": "204.0"
+          }
+        }
       },
       {
         "title": "Add a file reader that stays inside docs",
@@ -849,7 +913,49 @@
           }
         ],
         "check": "The first command prints the start of the policy, beginning `# Orbit Outdoor policies`. The second ends with `ValueError: ../tools.py is outside the docs folder`.",
-        "tip": "`Path(__file__).parent` is the folder tools.py lives in, so read_file finds docs no matter which folder you start Python from."
+        "tip": "`Path(__file__).parent` is the folder tools.py lives in, so read_file finds docs no matter which folder you start Python from.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "../tools.py bounced right off. resolve() works out the real path first, so no ../ trick gets scout out of docs"
+        },
+        "sim": {
+          "kind": "code",
+          "file": "tools.py",
+          "code": "DOCS = Path(__file__).parent / \"docs\"\n\n\ndef read_file(name):\n    \"\"\"Return the text of a file in the docs folder. Refuse anything outside it.\"\"\"\n    path = (DOCS / name).resolve()  # a full path, with any ../ worked out\n    if not path.is_relative_to(DOCS.resolve()):\n        raise ValueError(f\"{name} is outside the docs folder\")\n    if not path.is_file():\n        raise FileNotFoundError(f\"no file called {name} in docs\")\n    return path.read_text(encoding=\"utf-8\")",
+          "blanks": [
+            {
+              "token": "Path(__file__).parent",
+              "options": [
+                "Path.cwd()",
+                "Path(__file__).parent",
+                "Path.home()"
+              ]
+            },
+            {
+              "token": "(DOCS / name).resolve()",
+              "options": [
+                "DOCS / name",
+                "Path(name)",
+                "(DOCS / name).absolute()",
+                "(DOCS / name).resolve()"
+              ]
+            },
+            {
+              "token": "is_relative_to",
+              "options": [
+                "is_relative_to",
+                "exists",
+                "is_absolute",
+                "match"
+              ]
+            }
+          ],
+          "run": {
+            "cmd": "python -c \"from tools import read_file; read_file('../tools.py')\"",
+            "out": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"C:\\scout\\tools.py\", line 47, in read_file\n    raise ValueError(f\"{name} is outside the docs folder\")\nValueError: ../tools.py is outside the docs folder"
+          }
+        }
       },
       {
         "title": "Describe the tools and add a dispatcher",
@@ -865,7 +971,48 @@
           }
         ],
         "check": "It prints `36.0`. That is the exact path the agent will use: a tool name and an input dictionary in, text out.",
-        "tip": "The descriptions are prompts. If Scout later skips a tool or picks the wrong one, improve the description before you change any code."
+        "tip": "The descriptions are prompts. If Scout later skips a tool or picks the wrong one, improve the description before you change any code.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "36.0, via the exact path scout will take: name and input in, text out. remember, scout only ever sees those descriptions"
+        },
+        "sim": {
+          "kind": "code",
+          "file": "tools.py",
+          "code": "TOOLS = [\n    {\n        \"name\": \"calculate\",\n        \"description\": (\n            \"Work out an arithmetic expression exactly and return the answer. \"\n            # ...\n        ),\n        \"input_schema\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"expression\": {\"type\": \"string\", \"description\": \"Arithmetic only, e.g. 240 * 0.85\"},\n            },\n            \"required\": [\"expression\"],\n        },\n    },\n    # ...\n]\nFUNCTIONS = {\"calculate\": calculate, \"read_file\": read_file}",
+          "blanks": [
+            {
+              "token": "input_schema",
+              "options": [
+                "parameters",
+                "input_schema",
+                "arguments",
+                "schema"
+              ]
+            },
+            {
+              "token": "required",
+              "options": [
+                "optional",
+                "default",
+                "required"
+              ]
+            },
+            {
+              "token": "\"read_file\": read_file",
+              "options": [
+                "\"read_file\": \"read_file\"",
+                "\"read_file\": read_file()",
+                "\"read_file\": read_file"
+              ]
+            }
+          ],
+          "run": {
+            "cmd": "python -c \"from tools import run_tool; print(run_tool('calculate', {'expression': '240 * 15 / 100'}))\"",
+            "out": "36.0"
+          }
+        }
       },
       {
         "title": "Write the tool loop",
@@ -883,7 +1030,48 @@
           }
         ],
         "check": "The import prints nothing and shows no error. Your **scout** folder now holds **docs/policy.md**, **tools.py** and **agent.py**.",
-        "tip": "An IndentationError usually means the `try` and `except` lines aren't inside the `for block in response.content:` loop. Compare your indentation with the code above, line by line."
+        "tip": "An IndentationError usually means the `try` and `except` lines aren't inside the `for block in response.content:` loop. Compare your indentation with the code above, line by line.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "a silent import, the best kind. loop, step limit and is_error all in one file. MAX_STEPS = 6 is your seatbelt"
+        },
+        "sim": {
+          "kind": "code",
+          "file": "agent.py",
+          "code": "    for step in range(MAX_STEPS):                       # always a step limit\n        response = client.messages.create(model=MODEL, max_tokens=16000,\n                                          system=SYSTEM, tools=TOOLS, messages=messages)\n        messages.append({\"role\": \"assistant\", \"content\": response.content})\n        if response.stop_reason != \"tool_use\":\n            break\n        results = []\n        for block in response.content:\n            if block.type == \"tool_use\":\n                print(f\"  [tool] {block.name}({block.input})\")\n                try:\n                    output = run_tool(block.name, block.input)\n                    results.append({\"type\": \"tool_result\", \"tool_use_id\": block.id, \"content\": output})\n                except Exception as err:\n                    print(f\"  [error] {err}\")\n                    results.append({\"type\": \"tool_result\", \"tool_use_id\": block.id,\n                                    \"content\": f\"Error: {err}\", \"is_error\": True})\n        messages.append({\"role\": \"user\", \"content\": results})   # all results in one message",
+          "blanks": [
+            {
+              "token": "MAX_STEPS",
+              "options": [
+                "len(TOOLS)",
+                "MAX_STEPS",
+                "len(messages)"
+              ]
+            },
+            {
+              "token": "is_error",
+              "options": [
+                "is_error",
+                "error",
+                "failed",
+                "status"
+              ]
+            },
+            {
+              "token": "\"role\": \"user\", \"content\": results",
+              "options": [
+                "\"role\": \"assistant\", \"content\": results",
+                "\"role\": \"system\", \"content\": results",
+                "\"role\": \"user\", \"content\": results"
+              ]
+            }
+          ],
+          "run": {
+            "cmd": "python -c \"import agent\"",
+            "out": ""
+          }
+        }
       },
       {
         "title": "Ask Scout to do a sum",
@@ -893,7 +1081,29 @@
           "Watch for the `[tool]` lines that appear before the answer."
         ],
         "check": "You see at least one line like `[tool] calculate({'expression': '240 * 0.85'})`, then an answer of 204 dollars. Scout may work out the 36 dollar discount first, so two calculate calls are fine too.",
-        "tip": "No `[tool]` line means Scout did the sum in its head. Check that `tools=TOOLS` is in the create call and that SYSTEM tells Scout to use calculate for every sum."
+        "tip": "No `[tool]` line means Scout did the sum in its head. Check that `tools=TOOLS` is in the create call and that SYSTEM tells Scout to use calculate for every sum.",
+        "win": {
+          "who": "Maya — founder",
+          "av": "M",
+          "text": "it handed the sum to calculate and got 204. that's the first number from scout i'd put my name on"
+        },
+        "sim": {
+          "kind": "chat",
+          "start": {
+            "cmd": "python agent.py",
+            "out": "Ask Scout: "
+          },
+          "turns": [
+            {
+              "you": "What is 15 percent off a 240 dollar tent?",
+              "trace": [
+                "[tool] calculate({'expression': '240 * 0.15'})",
+                "[tool] calculate({'expression': '240 * 0.85'})"
+              ],
+              "scout": "15 percent off a 240 dollar tent is a 36 dollar discount, so the tent comes to 204 dollars."
+            }
+          ]
+        }
       },
       {
         "title": "Ask about the policy",
@@ -902,7 +1112,28 @@
           "Run `python agent.py \"What does our policy say about returns?\"`."
         ],
         "check": "You see `[tool] read_file({'name': 'policy.md'})`, then an answer that mentions 30 days from delivery, unused items in their original packaging, and free return shipping on orders over 75 dollars.",
-        "tip": "`[error] no file called policy.md in docs` means the file is in the wrong place or has a hidden .txt ending. It must be **scout/docs/policy.md**."
+        "tip": "`[error] no file called policy.md in docs` means the file is in the wrong place or has a hidden .txt ending. It must be **scout/docs/policy.md**.",
+        "win": {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "opened policy.md and nailed it: 30 days, unused, original packaging, free return shipping over $75. half my queue, handled"
+        },
+        "sim": {
+          "kind": "chat",
+          "start": {
+            "cmd": "python agent.py",
+            "out": "Ask Scout: "
+          },
+          "turns": [
+            {
+              "you": "What does our policy say about returns?",
+              "trace": [
+                "[tool] read_file({'name': 'policy.md'})"
+              ],
+              "scout": "You can return any unused item within 30 days of delivery for a full refund, as long as it's in its original packaging. Return shipping is free on orders over $75. Under $75, a $6.95 return label is taken off the refund."
+            }
+          ]
+        }
       },
       {
         "title": "Break it on purpose",
@@ -912,7 +1143,30 @@
           "Read the `[error]` line, then Scout's answer."
         ],
         "check": "You see `[tool] read_file({'name': 'warranty.md'})` and `[error] no file called warranty.md in docs`. Scout says it couldn't find a warranty file and doesn't invent warranty terms. It may also open policy.md to look, which is fine: there is no warranty section there either.",
-        "tip": "If Scout describes a warranty anyway, check that your except block sets `\"is_error\": True` and that SYSTEM tells Scout not to guess when a tool fails."
+        "tip": "If Scout describes a warranty anyway, check that your except block sets `\"is_error\": True` and that SYSTEM tells Scout not to guess when a tool fails.",
+        "win": {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "see that [error] line? that's exactly what elena's lookup never got. scout said no warranty file instead of making one up"
+        },
+        "sim": {
+          "kind": "chat",
+          "start": {
+            "cmd": "python agent.py",
+            "out": "Ask Scout: "
+          },
+          "turns": [
+            {
+              "you": "What does warranty.md in our docs say about tents?",
+              "trace": [
+                "[tool] read_file({'name': 'warranty.md'})",
+                "[error] no file called warranty.md in docs",
+                "[tool] read_file({'name': 'policy.md'})"
+              ],
+              "scout": "I couldn't find a file called warranty.md in our docs, so I can't tell you what it says about tents. Orbit's policy file doesn't cover warranties either. I can pass your question to a person on the team if you'd like."
+            }
+          ]
+        }
       }
     ],
     "finish": {
@@ -924,6 +1178,44 @@
         "**agent.py** runs the tool loop with MAX_STEPS = 6",
         "Tool failures go back as a tool_result with is_error true",
         "Scout answered a sum, a policy question and a missing file correctly"
+      ]
+    },
+    "mission": {
+      "codename": "Operation Multitool",
+      "badge": "Tool Loop Trailblazer",
+      "mentor": {
+        "who": "Priya — developer",
+        "av": "P"
+      },
+      "brief": [
+        {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "two questions eat hours of my team's day: \"how much will i get back?\" and \"what does the policy say?\" we still answer every one by hand"
+        },
+        {
+          "who": "Maya — founder",
+          "av": "M",
+          "text": "and scout can't take them yet. it does sums in its head and has never read our policy. after elena's rope, i'm done with it guessing"
+        },
+        {
+          "who": "Priya — developer",
+          "av": "P",
+          "text": "so here's your mission: give scout a calculator, a file reader locked to docs, and a tool loop that reports every failure. i'll hand you one step at a time"
+        }
+      ],
+      "goal": "Scout uses calculate for every sum, reads policy.md with read_file, and says what it couldn't check when a tool fails.",
+      "debrief": [
+        {
+          "who": "Leo — support lead",
+          "av": "L",
+          "text": "exact numbers from calculate, return rules straight from policy.md. those are the two questions my team answers all day, handled"
+        },
+        {
+          "who": "Maya — founder",
+          "av": "M",
+          "text": "and when warranty.md wasn't there, it said so instead of inventing terms. that's the lesson from elena's rope, built in. next it learns to remember"
+        }
       ]
     }
   },

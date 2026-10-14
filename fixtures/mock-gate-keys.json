@@ -43,11 +43,11 @@
     "p12": "a"
   },
   "gate-m1": {
-    "q1": "b",
+    "q1": "a",
     "q2": "a",
-    "q3": "d",
-    "q4": "c",
-    "q5": "b",
+    "q3": "a",
+    "q4": "a",
+    "q5": "a",
     "q6": "a"
   },
   "gate-m1_explain": {
@@ -59,12 +59,12 @@
     "q6": "The text has fixed steps, so a workflow sends it fast and cheaply every time. Questions vary and need lookups in the log, so the steps depend on the request: agent work, and it can start read-only. One agent for both adds cost and risk to a job with nothing to decide."
   },
   "gate-m2": {
-    "q1": "c",
-    "q2": "b",
+    "q1": "a",
+    "q2": "a",
     "q3": "a",
-    "q4": "d",
-    "q5": "c",
-    "q6": "b"
+    "q4": "a",
+    "q5": "a",
+    "q6": "a"
   },
   "gate-m2_explain": {
     "q1": "The model learned only in training and keeps nothing between requests, so last week's chat is gone. If the policy isn't in the context window, it doesn't exist for the model. A one-line reminder is rules without facts, which is how the 90-day promise happened.",
@@ -75,12 +75,12 @@
     "q6": "A valid shape is not a true answer, and a sentence in a prompt can't protect money: the model may copy the amount the customer asked for. Code that checks the value and routes odd cases to a person owns the decision. Louder rules or a bigger model still leave it to the model."
   },
   "gate-m3": {
-    "q1": "d",
-    "q2": "c",
-    "q3": "b",
+    "q1": "a",
+    "q2": "a",
+    "q3": "a",
     "q4": "a",
-    "q5": "d",
-    "q6": "c"
+    "q5": "a",
+    "q6": "a"
   },
   "gate-m3_explain": {
     "q1": "Scout can only write text, so \"I've refunded your $60\" was just words. A real action happens only when Scout asks for a tool like request_refund and your code runs it. A firmer rule or a bigger model still only produces text.",
@@ -92,11 +92,11 @@
   },
   "gate-m4": {
     "q1": "a",
-    "q2": "d",
-    "q3": "c",
-    "q4": "b",
+    "q2": "a",
+    "q3": "a",
+    "q4": "a",
     "q5": "a",
-    "q6": "d"
+    "q6": "a"
   },
   "gate-m4_explain": {
     "q1": "Her size is useful next time and low risk. Stock changes daily and already lives in Sam's stock sheet, so check it fresh. A full transcript is slow, costly and more to protect, and details kept just in case are only risk.",
@@ -107,11 +107,11 @@
     "q6": "Each part of the request needs a step. Two are grounded in retrieved text and the third isn't covered, so the honest reply says so and offers the owner. Guessing invents a promise, skipping it leaves her asking again, and handing off everything wastes good answers."
   },
   "gate-m5": {
-    "q1": "b",
+    "q1": "a",
     "q2": "a",
-    "q3": "d",
-    "q4": "c",
-    "q5": "b",
+    "q3": "a",
+    "q4": "a",
+    "q5": "a",
     "q6": "a"
   },
   "gate-m5_explain": {
@@ -123,12 +123,12 @@
     "q6": "A made-up nut-free claim is an unsafe failure, so the score can't decide this. With no allergen data the agent can never answer well: scope those questions to a person, test the hand-off and re-run. Ship when what still fails is safe, not perfect."
   },
   "gate-m6": {
-    "q1": "c",
-    "q2": "b",
+    "q1": "a",
+    "q2": "a",
     "q3": "a",
-    "q4": "d",
-    "q5": "c",
-    "q6": "b"
+    "q4": "a",
+    "q5": "a",
+    "q6": "a"
   },
   "gate-m6_explain": {
     "q1": "A prompt rule is followed most of the time, not every time. The approval guard only holds refunds over $200, so $190 slips past it, and a flag only logs. A check in your own code runs whatever the model decides.",

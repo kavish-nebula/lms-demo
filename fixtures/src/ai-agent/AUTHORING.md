@@ -427,6 +427,31 @@ Numbered steps the learner does on their own machine, with exact code to copy.
 - `values[].value` is copied as-is (multi-line is fine, use `\n`). Code must be complete and runnable at that step. Build on the previous module's files where it makes sense (`agent.py`, `tools.py`).
 - Every step has `check`. Give a `tip` on any step with a likely mistake.
 
+#### It plays as a mission
+
+The learner meets the guided practice as a mission on a trail:
+
+1. **Briefing.** The team briefs them on the real problem in chat. They tick off their gear and press "Accept the mission".
+2. **Waypoints.** Each step is a waypoint. The mentor hands it over as a message (`body`). The learner ticks the `actions` off, then answers the checkpoint (`check`): "Yes, I see it" or "Not quite". "Not quite" brings the mentor's `tip`.
+3. **Score.** A step that works earns 100 XP, plus 50 more when no help was used, and keeps the streak going. A teammate then reacts (`win`).
+4. **Summit.** The summit shows the badge, 1 to 3 stars (fewer the more help was used), the team's `debrief` and the `finish` checklist.
+
+Add the mission layer to `guided`, and a `win` to every step:
+
+```json
+"mission": {
+  "codename": "Operation Multitool (at most 32 characters)",
+  "badge": "Tool Loop Trailblazer (at most 28 characters)",
+  "mentor": {"who": "Priya — developer", "av": "P"},
+  "brief": [{"who": "Leo — support lead", "av": "L", "text": "the existing problem at Orbit, with stakes (at most 170)"}, ...2 or 3, the last one from the mentor handing over the mission],
+  "goal": "What will be true when the mission is done (at most 140).",
+  "debrief": [{"who": "Maya — founder", "av": "M", "text": "why what they built matters (at most 170)"}]
+},
+"steps": [{ ..., "win": {"who": "Priya — developer", "av": "P", "text": "a specific reaction when this step works (at most 130)"} }]
+```
+
+Write team lines in the chat voice of the hook messages, specific to what just worked. Speakers are `Maya — founder` (M), `Leo — support lead` (L) and `Priya — developer` (P).
+
 ### `lab` (phase 5: scenarios)
 
 Three realistic situations the learner has not seen yet. Each asks for a decision and explains it. Tie each to a lesson; cover at least two different lessons.

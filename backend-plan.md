@@ -1,5 +1,7 @@
 # Nebula KnowLab — Backend System Plan
 
+Current implementation note (12 October 2026): platform engagement runs in the existing Next.js backend using Drizzle and PGlite/Postgres, behind `PLATFORM_ENGAGEMENT_ENABLED`. Its additive learner row, serialized award processing, API contracts and privacy limits are described in [Platform engagement](docs/platform-engagement.md). The earlier target backend design below remains a separate roadmap.
+
 > Production-ready backend for the Proofcraft LMS prototype (`lms-feature/`).
 > Stack: **Python (FastAPI) · PostgreSQL · cloud-native**. Scope: **full platform** —
 > auth, progress sync, adaptive engine, assessments, credentials, content pipeline,
@@ -308,3 +310,6 @@ Total: roughly **11–16 weeks** for one backend engineer (2) + part-time fronte
 | Content updates breaking in-flight learners | Per-enrollment content version pinning; bundles immutable |
 | Event replay/duplication from offline client | `client_event_id` idempotency, monotonic first-completion semantics, server-side timestamps for truth |
 | Solo Postgres dependency (incl. vectors) | pgvector covers pilot scale; migration path to a dedicated vector store documented (Qdrant/OpenSearch) if >10M chunks or latency SLOs slip |
+# Workflow exercise storage
+
+The Next.js backend adds enrollment-scoped `workflow_projects` with revision-checked saves and server-side architecture checks. This independent practice does not write Python reports, course progress or adaptation signals. See [workflow-mini-project.md](docs/workflow-mini-project.md).

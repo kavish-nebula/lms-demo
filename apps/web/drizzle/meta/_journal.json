@@ -8,6 +8,27 @@
       "when": 1791455968108,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791540717328,
+      "tag": "0001_project_work",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791799383573,
+      "tag": "0002_groovy_morbius",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791805921253,
+      "tag": "0003_wealthy_oracle",
+      "breakpoints": true
     }
   ]
 }

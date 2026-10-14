@@ -6,6 +6,8 @@
  * just "wrong": every option carries a rationale where the content has one.
  */
 import * as React from "react";
+import { useLearningContext } from "@/components/learning/course-companion";
+import { recordLearning } from "@/lib/learning-state";
 import { cn } from "cn";
 import { useTranslations } from "next-intl";
 import { CheckCircle2, CircleAlert, Lightbulb } from "lucide-react";
@@ -141,6 +143,8 @@ export function McQuestion({
   const t = useTranslations("player");
   const [value, setValue] = React.useState<string[]>([]);
   const [checked, setChecked] = React.useState(false);
+  const context = useLearningContext();
+  const [attempted, setAttempted] = React.useState(false);
   const chosen = options.find((o) => o.id === value[0]);
   const correct = !!chosen?.correct;
 
@@ -167,6 +171,8 @@ export function McQuestion({
           onClick={() => {
             setChecked(true);
             onAnswered?.(correct);
+            if (context && !["precheck", "gate", "final-check"].includes(context.phase)) recordLearning(context.courseId, { id, moduleId: context.moduleId, correct, helped: attempted });
+            setAttempted(true);
           }}
         >
           {checkLabel ?? t("checkAnswer")}
@@ -412,9 +418,9 @@ export function CodeQuestion({
 /* ---------------------------------------------------------------- tiered hints */
 
 /** Hint 1 → 2 → 3, revealed one at a time. Hint use is a behavioural signal. */
-export function TieredHints({ hints, onReveal }: { hints: string[]; onReveal?: (level: number) => void }) {
+export function TieredHints({ hints, onReveal, initialShown = 0 }: { hints: string[]; onReveal?: (level: number) => void; initialShown?: number }) {
   const t = useTranslations("player");
-  const [shown, setShown] = React.useState(0);
+  const [shown, setShown] = React.useState(() => Math.min(initialShown, hints.length));
   if (!hints.length) return null;
 
   return (

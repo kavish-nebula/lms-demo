@@ -1,0 +1,19 @@
+.workflow-canvas {
+  --xy-background-color: var(--bg);
+  --xy-edge-stroke: var(--muted);
+  --xy-edge-stroke-selected: var(--accent);
+  --xy-edge-label-color: var(--text);
+  --xy-edge-label-background-color: var(--panel);
+  --xy-controls-button-background-color: var(--panel);
+  --xy-controls-button-background-color-hover: var(--panel2);
+  --xy-controls-button-color: var(--text);
+  --xy-controls-button-border-color: var(--line);
+  --xy-attribution-background-color: var(--panel);
+  --xy-handle-background-color: var(--accent);
+  --xy-handle-border-color: var(--panel);
+}
+.workflow-canvas .react-flow__controls-button { min-width: 44px; min-height: 44px; }
+.workflow-canvas .react-flow__node:focus-visible,
+.workflow-canvas .react-flow__edge:focus-visible,
+.workflow-canvas .react-flow__controls-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.workflow-canvas .react-flow__handle { width: 12px; height: 12px; }

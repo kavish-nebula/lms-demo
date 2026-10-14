@@ -3,6 +3,33 @@
   the prototype (src/index.css .vl-*) onto the app's tokens. Every size is in
   container units (cqw) so a slide looks the same at any width.
 */
+.concept-video-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--r-lg) + 4px);
+  background: var(--panel2);
+  box-shadow: var(--shadow-sm);
+}
+.concept-text-cards { display: flex; flex-direction: column; gap: 12px; }
+.concept-text-card {
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
+}
+.concept-transcript-card { padding: 0; overflow: hidden; }
+.concept-video-shell:fullscreen .concept-video-card {
+  width: 100%;
+  max-width: min(100%, calc((100dvh - 120px) * 16 / 9));
+  border: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
 .vl-stage {
   position: relative;
   container-type: inline-size;
@@ -171,8 +198,70 @@
 /* the checks and the end screen sit over the (dimmed) slide */
 .vl-overlay { position: absolute; inset: 0; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, var(--panel) 55%, transparent); backdrop-filter: blur(3px); overflow: auto; }
 
+/* Visual Story turns the existing narrated slides into one focused, swipeable scene. */
+.story-mode-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow-x: hidden;
+  overflow-y: auto;
+  align-items: center;
+  justify-content: flex-start !important;
+  gap: 14px !important;
+  padding: clamp(16px, 3vh, 34px) clamp(18px, 4vw, 70px) 28px;
+  background:
+    radial-gradient(55% 45% at 50% 28%, color-mix(in srgb, var(--accent) 19%, transparent), transparent 75%),
+    linear-gradient(150deg, color-mix(in srgb, var(--bg) 96%, #130d36), var(--bg));
+}
+.story-mode-topbar {
+  display: grid;
+  width: min(1120px, calc((100dvh - 210px) * 16 / 9), calc(100vw - 80px));
+  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+  align-items: center;
+  gap: 18px;
+  color: var(--text);
+}
+.story-mode-heading { min-width: 0; }
+.story-mode-heading span { display: flex; align-items: center; gap: 6px; color: var(--accent-ink); font-size: 10px; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; }
+.story-mode-heading span svg { width: 14px; height: 14px; }
+.story-mode-heading strong { display: block; overflow: hidden; margin-top: 3px; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.story-scene-dots { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.story-scene-dots button { width: 19px; height: 5px; border-radius: 999px; background: var(--line); transition: width 180ms var(--ease-out), background 180ms var(--ease-out); }
+.story-scene-dots button[aria-current=step] { width: 42px; background: var(--accent); }
+.story-mode-close { justify-self: end; display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--text); background: color-mix(in srgb, var(--panel) 88%, transparent); box-shadow: var(--shadow-sm); }
+.story-mode-close:hover { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent-ink); }
+.story-mode-close svg { width: 18px; height: 18px; }
+.story-mode-card { width: min(1120px, calc((100dvh - 210px) * 16 / 9), calc(100vw - 80px)); border-color: var(--accent-line); background: color-mix(in srgb, var(--panel2) 94%, transparent); box-shadow: 0 24px 80px color-mix(in srgb, #09051f 48%, transparent), 0 0 0 1px color-mix(in srgb, var(--accent) 16%, transparent); }
+.story-mode-stage { touch-action: pan-y; border-color: var(--accent-line); box-shadow: 0 22px 65px color-mix(in srgb, #08051c 44%, transparent); }
+.story-scene-nav { position: absolute; top: 50%; z-index: 25; display: grid; width: 46px; height: 46px; place-items: center; border: 1px solid color-mix(in srgb, white 24%, transparent); border-radius: 50%; color: white; background: color-mix(in srgb, #120d30 74%, transparent); box-shadow: 0 10px 30px rgba(0,0,0,.28); backdrop-filter: blur(10px); transform: translateY(-50%); transition: transform 180ms var(--ease-out), background 180ms var(--ease-out), opacity 180ms; }
+.story-scene-nav:hover { background: var(--accent-deep); transform: translateY(-50%) scale(1.06); }
+.story-scene-nav:disabled { pointer-events: none; opacity: 0; }
+.story-scene-nav svg { width: 22px; height: 22px; }
+.story-scene-prev { left: 16px; }
+.story-scene-next { right: 16px; }
+
+@media (max-width: 760px) {
+  .story-mode-shell { padding: 12px 10px 22px; }
+  .story-mode-topbar, .story-mode-card { width: 100%; }
+  .story-mode-topbar { grid-template-columns: minmax(0,1fr) auto; }
+  .story-scene-dots { grid-column: 1 / -1; grid-row: 2; }
+  .story-mode-close { grid-column: 2; grid-row: 1; }
+  .story-mode-stage { min-height: min(62dvh, 560px); }
+  .story-scene-nav { width: 40px; height: 40px; }
+  .story-scene-prev { left: 8px; }
+  .story-scene-next { right: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-scene-dots button, .story-scene-nav { transition: none; }
+}
+.reduce-motion .story-scene-dots button, .reduce-motion .story-scene-nav { transition: none; }
+
 /* phones: the slide grows to fit its content instead of scaling down */
 @media (max-width: 760px) {
+  .concept-video-card { padding: 8px; }
+  .concept-text-card { padding: 15px; }
+  .concept-transcript-card { padding: 0; }
   .vl-stage { aspect-ratio: auto; min-height: 520px; }
   .vl-cols, .vl-define, .vl-split, .vl-cards { grid-template-columns: 1fr; }
   .vl-flow { flex-direction: column; }

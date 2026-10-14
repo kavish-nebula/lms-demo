@@ -17,7 +17,8 @@ import agentVideos from "@lms/fixtures/videos-ai-agent.json";
 import agentIntro from "@lms/fixtures/intro-ai-agent.json";
 import agentPrecheck from "@lms/fixtures/precheck-ai-agent.json";
 import agentFinale from "@lms/fixtures/finale-ai-agent.json";
-import type { ConceptVideo, Course, CourseModule, ExplainerBlock, FinaleContent, GuidedBlock, Learner, ModuleContent, PrecheckContent } from "./types";
+import agentProject from "@lms/fixtures/project-ai-agent.json";
+import type { ConceptVideo, Course, CourseModule, ExplainerBlock, FinaleContent, GuidedBlock, Learner, ModuleContent, PrecheckContent, ProjectContent } from "./types";
 
 const learner = learnerJson as unknown as Learner;
 const baseCourses = (coursesJson as unknown as { courses: Course[] }).courses;
@@ -36,6 +37,8 @@ const courseVideos: { course_id: string; videos: ConceptVideo[] }[] = [agentVide
 const guided: { course_id: string; module_id: string; block: GuidedBlock }[] = [];
 const finales: FinaleContent[] = [agentFinale as unknown as FinaleContent];
 const prechecks: PrecheckContent[] = [agentPrecheck as unknown as PrecheckContent];
+/** The mini project workspace, for courses whose project is built in the browser. */
+const projects: ProjectContent[] = [agentProject as unknown as ProjectContent];
 /** The course preview video shown while enrolling, between "About you" and the quick check. */
 const intros: { course_id: string; video: ConceptVideo }[] = [agentIntro as unknown as { course_id: string; video: ConceptVideo }];
 
@@ -140,6 +143,11 @@ export async function getFinale(courseId: string): Promise<FinaleContent | undef
 /** The ungraded pre-check asked once, before Module 1. */
 export async function getPrecheck(courseId: string): Promise<PrecheckContent | undefined> {
   return prechecks.find((p) => p.course_id === courseId);
+}
+
+/** The mini project workspace (files and sample tickets), if the course has one. */
+export async function getProject(courseId: string): Promise<ProjectContent | undefined> {
+  return projects.find((p) => p.course_id === courseId);
 }
 
 /** The course preview video, if the course has one. */

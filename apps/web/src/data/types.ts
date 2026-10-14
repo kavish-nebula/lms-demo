@@ -4,6 +4,11 @@
  * that swapping fixtures for API calls is a change to src/data only.
  */
 import type { StageId } from "@/lib/stages";
+import type { ProjectTicket,TicketExpect } from "@/lib/project-grade";
+
+/** Existing Python mini project remains separate from adaptive practice. */
+export type ProjectFile = { path: string; content: string; editable?: boolean; hidden?: boolean };
+export type ProjectContent = { course_id: string; entry: string; files: ProjectFile[]; samples: (ProjectTicket & { expect: TicketExpect })[] };
 
 export type Bloom = "remember" | "understand" | "apply" | "analyze" | "evaluate" | "create";
 export type Load = "low" | "medium" | "high";
@@ -197,6 +202,63 @@ export type GuideStep = {
   check: string;
   /** "Stuck?" */
   tip?: string;
+  /** a teammate's reaction the moment the step works */
+  win?: HookMessage;
+  /** the hands-on challenge for this step in the practice simulator */
+  sim?: GuideSim;
+};
+
+/** A command and what the terminal prints back. */
+export type SimRun = { cmd: string; out: string };
+
+/**
+ * One step's challenge in the practice simulator: type the commands into a
+ * terminal, fill the blanks in the key lines of a file and run it, chat with
+ * Scout and watch its tool calls, or make a decision.
+ */
+export type GuideSim =
+  | { kind: "terminal"; prompt: string; lines: (SimRun & { alt?: string[]; prompt?: string })[] }
+  | { kind: "code"; file: string; code: string; blanks: { token: string; options: string[] }[]; run?: SimRun }
+  | { kind: "chat"; start: SimRun; turns: { you: string; trace?: string[]; scout: string }[] }
+  | { kind: "choice"; q: string; options: string[]; correct: number; explain: string };
+
+/**
+ * The guided practice played as a mission: the team briefs the learner on a
+ * real problem at Orbit, a mentor hands over each step, teammates react as
+ * steps work, and the team celebrates the badge at the end.
+ */
+export type GuidedMission = {
+  codename: string;
+  /** earned when every step is done */
+  badge: string;
+  /** who hands over each step */
+  mentor: { who: string; av: string };
+  brief: HookMessage[];
+  /** what will be true when the mission is done */
+  goal: string;
+  debrief: HookMessage[];
+};
+
+/** A published implementation taught as a solved case, with evidence and source attribution. */
+export type SolvedCaseStep = {
+  title: string;
+  purpose: string;
+  explanation: string;
+  code?: string;
+  result: string;
+};
+
+export type SolvedCaseStudy = {
+  label: string;
+  title: string;
+  source_label: string;
+  source_url: string;
+  source_note: string;
+  problem: string;
+  solution: string;
+  result: string;
+  evidence: string[];
+  solution_steps: SolvedCaseStep[];
 };
 
 export type GuidedBlock = BlockBase & {
@@ -207,6 +269,8 @@ export type GuidedBlock = BlockBase & {
   before: { items: string[]; downloads: { label: string; href: string; note: string }[] };
   steps: GuideStep[];
   finish: { title: string; body: string; checklist: string[] };
+  mission?: GuidedMission;
+  solved_case?: SolvedCaseStudy;
 };
 
 /* ---------------------------------------------------------------- scenarios */
@@ -227,8 +291,41 @@ export type Scenario = {
   debrief: string;
 };
 
+export type RoleplayMeterId = "goal" | "trust" | "safety";
+export type RoleplayVisual = "incoming" | "tool" | "evidence" | "twist" | "send";
+export type RoleplayChoice = {
+  id: string;
+  text: string;
+  feedback: string;
+  best?: boolean;
+  effects: Record<RoleplayMeterId, number>;
+};
+export type RoleplayScene = {
+  id: string;
+  visual: RoleplayVisual;
+  label: string;
+  title: string;
+  line: string;
+  /** Short voiceover used by the scene's cinematic audio control. */
+  narration: string;
+  prompt: string;
+  hint: string;
+  choices: RoleplayChoice[];
+};
+export type RoleplayMission = {
+  id: string;
+  eyebrow: string;
+  title: string;
+  brief: string;
+  learner_role: string;
+  customer: { name: string; role: string; initials: string };
+  start: Record<RoleplayMeterId, number>;
+  scenes: RoleplayScene[];
+  debrief: string;
+};
+
 /** Stage 5 (stored as "lab"): scenarios that apply the module to new situations. */
-export type ScenarioBlock = BlockBase & { stage: "lab"; title: string; intro: string; scenarios: Scenario[] };
+export type ScenarioBlock = BlockBase & { stage: "lab"; title: string; intro: string; scenarios: Scenario[]; roleplay?: RoleplayMission };
 
 export type PlaceholderBlock = BlockBase & { stage: "project" };
 

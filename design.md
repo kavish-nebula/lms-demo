@@ -2,6 +2,8 @@
 
 The visual language of Nebula KnowLab: the **"Frosted Aura"** system — warm paper neutrals, a frosted-glass elevation model, and an indigo-led accent palette measured from the *Forma* Figma template (`forma/index.html` is the token reference).
 
+The current Next.js platform reuses the token layer in `packages/ui/tokens.css`. Platform engagement adds a seven-day activity strip, private reward frames and icons, optional two-second toast celebrations, and a mobile Home/Courses/Plan bar. These appear only in the learner shell when enabled; course screens retain their existing presentation. Primary new actions have 44px targets, visible focus and reduced-motion support. See [Platform engagement](docs/platform-engagement.md).
+
 > Where things live: all tokens and component CSS are in `lms-feature/src/index.css`. Shared primitives in `src/ui/bits.jsx`, `GlassCard.jsx`, `TopNav.jsx`. Motion variants in `src/motion.js`.
 
 ---
@@ -110,3 +112,6 @@ Defined once in `index.css`, reused everywhere:
 3. Add CSS to `index.css` under a commented section header (`/* ---------- xxx ---------- */`), matching file organization.
 4. Check both motion paths (normal + reduced), focus states, and the 900px breakpoint.
 5. Reusable? Promote to `ui/bits.jsx` rather than duplicating markup.
+# Workflow workspace
+
+The drawing mini project reuses theme tokens and React Flow in a scoped canvas. A step palette, branch connection form and details/checks panel accompany the canvas; all operations have button/select alternatives to dragging. See [workflow-mini-project.md](docs/workflow-mini-project.md).

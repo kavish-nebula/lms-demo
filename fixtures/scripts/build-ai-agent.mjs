@@ -582,6 +582,84 @@ function checkFilm(film, where) {
   });
 }
 
+/* ------------------------------------------------------------------ guided practice simulator */
+
+/**
+ * Each guided step's hands-on challenge in the practice simulator (see
+ * GuideSim in apps/web/src/data/types.ts): type the commands into a terminal,
+ * fill the blanks in the key lines of a file and run it, chat with Scout, or
+ * make a decision.
+ */
+function checkSim(sim, w) {
+  const kind = sim?.kind;
+  const lines = (text) => String(text ?? "").split("\n").length;
+  const runOf = (r, wr) => {
+    allowedKeys(r, ["cmd", "out"], wr);
+    str(r, "cmd", wr, { max: 160 });
+    if (typeof r?.out !== "string") err(wr, `"out" must be a string (it can be empty)`);
+    else if (lines(r.out) > 14) warn(wr, `"out" has ${lines(r.out)} lines; keep it under 14`);
+  };
+  switch (kind) {
+    case "terminal": {
+      allowedKeys(sim, ["kind", "prompt", "lines"], w);
+      str(sim, "prompt", w, { max: 40 });
+      arr(sim, "lines", w, 1, 4).forEach((l, i) => {
+        const wl = `${w} line ${i}`;
+        allowedKeys(l, ["cmd", "out", "alt", "prompt"], wl);
+        str(l, "cmd", wl, { max: 160 });
+        if (typeof l?.out !== "string") err(wl, `"out" must be a string (it can be empty)`);
+        else if (lines(l.out) > 14) warn(wl, `"out" has ${lines(l.out)} lines; keep it under 14`);
+        if (l?.alt !== undefined && !(Array.isArray(l.alt) && l.alt.every(isStr))) err(wl, `"alt" must be an array of other accepted commands`);
+        if (l?.prompt !== undefined) str(l, "prompt", wl, { max: 40 });
+      });
+      break;
+    }
+    case "code": {
+      allowedKeys(sim, ["kind", "file", "code", "blanks", "run"], w);
+      str(sim, "file", w, { max: 40 });
+      str(sim, "code", w, { max: 1400 });
+      if (lines(sim.code) > 20) warn(w, `"code" has ${lines(sim.code)} lines; show only the key part (at most 20)`);
+      const tokens = new Set();
+      arr(sim, "blanks", w, 2, 4).forEach((b, i) => {
+        const wb = `${w} blank ${i}`;
+        allowedKeys(b, ["token", "options"], wb);
+        str(b, "token", wb, { max: 60 });
+        if (b?.token && !String(sim.code ?? "").includes(b.token)) err(wb, `token "${b.token}" does not appear in "code"`);
+        if (tokens.has(b?.token)) err(wb, `token "${b?.token}" is used twice`);
+        tokens.add(b?.token);
+        const opts = arr(b, "options", wb, 3, 4);
+        if (!opts.includes(b?.token)) err(wb, `"options" must include the token itself`);
+        if (new Set(opts).size !== opts.length) err(wb, `"options" has duplicates`);
+      });
+      if (sim.run !== undefined) runOf(sim.run, `${w} run`);
+      break;
+    }
+    case "chat": {
+      allowedKeys(sim, ["kind", "start", "turns"], w);
+      runOf(sim.start, `${w} start`);
+      arr(sim, "turns", w, 1, 3).forEach((tn, i) => {
+        const wt = `${w} turn ${i}`;
+        allowedKeys(tn, ["you", "trace", "scout"], wt);
+        str(tn, "you", wt, { max: 140 });
+        str(tn, "scout", wt, { max: 320 });
+        if (tn?.trace !== undefined) (Array.isArray(tn.trace) ? tn.trace : []).forEach((x, j) => str({ x }, "x", `${wt} trace ${j}`, { max: 120 }));
+      });
+      break;
+    }
+    case "choice": {
+      allowedKeys(sim, ["kind", "q", "options", "correct", "explain"], w);
+      str(sim, "q", w, { max: 220 });
+      const opts = arr(sim, "options", w, 3, 4);
+      opts.forEach((o, i) => (isStr(o) ? o.length > 130 && warn(`${w} option ${i}`, "keep it under 130 characters") : err(`${w} option ${i}`, "must be a string")));
+      if (!isInt(sim.correct) || sim.correct < 0 || sim.correct >= opts.length) err(w, `"correct" must be an option index`);
+      str(sim, "explain", w, { max: 260 });
+      break;
+    }
+    default:
+      err(w, `"kind" must be terminal, code, chat or choice`);
+  }
+}
+
 /* ------------------------------------------------------------------ module blocks */
 
 function buildModule(spine, mi) {
@@ -699,16 +777,56 @@ function buildModule(spine, mi) {
   const g = src.guided ?? {};
   const wg = `${where} guided`;
   if (!src.guided) err(where, "missing guided");
-  allowedKeys(g, ["title", "situation", "intro", "before", "steps", "finish"], wg);
+  allowedKeys(g, ["title", "situation", "intro", "before", "steps", "finish", "mission", "solved_case"], wg);
   for (const f of ["title", "situation", "intro"]) str(g, f, wg);
   if (g.title && g.title !== topic("guided")) warn(wg, `title differs from the topic title "${topic("guided")}"`);
   arr(g.before ?? {}, "items", `${wg} before`, 1, 6);
   if (g.before && !Array.isArray(g.before.downloads)) err(`${wg} before`, `"downloads" must be an array (it can be empty)`);
+  // the mission framing: who briefs the learner, the badge they earn, the team's reactions
+  const teamLine = (m, w, max) => {
+    allowedKeys(m, ["who", "av", "text"], w);
+    str(m, "who", w);
+    str(m, "av", w, { max: 2 });
+    str(m, "text", w, { max });
+  };
+  if (g.mission !== undefined) {
+    const mi = g.mission;
+    const wm = `${wg} mission`;
+    allowedKeys(mi, ["codename", "badge", "mentor", "brief", "goal", "debrief"], wm);
+    str(mi, "codename", wm, { max: 32 });
+    str(mi, "badge", wm, { max: 28 });
+    str(mi, "goal", wm, { max: 140 });
+    if (!mi?.mentor) err(wm, `missing "mentor" {who, av}`);
+    else {
+      allowedKeys(mi.mentor, ["who", "av"], `${wm} mentor`);
+      str(mi.mentor, "who", `${wm} mentor`);
+      str(mi.mentor, "av", `${wm} mentor`, { max: 2 });
+    }
+    arr(mi, "brief", wm, 2, 3).forEach((m, k) => teamLine(m, `${wm} brief ${k}`, 170));
+    arr(mi, "debrief", wm, 1, 2).forEach((m, k) => teamLine(m, `${wm} debrief ${k}`, 170));
+  }
+  if (g.solved_case !== undefined) {
+    const cs = g.solved_case;
+    const wc = `${wg} solved_case`;
+    allowedKeys(cs, ["label", "title", "source_label", "source_url", "source_note", "problem", "solution", "result", "evidence", "solution_steps"], wc);
+    for (const f of ["label", "title", "source_label", "source_url", "source_note", "problem", "solution", "result"]) str(cs, f, wc);
+    arr(cs, "evidence", wc, 2, 5).forEach((item, k) => isStr(item) || err(`${wc} evidence ${k}`, "must be a string"));
+    arr(cs, "solution_steps", wc, 3, 8).forEach((step, k) => {
+      const ws = `${wc} solution step ${k}`;
+      allowedKeys(step, ["title", "purpose", "explanation", "code", "result"], ws);
+      for (const f of ["title", "purpose", "explanation", "result"]) str(step, f, ws);
+      if (step?.code !== undefined) str(step, "code", ws);
+    });
+  }
   const gsteps = arr(g, "steps", wg, 4, 10);
   gsteps.forEach((s, k) => {
     const w = `${wg} step ${k}`;
-    allowedKeys(s, ["title", "body", "actions", "values", "check", "tip"], w);
+    allowedKeys(s, ["title", "body", "actions", "values", "check", "tip", "win", "sim"], w);
     for (const f of ["title", "body", "check"]) str(s, f, w);
+    if (s?.win !== undefined) teamLine(s.win, `${w} win`, 130);
+    else if (g.mission !== undefined) warn(w, `missing "win": a teammate's short reaction when the step works`);
+    if (s?.sim !== undefined) checkSim(s.sim, `${w} sim`);
+    else if (g.mission !== undefined) warn(w, `missing "sim": the hands-on challenge for this step`);
     arr(s, "actions", w, 1, 8).forEach((a, j) => isStr(a) || err(`${w} action ${j}`, "must be a string"));
     if (s?.values !== undefined)
       (Array.isArray(s.values) ? s.values : []).forEach((v, j) => {
@@ -729,13 +847,15 @@ function buildModule(spine, mi) {
     before: { items: g.before?.items ?? [], downloads: g.before?.downloads ?? [] },
     steps: gsteps.map((s, k) => ({ id: `s${k + 1}`, ...s })),
     finish: fin,
+    ...(g.mission ? { mission: g.mission } : {}),
+    ...(g.solved_case ? { solved_case: g.solved_case } : {}),
   };
 
   /* lab (scenarios) */
   const lb = src.lab ?? {};
   const wl = `${where} lab`;
   if (!src.lab) err(where, "missing lab");
-  allowedKeys(lb, ["title", "intro", "scenarios"], wl);
+  allowedKeys(lb, ["title", "intro", "scenarios", "roleplay"], wl);
   str(lb, "title", wl);
   str(lb, "intro", wl);
   if (lb.title && lb.title !== topic("lab")) warn(wl, `title differs from the topic title "${topic("lab")}"`);
@@ -769,7 +889,41 @@ function buildModule(spine, mi) {
     };
   });
   if (scen.length && scenLessons.size < 2) warn(wl, "all scenarios use one lesson; cover at least two");
-  const lab = { ...base("lab", "lab", scen.length * 3 + 1, "analyze"), title: lb.title, intro: lb.intro, scenarios };
+  let roleplay;
+  if (lb.roleplay) {
+    const rp = lb.roleplay;
+    const wr = `${wl} roleplay`;
+    allowedKeys(rp, ["id", "eyebrow", "title", "brief", "learner_role", "customer", "start", "scenes", "debrief"], wr);
+    for (const key of ["id", "eyebrow", "title", "brief", "learner_role", "debrief"]) str(rp, key, wr);
+    allowedKeys(rp.customer, ["name", "role", "initials"], `${wr} customer`);
+    for (const key of ["name", "role", "initials"]) str(rp.customer, key, `${wr} customer`);
+    allowedKeys(rp.start, ["goal", "trust", "safety"], `${wr} start`);
+    for (const key of ["goal", "trust", "safety"]) {
+      if (typeof rp.start?.[key] !== "number" || rp.start[key] < 0 || rp.start[key] > 100) err(`${wr} start`, `"${key}" must be a number from 0 to 100`);
+    }
+    const scenes = arr(rp, "scenes", wr, 5, 5);
+    const visuals = new Set(["incoming", "tool", "evidence", "twist", "send"]);
+    const usedVisuals = new Set();
+    scenes.forEach((scene, sceneIndex) => {
+      const ws = `${wr} scene ${sceneIndex + 1}`;
+      allowedKeys(scene, ["id", "visual", "label", "title", "line", "narration", "prompt", "hint", "choices"], ws);
+      for (const key of ["id", "visual", "label", "title", "line", "narration", "prompt", "hint"]) str(scene, key, ws);
+      if (!visuals.has(scene?.visual)) err(ws, `"visual" must be incoming, tool, evidence, twist or send`);
+      if (usedVisuals.has(scene?.visual)) err(ws, `visual "${scene?.visual}" repeats; every roleplay scene needs its own visual treatment`);
+      usedVisuals.add(scene?.visual);
+      const choices = arr(scene, "choices", ws, 3, 3);
+      choices.forEach((choice, choiceIndex) => {
+        const wc = `${ws} choice ${choiceIndex + 1}`;
+        allowedKeys(choice, ["id", "text", "feedback", "best", "effects"], wc);
+        for (const key of ["id", "text", "feedback"]) str(choice, key, wc);
+        allowedKeys(choice.effects, ["goal", "trust", "safety"], `${wc} effects`);
+        for (const key of ["goal", "trust", "safety"]) if (typeof choice.effects?.[key] !== "number") err(`${wc} effects`, `"${key}" must be a number`);
+      });
+      if (choices.filter((choice) => choice?.best).length !== 1) err(ws, "exactly one choice must have best: true");
+    });
+    roleplay = rp;
+  }
+  const lab = { ...base("lab", "lab", scen.length * 3 + (roleplay ? 6 : 1), "analyze"), title: lb.title, intro: lb.intro, scenarios, ...(roleplay ? { roleplay } : {}) };
 
   /* review */
   const rv = src.review ?? {};
@@ -852,11 +1006,12 @@ function buildModuleCheck(mod, mid, dir, lessonIds, base) {
     opts.forEach((o, j) => (isStr(o) ? o.length > 120 && warn(`${w} option ${j}`, `is ${o.length} characters; keep it under 120`) : err(`${w} option ${j}`, "must be a string")));
     if (!isInt(it?.correct) || it.correct < 0 || it.correct > 3) err(w, `"correct" must be 0 to 3`);
     str(it, "explain", w, { max: 300 });
-    // authors tend to put the right answer in the same place, and a shuffle of six can still bunch:
-    // rotate the right answer through every position (a d c b a d…, offset per module), the rest shuffled
+    // Demo-review mode keeps the authored correct option first for every module
+    // quiz. Distractors are still shuffled so their order remains varied.
     const tagged = opts.map((text, j) => ({ text, right: j === it?.correct }));
-    const order = shuffled(tagged.filter((o) => !o.right), `${mid}.gate.${k + 1}`);
-    order.splice((k * 3 + Number(mid.replace(/\D/g, "") || 0)) % 4, 0, ...tagged.filter((o) => o.right));
+    const right = tagged.find((o) => o.right);
+    const wrong = shuffled(tagged.filter((o) => !o.right), `${mid}.gate.${k + 1}`);
+    const order = right ? [right, ...wrong] : wrong;
     const id = `q${k + 1}`;
     keys[id] = letters[Math.max(0, order.findIndex((o) => o.right))];
     explain[id] = it?.explain;
@@ -1026,13 +1181,70 @@ if (ONLY && !moduleIdx.length) {
 }
 const built = moduleIdx.map((i) => buildModule(spine, i));
 
+function buildProject() {
+  const dir = path.join(SRC, "project");
+  const where = "project/";
+  const files = [
+    { path: "prompt_engine.py", editable: true },
+    { path: "docs/policy.md", editable: false },
+    { path: "orbit/__init__.py", hidden: true },
+    { path: "orbit/model.py", hidden: true },
+    { path: "run.py", hidden: true },
+  ].map((f) => {
+    const file = path.join(dir, f.path);
+    if (!fs.existsSync(file)) {
+      errors.push(`${where}${f.path}: missing`);
+      return null;
+    }
+    return { ...f, content: fs.readFileSync(file, "utf8").replace(/\r\n/g, "\n") };
+  });
+  if (!fs.existsSync(path.join(dir, "solution", "prompt_engine.py"))) errors.push(`${where}solution/prompt_engine.py: missing (the reference solution)`);
+  const tickets = readJson(path.join(dir, "tickets.json"), `${where}tickets.json`);
+  const ACTIONS = ["reply", "ask_for_order", "handoff"];
+  const INTENTS = ["order_status", "return", "exchange", "policy_question", "other"];
+  for (const [list, min] of [["samples", 2], ["hidden", 6]]) {
+    const ts = tickets[list];
+    if (!Array.isArray(ts) || ts.length < min) {
+      errors.push(`${where}tickets.json ${list}: needs at least ${min} tickets`);
+      continue;
+    }
+    for (const t of ts) {
+      const w = `${where}tickets.json ${list} ${t.id}`;
+      for (const k of ["id", "from", "subject", "body"]) if (typeof t[k] !== "string" || !t[k]) errors.push(`${w}: ${k} must be text`);
+      const e = t.expect ?? {};
+      if (![e.intent].flat().every((i) => INTENTS.includes(i))) errors.push(`${w}: expect.intent must be one of ${INTENTS.join(", ")}`);
+      if (!ACTIONS.includes(e.action)) errors.push(`${w}: expect.action must be one of ${ACTIONS.join(", ")}`);
+      if (!("order_id" in e) || !("email" in e)) errors.push(`${w}: expect needs order_id and email (null when there is none)`);
+    }
+  }
+  const ids = [...(tickets.samples ?? []), ...(tickets.hidden ?? [])].map((t) => t.id);
+  if (new Set(ids).size !== ids.length) errors.push(`${where}tickets.json: ticket ids must be unique`);
+  return {
+    client: {
+      $comment: "Generated from fixtures/src/ai-agent/project. The mini project workspace: files (the learner edits prompt_engine.py; hidden ones are the harness and practice model) and the sample tickets with what Scout should do. Hidden tickets live in project-ai-agent-tests.json, server only.",
+      course_id: spine.course_id,
+      entry: "prompt_engine.py",
+      files: files.filter(Boolean),
+      samples: tickets.samples ?? [],
+    },
+    server: {
+      $comment: "Generated. SERVER ONLY: the hidden tickets and what Scout should do with each. The browser receives the tickets without 'expect' when the learner runs the tests.",
+      course_id: spine.course_id,
+      runs: 2,
+      tickets: tickets.hidden ?? [],
+    },
+  };
+}
+
 let intro = null;
 let precheck = null;
 let finale = null;
+let project = null;
 if (!ONLY) {
   intro = buildVideo(readJson(path.join(SRC, "intro.json"), "intro.json"), "ai-agent-intro", "intro", "intro.json", { quizzes: false });
   precheck = buildPrecheck(spine);
   finale = buildFinale(spine);
+  project = buildProject();
 }
 
 for (const w of warnings) console.warn(`warning  ${w}`);
@@ -1076,6 +1288,8 @@ write("videos-ai-agent.json", { $comment: "Generated. Narration audio: apps/web/
 write("intro-ai-agent.json", { $comment: "Generated. The course preview video shown while enrolling.", course_id: spine.course_id, video: intro });
 write("precheck-ai-agent.json", precheck.file);
 write("finale-ai-agent.json", finale.file);
+write("project-ai-agent.json", project.client);
+write("project-ai-agent-tests.json", project.server);
 write("mock-gate-keys.json", {
   $comment: "MOCK ONLY. Generated. Stands in for server-side scoring; never ship keys to the client in production. Keys per check: final (final-assessment answers), final_explain (why each answer is right), precheck (prior-knowledge answers), gate-mN and gate-mN_explain (each module's closing check).",
   final: finale.keys,

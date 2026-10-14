@@ -159,15 +159,7 @@ export function EnrollFlow({
         course={course}
         answers={answers}
         setAnswers={setAnswers}
-        needs={needs}
-        setNeeds={setNeeds}
-        precheck={precheck}
-        override={override}
-        setOverride={setOverride}
-        pace={pace}
-        setPace={setPace}
         editing={enrolled}
-        onRetakeCheck={() => setPhase("precheck")}
         onEditProfile={() => {
           setReturnTo("customize");
           setPhase("profile");
@@ -197,7 +189,7 @@ export function EnrollFlow({
         onRetry={() => void commit()}
         onGo={() => {
           toast.success(t("toastEnrolled", { course: course.title }));
-          router.push(`${courseHref}?ready=1`);
+          router.push(courseHref);
         }}
       />
     );

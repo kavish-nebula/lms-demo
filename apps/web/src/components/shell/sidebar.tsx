@@ -18,6 +18,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserBadge, type ShellUser } from "@/components/shell/user-badge";
+import { useEngagement } from "@/components/engagement/provider";
+
+const hiddenLearnerItems = new Set(["reviews", "credentials", "history"]);
 
 export type SidebarProps = {
   role: Role;
@@ -46,6 +49,7 @@ export function useIsActive(role: Role) {
  */
 export function Sidebar({ role, heldRoles, user, badges = {}, onNavigate, className }: SidebarProps) {
   const t = useTranslations("nav");
+  const platform = useEngagement();
   // the desktop column and the mobile sheet each get their own pill
   const layoutScope = onNavigate ? "sheet" : "rail";
   const isActive = useIsActive(role);
@@ -65,7 +69,7 @@ export function Sidebar({ role, heldRoles, user, badges = {}, onNavigate, classN
       <nav aria-label={t("dashboard")} className="flex flex-1 flex-col gap-5 overflow-y-auto">
         {NAV[role].map((section, si) => (
           <ul key={si} className={cn("isolate flex flex-col gap-0.5", si > 0 && "border-t border-line pt-4")}>
-            {section.items.map((item) => {
+            {section.items.filter((item) => (platform || item.key !== "activity") && (role !== "learner" || !hiddenLearnerItems.has(item.key))).map((item) => {
               const active = isActive(item.href);
               const Icon = item.icon;
               const badge = badges[item.key];
