@@ -159,15 +159,7 @@ export function EnrollFlow({
         course={course}
         answers={answers}
         setAnswers={setAnswers}
-        needs={needs}
-        setNeeds={setNeeds}
-        precheck={precheck}
-        override={override}
-        setOverride={setOverride}
-        pace={pace}
-        setPace={setPace}
         editing={enrolled}
-        onRetakeCheck={() => setPhase("precheck")}
         onEditProfile={() => {
           setReturnTo("customize");
           setPhase("profile");
