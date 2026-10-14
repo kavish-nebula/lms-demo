@@ -19,9 +19,9 @@ export function NebulaMark({ size = 28, className }: { size?: number; className?
 export function Logo({ wordmark = true, className }: { wordmark?: boolean; className?: string }) {
   return (
     <span className={cn("inline-flex shrink-0 items-center gap-2.5", className)}>
-      <NebulaMark />
+      <NebulaMark size={wordmark ? 34 : 28} />
       {wordmark ? (
-        <span className="text-base font-semibold tracking-tight whitespace-nowrap">
+        <span className="text-lg font-semibold tracking-[-0.035em] whitespace-nowrap">
           Nebula <span className="text-brand-ink">KnowLab</span>
         </span>
       ) : null}
