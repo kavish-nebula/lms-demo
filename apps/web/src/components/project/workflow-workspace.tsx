@@ -23,7 +23,7 @@ const nodeTypes = { workflow: WorkflowNode };
 type Draft = { diagram: Workflow; revision: number; dirty: boolean };
 const selectClass = "min-h-11 w-full rounded-lg border border-line bg-panel px-3 text-sm text-ink focus-visible:outline-2 focus-visible:outline-brand";
 
-export function WorkflowWorkspace({ course }: { course: Course }) {
+export function WorkflowWorkspace({ course,embedded = false }: { course: Course; embedded?: boolean }) {
   const t = useTranslations("workflow");
   const { enrolled,ready } = useEnrollment(course.course_id);
   const endpoint = `/api/v1/enrollments/${course.course_id}/workflow-project`;
@@ -105,18 +105,18 @@ export function WorkflowWorkspace({ course }: { course: Course }) {
   const sourceNode = diagram?.nodes.find((n) => n.id === source);
   const choices = sourceNode ? branchesFor(sourceNode.kind) : [];
   if (!diagram) return <main className="page-pad py-8" aria-busy>{t("loading")}</main>;
-  return <div className="flex min-h-dvh flex-col bg-canvas text-ink">
+  return <div className={`flex flex-col bg-canvas text-ink ${embedded ? "min-h-[min(70rem,calc(100dvh-10rem))]" : "min-h-dvh"}`}>
     <header className="flex flex-wrap items-center gap-3 border-b border-line bg-panel px-4 py-3">
-      <Button asChild variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label={t("back")}><Link href={`/learn/courses/${course.course_id}/finale/capstone`}><ArrowLeft /></Link></Button>
-      <div className="min-w-0 flex-1"><p className="text-xs text-ink-muted">{course.title}</p><h1 className="flex items-center gap-2 font-semibold"><GitBranch className="size-4" aria-hidden />{t("title")}</h1></div>
+      {!embedded ? <Button asChild variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label={t("back")}><Link href={`/learn/courses/${course.course_id}/finale/capstone`}><ArrowLeft /></Link></Button> : null}
+      <div className="min-w-0 flex-1">{!embedded ? <p className="text-xs text-ink-muted">{course.title}</p> : null}<h1 className="flex items-center gap-2 font-semibold"><GitBranch className="size-4" aria-hidden />{t("title")}</h1></div>
       <span role="status" className="text-xs text-ink-muted">{busy ? t("saving") : !enrolled ? t("localOnly") : dirty ? t("draft") : t("saved")}</span>
-      <Button asChild variant="outline" className="min-h-11"><Link href={`/learn/courses/${course.course_id}/finale/capstone/workspace`}>{t("python")}</Link></Button>
+      {!embedded ? <Button asChild variant="outline" className="min-h-11"><Link href={`/learn/courses/${course.course_id}/finale/capstone/workspace`}>{t("python")}</Link></Button> : null}
       <Button className="min-h-11" variant="outline" disabled={busy || !enrolled} onClick={() => void save()}><Save aria-hidden />{t("save")}</Button>
       <Button className="min-h-11" variant="brand" disabled={busy} onClick={() => void save(true)}>{t("check")}</Button>
     </header>
-    <div className="border-b border-line px-4 py-3 text-sm"><p>{t("brief")}</p><p className="mt-1 text-ink-muted">{t("boundary")}</p>{!enrolled ? <Link className="inline-flex min-h-11 items-center text-brand-ink underline" href={`/learn/courses/${course.course_id}/enroll`}>{t("enroll")}</Link> : null}{error || loadError ? <><p role="alert" className="mt-2 text-err">{error || t("loadFailed")}</p>{enrolled ? <Button className="mt-2 min-h-11" variant="outline" onClick={() => setReloadOpen(true)}>{t("reloadServer")}</Button> : null}</> : null}</div>
+    <div className="border-b border-line px-4 py-3 text-sm"><p>{t("brief")}</p>{!embedded ? <p className="mt-1 text-ink-muted">{t("boundary")}</p> : null}{!enrolled ? <Link className="inline-flex min-h-11 items-center text-brand-ink underline" href={`/learn/courses/${course.course_id}/enroll`}>{t("enroll")}</Link> : null}{error || loadError ? <><p role="alert" className="mt-2 text-err">{error || t("loadFailed")}</p>{enrolled ? <Button className="mt-2 min-h-11" variant="outline" onClick={() => setReloadOpen(true)}>{t("reloadServer")}</Button> : null}</> : null}</div>
     <Dialog open={reloadOpen} onOpenChange={setReloadOpen}><DialogContent><DialogHeader><DialogTitle>{t("reloadServer")}</DialogTitle><DialogDescription>{t("reloadHelp")}</DialogDescription></DialogHeader><div className="flex flex-wrap gap-2"><Button variant="outline" className="min-h-11" onClick={exportDiagram}>{t("export")}</Button><Button className="min-h-11" disabled={busy} onClick={() => void reloadServer()}>{t("confirmReload")}</Button></div></DialogContent></Dialog>
-    <main className="grid flex-1 grid-cols-1 lg:grid-cols-[16rem_minmax(0,1fr)_20rem]">
+    <main className={`grid flex-1 grid-cols-1 lg:grid-cols-[16rem_minmax(0,1fr)_20rem] ${embedded ? "min-h-[55rem]" : ""}`}>
       <aside className="flex flex-col gap-4 border-b border-line p-4 lg:border-r lg:border-b-0" aria-label={t("steps")}>
         <h2 className="font-semibold">{t("addStep")}</h2><div className="grid grid-cols-2 gap-2 lg:grid-cols-1">{WORKFLOW_KINDS.map((kind) => <Button key={kind} variant="outline" className="min-h-11 justify-start" disabled={busy || diagram.nodes.length >= 40} onClick={() => { const id = crypto.randomUUID(); change({ ...diagram,nodes: [...diagram.nodes,{ id,kind,label: t(`${kind}Label`),notes: "",position: { x: 80 + (diagram.nodes.length % 3) * 280,y: 70 + Math.floor(diagram.nodes.length / 3) * 180 } }] }); setSelected(id); }}>{t(kind)}</Button>)}</div>
         <h2 className="font-semibold">{t("connect")}</h2>
@@ -126,7 +126,7 @@ export function WorkflowWorkspace({ course }: { course: Course }) {
         <Button className="min-h-11" disabled={busy || !source || !target || !choices.length || diagram.edges.length >= 80} onClick={() => connect(source,target,branch)}>{t("addConnection")}</Button>
         <div className="flex flex-wrap gap-2"><Button variant="outline" className="min-h-11" disabled={!history.length || busy} onClick={() => { const previous = history[history.length-1]; setHistory((old) => old.slice(0,-1)); change(previous,false); }}><Undo2 aria-hidden />{t("undo")}</Button><Button variant="outline" className="min-h-11" onClick={exportDiagram}><Download aria-hidden />{t("export")}</Button></div>
       </aside>
-      <section className="workflow-canvas order-first h-[65dvh] min-h-96 lg:order-none lg:h-[calc(100dvh-10rem)] lg:min-h-[650px]" aria-label={t("canvas")}>
+      <section className={`workflow-canvas order-first min-h-96 lg:order-none ${embedded ? "h-[55dvh] lg:h-[calc(100dvh-15rem)] lg:min-h-[520px]" : "h-[65dvh] lg:h-[calc(100dvh-10rem)] lg:min-h-[650px]"}`} aria-label={t("canvas")}>
         <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} onNodeClick={(_e,n) => setSelected(n.id)} onConnect={dragConnect} nodesDraggable={!busy} nodesConnectable={!busy} deleteKeyCode={null} onNodesChange={moveNodes} fitView minZoom={0.25} maxZoom={1.5}><Background /><Controls showInteractive={false} /></ReactFlow>
       </section>
       <aside className="flex flex-col gap-5 border-t border-line p-4 lg:border-t-0 lg:border-l" aria-label={t("details")}>

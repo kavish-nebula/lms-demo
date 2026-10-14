@@ -5,6 +5,9 @@ import type { NextConfig } from "next";
 const monorepoRoot = path.join(__dirname, "..", "..");
 
 const nextConfig: NextConfig = {
+  async headers() {
+    return [{ source: "/pyodide/:path*", headers: [{ key: "Access-Control-Allow-Origin", value: "*" }] }];
+  },
   outputFileTracingRoot: monorepoRoot,
   // PGlite (the built-in local Postgres) ships WASM; load it from node_modules
   // at runtime rather than through the bundler.

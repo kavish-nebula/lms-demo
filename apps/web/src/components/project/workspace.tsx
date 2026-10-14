@@ -6,7 +6,7 @@ import Link from "next/link";
 import { cn } from "cn";
 import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { ArrowRight, Check, ChevronLeft, FileCode2, FileText, FlaskConical, Loader2, Lock, Play, RotateCcw, TerminalSquare, TriangleAlert, X } from "lucide-react";
+import { ArrowRight, Check, ChevronLeft, Code2, FileCode2, FileText, FlaskConical, GitBranch, Loader2, Lock, Play, RotateCcw, TerminalSquare, TriangleAlert, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,6 +21,7 @@ import { gradeProject, type ProjectReport, type RequirementId } from "@/lib/proj
 import type { CapstoneBlock, Course, ProjectContent } from "@/data/types";
 
 const CodeEditor = dynamic(() => import("@/components/project/code-editor"), { ssr: false });
+const WorkflowBuilder = dynamic(() => import("@/components/project/workflow-workspace").then((module) => module.WorkflowWorkspace), { ssr: false });
 
 type Busy = null | "booting" | "running" | "testing";
 
@@ -32,7 +33,6 @@ type Busy = null | "booting" | "running" | "testing";
  */
 export function ProjectWorkspace({ course, project, block, briefHref, finalHref }: { course: Course; project: ProjectContent; block: CapstoneBlock; briefHref: string; finalHref: string }) {
   const t = useTranslations("project");
-  const tw = useTranslations("workflow");
   const courseId = course.course_id;
   const { enrolled, ready } = useEnrollment(courseId);
   const { work, loading } = useProjectWork(courseId, enrolled);
@@ -51,6 +51,7 @@ export function ProjectWorkspace({ course, project, block, briefHref, finalHref 
 
   const [busy, setBusy] = React.useState<Busy>(null);
   const [tab, setTab] = React.useState("samples");
+  const [workspaceView, setWorkspaceView] = React.useState("code");
   const [sample, setSample] = React.useState<{ out: RunOutput; report: ProjectReport } | null>(null);
   const [report, setReport] = React.useState<SavedReport | null>(null);
   const [failure, setFailure] = React.useState<string | null>(null);
@@ -82,7 +83,7 @@ export function ProjectWorkspace({ course, project, block, briefHref, finalHref 
         ? e.kind === "timeout"
           ? t("errorTimeout", { seconds: Math.round(RUN_MS / 1000) })
           : e.kind === "boot"
-            ? t("errorBoot")
+            ? t("errorBoot", { reason: e.message })
             : t("errorCrash", { reason: e.message })
         : t("errorCrash", { reason: e instanceof Error ? e.message : String(e) }),
     [t],
@@ -166,18 +167,25 @@ export function ProjectWorkspace({ course, project, block, briefHref, finalHref 
           <span className="hidden text-xs text-ink-faint md:block" aria-live="polite">
             {t(`save_${saveState}`)}
           </span>
-          {courseId === "ai-agent" ? <Button asChild variant="outline" size="sm"><Link href={`${briefHref}/diagram`}>{tw("open")}</Link></Button> : null}
-          <Button variant="outline" size="sm" onClick={() => void runSamples()} disabled={!files || !!busy} title={t("runHint")}>
+          {workspaceView === "code" ? <Button variant="outline" size="sm" onClick={() => void runSamples()} disabled={!files || !!busy} title={t("runHint")}>
             {busy === "running" || (busy === "booting" && tab === "samples") ? <Loader2 className="animate-spin motion-reduce:animate-none" data-icon="inline-start" /> : <Play data-icon="inline-start" />}
-            {t("run")}
-          </Button>
-          <Button variant="brand" size="sm" onClick={() => void runTests()} disabled={!files || !!busy || !enrolled}>
+            {t("runCode")}
+          </Button> : null}
+          {workspaceView === "code" ? <Button variant="brand" size="sm" onClick={() => void runTests()} disabled={!files || !!busy || !enrolled}>
             {busy === "testing" || (busy === "booting" && tab === "tests") ? <Loader2 className="animate-spin motion-reduce:animate-none" data-icon="inline-start" /> : <FlaskConical data-icon="inline-start" />}
-            {t("runTests")}
-          </Button>
+            {t("testCode")}
+          </Button> : null}
         </div>
       </header>
 
+      <Tabs value={workspaceView} onValueChange={setWorkspaceView} className="flex min-h-0 flex-1 flex-col gap-0">
+        <div className="border-b border-line px-3 py-2 page-pad">
+          <TabsList aria-label={t("workspaceModes")} className="h-10">
+            <TabsTrigger value="code" className="min-h-9 gap-2 px-3"><Code2 aria-hidden />{t("codeWorkspace")}</TabsTrigger>
+            {courseId === "ai-agent" ? <TabsTrigger value="workflow" className="min-h-9 gap-2 px-3"><GitBranch aria-hidden />{t("workflowWorkspace")}</TabsTrigger> : null}
+          </TabsList>
+        </div>
+        <TabsContent value="code" className="m-0 flex min-h-0 flex-1 flex-col">
       <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[13rem_minmax(0,1fr)_minmax(22rem,28rem)]">
         {/* files */}
         <nav aria-label={t("files")} className="flex gap-1 overflow-x-auto border-b border-line p-2 lg:flex-col lg:border-r lg:border-b-0">
@@ -270,6 +278,9 @@ export function ProjectWorkspace({ course, project, block, briefHref, finalHref 
           </Tabs>
         </section>
       </div>
+        </TabsContent>
+        {courseId === "ai-agent" ? <TabsContent value="workflow" className="m-0 min-h-0 flex-1 overflow-auto"><WorkflowBuilder course={course} embedded /></TabsContent> : null}
+      </Tabs>
     </div>
   );
 }

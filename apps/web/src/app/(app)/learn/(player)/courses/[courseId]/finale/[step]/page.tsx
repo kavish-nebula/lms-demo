@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAuthoredModuleIds, getCourse, getFinale } from "@/data";
+import { getAuthoredModuleIds, getCourse, getFinale, getProject } from "@/data";
 import { FinalePlayer } from "@/components/finale/finale-player";
 import { isFinaleStepId } from "@/lib/stages";
 
@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 export default async function FinalePage({ params }: { params: Promise<Params> }) {
   const { courseId, step } = await params;
   if (!isFinaleStepId(step)) notFound();
-  const [course, finale, authored] = await Promise.all([getCourse(courseId), getFinale(courseId), getAuthoredModuleIds(courseId)]);
+  const [course, finale, authored, project] = await Promise.all([getCourse(courseId), getFinale(courseId), getAuthoredModuleIds(courseId), getProject(courseId)]);
   if (!course || !finale) notFound();
-  return <FinalePlayer course={course} finale={finale} step={step} authoredModules={authored} />;
+  return <FinalePlayer course={course} finale={finale} step={step} authoredModules={authored} hasProject={!!project} />;
 }

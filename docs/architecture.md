@@ -6,6 +6,8 @@ This document covers the October 2026 learning UI changes in `apps/web`, merged 
 
 Enrollment keeps profile → introductory preview → prior-knowledge check → customization. Existing module stage identifiers and completion keys are unchanged. The visible module journey is problem/hook, concept, worked example, guided practice, scenarios, then one module quiz. Passing the quiz reveals reflection and schedules the 3/10/30-day reviews in the same result view. Scheduled reviews retain their direct route. The finale still has exactly one course mini-project (`capstone`), immediately followed by `final-check`, then `wrap-up`.
 
+The AI Agent capstone mini-project opens one workspace with separate **Code and run** and **Build workflow** tabs. Python code and samples run in an isolated browser sandbox using locally served Pyodide assets; the saved architecture diagram retains its existing server-side save and check flow. Neither tool changes course completion rules.
+
 ## Course companion
 
 `app/(app)/learn/layout.tsx` builds a teaching-only passage index on the server. `lib/companion.ts` excludes assessment questions, answer keys, and scenario solutions. The client provider selects the current course from the route and registers transient step context from video slides, worked examples, guided checkpoints, and scenarios. Unmounting a registered context releases it.

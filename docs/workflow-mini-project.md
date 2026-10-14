@@ -1,6 +1,8 @@
 # Workflow mini project
 
-The AI Agent capstone now offers **Workflow project** alongside the existing **Python project**. Open it from the project brief or Python workspace at `/learn/courses/ai-agent/finale/capstone/diagram`.
+The AI Agent capstone mini-project combines **Code and run** with **Build workflow** tabs in one workspace. The Python editor includes `prompt_engine.py` and the read-only `docs/policy.md`; sample emails and tests run in the browser Python sandbox. The workflow tab opens the learner’s saved Scout diagram, where learners can edit, save and check the connected architecture. The standalone `/learn/courses/ai-agent/finale/capstone/diagram` route remains available and opens the same workflow builder.
+
+The sandbox uses Pyodide 0.29.5 from the npm dependency and serves the runtime assets from `/pyodide/`. `predev`, `prebuild` and `prestart` copy only the required runtime files into the ignored public asset directory. This keeps first-run Python startup independent of a third-party CDN; the sandbox remains isolated in its scripts-only iframe and worker. The local asset route permits cross-origin worker loading only for these public runtime files.
 
 Learners arrange and connect seven step types: receive request, safety check, classify intent, order lookup, decision, reply and human handoff. Starter steps are unconnected. Steps have editable names and notes; connections have explicit branches. Dragging is optional: select controls and buttons support connecting, editing, removal and Undo. Focused canvas steps can be moved with arrow keys. JSON export retains the full diagram.
 

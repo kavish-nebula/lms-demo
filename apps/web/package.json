@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/copy-pyodide.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/copy-pyodide.mjs",
     "build": "next build",
+    "prestart": "node scripts/copy-pyodide.mjs",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit"
@@ -26,6 +29,7 @@
     "next-intl": "^4.14.9",
     "next-themes": "^0.4.6",
     "pg": "^8.23.1",
+    "pyodide": "^0.29.5",
     "radix-ui": "^1.7.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
