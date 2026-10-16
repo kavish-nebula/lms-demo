@@ -2,7 +2,6 @@ import { integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid
 import type { LearnerPlan, PlanChangeT, PlanSource, PlanStatus, PlanVersion } from "@/lib/learner-plan";
 import type { PrecheckResult, SetupAnswers, SupportOverride } from "@/lib/setup";
 import type { ProfileDerived } from "@/lib/profiling/derived";
-import type { ProjectReport } from "@/lib/project-grade";
 import type { EngagementState } from "@/lib/engagement";
 import type { Workflow, WorkflowReport } from "@/lib/workflow-project";
 
@@ -157,20 +156,20 @@ export const adaptedContent = pgTable(
   (t) => [uniqueIndex("adapted_content_piece").on(t.enrollmentId, t.moduleId, t.piece)],
 );
 
-/** The mini project's report: the score from the hidden tickets, kept with the work it graded. */
-export type ProjectReportRow = ProjectReport & { at: string };
-
-/** A learner's mini project: their files as they last left them, and the last test report. */
+/**
+ * The retired Python mini project ("Code and run"): learners' files and last
+ * test report, kept so nothing they wrote is lost. Nothing writes to it now.
+ */
 export const projectWork = pgTable("project_work", {
   enrollmentId: uuid("enrollment_id")
     .primaryKey()
     .references(() => enrollments.id, { onDelete: "cascade" }),
   files: jsonb("files").$type<Record<string, string>>().notNull(),
-  report: jsonb("report").$type<ProjectReportRow>(),
+  report: jsonb("report").$type<Record<string, unknown>>(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-/** Separate architecture practice; never replaces Python files or its grade. */
+/** The mini project: the agent's workflow, as the learner drew it. */
 export const workflowProjects = pgTable("workflow_projects", {
   enrollmentId: uuid("enrollment_id").primaryKey().references(() => enrollments.id, { onDelete: "cascade" }),
   diagram: jsonb("diagram").$type<Workflow>().notNull(),

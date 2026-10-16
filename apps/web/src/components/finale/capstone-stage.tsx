@@ -3,14 +3,13 @@
 import { useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
-import { ArrowRight, Check, ClipboardCheck, Clock, Code2, TriangleAlert, UserRound } from "lucide-react";
+import { ArrowRight, Check, ClipboardCheck, Clock, GitBranch, TriangleAlert, UserRound } from "lucide-react";
 import { Surface } from "@/components/kit/surface";
 import { Chip } from "@/components/kit/chip";
 import { NumberTicker } from "@/components/kit/number-ticker";
 import { Button } from "@/components/ui/button";
 import { StageShell, Callout } from "@/components/player/stage-shell";
 import { ROLE_BRIEF } from "@/lib/world";
-import { useProjectWork } from "@/lib/project";
 import type { CapstoneBlock } from "@/data/types";
 
 /**
@@ -205,27 +204,17 @@ function Done({ block, workspace, onComplete }: { block: CapstoneBlock; workspac
 
 type Workspace = { href: string; courseId: string; enrolled: boolean };
 
-/** Opens the in-browser workspace, with the last test run's result. */
+/** Opens the workspace, where the learner builds the agent's workflow. */
 function WorkspaceCard({ workspace, preview }: { workspace: Workspace; preview: boolean }) {
   const t = useTranslations("finale");
-  const { work } = useProjectWork(workspace.courseId, workspace.enrolled);
-  const report = work?.report;
   return (
     <Surface pad="md" className="flex flex-wrap items-center justify-between gap-4 border-brand-line">
       <div className="flex min-w-0 flex-col gap-1.5">
         <span className="flex items-center gap-2 font-semibold">
-          <Code2 className="size-4 text-brand-ink" aria-hidden />
+          <GitBranch className="size-4 text-brand-ink" aria-hidden />
           {t("workspaceTitle")}
         </span>
         <span className="text-sm text-ink-muted">{t("workspaceBody")}</span>
-        {report ? (
-          <span className="flex flex-wrap items-center gap-2 text-sm">
-            <Chip size="sm" tone={report.passed ? "ok" : "warn"}>
-              {report.passed ? t("reportPassed") : t("reportNotPassed")}
-            </Chip>
-            <span className="text-ink-muted tabular-nums">{t("reportLine", { score: report.score, total: report.total, percent: Math.round(report.ratio * 100) })}</span>
-          </span>
-        ) : null}
       </div>
       <div className="flex flex-wrap gap-2">
       {preview ? (

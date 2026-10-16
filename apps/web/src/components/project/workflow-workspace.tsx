@@ -110,7 +110,6 @@ export function WorkflowWorkspace({ course,embedded = false }: { course: Course;
       {!embedded ? <Button asChild variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label={t("back")}><Link href={`/learn/courses/${course.course_id}/finale/capstone`}><ArrowLeft /></Link></Button> : null}
       <div className="min-w-0 flex-1">{!embedded ? <p className="text-xs text-ink-muted">{course.title}</p> : null}<h1 className="flex items-center gap-2 font-semibold"><GitBranch className="size-4" aria-hidden />{t("title")}</h1></div>
       <span role="status" className="text-xs text-ink-muted">{busy ? t("saving") : !enrolled ? t("localOnly") : dirty ? t("draft") : t("saved")}</span>
-      {!embedded ? <Button asChild variant="outline" className="min-h-11"><Link href={`/learn/courses/${course.course_id}/finale/capstone/workspace`}>{t("python")}</Link></Button> : null}
       <Button className="min-h-11" variant="outline" disabled={busy || !enrolled} onClick={() => void save()}><Save aria-hidden />{t("save")}</Button>
       <Button className="min-h-11" variant="brand" disabled={busy} onClick={() => void save(true)}>{t("check")}</Button>
     </header>

@@ -3,7 +3,7 @@ import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { SetupAnswers, SupportOverride } from "@/lib/setup";
 import type { ProfileDerived } from "@/lib/profiling/derived";
 import { db } from "./db/client";
-import { adaptedContent, enrollments, learnerPlans, profileDrafts, profiles, projectWork, signals, stepProgress, type AdaptedPiece, type Pace, type ProjectReportRow, type StoredPrecheck } from "./db/schema";
+import { adaptedContent, enrollments, learnerPlans, profileDrafts, profiles, signals, stepProgress, type AdaptedPiece, type Pace, type StoredPrecheck } from "./db/schema";
 
 /** Queries for learner data. Callers pass the session user's id; nothing here reads across users. */
 
@@ -186,26 +186,3 @@ export async function addProgress(enrollmentId: string, moduleId: string, stage:
   return rows.length > 0;
 }
 
-/* ---------------------------------------------------------------- mini project */
-
-export async function projectFor(enrollmentId: string) {
-  const d = await db();
-  return (await d.query.projectWork.findFirst({ where: eq(projectWork.enrollmentId, enrollmentId) })) ?? null;
-}
-
-/** Saves the learner's files, keeping the last report. */
-export async function saveProjectFiles(enrollmentId: string, files: Record<string, string>) {
-  const d = await db();
-  const now = new Date();
-  await d.insert(projectWork).values({ enrollmentId, files, updatedAt: now }).onConflictDoUpdate({ target: projectWork.enrollmentId, set: { files, updatedAt: now } });
-}
-
-/** Saves the files a test run graded, with its report. */
-export async function saveProjectReport(enrollmentId: string, files: Record<string, string>, report: ProjectReportRow) {
-  const d = await db();
-  const now = new Date();
-  await d
-    .insert(projectWork)
-    .values({ enrollmentId, files, report, updatedAt: now })
-    .onConflictDoUpdate({ target: projectWork.enrollmentId, set: { files, report, updatedAt: now } });
-}

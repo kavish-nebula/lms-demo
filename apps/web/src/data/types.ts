@@ -4,11 +4,6 @@
  * that swapping fixtures for API calls is a change to src/data only.
  */
 import type { StageId } from "@/lib/stages";
-import type { ProjectTicket,TicketExpect } from "@/lib/project-grade";
-
-/** Existing Python mini project remains separate from adaptive practice. */
-export type ProjectFile = { path: string; content: string; editable?: boolean; hidden?: boolean };
-export type ProjectContent = { course_id: string; entry: string; files: ProjectFile[]; samples: (ProjectTicket & { expect: TicketExpect })[] };
 
 export type Bloom = "remember" | "understand" | "apply" | "analyze" | "evaluate" | "create";
 export type Load = "low" | "medium" | "high";
