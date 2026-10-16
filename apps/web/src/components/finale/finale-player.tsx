@@ -48,7 +48,7 @@ export function FinalePlayer({
   const hydrated = useLearnerReady();
   const progress = useCourseProgress(course);
   const { state, markDone, recordFinal } = useFinale(course.course_id);
-  const { adaptation, enrolled } = useEnrollment(course.course_id);
+  const { enrolled } = useEnrollment(course.course_id);
   const [railOpen, setRailOpen] = React.useState(false);
   const courseHref = `/learn/courses/${course.course_id}`;
 
@@ -109,9 +109,6 @@ export function FinalePlayer({
       <CapstoneStage
         block={finale.capstone}
         preview={preview}
-        roleKey={adaptation.roleKey}
-        roleLabel={adaptation.roleLabel}
-        planBrief={adaptation.plan?.capstoneBrief ?? null}
         workspace={hasProject ? { href: `/learn/courses/${course.course_id}/finale/capstone/workspace`, courseId: course.course_id, enrolled } : null}
         done={current.done}
         onComplete={() => {

@@ -41,8 +41,12 @@ export function WorkflowWorkspace({ course,embedded = false }: { course: Course;
   const [reloadOpen,setReloadOpen] = React.useState(false);
   const dragStart = React.useRef<Workflow | null>(null);
   if (!diagram && ready && !isLoading) {
-    const start: Workflow = { version: 1,nodes: WORKFLOW_KINDS.map((kind,i) => ({ id: crypto.randomUUID(),kind,label: t(`${kind}Label`),notes: "",position: { x: 80 + (i % 3) * 280,y: 70 + Math.floor(i / 3) * 180 } })),edges: [] };
-    const initial = local?.dirty ? local : { diagram: data?.diagram ?? local?.diagram ?? start,revision: data?.revision ?? 0,dirty: !data?.diagram };
+    // the learner builds the workflow from scratch: no starter steps on the canvas
+    const start: Workflow = { version: 1,nodes: [],edges: [] };
+    // the old starter (one untouched step of each kind, nothing connected) counts as not started
+    const untouched = (w?: Workflow | null) => !!w && !w.edges.length && w.nodes.length === WORKFLOW_KINDS.length && WORKFLOW_KINDS.every((kind) => w.nodes.some((n) => n.kind === kind && n.label === t(`${kind}Label`) && !n.notes));
+    const fresh = (w?: Workflow | null) => (untouched(w) ? start : w);
+    const initial = local?.dirty && !untouched(local.diagram) ? local : { diagram: fresh(data?.diagram) ?? fresh(local?.diagram) ?? start,revision: data?.revision ?? 0,dirty: !data?.diagram };
     setDiagram(initial.diagram); setRevision(initial.revision); setDirty(initial.dirty); setReport(initial.dirty ? null : data?.report ?? null);
   }
   function change(next: Workflow,remember = true) {
@@ -125,7 +129,15 @@ export function WorkflowWorkspace({ course,embedded = false }: { course: Course;
         <Button className="min-h-11" disabled={busy || !source || !target || !choices.length || diagram.edges.length >= 80} onClick={() => connect(source,target,branch)}>{t("addConnection")}</Button>
         <div className="flex flex-wrap gap-2"><Button variant="outline" className="min-h-11" disabled={!history.length || busy} onClick={() => { const previous = history[history.length-1]; setHistory((old) => old.slice(0,-1)); change(previous,false); }}><Undo2 aria-hidden />{t("undo")}</Button><Button variant="outline" className="min-h-11" onClick={exportDiagram}><Download aria-hidden />{t("export")}</Button></div>
       </aside>
-      <section className={`workflow-canvas order-first min-h-96 lg:order-none ${embedded ? "h-[55dvh] lg:h-[calc(100dvh-15rem)] lg:min-h-[520px]" : "h-[65dvh] lg:h-[calc(100dvh-10rem)] lg:min-h-[650px]"}`} aria-label={t("canvas")}>
+      <section className={`workflow-canvas relative order-first min-h-96 lg:order-none ${embedded ? "h-[55dvh] lg:h-[calc(100dvh-15rem)] lg:min-h-[520px]" : "h-[65dvh] lg:h-[calc(100dvh-10rem)] lg:min-h-[650px]"}`} aria-label={t("canvas")}>
+        {!diagram.nodes.length ? (
+          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-6">
+            <div className="max-w-sm rounded-(--r-lg) border border-dashed border-line bg-panel/90 p-5 text-center shadow-(--shadow-sm)">
+              <p className="font-semibold">{t("emptyTitle")}</p>
+              <p className="mt-1 text-sm text-ink-muted">{t("emptyBody")}</p>
+            </div>
+          </div>
+        ) : null}
         <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} onNodeClick={(_e,n) => setSelected(n.id)} onConnect={dragConnect} nodesDraggable={!busy} nodesConnectable={!busy} deleteKeyCode={null} onNodesChange={moveNodes} fitView minZoom={0.25} maxZoom={1.5}><Background /><Controls showInteractive={false} /></ReactFlow>
       </section>
       <aside className="flex flex-col gap-5 border-t border-line p-4 lg:border-t-0 lg:border-l" aria-label={t("details")}>

@@ -8,7 +8,6 @@ import { SectionNav } from "@/components/course/section-nav";
 import {
   AboutSection,
   ModulesSection,
-  OutcomesSection,
 } from "@/components/course/course-sections";
 
 type Params = { courseId: string };
@@ -37,7 +36,6 @@ export default async function CoursePage({ params }: { params: Promise<Params> }
 
   const sections = [
     { id: "about", label: t("navAbout") },
-    { id: "outcomes", label: t("navOutcomes") },
     { id: "modules", label: t("navModules") },
   ];
 
@@ -49,7 +47,6 @@ export default async function CoursePage({ params }: { params: Promise<Params> }
 
       <div className="flex flex-col gap-16 pb-16">
         <AboutSection course={course} />
-        <OutcomesSection course={course} />
         <ModulesSection course={course} outlines={outlines} />
       </div>
     </div>

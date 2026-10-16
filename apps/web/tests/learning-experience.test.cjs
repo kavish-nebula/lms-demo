@@ -170,16 +170,15 @@ test('backend module completion and existing finale records drive course progres
   assert.equal(afterProject.finale[1].locked, false);
 });
 
-test('the lesson workspace keeps adaptation and navigation in a compact focus bar', () => {
+test('the lesson workspace shows the lesson alone, with no phase strip or guidance picker', () => {
   const React = require('react');
   const { renderToString } = require('react-dom/server');
   const { LearningWorkspace } = load('apps/web/src/components/learning/learning-workspace.tsx');
-  const html = renderToString(React.createElement(LearningWorkspace, { courseId: 'ai-agent', moduleId: 'm1', stage: 'guided', support: 'extra', done: ['hook'], children: React.createElement('div', null, 'Current activity') }));
-  assert.ok(html.includes('learning-focus-controls'));
-  assert.ok(html.includes('Adaptive mode'));
-  assert.ok(html.includes('Hints appear early'));
-  assert.ok(!html.includes('Ask Pip'));
-  assert.ok(html.includes('Module quiz'));
+  const html = renderToString(React.createElement(LearningWorkspace, { children: React.createElement('div', null, 'Current activity') }));
+  assert.ok(html.includes('Current activity'));
+  assert.ok(!html.includes('Adaptive mode'));
+  assert.ok(!html.includes('Module quiz'));
+  assert.ok(!html.includes('Guidance level'));
 });
 
 test('the wide learning dock keeps the current mission, focus sprint and course tools beside the lesson', () => {

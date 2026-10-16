@@ -2,7 +2,7 @@
 
 /**
  * Course details page sections (Coursera layout): About, How it works,
- * Outcomes, Modules, Reviews. Real course data from the content spine;
+ * Modules, Reviews. Real course data from the content spine;
  * ratings, reviews and career statistics show empty states until real data
  * exists (no invented numbers).
  */
@@ -27,7 +27,6 @@ import {
 } from "lucide-react";
 import { Surface } from "@/components/kit/surface";
 import { Chip } from "@/components/kit/chip";
-import { NumberTicker } from "@/components/kit/number-ticker";
 import { NebulaMark } from "@/components/kit/logo";
 import { EmptyState } from "@/components/kit/states";
 import { Button } from "@/components/ui/button";
@@ -352,62 +351,6 @@ export function MethodSection({ course }: { course: Course }) {
           })}
         </ol>
       </Surface>
-    </section>
-  );
-}
-
-/* ---------------------------------------------------------------- outcomes */
-
-export function OutcomesSection({ course }: { course: Course }) {
-  const t = useTranslations("course");
-  // hours of manual work only apply to courses that estimate them
-  const hasHours = course.modules.some((m) => m.hours_saved != null);
-  const max = Math.max(1, ...course.modules.map((m) => m.hours_saved ?? 0));
-  return (
-    <section id="outcomes" tabIndex={-1} aria-labelledby="outcomes-title" className="flex scroll-mt-40 flex-col gap-6 outline-none">
-      <SectionTitle id="outcomes">{t("outcomesTitle")}</SectionTitle>
-      <div className={cn("grid grid-cols-[minmax(0,1fr)] gap-6", hasHours && "lg:grid-cols-2")}>
-        <Surface pad="lg" className="flex flex-col gap-4">
-          <p className="text-lg leading-relaxed">{course.goal}</p>
-          <ul className="flex flex-col gap-2">
-            {[t("outcomeBuild"), t("outcomeCredential"), t("outcomePortfolio")].map((o) => (
-              <li key={o} className="flex gap-3">
-                <Check className="mt-1 size-4 shrink-0 text-ok" aria-hidden />
-                {o}
-              </li>
-            ))}
-          </ul>
-        </Surface>
-        {hasHours ? (
-        <Surface pad="lg" className="flex flex-col gap-4">
-          <div>
-            <h3 className="font-semibold">{t("hoursTitle")}</h3>
-            <p className="text-sm text-ink-muted">{t("hoursBody")}</p>
-          </div>
-          <ul className="flex flex-col gap-3">
-            {course.modules.map((m, i) => (
-              <li key={m.module_id} className="grid grid-cols-[2.5rem_minmax(0,1fr)_3.5rem] items-center gap-3 text-sm">
-                <span className="font-mono text-xs text-ink-faint">M{i + 1}</span>
-                <span className="relative h-2.5 overflow-hidden rounded-pill bg-chart-track">
-                  <motion.span
-                    className="absolute inset-y-0 left-0 origin-left rounded-pill bg-[linear-gradient(90deg,var(--accent-deep),var(--accent))]"
-                    style={{ width: `${((m.hours_saved ?? 0) / max) * 100}%` }}
-                    initial={{ scaleX: 0 }}
-                    whileInView={{ scaleX: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.9, delay: i * 0.08, ease: [0.2, 0.8, 0.2, 1] }}
-                  />
-                </span>
-                <span className="text-right font-semibold tabular-nums">
-                  <NumberTicker value={m.hours_saved ?? 0} suffix=" h" />
-                </span>
-              </li>
-            ))}
-          </ul>
-          <p className="text-xs text-ink-faint">{t("hoursNote")}</p>
-        </Surface>
-        ) : null}
-      </div>
     </section>
   );
 }

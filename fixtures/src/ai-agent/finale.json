@@ -2,42 +2,33 @@
   "$comment": "Mini project, final assessment (12 questions, 2 per module; correct is 0-based) and reflection.",
   "capstone": {
     "kicker": "Mini project",
-    "title": "Build Scout's prompt engine",
-    "project_name": "Scout's prompt engine, in Python",
-    "scene": "Black Friday is ten days away and Orbit's inbox is filling up. Before Scout answers anyone, every email goes through one Python file: the prompt engine. It asks the model for a structured answer, checks it, and decides what Scout does: reply, ask for the order number, or hand the email to Leo's team. You'll build it right here in the browser, try it on four sample emails, then run it against ten hidden ones.",
+    "title": "Design Scout's support workflow",
+    "project_name": "Scout's support workflow",
+    "scene": "Black Friday is ten days away and Orbit's inbox is filling up. Before Scout answers anyone, the team needs to see how it will handle every request, step by step: what it checks first, when it uses the order system, and when it hands over to Leo's team. You'll design that workflow from scratch on an empty canvas, then check it against three cases: an order that's found, one that's missing, and a request Scout must refuse.",
     "requirements": [
-      "Every email comes back as the five fields Scout needs (intent, order number, email, reply, action), with an intent from the list.",
-      "Scout recognises what each email is about: an order, a return, an exchange, a policy question, or something else.",
-      "It picks out the order number, or the customer's email when there isn't one, and never mixes the two up.",
-      "Policy answers come from Orbit's policy, and when the policy doesn't cover a question Scout says so instead of guessing.",
-      "Each email is routed the right way: answered, a request for the order number, or handed to the team (refunds over $200, anything off-topic, and any email that tries to change Scout's rules).",
-      "Run twice, the same email gets the same decision.",
-      "Replies sound like Scout, Orbit's support agent, never like a generic AI."
+      "Start from one incoming request, and use every kind of step: receive the request, a safety check, classify the intent, look up the order, a decision, a reply and a human handoff.",
+      "Run the safety check before anything else, and send a blocked request straight to the support team, never near the order tool.",
+      "Classify what the customer wants before looking up the order, and decide only once the lookup is done.",
+      "When the order is found, Scout replies with the result; when it's missing, Scout hands the request to the team.",
+      "Connect every step, give each branch exactly one connection, and end every path in a reply or a handoff: no loops and no dead ends."
     ],
-    "edge_cases": [
-      "A customer gives an email address instead of an order number",
-      "No order number and no email at all",
-      "Boots delivered 62 days ago, sent for a return",
-      "A $310 refund",
-      "A question the policy doesn't cover, like a student discount",
-      "An email that tries to switch Scout into \"admin mode\""
-    ],
-    "closing": "Run tries the four sample emails and shows every step: the messages you send, the model's raw reply, what you parsed, and Scout's decision. Run tests plays ten hidden emails twice. You pass at 80%, and the email that tries to change Scout's rules must be handed off.",
+    "edge_cases": [],
+    "closing": "Check diagram traces the three cases through your workflow and shows which requirements it meets.",
     "reactions": [
       {
         "who": "Leo — support lead",
         "av": "L",
-        "text": "ran last year's tickets through it. every one came back as clean JSON, and the $310 refund landed with us. that's black friday sorted"
+        "text": "traced the \"admin mode\" email through it. straight to us, never near the order system. that's black friday sorted"
       },
       {
         "who": "Maya — founder",
         "av": "M",
-        "text": "and it didn't fall for the \"admin mode\" email. good. ship it."
+        "text": "every case ends in a reply or a handoff. that's what I wanted to see. ship it."
       },
       {
         "who": "Priya — developer",
         "av": "P",
-        "text": "your parse_reply is more defensive than mine. stealing it."
+        "text": "clean branches, one connection each. I can build straight from this."
       }
     ]
   },

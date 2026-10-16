@@ -10,7 +10,7 @@
 @keyframes assistant-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); } 100% { box-shadow: 0 0 0 12px transparent; } }
 .pip-dock { position: fixed; bottom: 20px; right: 24px; z-index: 110; }
 .pip-dock[data-phase="hook"] { bottom: 100px; z-index: 110; }
-.pip-launcher:focus-visible, .pip-tab:focus-visible, .pip-suggestion:focus-visible, .pip-notes:focus-visible, .stair-step:focus-visible, .journey-phase-strip a:focus-visible, .focus-lengths button:focus-visible, .focus-tool-grid button:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 3px; }
+.pip-launcher:focus-visible, .pip-tab:focus-visible, .pip-suggestion:focus-visible, .pip-notes:focus-visible, .stair-step:focus-visible, .focus-lengths button:focus-visible, .focus-tool-grid button:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 3px; }
 .pip-launcher { position: relative; display: grid; width: 56px; height: 56px; place-items: center; border: 0; border-radius: 999px; padding: 0; background: transparent; cursor: pointer; transition: transform 180ms; }
 .pip-launcher:hover { transform: translateY(-3px); }
 
@@ -131,18 +131,8 @@ html[data-pip-chat] .pip-dock { display: none; }
 .game-badge strong, .game-badge small { display: block; }
 .game-badge strong { font-size: 11px; }
 .game-badge small { margin-top: 2px; color: var(--muted); font-size: 8px; line-height: 1.25; }
-.journey-phase-strip { display: flex; overflow-x: auto; gap: 7px; padding: 4px 0 12px; scrollbar-width: thin; }
-.journey-phase-strip a { white-space: nowrap; display: flex; gap: 5px; align-items: center; padding: 8px 10px; border-radius: 999px; border: 1px solid var(--line); font-size: 11px; color: var(--muted); }
-.journey-phase-strip a[aria-current=step] { color: var(--accent-ink); background: var(--accent-soft); border-color: var(--accent-line); }
 .learning-stage-layout { display: grid; min-width: 0; align-items: start; }
 .learning-workspace { min-width: 0; }
-.learning-toolbar { position: sticky; top: calc(var(--nav-h) + 8px); z-index: 20; width: 100%; max-width: 1040px; margin: 0 auto 16px; border: 1px solid var(--line); border-radius: 18px; padding: 10px 14px; background: color-mix(in srgb, var(--panel) 94%, transparent); box-shadow: var(--shadow-sm); backdrop-filter: blur(14px); }
-.learning-toolbar select { padding: 7px 9px; font-size: 12px; background: var(--panel2); border: 1px solid var(--line); border-radius: 9px; }
-.learning-focus-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; border-top: 1px solid var(--line); padding-top: 8px; }
-.adaptive-pulse { display: flex; min-width: 0; align-items: center; gap: 7px; color: var(--accent-ink); }
-.adaptive-pulse span, .adaptive-pulse strong, .adaptive-pulse small { display: block; }
-.adaptive-pulse strong { font-size: 11px; line-height: 1.1; }
-.adaptive-pulse small { margin-top: 2px; color: var(--muted); font-size: 9px; line-height: 1.1; }
 .stage-focus-shell { max-width: 1040px; scroll-margin-top: 180px; }
 .stage-separated-shell { gap: 14px; }
 .stage-primary-card, .stage-related-card { overflow: hidden; border: 1px solid var(--line); border-radius: 22px; background: var(--panel); box-shadow: var(--shadow-sm); }
@@ -196,7 +186,7 @@ html[data-pip-chat] .pip-dock { display: none; }
 .focus-tool-grid small { color: var(--muted); font-size: 8px; }
 @media (min-width: 1500px) {
   .learning-stage-layout { grid-template-columns: minmax(0,1fr) 270px; gap: 16px; }
-  .learning-stage-layout .learning-toolbar, .learning-stage-layout .stage-focus-shell { max-width: none; }
+  .learning-stage-layout .stage-focus-shell { max-width: none; }
   .learning-focus-dock { position: sticky; top: calc(var(--nav-h) + 20px); display: flex; max-height: calc(100dvh - var(--nav-h) - 28px); overflow-y: auto; scrollbar-width: thin; }
 }
 @media (min-width: 1024px) and (min-height: 720px) {
@@ -214,7 +204,7 @@ html[data-pip-chat] .pip-dock { display: none; }
 .learning-reflection { padding: 22px; border: 1px solid var(--stage-reflect-line); border-radius: 18px; background: var(--stage-reflect-soft); }
 .learning-reflection textarea { width: 100%; margin-top: 12px; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; font-size: 14px; }
 @media (max-width: 1000px) { .journey-hero { padding: 28px; gap: 24px; } .learning-staircase { padding-inline: 54px; } .launch-summit { width: 58%; } .badge-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
-@media (max-width: 700px) { .journey-hero { grid-template-columns: minmax(0,1fr); padding: 22px; } .journey-world { min-height: 230px; } .journey-section { padding: 18px; } .steps-heading { align-items: center; } .steps-heading > span { max-width: 100px; text-align: center; } .learning-staircase { padding-inline: 0; } .launch-summit { width: 76%; padding: 12px 14px; } .launch-summit .daily-reward { display: none; } .stair-step { width: 94% !important; min-height: 76px; grid-template-columns: 40px minmax(0,1fr) 68px; gap: 8px; padding-inline: 11px; } .stair-step .mastery-stars { display: none; } .step-pip { top: -34px; left: 48px; transform: none; } .step-pip .step-pip-label { display: none; } .daily-mission { align-items: flex-start; flex-wrap: wrap; } .daily-mission .min-w-0 { min-width: calc(100% - 70px); } .game-status { grid-template-columns: repeat(3, minmax(0, 1fr)); } .game-rank { grid-column: 1 / -1; } .focus-split { grid-template-columns: minmax(0,1fr); } .pip-dock { right: 12px; bottom: 12px; } .pip-launcher, .pip-launcher-avatar { width: 52px; height: 52px; } .learning-toolbar { position: static; } }
+@media (max-width: 700px) { .journey-hero { grid-template-columns: minmax(0,1fr); padding: 22px; } .journey-world { min-height: 230px; } .journey-section { padding: 18px; } .steps-heading { align-items: center; } .steps-heading > span { max-width: 100px; text-align: center; } .learning-staircase { padding-inline: 0; } .launch-summit { width: 76%; padding: 12px 14px; } .launch-summit .daily-reward { display: none; } .stair-step { width: 94% !important; min-height: 76px; grid-template-columns: 40px minmax(0,1fr) 68px; gap: 8px; padding-inline: 11px; } .stair-step .mastery-stars { display: none; } .step-pip { top: -34px; left: 48px; transform: none; } .step-pip .step-pip-label { display: none; } .daily-mission { align-items: flex-start; flex-wrap: wrap; } .daily-mission .min-w-0 { min-width: calc(100% - 70px); } .game-status { grid-template-columns: repeat(3, minmax(0, 1fr)); } .game-rank { grid-column: 1 / -1; } .focus-split { grid-template-columns: minmax(0,1fr); } .pip-dock { right: 12px; bottom: 12px; } .pip-launcher, .pip-launcher-avatar { width: 52px; height: 52px; } }
 @media (max-width: 430px) { .badge-grid { grid-template-columns: minmax(0,1fr); } .launch-summit { width: 88%; } .stair-step { grid-template-columns: 36px minmax(0,1fr) 58px; } .step-copy > span { font-size: 7px; } .step-status small { display: none; } .capability-rack { grid-template-columns: minmax(0,1fr); } .daily-mission > a { width: 100%; } .daily-reward { margin-left: 64px; } }
 @media (prefers-reduced-motion: reduce) { .pip-launcher, .stair-step { transition: none; transform: none !important; } .assistant-avatar *, .assistant-avatar::after, .pip-reaction-bubble { animation: none !important; } .focus-meter > span { transition: none; } }
 .reduce-motion .pip-launcher, .reduce-motion .stair-step { transition: none; transform: none !important; }

@@ -71,8 +71,8 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
   const { enrolled, adaptation: startingAdaptation } = useEnrollment(module.course_id);
   const { state: learning, update: updateLearning } = useLearning(module.course_id);
   const baseline = supportFor(startingAdaptation, String(moduleIndex));
-  const choice = learning.support[module.module_id] ?? "auto";
-  const support = choice === "auto" ? startingAdaptation.override ?? recommendedSupport(learning.attempts, module.module_id, baseline) : choice;
+  // help follows the learner's setup and recent practice (there is no per-module guidance picker any more)
+  const support = startingAdaptation.override ?? recommendedSupport(learning.attempts, module.module_id, baseline);
   const adaptation = React.useMemo(() => ({ ...startingAdaptation, support, override: support }), [startingAdaptation, support]);
   // the hook, concept videos and worked examples rewritten in the learner's own world (server/adapt), once ready
   const latestAdapted = useAdaptedModule(module.course_id, module.module_id, enrolled);
@@ -284,7 +284,18 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
 
       <div className="flex flex-1 gap-8 page-pad py-4 md:py-5">
         <aside id="module-outline" data-map-scroll className={`sticky top-[calc(var(--nav-h)+24px)] hidden max-h-[calc(100dvh-var(--nav-h)-48px)] w-72 shrink-0 overflow-y-auto pr-1 ${outlineHidden ? "" : "nav:block"}`}>
-          <div className="mb-3 px-2.5 text-xs font-semibold tracking-wide text-ink-faint uppercase">{to("label")}</div>
+          <div className="mb-3 flex items-center justify-between gap-2 px-2.5">
+            <span className="text-xs font-semibold tracking-wide text-ink-faint uppercase">{to("label")}</span>
+            {/* hide the outline from its own header; once hidden, the strip above the lesson offers it back */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="size-8 text-ink-muted" aria-label={to("hideOutline")} aria-expanded aria-controls="module-outline" onClick={() => writeLocal(outlineKey, "hidden")}>
+                  <PanelLeftClose />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{to("hideOutline")}</TooltipContent>
+            </Tooltip>
+          </div>
           {map}
         </aside>
         <main id="stage-main" tabIndex={-1} className="min-w-0 flex-1 pb-6 outline-none">
@@ -295,27 +306,21 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
             setupHref={setupHref}
             personal={personal}
             leading={
-              // the outline toggle sits with the lesson's own controls; wide screens only (narrow ones use the sheet)
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="hidden size-8 nav:inline-flex"
-                    aria-label={to(outlineHidden ? "showOutline" : "hideOutline")}
-                    aria-expanded={!outlineHidden}
-                    aria-controls="module-outline"
-                    onClick={() => writeLocal(outlineKey, outlineHidden ? "visible" : "hidden")}
-                  >
-                    {outlineHidden ? <PanelLeftOpen /> : <PanelLeftClose />}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{to(outlineHidden ? "showOutline" : "hideOutline")}</TooltipContent>
-              </Tooltip>
+              // with the outline hidden, it comes back from here; wide screens only (narrow ones use the sheet)
+              outlineHidden ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon" className="hidden size-8 nav:inline-flex" aria-label={to("showOutline")} aria-expanded={false} aria-controls="module-outline" onClick={() => writeLocal(outlineKey, "visible")}>
+                      <PanelLeftOpen />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{to("showOutline")}</TooltipContent>
+                </Tooltip>
+              ) : null
             }
           />
           <div className="learning-stage-layout">
-            <SignalProvider courseId={module.course_id} enabled={enrolled}><LearningWorkspace key={`${module.module_id}:${stage}:${video ?? ""}`} courseId={module.course_id} moduleId={module.module_id} stage={stage} support={support} done={done}>
+            <SignalProvider courseId={module.course_id} enabled={enrolled}><LearningWorkspace key={`${module.module_id}:${stage}:${video ?? ""}`}>
               <TopicContext.Provider value={header}>{body}</TopicContext.Provider>
             </LearningWorkspace></SignalProvider>
             <LearningFocusDock

@@ -3,65 +3,50 @@
 import { useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
-import { ArrowRight, Check, ClipboardCheck, Clock, GitBranch, TriangleAlert, UserRound } from "lucide-react";
+import { ArrowRight, Check, ClipboardCheck, Clock, GitBranch } from "lucide-react";
 import { Surface } from "@/components/kit/surface";
 import { Chip } from "@/components/kit/chip";
 import { NumberTicker } from "@/components/kit/number-ticker";
 import { Button } from "@/components/ui/button";
-import { StageShell, Callout } from "@/components/player/stage-shell";
-import { ROLE_BRIEF } from "@/lib/world";
+import { StageShell } from "@/components/player/stage-shell";
 import type { CapstoneBlock } from "@/data/types";
 
 /**
- * The course capstone, once, after all modules. The brief lists what the
- * project has to do; the learner builds it with the course's own tools and
- * marks it done here. Once done, this page shows the requirements met.
+ * The course capstone, once, after all modules. The brief is the scene and
+ * the requirements the project has to meet; the learner builds it in the
+ * workspace and marks it done here. Once done, this page shows the
+ * requirements met.
  */
 export function CapstoneStage({
   block,
   preview,
-  roleKey,
-  roleLabel,
-  planBrief,
   workspace = null,
   done,
   onComplete,
 }: {
   block: CapstoneBlock;
   preview: boolean;
-  roleKey: string | null;
-  roleLabel: string | null;
-  /** the learner's plan frames the capstone for their role */
-  planBrief: string | null;
-  /** where the project is built and tested, for a course whose project runs in the browser */
+  /** where the project is built, for a course whose project is built in the browser */
   workspace?: Workspace | null;
   done: boolean;
   onComplete: () => void;
 }) {
   if (done) return <Done block={block} workspace={workspace} onComplete={onComplete} />;
-  return <Brief block={block} preview={preview} roleKey={roleKey} roleLabel={roleLabel} planBrief={planBrief} workspace={workspace} onComplete={onComplete} />;
+  return <Brief block={block} preview={preview} workspace={workspace} onComplete={onComplete} />;
 }
 
 function Brief({
   block,
   preview,
-  roleKey,
-  roleLabel,
-  planBrief,
   workspace,
   onComplete,
 }: {
   block: CapstoneBlock;
   preview: boolean;
-  roleKey: string | null;
-  roleLabel: string | null;
-  planBrief: string | null;
   workspace: Workspace | null;
   onComplete: () => void;
 }) {
   const t = useTranslations("finale");
-  // the learner's plan frames the project for their role; without one, the role's standard brief
-  const brief = planBrief || (roleKey ? ROLE_BRIEF[roleKey as keyof typeof ROLE_BRIEF] : undefined);
 
   return (
     <StageShell stage="project" title={block.title} minutes={block.duration_min} hideFooter>
@@ -89,31 +74,6 @@ function Brief({
           </ol>
         </div>
       </Surface>
-
-      {block.edge_cases.length ? (
-        <Surface pad="md" className="flex flex-col gap-2.5">
-          <h2 className="flex items-center gap-2 font-semibold">
-            <TriangleAlert className="size-4 text-warn" aria-hidden />
-            {t("edgeCases")}
-          </h2>
-          <ul className="flex flex-col gap-1.5 text-sm text-ink-muted">
-            {block.edge_cases.map((e) => (
-              <li key={e} className="flex gap-2">
-                <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-warn" />
-                {e}
-              </li>
-            ))}
-          </ul>
-        </Surface>
-      ) : null}
-
-      {brief ? (
-        <Callout tone="hook" label={roleLabel ? t("forYou", { role: roleLabel }) : t("forYouPlain")} icon={<UserRound />}>
-          {brief}
-        </Callout>
-      ) : null}
-
-      {block.closing ? <p className="leading-relaxed text-ink-muted">{block.closing}</p> : null}
 
       {workspace ? <WorkspaceCard workspace={workspace} preview={preview} /> : null}
 
