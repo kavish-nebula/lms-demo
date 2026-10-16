@@ -10,7 +10,7 @@
 @keyframes assistant-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); } 100% { box-shadow: 0 0 0 12px transparent; } }
 .pip-dock { position: fixed; bottom: 20px; right: 24px; z-index: 110; }
 .pip-dock[data-phase="hook"] { bottom: 100px; z-index: 110; }
-.pip-launcher:focus-visible, .pip-tab:focus-visible, .pip-suggestion:focus-visible, .pip-notes:focus-visible, .stair-step:focus-visible, .focus-lengths button:focus-visible, .focus-tool-grid button:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 3px; }
+.pip-launcher:focus-visible, .pip-tab:focus-visible, .pip-suggestion:focus-visible, .pip-notes:focus-visible, .stair-step:focus-visible, .focus-lengths button:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 3px; }
 .pip-launcher { position: relative; display: grid; width: 56px; height: 56px; place-items: center; border: 0; border-radius: 999px; padding: 0; background: transparent; cursor: pointer; transition: transform 180ms; }
 .pip-launcher:hover { transform: translateY(-3px); }
 
@@ -22,7 +22,14 @@
 .pip-tab { display: flex; align-items: center; gap: 7px; padding: 8px 10px; border-radius: 8px; color: var(--muted); font-size: 12px; cursor: pointer; }
 .pip-tab[aria-pressed=true] { background: var(--accent-soft); color: var(--accent-ink); }
 .pip-tab:disabled { opacity: .45; cursor: default; }
-.pip-messages { display: flex; flex-direction: column; gap: 9px; overflow-y: auto; padding: 12px 14px; min-height: 0; max-height: 280px; }
+/* My Assistant: a full-height panel on the right (course-companion.tsx) */
+.assistant-sheet { background: var(--panel); border-color: var(--line); }
+.assistant-messages { display: flex; flex: 1; flex-direction: column; gap: 12px; overflow-y: auto; padding: 18px 20px; min-height: 0; }
+.assistant-messages .pip-bubble { font-size: 14px; padding: 12px 14px; }
+.assistant-starter { display: flex; align-items: center; gap: 9px; min-height: 48px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel2); text-align: left; font-size: 13px; cursor: pointer; transition: border-color 120ms, background-color 120ms; }
+.assistant-starter:hover { border-color: var(--accent-line); background: var(--accent-soft); }
+.assistant-starter:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+.assistant-starter:disabled { opacity: .5; cursor: default; }
 .pip-bubble { background: var(--panel2); border: 1px solid var(--line); border-radius: 14px 14px 14px 4px; padding: 10px; font-size: 12px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
 .pip-nudge { border-color: var(--accent-line); background: color-mix(in srgb, var(--accent-soft) 48%, var(--panel2)); }
 .pip-user { margin-left: 30px; background: var(--accent-soft); border-color: var(--accent-line); border-radius: 15px 15px 4px 15px; }
@@ -31,8 +38,8 @@ html[data-pip-chat] .pip-dock { display: none; }
 @media (prefers-reduced-motion: no-preference) { .pip-thinking { animation: pip-thinking 1.4s ease-in-out infinite; } }
 @keyframes pip-thinking { 50% { opacity: .55; } }
 .pip-suggestion { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--accent-line); border-radius: 999px; padding: 6px 9px; color: var(--accent-ink); font-size: 11px; cursor: pointer; }
-.pip-input { margin: 0 12px 8px; display: flex; align-items: center; gap: 6px; padding: 7px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel2); }
-.pip-input input { min-width: 0; flex: 1; background: transparent; padding: 4px; font-size: 13px; outline: none; }
+.pip-input { margin: 0 20px 8px; display: flex; align-items: center; gap: 6px; padding: 7px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel2); }
+.pip-input input { min-width: 0; flex: 1; background: transparent; padding: 6px; font-size: 14px; outline: none; }
 .pip-input:focus-within { outline: 2px solid var(--accent-ink); }
 .pip-notes { width: 100%; resize: vertical; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel2); font-size: 14px; }
 .journey-hero { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0,1fr); gap: 36px; overflow: hidden; padding: 40px; border: 1px solid var(--accent-line); border-radius: 28px; background: linear-gradient(120deg, var(--panel), var(--accent-soft)); }
@@ -166,36 +173,19 @@ html[data-pip-chat] .pip-dock { display: none; }
 .focus-lengths button:disabled { cursor: default; opacity: .55; }
 .focus-session-actions { display: flex; align-items: center; gap: 5px; margin-top: 10px; }
 .focus-session-actions > button:first-child { flex: 1; }
-.focus-mission-kicker { margin-top: 14px; color: var(--accent-ink); font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .focus-dock-card h2 { margin-top: 4px; font-size: 16px; line-height: 1.25; }
-.focus-reward { display: inline-flex; align-items: center; gap: 4px; margin-top: 9px; border-radius: 999px; padding: 4px 7px; color: var(--accent-ink); background: var(--accent-soft); font-size: 9px; font-weight: 700; }
-.focus-reward svg { width: 11px; height: 11px; }
-.focus-course-progress { margin-top: 14px; }
-.focus-course-progress > div:first-child { display: flex; justify-content: space-between; margin-bottom: 6px; color: var(--muted); font-size: 9px; }
-.focus-course-progress strong { color: var(--text); }
-.focus-next { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 7px; margin-top: 12px; border-top: 1px solid var(--line); padding-top: 11px; }
-.focus-next span { color: var(--muted); font-size: 9px; font-weight: 700; text-transform: uppercase; }
-.focus-next p { overflow: hidden; font-size: 11px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
-.focus-next svg { width: 13px; color: var(--muted); }
-.focus-tool-grid { display: grid; gap: 6px; margin-top: 12px; }
-.focus-tool-grid button { display: flex; align-items: center; gap: 9px; border: 1px solid var(--line); border-radius: 11px; padding: 9px; text-align: left; background: var(--panel2); }
-.focus-tool-grid button:hover { border-color: var(--accent-line); background: var(--accent-soft); }
-.focus-tool-grid button > svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--accent-ink); }
-.focus-tool-grid span, .focus-tool-grid strong, .focus-tool-grid small { display: block; }
-.focus-tool-grid strong { font-size: 11px; }
-.focus-tool-grid small { color: var(--muted); font-size: 8px; }
 @media (min-width: 1500px) {
   .learning-stage-layout { grid-template-columns: minmax(0,1fr) 270px; gap: 16px; }
   .learning-stage-layout .stage-focus-shell { max-width: none; }
   .learning-focus-dock { position: sticky; top: calc(var(--nav-h) + 20px); display: flex; max-height: calc(100dvh - var(--nav-h) - 28px); overflow-y: auto; scrollbar-width: thin; }
 }
 @media (min-width: 1024px) and (min-height: 720px) {
-  #stage-main .stage-focus-shell { height: calc(100dvh - var(--nav-h) - 215px); min-height: 460px; max-height: 680px; gap: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 22px; background: var(--panel); box-shadow: var(--shadow-sm); }
+  #stage-main .stage-focus-shell { gap: 0; border: 1px solid var(--line); border-radius: 22px; background: var(--panel); box-shadow: var(--shadow-sm); }
   #stage-main .stage-focus-header { flex-shrink: 0; padding: 18px 22px 14px; border-bottom: 1px solid var(--line); }
   #stage-main .stage-focus-header h1 { font-size: 1.35rem; }
-  #stage-main .stage-focus-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 18px 22px; scrollbar-width: thin; }
-  #stage-main .stage-focus-footer { flex-shrink: 0; margin: 0; padding: 14px 22px; background: var(--panel); }
-  #stage-main .stage-focus-shell.stage-separated-shell { display: flex; height: calc(100dvh - var(--nav-h) - 215px); max-height: 680px; gap: 14px; overflow-y: auto; border: 0; background: transparent; box-shadow: none; scrollbar-width: thin; }
+  #stage-main .stage-focus-body { flex: 1; padding: 18px 22px; }
+  #stage-main .stage-focus-footer { position: sticky; bottom: 0; z-index: 3; flex-shrink: 0; margin: 0; padding: 14px 22px; border-radius: 0 0 22px 22px; background: var(--panel); }
+  #stage-main .stage-focus-shell.stage-separated-shell { display: flex; gap: 14px; border: 0; background: transparent; box-shadow: none; }
   #stage-main .stage-separated-shell .stage-primary-card { flex-shrink: 0; }
   #stage-main .stage-separated-shell .stage-primary-body { display: block; overflow: visible; padding: 18px 22px 22px; }
   #stage-main .stage-separated-shell .stage-related-card { flex-shrink: 0; }

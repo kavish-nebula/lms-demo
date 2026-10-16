@@ -359,7 +359,7 @@ export function VideoLesson({
       </div> : null}
       <div className={cn("concept-video-card", storyMode && "story-mode-card")}>
         <div
-          className={cn("vl-stage", full && "w-[min(100%,calc((100dvh-170px)*16/9))]", storyMode && "story-mode-stage")}
+          className={cn("vl-stage", full ? "w-[min(100%,calc((100dvh-170px)*16/9))]" : "mx-auto w-full max-w-[max(28rem,calc((100dvh-var(--nav-h)-21rem)*16/9))]", storyMode && "story-mode-stage")}
           onPointerDown={(event) => { if (storyMode) swipeStart.current = event.clientX; }}
           onPointerUp={(event) => {
             if (!storyMode || swipeStart.current === null || phase !== "play") return;

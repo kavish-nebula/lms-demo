@@ -175,7 +175,8 @@ function MissionGuidedStage({ block, adaptation, ...nav }: StageProps<GuidedBloc
   const save = (next: Save) => writeLocal(key, JSON.stringify(next));
   const go = (v: typeof view) => {
     setView(v);
-    requestAnimationFrame(() => document.getElementById("mission-top")?.closest<HTMLElement>(".stage-focus-body")?.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" }));
+    // the page scrolls (the lesson card grows with its content), so bring the new step's top into view
+    requestAnimationFrame(() => document.getElementById("mission-top")?.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" }));
   };
   const accept = () => {
     save({ ...saved, accepted: true });

@@ -181,22 +181,15 @@ test('the lesson workspace shows the lesson alone, with no phase strip or guidan
   assert.ok(!html.includes('Guidance level'));
 });
 
-test('the wide learning dock keeps the current mission, focus sprint and course tools beside the lesson', () => {
+test('the wide learning dock keeps only the focus sprint beside the lesson', () => {
   const React = require('react');
   const { renderToString } = require('react-dom/server');
   const { LearningFocusDock } = load('apps/web/src/components/learning/learning-focus-dock.tsx');
-  const html = renderToString(React.createElement(LearningFocusDock, {
-    courseId: 'ai-agent', moduleTitle: 'Agent basics', stage: 'explainer', currentTitle: 'What is an agent?', nextTitle: 'Agents vs. chatbots', part: 2, total: 10, completed: 1, reward: 10, support: 'extra',
-  }));
+  const html = renderToString(React.createElement(LearningFocusDock, { courseId: 'ai-agent' }));
   assert.ok(html.includes('Focus sprint'));
-  assert.ok(html.includes('Current mission'));
-  assert.ok(html.includes('What is an agent?'));
-  assert.match(html, /Part.*2.*of.*10/);
-  assert.match(html, /\+.*10.*XP on completion/);
-  assert.ok(html.includes('Extra guidance'));
-  assert.ok(!html.includes('Ask Pip'));
-  assert.ok(html.includes('Notebook'));
-  assert.ok(!html.includes('Try the lab')); // the experiment lab was removed
+  assert.ok(!html.includes('Current mission'));
+  assert.ok(!html.includes('Learning tools'));
+  assert.ok(!html.includes('XP on completion'));
 });
 
 test('concept lessons render one media card before their supporting text cards', () => {

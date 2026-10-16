@@ -1,54 +1,21 @@
 "use client";
 
 import * as React from "react";
-import { ArrowRight, CheckCircle2, NotebookPen, Pause, Play, RotateCcw, Sparkles, Target, Timer, Zap } from "lucide-react";
+import { CheckCircle2, Pause, Play, RotateCcw, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHydrated, useLocalJson, writeLocal } from "@/lib/local-store";
-import type { Support } from "@/lib/setup";
-import type { StageId } from "@/lib/stages";
-import { openPipNotes } from "./course-companion";
 
 type FocusSession = { duration: number; remaining: number; runningSince?: number };
 const DEFAULT_SESSION: FocusSession = { duration: 15 * 60, remaining: 15 * 60 };
 const SESSION_LENGTHS = [10, 15, 25] as const;
-
-const STAGE_MISSIONS: Partial<Record<StageId, string>> = {
-  explainer: "Build the idea",
-  worked: "Trace the example",
-  guided: "Practise with support",
-  lab: "Make a decision",
-  gate: "Prove your mastery",
-  review: "Strengthen your recall",
-};
 
 function formatTime(seconds: number) {
   const minutes = Math.floor(seconds / 60);
   return `${String(minutes).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
-export function LearningFocusDock({
-  courseId,
-  moduleTitle,
-  stage,
-  currentTitle,
-  nextTitle,
-  part,
-  total,
-  completed,
-  reward,
-  support,
-}: {
-  courseId: string;
-  moduleTitle: string;
-  stage: StageId;
-  currentTitle: string;
-  nextTitle: string;
-  part: number;
-  total: number;
-  completed: number;
-  reward: number;
-  support: Support;
-}) {
+/** Beside the lesson on wide screens: a voluntary focus sprint (the mission and tools cards were removed). */
+export function LearningFocusDock({ courseId }: { courseId: string }) {
   const key = `lms-focus:v1:${courseId}`;
   const stored = useLocalJson<FocusSession>(key, DEFAULT_SESSION);
   const hydrated = useHydrated();
@@ -59,7 +26,6 @@ export function LearningFocusDock({
   const remaining = Math.max(0, session.remaining - elapsed);
   const finished = !running && session.remaining === 0;
   const focusProgress = Math.min(1, Math.max(0, 1 - remaining / session.duration));
-  const courseProgress = Math.min(1, completed / Math.max(1, total));
 
   React.useEffect(() => {
     if (!running) return;
@@ -79,7 +45,6 @@ export function LearningFocusDock({
     ? save({ duration: session.duration, remaining })
     : save({ duration: session.duration, remaining: remaining || session.duration, runningSince: Date.now() });
   const reset = () => save({ duration: session.duration, remaining: session.duration });
-  const supportLabel = support === "extra" ? "Extra guidance" : support === "light" ? "Independent mode" : "Balanced guidance";
 
   return (
     <aside className="learning-focus-dock" aria-label="Learning focus tools">
@@ -102,30 +67,6 @@ export function LearningFocusDock({
         </div>
       </section>
 
-      <section className="focus-dock-card">
-        <div className="focus-dock-heading">
-          <span className="focus-dock-icon"><Target /></span>
-          <div><span>Current mission</span><small>{moduleTitle}</small></div>
-        </div>
-        <p className="focus-mission-kicker">{STAGE_MISSIONS[stage] ?? "Keep moving"}</p>
-        <h2>{currentTitle}</h2>
-        <div className="focus-reward"><Zap />+{reward} XP on completion</div>
-        <div className="focus-course-progress">
-          <div><span>Part {part} of {total}</span><strong>{Math.round(courseProgress * 100)}%</strong></div>
-          <div className="focus-meter" role="progressbar" aria-label="Module progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(courseProgress * 100)}><span style={{ width: `${courseProgress * 100}%` }} /></div>
-        </div>
-        <div className="focus-next"><span>Next</span><p>{nextTitle}</p><ArrowRight /></div>
-      </section>
-
-      {stage !== "gate" && <section className="focus-dock-card">
-        <div className="focus-dock-heading">
-          <span className="focus-dock-icon"><Sparkles /></span>
-          <div><span>Learning tools</span><small>{supportLabel}</small></div>
-        </div>
-        <div className="focus-tool-grid">
-          <button type="button" onClick={openPipNotes}><NotebookPen /><span><strong>Notebook</strong><small>Capture an insight</small></span></button>
-        </div>
-      </section>}
     </aside>
   );
 }

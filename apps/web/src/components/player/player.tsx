@@ -323,18 +323,7 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
             <SignalProvider courseId={module.course_id} enabled={enrolled}><LearningWorkspace key={`${module.module_id}:${stage}:${video ?? ""}`}>
               <TopicContext.Provider value={header}>{body}</TopicContext.Provider>
             </LearningWorkspace></SignalProvider>
-            <LearningFocusDock
-              courseId={module.course_id}
-              moduleTitle={module.title}
-              stage={stage}
-              currentTitle={title}
-              nextTitle={nextTitle}
-              part={Math.max(1, at + 1)}
-              total={parts.length}
-              completed={doneKeys.size}
-              reward={rewardFor(stage, !!part?.video)}
-              support={support}
-            />
+            <LearningFocusDock courseId={module.course_id} />
           </div>
         </main>
       </div>
