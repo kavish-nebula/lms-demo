@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { FIXTURE_TODAY, getAuthoredModuleIds, getCourse, getCourseIntro, getLearner, getPrecheck } from "@/data";
+import { FIXTURE_TODAY, getAuthoredModuleIds, getCourse, getLearner } from "@/data";
 import { EnrollFlow, type EnrollPhase } from "@/components/enroll/enroll-flow";
 
 type Params = { courseId: string };
 type Search = { step?: string };
 
-const STEPS: EnrollPhase[] = ["profile", "intro", "precheck", "customize"];
+const STEPS: EnrollPhase[] = ["fit", "customize"];
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { courseId } = await params;
@@ -16,24 +16,17 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 /**
  * Enrolling: /learn/courses/[courseId]/enroll (focused layout, no sidebar).
- * About you -> quick check -> customise -> build. `?step=` opens one step,
- * e.g. from "Edit setup" or "Retake the quick check".
+ * Pip's questions about this course -> customise -> build. "About you" comes before this, right
+ * after signing in (/learn/welcome). `?step=` opens one step, e.g. from
+ * "Edit setup".
  */
 export default async function EnrollPage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<Search> }) {
   const [{ courseId }, { step }] = await Promise.all([params, searchParams]);
-  const [course, precheck, learner, authored, intro] = await Promise.all([
-    getCourse(courseId),
-    getPrecheck(courseId),
-    getLearner(),
-    getAuthoredModuleIds(courseId),
-    getCourseIntro(courseId),
-  ]);
+  const [course, learner, authored] = await Promise.all([getCourse(courseId), getLearner(), getAuthoredModuleIds(courseId)]);
   if (!course) notFound();
   return (
     <EnrollFlow
       course={course}
-      introVideo={intro}
-      precheckItems={precheck?.items ?? []}
       name={learner.user.name.split(" ")[0] ?? learner.user.name}
       today={FIXTURE_TODAY}
       authoredModules={authored}

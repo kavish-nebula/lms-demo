@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import { planLesson } from "@/lib/learner-plan";
 import { Globe2, Lightbulb } from "lucide-react";
 import { StageShell, Callout } from "@/components/player/stage-shell";
 import { VideoLesson } from "@/components/player/video/video-lesson";
@@ -30,7 +31,14 @@ export function VideoExplainer({
   const videos = block.videos!;
   const video = videos.find((v) => v.id === videoId) ?? videos[0]!;
   const { watched, markWatched } = useWatchedVideos();
-  const world = adaptation.domain ? WORLD[video.lesson] : undefined;
+  // the planner's example for this learner (their field and role), else the field's template
+  const planned = planLesson(adaptation.plan, video.lesson)?.inYourWorld;
+  const template = adaptation.domain ? WORLD[video.lesson] : undefined;
+  const world = planned?.body
+    ? { label: planned.title || t("inYourWorld", { field: adaptation.domain?.label ?? t("yourWork") }), body: planned.body }
+    : template && adaptation.domain
+      ? { label: t("inYourWorld", { field: adaptation.domain.label }), body: template(adaptation.domain) }
+      : null;
 
   return (
     <StageShell
@@ -53,12 +61,12 @@ export function VideoExplainer({
 
       <div className="concept-text-cards" aria-label="Lesson reading cards">
         {adaptation.support === "extra" && <Callout className="concept-text-card" tone="worked" label="A little guidance before you begin" icon={<Lightbulb />}>
-          <p className="text-sm">{video.notes[0]} Pause whenever you need to, ask Pip about this slide, or try the experiment. Your place is saved.</p>
+          <p className="text-sm">{video.notes[0]} Pause whenever you need to, or ask Pip about this slide. Your place is saved.</p>
         </Callout>}
 
-        {world && adaptation.domain ? (
-          <Callout className="concept-text-card" tone="worked" label={t("inYourWorld", { field: adaptation.domain.label })} icon={<Globe2 />}>
-            {world(adaptation.domain)}
+        {world ? (
+          <Callout className="concept-text-card" tone="worked" label={world.label} icon={<Globe2 />}>
+            {world.body}
           </Callout>
         ) : null}
 

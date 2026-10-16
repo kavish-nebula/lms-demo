@@ -11,7 +11,7 @@ export function companionNudge(context: { phase: string; moduleTitle?: string; s
 
   switch (context.phase) {
     case "profile": return "Choose what fits you so the course can adapt.";
-    case "intro": return "Watch the preview, then continue to the quick check.";
+    case "intro": return "Watch the preview, then customise your course.";
     case "precheck": return "Answer independently so the course can match your starting level.";
     case "customize": return "Choose the support and pace that feel right today.";
     case "build": return "Your learning path is ready. Open the first module.";
@@ -62,7 +62,8 @@ export function coursePassages(course: Course, modules: ModuleContent[]): Course
 
 const STOP = new Set("a an the and or i my me you your it its is are was be to of for in on with can could would should please explain what how why does this that about meaning mean define definition tell help give course step example understand need want know use using work works".split(" "));
 const aliases: Record<string, string> = { tools: "tool", memories: "memory", hallucinations: "hallucination", agents: "agent", prompts: "prompt", llms: "llm", retrys: "retry", retries: "retry", gaurdrails: "guardrail", guardrails: "guardrail" };
-const tokens = (s: string) => [...new Set((s.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter((w) => (w.length > 2 || w === "ai") && !STOP.has(w)).map((w) => aliases[w] ?? w))];
+/** The meaningful words of a text, lower-cased and de-duplicated: the unit every match here counts in. */
+export const tokens = (s: string) => [...new Set((s.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter((w) => (w.length > 2 || w === "ai") && !STOP.has(w)).map((w) => aliases[w] ?? w))];
 
 /** Answers must match the teaching text, not merely an inherited module title. */
 export function findPassage(query: string, passages: CoursePassage[], moduleId?: string, videoId?: string, slideTitle?: string): CoursePassage | undefined {
@@ -88,24 +89,57 @@ export function findPassage(query: string, passages: CoursePassage[], moduleId?:
   return ranked[0]?.p;
 }
 
-export function companionReply(query: string, context: { phase: string; guidance: string; nextStep?: string; hint?: string; courseTitle: string; moduleId?: string; videoId?: string; slideTitle?: string; passages: CoursePassage[] }): { text: string; source?: Pick<CoursePassage, "title" | "href"> } {
-  if (["gate", "final-check", "precheck"].includes(context.phase)) return { text: PHASE_GUIDANCE[context.phase]! };
+/** Phases that check what the learner knows on their own: Pip explains the process, never the content. */
+export const RESTRICTED_PHASES = ["gate", "final-check", "precheck"];
+
+export type ReplyContext = { phase: string; guidance: string; nextStep?: string; hint?: string; courseTitle: string; moduleId?: string; videoId?: string; slideTitle?: string; passages: CoursePassage[] };
+export type CompanionAnswer = { text: string; source?: Pick<CoursePassage, "title" | "href"> };
+
+/** The answers that never need the model: assessment phases and the quick buttons ("Next step", "Hint"). */
+export function quickReply(query: string, context: Omit<ReplyContext, "passages" | "courseTitle">): CompanionAnswer | undefined {
+  if (RESTRICTED_PHASES.includes(context.phase)) return { text: PHASE_GUIDANCE[context.phase]! };
   const prompt = query.trim();
   if (/^(hint|give me a hint)[?.!]?$/i.test(prompt)) return { text: context.hint || context.nextStep || context.guidance };
   if (/^(next step|what should i do here|help me with this step|how does this work)[?.!]?$/i.test(prompt)) return { text: context.nextStep || context.guidance };
   if (/^(explain this(?: step| slide)?|what does this mean)[?.!]?$/i.test(prompt)) return { text: context.guidance };
+  return undefined;
+}
+
+/** The offline answer: a quick reply, else the best-matching course passage verbatim. */
+export function companionReply(query: string, context: ReplyContext): CompanionAnswer {
+  const quick = quickReply(query, context);
+  if (quick) return quick;
   const hit = findPassage(query, context.passages, context.moduleId, context.videoId, context.slideTitle);
   return hit ? { text: hit.text, source: { title: hit.title, href: hit.href } } : { text: `I couldn’t find a reliable match in ${context.courseTitle}. Try naming the course concept or ask “What should I do here?” I can help with this course only.` };
 }
 
+/**
+ * The passages most worth showing the model for one question, best first.
+ * Looser than findPassage (the model judges relevance), but still ranked by
+ * the words of the question, with the learner's current video and module first.
+ */
+export function relatedPassages(query: string, passages: CoursePassage[], where: { moduleId?: string; videoId?: string; slideTitle?: string }, limit = 6): CoursePassage[] {
+  const q = tokens(query);
+  const ranked = passages.map((p) => {
+    const body = new Set(tokens(`${p.title} ${p.text}`));
+    const hits = q.filter((w) => body.has(w)).length;
+    const here = (where.videoId && p.videoId === where.videoId ? 1.5 : 0) + (where.slideTitle && p.slideTitle === where.slideTitle ? 2 : 0) + (p.moduleId === where.moduleId ? 0.5 : 0);
+    return { p, hits, score: hits * 3 + here + (hits && p.kind === "definition" ? 1 : 0) + (hits && p.kind === "summary" ? 0.5 : 0) };
+  });
+  const matching = ranked.filter((r) => r.hits > 0).sort((a, b) => b.score - a.score);
+  // the slide on screen is always context, even when the question shares no words with it ("why does this matter?")
+  const onScreen = ranked.filter((r) => where.slideTitle && r.p.slideTitle === where.slideTitle && r.p.videoId === where.videoId).slice(0, 2);
+  return [...new Set([...onScreen, ...matching].map((r) => r.p))].slice(0, limit);
+}
+
 export const PHASE_GUIDANCE: Record<string, string> = {
   profile: "Choose the answers that fit you today. You can skip a question or change your preferences later. Your choices set examples, lesson order, and starting support.",
-  intro: "Watch the course preview to see what you will build. You can pause, replay, or read the transcript before continuing to the quick check.",
+  intro: "Watch the course preview to see what you will build. You can pause, replay, or read the transcript before customising your course.",
   precheck: "This quick check finds your starting point. Choose what you know, or use the unsure option. I can explain the process, but will leave the answers to you.",
   customize: "Review your starting plan. Choose your guidance level, session length, and study days. You can adjust your guidance in every module.",
   build: "Your course setup is ready. Open your journey to begin the first problem and meet the Orbit Outdoor team.",
   hook: "Explore the team's real problem. Make a prediction, watch what happens, and compare it with your initial idea. You can replay the scene.",
-  explainer: "Watch a short explanation, use the transcript when useful, then open the experiment to change one thing and observe the outcome.",
+  explainer: "Watch a short explanation, use the transcript when useful, and answer the quick checks along the way.",
   worked: "Predict what will happen before running the example. Step through the result and ask why each decision was made.",
   guided: "Accept the mission, work through one checkpoint at a time, and test your result. Ask for a hint whenever useful; help does not reduce your reward.",
   lab: "Read the evidence, make your decision, then inspect its consequence. Revise your approach before moving to the next situation.",
@@ -114,5 +148,5 @@ export const PHASE_GUIDANCE: Record<string, string> = {
   capstone: "This is your one course mini-project. Use the brief and checklist to assemble what you learned, test the edge cases, and save your project evidence before the final assessment.",
   "final-check": "Your final assessment follows the mini-project. Work independently and submit when ready. I can explain the process, but cannot provide answers or course hints here.",
   "wrap-up": "Reflect on what changed in your understanding and what you can now build. Save your reflection and revisit the scheduled practice challenges.",
-  course: "Start with your profile, course preview, and quick check. Then follow the mission trail through the modules. One mini-project comes immediately before the final assessment.",
+  course: "Start with the course preview and set up how the course fits you. Then follow the mission trail through the modules. One mini-project comes immediately before the final assessment.",
 };

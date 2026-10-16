@@ -20,17 +20,24 @@ export function AdaptedStrip({
   adaptation,
   enrolled,
   setupHref,
+  personal,
+  leading,
 }: {
   stage: StageId;
   adaptation: Adaptation;
   enrolled: boolean;
   setupHref: string;
+  /** the topic's story rewritten in the learner's world (shown), or being rewritten */
+  personal?: { shown: boolean; writing: boolean; organisation?: string };
+  /** a control shown at the start of the row (the outline toggle) */
+  leading?: React.ReactNode;
 }) {
   const t = useTranslations("player");
 
   if (!enrolled) {
     return (
       <div className="mx-auto mb-6 flex w-full max-w-3xl flex-wrap items-center gap-3 rounded-card border border-brand-line bg-brand-soft p-3 pl-4 text-sm">
+        {leading}
         <Sparkles className="size-4 shrink-0 text-brand-ink" aria-hidden />
         <span className="min-w-0 flex-1">{t("previewBanner")}</span>
         <Button asChild size="sm" variant="brand">
@@ -42,6 +49,8 @@ export function AdaptedStrip({
 
   const chips: { text: string; why: string }[] = [];
   const a = adaptation;
+  if (personal?.shown) chips.push({ text: personal.organisation ? t("chipStoryAt", { organisation: personal.organisation }) : t("chipStory"), why: t("whyStory") });
+  else if (personal?.writing) chips.push({ text: t("chipStoryWriting"), why: t("whyStoryWriting") });
   if (stage === "hook" && a.roleLabel) chips.push({ text: t("chipRole", { role: a.roleLabel }), why: t("whyRole") });
   if (stage === "explainer" && a.domain) chips.push({ text: t("chipWorld", { field: a.domain.label }), why: t("whyWorld") });
   if (stage === "explainer" && a.analogyOpen) chips.push({ text: t("chipAnalogy"), why: t("whyAnalogy") });
@@ -51,10 +60,11 @@ export function AdaptedStrip({
   if (stage !== "gate" && a.support !== "standard")
     chips.push({ text: a.support === "extra" ? t("chipExtra") : t("chipLight"), why: t("whySupport") });
 
-  if (!chips.length) return null;
+  if (!chips.length) return leading ? <div className="mx-auto mb-6 flex w-full max-w-3xl items-center">{leading}</div> : null;
 
   return (
     <div className="mx-auto mb-6 flex w-full max-w-3xl flex-wrap items-center gap-2" aria-label={t("adaptedFor")}>
+      {leading}
       <span className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-faint">
         <Sparkles className="size-3.5 text-brand-ink" aria-hidden />
         {t("adaptedFor")}

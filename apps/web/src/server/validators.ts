@@ -10,18 +10,74 @@ const free = z
   .nullish()
   .transform((v) => v ?? undefined);
 
-export const AnswersIn = z.object({
-  domain: answer,
-  role: answer,
-  goal: answer,
-  experience: answer,
-  firstStep: answer,
-  style: answer,
-  domainOther: free,
-  roleOther: free,
-});
+const transcript = z
+  .array(z.object({ slot: z.string().max(20), q: z.string().max(220), a: z.string().max(200) }))
+  .max(16)
+  .optional();
+
+/**
+ * The profile answers, shape only. Which questions apply depends on earlier
+ * answers (the field decides the rest, and a typed field may be matched to a
+ * pack by the model), so the services normalise them with the learner's
+ * derived result before anything is stored or planned from (normalizeAnswers):
+ * answers from a branch that no longer applies, and values that are not
+ * options, are dropped.
+ */
+export const AnswersIn = z
+  .object({
+    domain: answer,
+    role: answer,
+    years: answer,
+    tools: z.array(z.string().max(40)).max(8).nullish(),
+    firstJob: answer,
+    studyLevel: answer,
+    studyField: answer,
+    project: answer,
+    goal: answer,
+    experience: answer,
+    coding: answer,
+    firstStep: answer,
+    style: answer,
+    domainOther: free,
+    roleOther: free,
+    studyFieldOther: free,
+    firstJobOther: free,
+    roleKind: z.enum(["engineer", "lead", "manager", "student", "other"]).optional(),
+    interview: transcript,
+    known: z.array(z.string().max(12)).max(12).optional(),
+    expect: z.string().trim().max(200).optional(),
+    courseInterview: transcript,
+    field: z.enum(["it", "manufacturing", "retail", "finance", "healthcare", "education"]).optional(),
+    extra: z
+      .record(z.string().max(12), z.string().max(12))
+      .refine((r) => Object.keys(r).length <= 4, "at most 4 follow-up answers")
+      .optional(),
+  });
 
 export const ProfileIn = z.object({ answers: AnswersIn, needs: z.array(z.enum(["text", "motion", "none"])).max(3) });
+
+/** One step of "About you": the answers so far. */
+export const ProfilingNextIn = ProfileIn;
+
+/** One turn of the "About you" interview: the answers so far, and what the learner did with the last question. */
+export const InterviewTurnIn = z.object({
+  answers: AnswersIn,
+  needs: z.array(z.enum(["text", "motion", "none"])).max(3),
+  last: z
+    .object({
+      slot: z.string().min(1).max(20),
+      q: z.string().max(200),
+      value: z.union([z.string().max(40), z.array(z.string().max(40)).max(8)]).optional(),
+      label: z.string().max(80).optional(),
+      text: z.string().trim().max(200).optional(),
+      kind: z.enum(["engineer", "lead", "manager", "student", "other"]).optional(),
+      skipped: z.boolean().optional(),
+    })
+    .nullish(),
+});
+
+/** One turn of a course's enrolment questions: the course answers so far, and what the learner did with the last one. */
+export const CourseFitIn = InterviewTurnIn.omit({ needs: true });
 
 export const PaceIn = z
   .object({ sessionMinutes: z.number().int().min(5).max(120), studyDays: z.array(z.number().int().min(0).max(6)).max(7) })
@@ -109,4 +165,19 @@ export const ProjectCheckBody = z.object({
       }),
     )
     .max(100),
+});
+
+/** One message to Pip. Lengths match the input box; the history is the browser's copy, so it is capped too. */
+const stepText = (max: number) => z.string().max(max).optional();
+export const CompanionBody = z.object({
+  message: z.string().trim().min(1).max(600),
+  phase: z.string().max(40),
+  moduleId: z.string().max(40).optional(),
+  step: z
+    .object({ title: stepText(200), guidance: stepText(1000), hint: stepText(1000), videoId: stepText(80), slideTitle: stepText(200) })
+    .optional(),
+  history: z
+    .array(z.object({ role: z.enum(["user", "assistant"]), text: z.string().max(1500) }))
+    .max(8)
+    .default([]),
 });

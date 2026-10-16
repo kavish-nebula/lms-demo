@@ -28,7 +28,7 @@ export function Replay({ block, moduleId, voice, guessed, reduce, onDone }: { bl
     let alive = true;
     let timer = 0;
     const words = frames[k]!.caption.split(/\s+/).length;
-    void say(`/audio/hook-${moduleId}-r${k}.mp3`).then((heard) => {
+    void say(block.audio ? (block.audio[`r${k}`] ?? "") : `/audio/hook-${moduleId}-r${k}.mp3`).then((heard) => {
       if (!alive) return;
       timer = window.setTimeout(
         () => (k + 1 < frames.length ? setK(k + 1) : setTold(true)),
@@ -39,7 +39,7 @@ export function Replay({ block, moduleId, voice, guessed, reduce, onDone }: { bl
       alive = false;
       window.clearTimeout(timer);
     };
-  }, [k, frames, say, moduleId]);
+  }, [k, frames, say, moduleId, block.audio]);
 
   const go = React.useCallback(
     (j: number) => {

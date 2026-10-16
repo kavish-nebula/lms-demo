@@ -71,6 +71,7 @@ import { ResumeCard } from "@/components/learn/resume-card";
 import { CredentialCard } from "@/components/learn/credential-card";
 import { UserAvatar } from "@/components/shell/user-badge";
 import { STAGE_ORDER } from "@/lib/stages";
+import { AssistantAvatar } from "@/components/learning/assistant-avatar";
 import type { Course, Credential, Pipeline } from "@/data/types";
 
 const SECTIONS = [
@@ -87,6 +88,7 @@ const SECTIONS = [
   ["overlays", "Overlays"],
   ["data", "Table & states"],
   ["composites", "Composites"],
+  ["pip", "Assistant"],
 ] as const;
 
 const DEMO_PIPELINE: Pipeline = {
@@ -545,6 +547,18 @@ export function KitShowcase({
             ) : null}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               <CredentialCard credential={credential} />
+            </div>
+          </Section>
+
+          <Section id="pip" title="Assistant">
+            <p className="max-w-2xl text-sm text-ink-muted">Pip, the course assistant: a round accent badge with a chat mark. It follows the field palette. Thinking shows typing dots; other reactions a single pulse; none under reduced motion.</p>
+            <div className="flex flex-wrap items-end gap-6">
+              {([["size-8", "idle"], ["size-10", "point"], ["size-12", "think"], ["size-14", "celebrate"]] as const).map(([size, reaction]) => (
+                <figure key={size} className="flex flex-col items-center gap-2">
+                  <AssistantAvatar className={size} reaction={reaction} />
+                  <figcaption className="text-xs text-ink-muted">{reaction}</figcaption>
+                </figure>
+              ))}
             </div>
           </Section>
         </main>

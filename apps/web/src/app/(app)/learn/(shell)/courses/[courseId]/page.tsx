@@ -2,10 +2,8 @@ import { CourseJourney } from "@/components/learning/course-journey";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { Award, Clock, Signal, Star } from "lucide-react";
 import { getCourse, getModule } from "@/data";
 import { moduleOutline } from "@/lib/module-outline";
-import { Surface } from "@/components/kit/surface";
 import { SectionNav } from "@/components/course/section-nav";
 import {
   AboutSection,
@@ -21,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return { title: course?.title ?? "Course" };
 }
 
-/** S3 Course details (Coursera layout): hero, stats strip, sticky section nav, sections. */
+/** S3 Course details (Coursera layout): hero, sticky section nav, sections. */
 export default async function CoursePage({ params }: { params: Promise<Params> }) {
   const { courseId } = await params;
   const course = await getCourse(courseId);
@@ -46,24 +44,6 @@ export default async function CoursePage({ params }: { params: Promise<Params> }
   return (
     <div className="flex flex-col gap-10">
       <CourseJourney course={course} />
-
-      {/* ---------------- stats strip ---------------- */}
-      <Surface pad="none" className="grid grid-cols-1 divide-y divide-line sm:grid-cols-2 sm:divide-y-0 xl:grid-cols-4 xl:divide-x">
-        {[
-          { icon: <Award />, title: t("statModules", { count: course.modules.length }), body: t("statModulesBody") },
-          { icon: <Star />, title: t("noRatingsYet"), body: t("statRatingsBody") },
-          { icon: <Signal />, title: t("statLevel", { level: course.level }), body: t("statLevelBody") },
-          { icon: <Clock />, title: t("statSchedule"), body: t("statScheduleBody", { hours: course.estimated_hours }) },
-        ].map((s) => (
-          <div key={s.title} className="flex gap-3 p-5">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand-ink [&_svg]:size-4">{s.icon}</span>
-            <div>
-              <div className="font-semibold">{s.title}</div>
-              <div className="text-sm text-ink-muted">{s.body}</div>
-            </div>
-          </div>
-        ))}
-      </Surface>
 
       <SectionNav sections={sections} course={course} heroId="course-hero" label={t("sectionsLabel")} />
 

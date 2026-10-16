@@ -5,13 +5,14 @@ import { api, storeProfile, useProfileData, type ProfileView } from "@/lib/api";
 import { writeLocal } from "@/lib/local-store";
 import { PREFS_KEY } from "@/lib/prefs";
 import type { SetupAnswers } from "@/lib/setup";
+import type { ProfileDerived } from "@/lib/profiling/derived";
 
 /**
  * The learner profile: answered once, at the first enrolment, and reused for
  * every course after that. Editable on the Profile page. Stored on the server
  * (PUT /api/v1/profile); the comfort answers also set this browser's display.
  */
-export type Profile = { answers: SetupAnswers; needs: string[]; at: string; version: 1 };
+export type Profile = { answers: SetupAnswers; needs: string[]; derived?: ProfileDerived | null; at: string; version: 1 };
 
 /** Comfort answers become the app's display settings (text size, motion). */
 export function applyComfort(needs: string[]) {
@@ -28,16 +29,16 @@ export function applyComfort(needs: string[]) {
 }
 
 export function useProfile() {
-  const { profile: stored, ready } = useProfileData();
+  const { profile: stored, ready, loaded } = useProfileData();
   const profile: Profile | null = React.useMemo(() => (stored ? { ...stored, version: 1 } : null), [stored]);
 
   const save = React.useCallback(async (answers: SetupAnswers, needs: string[]) => {
     // optimistic, then the server's copy
-    await storeProfile({ answers, needs, at: new Date().toISOString() });
+    await storeProfile({ answers, needs, derived: stored?.derived ?? null, at: new Date().toISOString() });
     const res = await api<{ profile: ProfileView }>("/api/v1/profile", { method: "PUT", body: { answers, needs } });
     await storeProfile(res.profile);
     if (needs.length) applyComfort(needs.includes("none") ? [] : needs);
-  }, []);
+  }, [stored?.derived]);
 
-  return { profile, ready, save };
+  return { profile, ready, loaded, save };
 }

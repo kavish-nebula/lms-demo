@@ -247,6 +247,36 @@
 }
 
 /* ============================================================
+   Field palettes: <html data-accent="…"> from the learner's field
+   (lib/field-accent.ts). Only the accent family changes; students and
+   typed fields keep the brand indigo. Contrast, checked for each field:
+   light ink ≥ 5.6:1 on --bg, white on --accent-deep ≥ 5.5:1 in both
+   themes, dark ink ≥ 10:1 on the aurora --bg.
+   ============================================================ */
+[data-accent] {
+  --accent-soft: color-mix(in srgb, var(--accent) 9%, #ffffff);
+  --accent-line: color-mix(in srgb, var(--accent) 35%, #ffffff);
+  --spotlight: color-mix(in srgb, var(--accent) 9%, transparent);
+}
+[data-theme='aurora'][data-accent] {
+  --accent-soft: color-mix(in srgb, var(--accent) 14%, transparent);
+  --accent-line: color-mix(in srgb, var(--accent) 40%, transparent);
+  --spotlight: color-mix(in srgb, var(--accent) 13%, transparent);
+}
+[data-accent='it'] { --accent: #2f7be0; --accent-ink: #1d5fc0; --accent-deep: #1c56c4; }
+[data-accent='manufacturing'] { --accent: #c4620a; --accent-ink: #9c4a05; --accent-deep: #a84f06; }
+[data-accent='retail'] { --accent: #0d8a79; --accent-ink: #08695c; --accent-deep: #0a7465; }
+[data-accent='finance'] { --accent: #2e8a4a; --accent-ink: #1f6b37; --accent-deep: #25753e; }
+[data-accent='healthcare'] { --accent: #d23f66; --accent-ink: #ad2a4f; --accent-deep: #b8325a; }
+[data-accent='education'] { --accent: #9a45c4; --accent-ink: #7c30a6; --accent-deep: #8436b0; }
+[data-theme='aurora'][data-accent='it'] { --accent: #5c9cf0; --accent-ink: #9cc3fa; }
+[data-theme='aurora'][data-accent='manufacturing'] { --accent: #e8853a; --accent-ink: #f5b77d; }
+[data-theme='aurora'][data-accent='retail'] { --accent: #2fb8a5; --accent-ink: #7fdccd; }
+[data-theme='aurora'][data-accent='finance'] { --accent: #4cb36c; --accent-ink: #94dba8; }
+[data-theme='aurora'][data-accent='healthcare'] { --accent: #ec6d8e; --accent-ink: #f7a9bd; }
+[data-theme='aurora'][data-accent='education'] { --accent: #bd7ae0; --accent-ink: #dcb3f2; }
+
+/* ============================================================
    Base
    ============================================================ */
 html {

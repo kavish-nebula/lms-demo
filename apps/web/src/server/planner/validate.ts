@@ -2,6 +2,7 @@ import "server-only";
 import type { LearnerPlan, PlanLessonT, PlanModuleT } from "@/lib/learner-plan";
 import type { Support, SupportOverride } from "@/lib/setup";
 import type { CourseContext } from "./context";
+import { practiceAfterExamples } from "@/lib/topics";
 
 /**
  * Checks a plan against the real course before anyone sees it. The schema
@@ -62,6 +63,12 @@ export function validatePlan(
     if (!same || !hookOk || !tailOk) {
       issues.push(`module ${cm.id}: topic order ${JSON.stringify(order)} rejected`);
       order = base.topicOrder;
+    }
+    // guided practice comes after the explanation and the worked example, whatever the model chose
+    const repaired = practiceAfterExamples(order);
+    if (repaired.join() !== order.join()) {
+      issues.push(`module ${cm.id}: guided practice moved after the worked example`);
+      order = repaired;
     }
     // "see a full example first" is the learner's own choice
     const exampleFirst = (o: readonly string[]) => o.includes("worked") && o.includes("explainer") && o.indexOf("worked") < o.indexOf("explainer");

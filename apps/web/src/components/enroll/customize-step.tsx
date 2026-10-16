@@ -15,18 +15,18 @@ import { Segmented } from "@/components/kit/segmented";
 import { Button } from "@/components/ui/button";
 import { LessonOrderPreview } from "@/components/enroll/lesson-order-preview";
 import {
-  QUESTIONS,
   adaptationOf,
+  questionById,
   type SetupAnswers,
 } from "@/lib/setup";
 import type { Course } from "@/data/types";
 
 export type Pace = { sessionMinutes: number; studyDays: number[]; addToPlan: boolean };
 
-const q = (id: string) => QUESTIONS.find((x) => x.id === id)!;
+const firstStepQ = questionById("firstStep");
 
 /**
- * Customise the course: every change the profile and the quick check made,
+ * Customise the course: every change the profile made,
  * shown as a control the learner can adjust, with a live sample beside it.
  * Nothing is saved until "Build my course" (or "Save changes" when editing).
  */
@@ -48,7 +48,7 @@ export function CustomizeStep({
   const t = useTranslations("enroll");
   const a = adaptationOf(answers);
   const set = (patch: Partial<SetupAnswers>) => setAnswers((x) => ({ ...x, ...patch }));
-  const orderLabel = q("firstStep").options.find((o) => o.v === (answers.firstStep ?? "idea"))!.label;
+  const orderLabel = firstStepQ.options.find((o) => o.v === (answers.firstStep ?? "idea"))!.label;
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -66,7 +66,7 @@ export function CustomizeStep({
             aria-label={t("cLessonOrder")}
             value={answers.firstStep ?? "idea"}
             onValueChange={(v) => set({ firstStep: v })}
-            options={q("firstStep").options.map((o) => ({ value: o.v, label: o.label }))}
+            options={firstStepQ.options.map((o) => ({ value: o.v, label: o.label }))}
           />
           <LessonOrderPreview order={a.order} />
         </Section>

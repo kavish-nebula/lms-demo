@@ -10,7 +10,9 @@ import { Shot, actLabel, trackOf } from "./shots";
 import type { Sfx } from "./sfx";
 import type { Voice } from "./voice";
 
-const clip = (moduleId: string, i: number, then = false) => `/audio/hook-${moduleId}-s${i}${then ? "-then" : ""}.mp3`;
+/** A scene's narration clip: the learner's own when the hook was rewritten for them, else the authored one. */
+const clip = (moduleId: string, i: number, then = false, audio?: Record<string, string>) =>
+  audio ? (audio[`s${i}${then ? "-then" : ""}`] ?? "") : `/audio/hook-${moduleId}-s${i}${then ? "-then" : ""}.mp3`;
 
 /**
  * A line of narration whose words light up as the voice reaches them, so the
@@ -117,23 +119,23 @@ function FilmScene({
   // the scene's line, then (once the learner has acted) its payoff line
   React.useEffect(() => {
     let alive = true;
-    void say(clip(moduleId, index)).then(() => {
+    void say(clip(moduleId, index, false, block.audio)).then(() => {
       if (alive) setHeard((h) => h ?? "say");
     });
     return () => {
       alive = false;
     };
-  }, [say, moduleId, index]);
+  }, [say, moduleId, index, block.audio]);
   React.useEffect(() => {
     if (!acted || !then) return;
     let alive = true;
-    void say(clip(moduleId, index, true)).then(() => {
+    void say(clip(moduleId, index, true, block.audio)).then(() => {
       if (alive) setHeard("then");
     });
     return () => {
       alive = false;
     };
-  }, [acted, then, say, moduleId, index]);
+  }, [acted, then, say, moduleId, index, block.audio]);
 
   // the scene clock: runs to the next stop (a gate, or the start of an un-held stretch), then waits
   React.useEffect(() => {

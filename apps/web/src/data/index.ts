@@ -14,7 +14,6 @@ import agentM4 from "@lms/fixtures/module-ai-agent-m4.json";
 import agentM5 from "@lms/fixtures/module-ai-agent-m5.json";
 import agentM6 from "@lms/fixtures/module-ai-agent-m6.json";
 import agentVideos from "@lms/fixtures/videos-ai-agent.json";
-import agentIntro from "@lms/fixtures/intro-ai-agent.json";
 import agentPrecheck from "@lms/fixtures/precheck-ai-agent.json";
 import agentFinale from "@lms/fixtures/finale-ai-agent.json";
 import agentProject from "@lms/fixtures/project-ai-agent.json";
@@ -39,8 +38,7 @@ const finales: FinaleContent[] = [agentFinale as unknown as FinaleContent];
 const prechecks: PrecheckContent[] = [agentPrecheck as unknown as PrecheckContent];
 /** The mini project workspace, for courses whose project is built in the browser. */
 const projects: ProjectContent[] = [agentProject as unknown as ProjectContent];
-/** The course preview video shown while enrolling, between "About you" and the quick check. */
-const intros: { course_id: string; video: ConceptVideo }[] = [agentIntro as unknown as { course_id: string; video: ConceptVideo }];
+/** The course preview video shown while enrolling, before customising. */
 
 function videosFor(courseId: string, moduleId: string): ConceptVideo[] {
   return (courseVideos.find((v) => v.course_id === courseId)?.videos ?? []).filter((v) => v.module === moduleId);
@@ -148,11 +146,6 @@ export async function getPrecheck(courseId: string): Promise<PrecheckContent | u
 /** The mini project workspace (files and sample tickets), if the course has one. */
 export async function getProject(courseId: string): Promise<ProjectContent | undefined> {
   return projects.find((p) => p.course_id === courseId);
-}
-
-/** The course preview video, if the course has one. */
-export async function getCourseIntro(courseId: string): Promise<ConceptVideo | undefined> {
-  return intros.find((i) => i.course_id === courseId)?.video;
 }
 
 export { getBlock } from "./client";

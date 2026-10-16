@@ -109,6 +109,10 @@ export type HookBlock = BlockBase & {
   wrap_correct: string;
   wrap_wrong: string;
   wrap_point: string;
+  /** rewritten for the learner (server/adapt): the organisation the scenes show (their website, helpdesk, team chat) */
+  brand?: { name: string; short: string };
+  /** rewritten for the learner (server/adapt): the narration clips by line ("open", "s0", "s0-then", "r0"); a missing line plays silently */
+  audio?: Record<string, string>;
 };
 
 export type Beat = { id: string; narration: string; why: Record<string, string>; check: McItem | null };
@@ -165,6 +169,8 @@ export type ConceptVideo = {
   slides: VideoSlide[];
   midQuiz: VideoQuiz[];
   endQuiz: VideoQuiz[];
+  /** rewritten for the learner (server/adapt): each slide's clip ("" plays silently with captions) */
+  audio?: string[];
 };
 
 export type ExplainerBlock = BlockBase & {

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { clearLocal, useLocalJson, writeLocal } from "@/lib/local-store";
 import { api, refreshEnrollments, storeProfile } from "@/lib/api";
 import { Surface } from "@/components/kit/surface";
+import { TOUR_KEY } from "@/components/onboarding/pip-tour";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ function save(p: Prefs) {
  */
 export function SettingsForm({ languages }: { languages: { code: string; label: string; available: boolean }[] }) {
   const t = useTranslations("settings");
+  const tTour = useTranslations("tour");
   const stored = useLocalJson<Partial<Prefs>>(KEY, {});
   const prefs: Prefs = { ...DEFAULTS, ...stored };
 
@@ -123,6 +125,23 @@ export function SettingsForm({ languages }: { languages: { code: string; label: 
           checked={prefs.microphone}
           onChange={(v) => update("microphone", v)}
         />
+      </Surface>
+
+      <Surface pad="lg" className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="font-semibold">{tTour("replay")}</h2>
+          <p className="text-sm text-ink-muted">{tTour("replayHelp")}</p>
+        </div>
+        <Button
+          variant="outline"
+          className="bg-transparent"
+          onClick={() => {
+            writeLocal(TOUR_KEY, null);
+            toast.success(tTour("replayed"));
+          }}
+        >
+          {tTour("replay")}
+        </Button>
       </Surface>
 
       <Surface pad="lg" className="flex flex-wrap items-center justify-between gap-4 border-err-line">

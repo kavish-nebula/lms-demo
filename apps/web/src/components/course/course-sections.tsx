@@ -13,7 +13,6 @@ import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Award,
-  BarChart3,
   Check,
   ChevronDown,
   Clock,
@@ -40,7 +39,10 @@ import { useWatchedVideos } from "@/components/player/video/watched";
 import { useEnrollment } from "@/lib/enrollment";
 import { flatParts, type ModuleSection } from "@/lib/module-outline";
 import { useCourseProgress, type ModuleProgress } from "@/lib/course-progress";
-import { QUESTIONS, lessonOrder } from "@/lib/setup";
+import { lessonOrder, questionById, questionsFor } from "@/lib/setup";
+
+// the questions as a learner who has not answered yet would meet them; the rest follow from their field
+const FIRST_QUESTIONS = questionsFor({});
 import { STAGE_META, type StageId } from "@/lib/stages";
 import { moduleTopics } from "@/lib/topics";
 import type { Course } from "@/data/types";
@@ -279,9 +281,9 @@ export function MethodSection({ course }: { course: Course }) {
             <Sparkles className="size-4 text-brand-ink" aria-hidden />
             <h3 className="text-lg font-semibold">{t("adaptTitle")}</h3>
           </div>
-          <p className="text-ink-muted">{t("adaptBody", { count: QUESTIONS.length })}</p>
+          <p className="text-ink-muted">{t("adaptBody")}</p>
           <ol className="grid gap-2 sm:grid-cols-2">
-            {QUESTIONS.map((q, i) => (
+            {FIRST_QUESTIONS.map((q, i) => (
               <li key={q.id} className="flex items-start gap-3 rounded-lg border border-line bg-panel-2/40 p-3">
                 <span className="font-mono text-xs text-ink-faint">{String(i + 1).padStart(2, "0")}</span>
                 <span>
@@ -295,10 +297,10 @@ export function MethodSection({ course }: { course: Course }) {
         <Surface pad="lg" className="flex flex-col gap-4">
           <h3 className="font-semibold">{t("tryOneAnswer")}</h3>
           <p id="try-q" className="text-sm text-ink-muted">
-            {QUESTIONS.find((q) => q.id === "firstStep")!.q}
+            {questionById("firstStep").q}
           </p>
           <div role="radiogroup" aria-labelledby="try-q" className="flex flex-wrap gap-1.5">
-            {QUESTIONS.find((q) => q.id === "firstStep")!.options.map((o) => (
+            {questionById("firstStep").options.map((o) => (
               <button
                 key={o.v}
                 type="button"
@@ -406,7 +408,6 @@ export function OutcomesSection({ course }: { course: Course }) {
         </Surface>
         ) : null}
       </div>
-      <EmptyState icon={<BarChart3 />} title={t("careerEmptyTitle")} description={t("careerEmptyBody")} />
     </section>
   );
 }

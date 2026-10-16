@@ -30,7 +30,6 @@ const rules = load('apps/web/src/lib/learning-rules.ts');
 const companion = load('apps/web/src/lib/companion.ts');
 const state = load('apps/web/src/lib/learning-state.ts');
 const gameRules = load('apps/web/src/lib/gamification.ts');
-const { EXPERIMENTS } = load('apps/web/src/data/experiments.ts');
 const memory = new Map();
 global.localStorage = { getItem: (k) => memory.get(k) ?? null, setItem: (k, v) => memory.set(k, v), removeItem: (k) => memory.delete(k) };
 const attempt = (id, correct, helped = false, moduleId = 'm1') => ({ id, correct, helped, moduleId, at: '2026-10-12T10:00:00Z' });
@@ -138,16 +137,6 @@ test('contextual help uses the current step and a distinct authored hint', () =>
   assert.equal(companion.companionReply('What should I do here?', ctx).text, ctx.guidance);
   assert.equal(companion.companionReply('Give me a hint', ctx).text, ctx.hint);
 });
-test('all six experiments have distinct normal and unexpected outcomes', () => {
-  assert.equal(Object.keys(EXPERIMENTS).length, 6);
-  for (const ex of Object.values(EXPERIMENTS)) {
-    assert.equal(ex.choices.length, 3);
-    assert.equal(ex.outcomes.length, 3);
-    assert.equal(ex.edge.length, 3);
-    assert.notEqual(ex.outcomes[2], ex.edge[2]);
-    assert.ok(ex.prediction && ex.transfer && ex.explanations.every(Boolean));
-  }
-});
 test('course retains exactly one mini-project immediately before final assessment', () => {
   assert.deepEqual(course.finale.steps.map((s) => s.id), ['capstone','final-check','wrap-up']);
   assert.ok(course.modules.every((m) => !m.stages.includes('project')));
@@ -181,19 +170,6 @@ test('backend module completion and existing finale records drive course progres
   assert.equal(afterProject.finale[1].locked, false);
 });
 
-test('all six experiment workspaces server-render with accessible controls', () => {
-  const React = require('react');
-  const { renderToString } = require('react-dom/server');
-  const { ExperimentLab } = load('apps/web/src/components/learning/experiment-lab.tsx');
-  for (const moduleId of Object.keys(EXPERIMENTS)) {
-    const html = renderToString(React.createElement(ExperimentLab, { courseId: 'ai-agent', moduleId }));
-    assert.ok(html.includes('Run experiment'));
-    assert.ok(html.includes('Safe simulation'));
-    assert.ok(html.includes(`prediction-${moduleId}`));
-    assert.equal((html.match(/type="radio"/g) ?? []).length, 3);
-  }
-});
-
 test('the lesson workspace keeps adaptation and navigation in a compact focus bar', () => {
   const React = require('react');
   const { renderToString } = require('react-dom/server');
@@ -211,7 +187,7 @@ test('the wide learning dock keeps the current mission, focus sprint and course 
   const { renderToString } = require('react-dom/server');
   const { LearningFocusDock } = load('apps/web/src/components/learning/learning-focus-dock.tsx');
   const html = renderToString(React.createElement(LearningFocusDock, {
-    courseId: 'ai-agent', moduleTitle: 'Agent basics', stage: 'explainer', currentTitle: 'What is an agent?', nextTitle: 'Agents vs. chatbots', part: 2, total: 10, completed: 1, reward: 10, support: 'extra', experimentAvailable: true,
+    courseId: 'ai-agent', moduleTitle: 'Agent basics', stage: 'explainer', currentTitle: 'What is an agent?', nextTitle: 'Agents vs. chatbots', part: 2, total: 10, completed: 1, reward: 10, support: 'extra',
   }));
   assert.ok(html.includes('Focus sprint'));
   assert.ok(html.includes('Current mission'));
@@ -221,7 +197,7 @@ test('the wide learning dock keeps the current mission, focus sprint and course 
   assert.ok(html.includes('Extra guidance'));
   assert.ok(!html.includes('Ask Pip'));
   assert.ok(html.includes('Notebook'));
-  assert.ok(html.includes('Try the lab'));
+  assert.ok(!html.includes('Try the lab')); // the experiment lab was removed
 });
 
 test('concept lessons render one media card before their supporting text cards', () => {
@@ -310,17 +286,19 @@ test('scenario delivery opens with roleplay and retains adaptive bonus cases', (
 test('course journey server-renders the real module trail and single final project', () => {
   const React = require('react');
   const { renderToString } = require('react-dom/server');
+  const { NextIntlClientProvider } = require('next-intl');
+  const messages = JSON.parse(fs.readFileSync(path.join(root, 'packages/i18n/en.json'), 'utf8'));
   const { CourseJourney } = load('apps/web/src/components/learning/course-journey.tsx');
-  const html = renderToString(React.createElement(CourseJourney, { course }));
+  const html = renderToString(React.createElement(NextIntlClientProvider, { locale: 'en', messages, timeZone: 'UTC' }, React.createElement(CourseJourney, { course })));
   assert.ok(html.includes('Make this course mine'));
   assert.ok(html.includes('/finale/capstone'));
   assert.equal((html.match(/class="stair-step"/g) ?? []).length, 6);
   assert.equal((html.match(/data-state="locked"/g) ?? []).length, 0);
-  assert.ok(html.includes('Say hello to Pip'));
+  assert.ok(!html.includes('Try an experiment')); // the experiment lab was removed
   assert.ok(html.includes('FIRST MISSION'));
   assert.ok(html.includes('/enroll'));
   assert.ok(html.includes('Scout’s Brain'));
-  assert.ok(html.includes('Capability badges'));
+  assert.ok(!html.includes('Capability badges')); // the badges panel was removed from the course page
 });
 
 test('game progress rewards real learning and preserves rewards when hints were used', () => {

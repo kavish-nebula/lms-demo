@@ -6,7 +6,7 @@
 export const PREFS_KEY = "lms-prefs";
 
 export function prefsScript(allowLight: boolean) {
-  return `(function(){try{var p=JSON.parse(localStorage.getItem('${PREFS_KEY}')||'{}');var r=document.documentElement;r.classList.toggle('text-lg',p.textScale==='large');r.classList.toggle('reduce-motion',!!p.reduceMotion);${
+  return `(function(){try{var p=JSON.parse(localStorage.getItem('${PREFS_KEY}')||'{}');var r=document.documentElement;r.classList.toggle('text-lg',p.textScale==='large');r.classList.toggle('reduce-motion',!!p.reduceMotion);if(p.accent)r.setAttribute('data-accent',p.accent);else r.removeAttribute('data-accent');${
     allowLight ? "if(p.theme==='light')r.removeAttribute('data-theme');else r.setAttribute('data-theme','aurora');" : ""
   }}catch(e){}})();`;
 }
@@ -17,10 +17,14 @@ export function applyPrefs(allowLight: boolean) {
       textScale?: string;
       reduceMotion?: boolean;
       theme?: string;
+      accent?: string | null;
     };
     const r = document.documentElement;
     r.classList.toggle("text-lg", p.textScale === "large");
     r.classList.toggle("reduce-motion", !!p.reduceMotion);
+    // the learner's field colour (lib/field-accent.ts)
+    if (p.accent) r.setAttribute("data-accent", p.accent);
+    else r.removeAttribute("data-accent");
     if (allowLight) {
       if (p.theme === "light") r.removeAttribute("data-theme");
       else r.setAttribute("data-theme", "aurora");

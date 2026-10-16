@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ArrowRight, CheckCircle2, FlaskConical, NotebookPen, Pause, Play, RotateCcw, Sparkles, Target, Timer, Zap } from "lucide-react";
+import { ArrowRight, CheckCircle2, NotebookPen, Pause, Play, RotateCcw, Sparkles, Target, Timer, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useHydrated, useLocalJson, writeLocal } from "@/lib/local-store";
 import type { Support } from "@/lib/setup";
@@ -37,7 +37,6 @@ export function LearningFocusDock({
   completed,
   reward,
   support,
-  experimentAvailable,
 }: {
   courseId: string;
   moduleTitle: string;
@@ -49,7 +48,6 @@ export function LearningFocusDock({
   completed: number;
   reward: number;
   support: Support;
-  experimentAvailable: boolean;
 }) {
   const key = `lms-focus:v1:${courseId}`;
   const stored = useLocalJson<FocusSession>(key, DEFAULT_SESSION);
@@ -119,14 +117,13 @@ export function LearningFocusDock({
         <div className="focus-next"><span>Next</span><p>{nextTitle}</p><ArrowRight /></div>
       </section>
 
-      {(stage !== "gate" || experimentAvailable) && <section className="focus-dock-card">
+      {stage !== "gate" && <section className="focus-dock-card">
         <div className="focus-dock-heading">
           <span className="focus-dock-icon"><Sparkles /></span>
           <div><span>Learning tools</span><small>{supportLabel}</small></div>
         </div>
         <div className="focus-tool-grid">
-          {stage !== "gate" && <button type="button" onClick={openPipNotes}><NotebookPen /><span><strong>Notebook</strong><small>Capture an insight</small></span></button>}
-          {experimentAvailable && <button type="button" onClick={() => window.dispatchEvent(new Event("learning:experiment"))}><FlaskConical /><span><strong>Try the lab</strong><small>Change and observe</small></span></button>}
+          <button type="button" onClick={openPipNotes}><NotebookPen /><span><strong>Notebook</strong><small>Capture an insight</small></span></button>
         </div>
       </section>}
     </aside>

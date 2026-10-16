@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
 import useSWR from "swr";
 import { useFormatter } from "next-intl";
-import { BookOpenText, CalendarDays, ChevronDown, Globe2, History, LifeBuoy, ListOrdered, Loader2, RotateCcw, Settings2, Sparkles, UserRound } from "lucide-react";
+import { BookOpenText, CalendarDays, ChevronDown, Globe2, History, LifeBuoy, ListOrdered, Loader2, Settings2, Sparkles, UserRound } from "lucide-react";
 import { Surface } from "@/components/kit/surface";
 import { Chip } from "@/components/kit/chip";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { usePlanState } from "@/components/plan/use-plan";
 import { api, plansKey } from "@/lib/api";
 import { useEnrollment } from "@/lib/enrollment";
-import { QUESTIONS } from "@/lib/setup";
+import { questionById } from "@/lib/setup";
 import type { PlanVersion } from "@/lib/learner-plan";
 import type { Course } from "@/data/types";
 
@@ -34,7 +34,7 @@ export function SetupPanel({ course, ready }: { course: Course; ready: boolean }
   const lp = a.plan;
   const emphasis = (lp?.modules ?? []).filter((m) => m.emphasis !== "standard");
 
-  const first = QUESTIONS.find((q) => q.id === "firstStep")!.options.find((o) => o.v === (enrollment.answers.firstStep ?? "idea"))!.label;
+  const first = questionById("firstStep").options.find((o) => o.v === (enrollment.answers.firstStep ?? "idea"))!.label;
   const items = [
     a.roleLabel ? { icon: <UserRound />, text: t("sumRole", { role: a.roleLabel }) } : null,
     a.domain ? { icon: <Globe2 />, text: t("sumField", { field: a.domain.label }) } : null,
@@ -80,12 +80,6 @@ export function SetupPanel({ course, ready }: { course: Course; ready: boolean }
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button asChild variant="outline" size="sm" className="bg-transparent">
-                <Link href={`${base}?step=precheck`}>
-                  <RotateCcw data-icon="inline-start" />
-                  {enrollment.precheck && !enrollment.precheck.skipped ? t("cRetakeCheck") : t("cTakeCheck")}
-                </Link>
-              </Button>
               <Button asChild variant="outline" size="sm" className="bg-transparent">
                 <Link href={base}>
                   <Settings2 data-icon="inline-start" />

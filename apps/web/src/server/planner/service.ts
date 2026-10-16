@@ -2,7 +2,7 @@ import "server-only";
 import { getCourse, getPrecheck } from "@/data";
 import { scorePrecheck } from "@/data/mock-grader";
 import type { EnrollmentView, PlanSource, PlanVersion } from "@/lib/learner-plan";
-import type { PrecheckResult, SetupAnswers, SupportOverride } from "@/lib/setup";
+import { normalizeAnswers, type PrecheckResult, type SetupAnswers, type SupportOverride } from "@/lib/setup";
 import type { Pace, StoredPrecheck } from "@/server/db/schema";
 import type { SessionUser } from "@/server/auth";
 import { ApiError } from "@/server/http";
@@ -12,6 +12,7 @@ import { PlannerError, aiConfigured, generatePlan, plannerModel, type PlannerTra
 import { courseContext } from "./context";
 import { AI_COOLDOWN_MS, replanReason, ruleRevision } from "./policy";
 import { validatePlan } from "./validate";
+import { adaptFirstModule, adaptNextModule } from "@/server/adapt/service";
 
 /**
  * The plan lifecycle. Enrolling stores a baseline plan at once and asks the
@@ -87,12 +88,14 @@ async function scored(courseId: string, p: PrecheckIn | undefined, keep: StoredP
   return { at, lessons: scorePrecheck(items, responses), responses };
 }
 
-const inputOf = (user: SessionUser, e: repo.EnrollmentRow): PlannerInput => ({
+/** What a plan is made from; the profile's `derived` explains a typed field (its pack, its nouns, follow-up answers). */
+const inputOf = async (user: SessionUser, e: repo.EnrollmentRow): Promise<PlannerInput> => ({
   name: user.name,
   answers: e.answers,
   supportOverride: e.supportOverride,
   pace: e.pace ?? null,
   precheck: e.precheck ?? null,
+  derived: (await repo.getProfile(user.id))?.derived ?? null,
 });
 
 /** Enrol, or change the setup of an existing enrollment. Either way the plan is rebuilt. */
@@ -102,10 +105,14 @@ export async function saveSetup(user: SessionUser, courseId: string, setup: Setu
   });
   const existing = await repo.findEnrollment(user.id, courseId);
   const precheck = await scored(courseId, setup.precheck, existing?.precheck ?? null);
-  const e = await repo.upsertEnrollment(user.id, courseId, { answers: setup.answers, supportOverride: setup.supportOverride, pace: setup.pace, precheck });
+  // only answers that still apply are stored; a typed field's pack match and follow-up answers need the profile's derived result
+  const answers = normalizeAnswers(setup.answers, (await repo.getProfile(user.id))?.derived ?? null);
+  const e = await repo.upsertEnrollment(user.id, courseId, { answers, supportOverride: setup.supportOverride, pace: setup.pace, precheck });
   const trigger = existing ? "setup" : "enrol";
-  await repo.insertPlan(e.id, { status: "ready", source: "baseline", trigger, plan: baselinePlan(inputOf(user, e), ctx), changes: [], completedAt: new Date() });
+  await repo.insertPlan(e.id, { status: "ready", source: "baseline", trigger, plan: baselinePlan(await inputOf(user, e), ctx), changes: [], completedAt: new Date() });
   await startAi(user, e, trigger, schedule, api);
+  // the lessons themselves: module 1 is rewritten for this learner straight away (a changed setup rewrites it)
+  if (!api) await adaptFirstModule(user, courseId, schedule).catch((err) => console.warn(`[adapt] ${err instanceof Error ? err.message : err}`));
   return viewOf(e);
 }
 
@@ -130,6 +137,8 @@ export async function recordProgress(user: SessionUser, courseId: string, module
     if (m.authored.length && m.authored.every((s) => done.has(s))) list.push({ key: `${e.id}:module:${moduleId}`, kind: "module_complete", moduleId, lesson: null, payload: {} });
     const fresh = await repo.insertSignals(e.id, list);
     await maybeReplan(user, e, fresh, schedule, api);
+    // a finished module: the next one is rewritten for this learner before they get there
+    if (!api && fresh.some((s) => s.kind === "module_complete")) await adaptNextModule(user, courseId, moduleId, schedule).catch((err) => console.warn(`[adapt] ${err instanceof Error ? err.message : err}`));
   }
   return viewOf(e);
 }
@@ -176,7 +185,7 @@ async function runAi(user: SessionUser, enrollmentId: string, courseId: string, 
     const e = await repo.findEnrollment(user.id, courseId);
     if (!e || e.id !== enrollmentId) return;
     const ctx = await courseContext(courseId);
-    const input = inputOf(user, e);
+    const input = await inputOf(user, e);
     const plans = await repo.plansFor(e.id);
     const current = plans.find((p) => p.status === "ready" && p.version < row.version);
     const evidence = trigger === "enrol" ? [] : await repo.unusedSignals(e.id);

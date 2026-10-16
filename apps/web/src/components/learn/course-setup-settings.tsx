@@ -8,7 +8,7 @@ import { Surface } from "@/components/kit/surface";
 import { Button } from "@/components/ui/button";
 import { useEnrollments } from "@/lib/enrollment";
 import { useLearnerReady } from "@/lib/api";
-import { QUESTIONS, answerLabel } from "@/lib/setup";
+import { profileLines } from "@/lib/setup";
 import type { Course } from "@/data/types";
 
 /** Settings: the setup answers per enrolled course, each with a link back into the wizard. */
@@ -28,7 +28,7 @@ export function CourseSetupSettings({ courses }: { courses: Course[] }) {
         <ul className="flex flex-col divide-y divide-line">
           {enrolled.map((c) => {
             const answers = enrollments[c.course_id]!.answers;
-            const summary = QUESTIONS.map((q) => answerLabel(q, answers)).filter(Boolean).join(" · ");
+            const summary = profileLines(answers).map((l) => l.answer).filter(Boolean).join(" · ");
             return (
               <li key={c.course_id} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                 <div className="min-w-0">

@@ -5,7 +5,7 @@ import * as React from "react";
 import { useCompanionStep, useLearningContext } from "@/components/learning/course-companion";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotionConfig } from "motion/react";
-import { ArrowRight, Play, RotateCcw, Volume2, VolumeX, X } from "lucide-react";
+import { ArrowRight, Play, RotateCcw, Sparkles, Volume2, VolumeX, X } from "lucide-react";
 import { PipelineDiagram } from "@/components/kit/pipeline";
 import { NumberTicker } from "@/components/kit/number-ticker";
 import { DEMO_OPEN } from "@/lib/demo";
@@ -107,6 +107,7 @@ export function HookCinema({
   done,
   onComplete,
   onExit,
+  personal,
 }: {
   block: HookBlock;
   moduleId: string;
@@ -119,6 +120,8 @@ export function HookCinema({
   done: boolean;
   onComplete: () => void;
   onExit: () => void;
+  /** this opening rewritten in the learner's world (shown), or being rewritten (the authored one plays meanwhile) */
+  personal?: { shown: boolean; writing: boolean; organisation?: string };
 }) {
   const t = useTranslations("cinema");
   const reduce = useReducedMotionConfig() ?? false;
@@ -129,7 +132,7 @@ export function HookCinema({
   useCompanionStep({ title: block.title, phase: "hook", guidance: scene === "call" ? `${block.prompt} Choose your prediction and how confident you feel. It is fine to be unsure.` : scene === "verdict" ? block.wrap_point : `Explore this problem: ${block.why} Use the scene controls to interact, then continue when ready.` });
   const soundOn = useLocalString(SOUND_KEY) !== "off";
   // the text opening (for a hook without a film) is one clip; the film and the replay speak line by line
-  const openClip = useClip(`/audio/hook-${moduleId}-open.mp3`);
+  const openClip = useClip(block.audio ? (block.audio.open ?? "") : `/audio/hook-${moduleId}-open.mp3`);
   const voice = useVoice(soundOn);
   const clock = useSceneClock(scene);
   const sceneRef = React.useRef<HTMLDivElement>(null);
@@ -271,8 +274,14 @@ export function HookCinema({
           {block.title}
         </motion.h1>
         <motion.p {...appear(0.25)} className="hc-lede">
-          {t("startLine")}
+          {block.brand ? t("startLineAt", { organisation: block.brand.name }) : t("startLine")}
         </motion.p>
+        {personal?.shown || personal?.writing ? (
+          <motion.p {...appear(0.32)} className="hc-hint flex items-center gap-2">
+            <Sparkles className="size-4 shrink-0" aria-hidden />
+            {personal.shown ? (personal.organisation ? t("personalAt", { organisation: personal.organisation }) : t("personal")) : t("personalWriting")}
+          </motion.p>
+        ) : null}
         <motion.div {...appear(0.4)} className="flex flex-wrap items-center gap-5 pt-2">
           <button type="button" className="hc-btn big" onClick={begin} autoFocus>
             <Play />

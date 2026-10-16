@@ -14,7 +14,6 @@ import { Segmented } from "@/components/kit/segmented";
 import { StatTile } from "@/components/kit/stat-tile";
 import { Stagger, StaggerItem } from "@/components/kit/stagger";
 import { PlanCalendar } from "@/components/plan/plan-calendar";
-import { PlanOutline } from "@/components/plan/plan-outline";
 import { UpNextTicker } from "@/components/plan/up-next-ticker";
 import { keyDate, useCourseUnits, usePlanState } from "@/components/plan/use-plan";
 import {
@@ -296,21 +295,6 @@ export function PlanBoard({ courses, reviews, history, assignments, today }: Pla
           />
         </Surface>
 
-        {/* ---------------- outline ---------------- */}
-        <Surface pad="lg" className="xl:col-start-1 xl:row-start-2">
-          <PlanOutline
-            title={course.title}
-            units={units}
-            plannedOn={plannedOn}
-            nextUpId={nextUp?.id}
-            pickedId={unitId}
-            onPick={(id) => {
-              setPicked(id);
-              const date = plannedOn[id];
-              if (date) setSelected(date);
-            }}
-          />
-        </Surface>
       </div>
     </div>
   );

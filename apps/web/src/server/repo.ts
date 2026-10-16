@@ -1,8 +1,9 @@
 import "server-only";
 import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { SetupAnswers, SupportOverride } from "@/lib/setup";
+import type { ProfileDerived } from "@/lib/profiling/derived";
 import { db } from "./db/client";
-import { enrollments, learnerPlans, profiles, projectWork, signals, stepProgress, type Pace, type ProjectReportRow, type StoredPrecheck } from "./db/schema";
+import { adaptedContent, enrollments, learnerPlans, profileDrafts, profiles, projectWork, signals, stepProgress, type AdaptedPiece, type Pace, type ProjectReportRow, type StoredPrecheck } from "./db/schema";
 
 /** Queries for learner data. Callers pass the session user's id; nothing here reads across users. */
 
@@ -10,6 +11,7 @@ export type EnrollmentRow = typeof enrollments.$inferSelect;
 export type PlanRow = typeof learnerPlans.$inferSelect;
 export type SignalRow = typeof signals.$inferSelect;
 export type NewPlan = Omit<typeof learnerPlans.$inferInsert, "id" | "enrollmentId" | "version">;
+export type AdaptedRow = typeof adaptedContent.$inferSelect;
 export type NewSignal = { key: string; kind: string; moduleId: string | null; lesson: string | null; payload: Record<string, unknown> };
 
 /* ---------------------------------------------------------------- profile */
@@ -19,14 +21,38 @@ export async function getProfile(userId: string) {
   return (await d.query.profiles.findFirst({ where: eq(profiles.userId, userId) })) ?? null;
 }
 
-export async function saveProfile(userId: string, answers: SetupAnswers, needs: string[]) {
+/** `derived` is left as it is when not given. */
+export async function saveProfile(userId: string, answers: SetupAnswers, needs: string[], derived?: ProfileDerived | null) {
   const d = await db();
   const now = new Date();
+  const set = { answers, needs, updatedAt: now, ...(derived !== undefined ? { derived } : {}) };
   await d
     .insert(profiles)
-    .values({ userId, answers, needs, updatedAt: now })
-    .onConflictDoUpdate({ target: profiles.userId, set: { answers, needs, updatedAt: now } });
+    .values({ userId, ...set })
+    .onConflictDoUpdate({ target: profiles.userId, set });
   return getProfile(userId);
+}
+
+/* ---------------------------------------------------------------- profile draft ("About you" in progress) */
+
+export async function getProfileDraft(userId: string) {
+  const d = await db();
+  return (await d.query.profileDrafts.findFirst({ where: eq(profileDrafts.userId, userId) })) ?? null;
+}
+
+export async function saveProfileDraft(userId: string, answers: SetupAnswers, needs: string[], derived: ProfileDerived | null) {
+  const d = await db();
+  const now = new Date();
+  const set = { answers, needs, derived, updatedAt: now };
+  await d
+    .insert(profileDrafts)
+    .values({ userId, ...set })
+    .onConflictDoUpdate({ target: profileDrafts.userId, set });
+}
+
+export async function deleteProfileDraft(userId: string) {
+  const d = await db();
+  await d.delete(profileDrafts).where(eq(profileDrafts.userId, userId));
 }
 
 /* ---------------------------------------------------------------- enrollments */
@@ -67,6 +93,34 @@ export async function deleteUserData(userId: string) {
   const d = await db();
   await d.delete(enrollments).where(eq(enrollments.userId, userId));
   await d.delete(profiles).where(eq(profiles.userId, userId));
+  await d.delete(profileDrafts).where(eq(profileDrafts.userId, userId));
+}
+
+/* ---------------------------------------------------------------- adapted content */
+
+export async function adaptedFor(enrollmentId: string, moduleId?: string) {
+  const d = await db();
+  return d.query.adaptedContent.findMany({
+    where: moduleId ? and(eq(adaptedContent.enrollmentId, enrollmentId), eq(adaptedContent.moduleId, moduleId)) : eq(adaptedContent.enrollmentId, enrollmentId),
+    orderBy: asc(adaptedContent.createdAt),
+  });
+}
+
+/** Starts (or restarts) one piece: its row, reset to `writing` from these inputs. */
+export async function startAdapted(enrollmentId: string, moduleId: string, piece: AdaptedPiece, inputs: string) {
+  const d = await db();
+  const set = { status: "writing" as const, inputs, content: null, audio: null, model: null, error: null, updatedAt: new Date() };
+  const [row] = await d
+    .insert(adaptedContent)
+    .values({ enrollmentId, moduleId, piece, ...set })
+    .onConflictDoUpdate({ target: [adaptedContent.enrollmentId, adaptedContent.moduleId, adaptedContent.piece], set })
+    .returning();
+  return row!;
+}
+
+export async function updateAdapted(id: string, set: Partial<Pick<AdaptedRow, "status" | "content" | "audio" | "model" | "error">>) {
+  const d = await db();
+  await d.update(adaptedContent).set({ ...set, updatedAt: new Date() }).where(eq(adaptedContent.id, id));
 }
 
 /* ---------------------------------------------------------------- plans */

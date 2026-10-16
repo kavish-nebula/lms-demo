@@ -37,7 +37,7 @@ const RATES = [0.75, 1, 1.25, 1.5] as const;
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 /** seconds, until the clip's real length is known (or when a clip is missing) */
 const estimate = (text: string) => Math.max(4, text.split(/\s+/).length * 0.4);
-const audioSrc = (video: ConceptVideo, i: number) => `/audio/video-${video.id}-s${i}.mp3`;
+const audioSrc = (video: ConceptVideo, i: number) => (video.audio ? (video.audio[i] ?? "") : `/audio/video-${video.id}-s${i}.mp3`);
 
 type Phase = "play" | "mid" | "end" | "done";
 
@@ -124,7 +124,7 @@ export function VideoLesson({
     const probes = srcs.map((src, i) => {
       const a = new Audio();
       a.preload = "metadata";
-      a.onloadedmetadata = () => setLengths((l) => l.map((v, k) => (k === i && a.duration ? a.duration : v)));
+      a.onloadedmetadata = () => setLengths((l) => l.map((v, k) => (k === i && Number.isFinite(a.duration) && a.duration > 0 ? a.duration : v)));
       a.src = src;
       return a;
     });

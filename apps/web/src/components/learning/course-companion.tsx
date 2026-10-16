@@ -6,8 +6,9 @@ import { usePathname } from "next/navigation";
 import { ArrowUp, BookOpen, Check, Lightbulb, MessageCircle, NotebookPen, ShieldCheck, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { PipMascot, type PipReaction } from "./pip-mascot";
-import { companionNudge, companionReply, PHASE_GUIDANCE, type CompanionCourse, type CompanionStep, type CoursePassage } from "@/lib/companion";
+import { AssistantAvatar, type PipReaction } from "./assistant-avatar";
+import { companionNudge, companionReply, quickReply, PHASE_GUIDANCE, RESTRICTED_PHASES, type CompanionAnswer, type CompanionCourse, type CompanionStep, type CoursePassage } from "@/lib/companion";
+import { api, ApiRequestError } from "@/lib/api";
 import { courseLabel } from "@/lib/course-labels";
 import { useLearning } from "@/lib/learning-state";
 import "./learning.css";
@@ -53,6 +54,8 @@ export function CourseCompanionProvider({ catalog, children }: { catalog: Compan
 }
 
 type Message = { role: "user" | "assistant"; text: string; source?: Pick<CoursePassage, "title" | "href"> };
+/** Turns sent with each question so follow-ups ("and why?") make sense; the server caps it at 8 too. */
+const HISTORY = 8;
 function Companion({ data, moduleId, phase, step }: { data: CompanionCourse; moduleId: string; phase: string; step?: CompanionStep }) {
   const [open, setOpen] = React.useState(false);
   const [tab, setTab] = React.useState<"chat" | "notes">("chat");
@@ -61,12 +64,17 @@ function Companion({ data, moduleId, phase, step }: { data: CompanionCourse; mod
   const [saved, setSaved] = React.useState(false);
   const [reaction, setReaction] = React.useState<PipReaction>("idle");
   const [reactionText, setReactionText] = React.useState("");
+  const [waiting, setWaiting] = React.useState(false);
   const { state, update } = useLearning(data.course.course_id);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const listRef = React.useRef<HTMLDivElement>(null);
   const reactionTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const answerTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const restricted = ["gate", "final-check", "precheck"].includes(phase);
+  const messagesRef = React.useRef<Message[]>([]);
+  React.useEffect(() => { messagesRef.current = messages; }, [messages]);
+  /** Bumped on unmount and each new question, so a late answer never lands in the wrong place. */
+  const askId = React.useRef(0);
+  const restricted = RESTRICTED_PHASES.includes(phase);
   const module = data.course.modules.find((candidate) => candidate.module_id === moduleId);
   const moduleTitle = module ? courseLabel(data.course.course_id, "modules", module.module_id, module.title) : undefined;
   const guidance = restricted ? PHASE_GUIDANCE[phase]! : step?.guidance || PHASE_GUIDANCE[phase] || PHASE_GUIDANCE.course!;
@@ -83,21 +91,47 @@ function Companion({ data, moduleId, phase, step }: { data: CompanionCourse; mod
   }, []);
 
   React.useEffect(() => () => {
+    askId.current++;
     if (reactionTimer.current) clearTimeout(reactionTimer.current);
     if (answerTimer.current) clearTimeout(answerTimer.current);
   }, []);
   React.useEffect(() => { showReaction("wave", "Ready when you are!"); }, [showReaction]);
 
-  const ask = React.useCallback((raw: string) => {
+  // Quick buttons and assessment phases answer at once, here; anything else goes to the server, which keeps Pip to this course.
+  const ask = React.useCallback(async (raw: string) => {
     const text = raw.trim().slice(0, 600);
     if (!text) return;
+    setInput("");
+    const context = { phase, guidance, nextStep: nudge, hint: step?.hint, courseTitle: data.course.title, moduleId, videoId: step?.videoId, slideTitle: step?.slideTitle, passages: data.passages };
+    const answer = (reply: CompanionAnswer) => setMessages((m) => [...m, { role: "assistant" as const, ...reply }].slice(-30));
+    const history = messagesRef.current.slice(-HISTORY).map(({ role, text }) => ({ role, text }));
+    setMessages((m) => [...m, { role: "user" as const, text }].slice(-30));
     showReaction("think", "Let me check this step…");
     if (answerTimer.current) clearTimeout(answerTimer.current);
-    answerTimer.current = setTimeout(() => showReaction("point", "Here’s the key idea."), 850);
-    setInput("");
-    const response: Message = { role: "assistant", ...companionReply(text, { phase, guidance, nextStep: nudge, hint: step?.hint, courseTitle: data.course.title, moduleId, videoId: step?.videoId, slideTitle: step?.slideTitle, passages: data.passages }) };
-    setMessages((m) => [...m, { role: "user" as const, text }, response].slice(-30));
-  }, [data, moduleId, phase, guidance, nudge, showReaction, step?.hint, step?.videoId, step?.slideTitle]);
+
+    const quick = quickReply(text, context);
+    if (quick) {
+      answerTimer.current = setTimeout(() => showReaction("point", "Here’s the key idea."), 850);
+      answer(quick);
+      return;
+    }
+    const id = ++askId.current;
+    setWaiting(true);
+    let reply: CompanionAnswer;
+    try {
+      reply = await api<CompanionAnswer>(`/api/v1/courses/${data.course.course_id}/companion`, {
+        method: "POST",
+        body: { message: text, phase, moduleId: moduleId || undefined, history, step: step && { title: step.title, guidance: step.guidance, hint: step.hint, videoId: step.videoId, slideTitle: step.slideTitle } },
+      });
+    } catch (e) {
+      // offline or server trouble: the in-browser passage match still answers
+      reply = e instanceof ApiRequestError && e.status === 429 ? { text: e.message } : companionReply(text, context);
+    }
+    if (id !== askId.current) return;
+    setWaiting(false);
+    showReaction("point", "Here’s the key idea.");
+    answer(reply);
+  }, [data, moduleId, phase, guidance, nudge, showReaction, step]);
 
   React.useEffect(() => {
     const onAsk = (event: Event) => { setOpen(true); setTab("chat"); ask((event as CustomEvent<string>).detail); };
@@ -115,15 +149,15 @@ function Companion({ data, moduleId, phase, step }: { data: CompanionCourse; mod
       window.removeEventListener("pip:react", onReact);
     };
   }, [ask, restricted, showReaction]);
-  React.useEffect(() => { listRef.current?.scrollTo({ top: listRef.current.scrollHeight }); }, [messages, open]);
+  React.useEffect(() => { listRef.current?.scrollTo({ top: listRef.current.scrollHeight }); }, [messages, open, waiting]);
   React.useEffect(() => { if (open) window.dispatchEvent(new Event("pip:opened")); }, [open]);
 
   return <div className="pip-dock" data-phase={phase}>
     <Popover open={open} onOpenChange={(next) => { setOpen(next); if (next) showReaction("wave", "Hi! How can I help?"); }}>
       <PopoverTrigger asChild>
-        <button className="pip-launcher pip-character-launcher" aria-label="Ask Pip, your course companion" title="Ask Pip">
+        <button data-tour="pip" className="pip-launcher pip-character-launcher" aria-label="Ask Pip, your course companion" title="Ask Pip">
           {reactionText && !open ? <span className="pip-reaction-bubble" role="status" aria-live="polite">{reactionText}</span> : null}
-          <PipMascot className="pip-launcher-mascot" reaction={reaction} />
+          <AssistantAvatar className="pip-launcher-avatar" reaction={reaction} />
         </button>
       </PopoverTrigger>
       <PopoverContent side="top" align="end" sideOffset={12} className="pip-panel p-0" onKeyDown={(e) => e.stopPropagation()} onEscapeKeyDown={(e) => e.stopPropagation()} onOpenAutoFocus={(e) => { e.preventDefault(); inputRef.current?.focus(); }}>
@@ -143,19 +177,20 @@ function Companion({ data, moduleId, phase, step }: { data: CompanionCourse; mod
           </div> : <>
             <div id="pip-chat-panel" role="region" aria-labelledby="pip-chat-tab" ref={listRef} className="pip-messages">
               <div className="pip-bubble pip-nudge"><strong className="block mb-1">Quick nudge</strong>{nudge}</div>
-              <div className="flex flex-wrap gap-2">{["Next step", "Hint"].map((q) => <button key={q} onClick={() => ask(q)} className="pip-suggestion"><Lightbulb className="size-3.5" />{q}</button>)}</div>
+              <div className="flex flex-wrap gap-2">{["Next step", "Hint"].map((q) => <button key={q} onClick={() => ask(q)} disabled={waiting} className="pip-suggestion"><Lightbulb className="size-3.5" />{q}</button>)}</div>
               <div role="log" aria-live="polite" aria-relevant="additions" className="flex flex-col gap-3">
                 {messages.map((m, i) => <div key={i} className={`pip-bubble ${m.role === "user" ? "pip-user" : ""}`}>
                   <span className="sr-only">{m.role === "user" ? "You: " : "Pip: "}</span>{m.text}
                   {m.source && <Link onClick={() => setOpen(false)} href={m.source.href} className="mt-3 flex items-start gap-2 text-xs text-brand-ink underline underline-offset-4"><BookOpen className="size-3.5 shrink-0" />{m.source.title}</Link>}
                 </div>)}
+                {waiting && <div className="pip-bubble pip-thinking" aria-busy="true"><span className="sr-only">Pip is thinking</span><span aria-hidden="true">Pip is thinking…</span></div>}
               </div>
             </div>
             {messages.at(-1)?.source && <button className="px-4 pb-2 text-left text-xs text-brand-ink" onClick={() => { const message = messages.at(-1)!; update((s) => ({ ...s, notes: `${s.notes}\n\n${message.text}\n${message.source?.title ?? ""}`.trim().slice(0, 10000) })); setSaved(true); }}><Check className="inline size-3.5 mr-1" />{saved ? "Added to your notebook" : "Save this explanation to my notebook"}</button>}
-            <form className="pip-input" onSubmit={(e) => { e.preventDefault(); setSaved(false); ask(input); }}>
+            <form className="pip-input" onSubmit={(e) => { e.preventDefault(); if (waiting) return; setSaved(false); ask(input); }}>
               <label htmlFor="pip-question" className="sr-only">Ask a question about this course</label>
               <input ref={inputRef} id="pip-question" value={input} onChange={(e) => setInput(e.target.value)} maxLength={600} placeholder="Ask Pip…" autoComplete="off" />
-              <Button type="submit" variant="brand" size="icon-sm" disabled={!input.trim()} aria-label="Send question"><ArrowUp /></Button>
+              <Button type="submit" variant="brand" size="icon-sm" disabled={!input.trim() || waiting} aria-label="Send question"><ArrowUp /></Button>
             </form>
             <p className="px-4 pb-3 text-[11px] text-ink-muted">Course material only.</p>
           </>}

@@ -3,6 +3,7 @@
 import * as React from "react";
 import { cn } from "cn";
 import { useTranslations } from "next-intl";
+import { planLesson } from "@/lib/learner-plan";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, Globe2, Lightbulb, ListChecks } from "lucide-react";
 import { Chip } from "@/components/kit/chip";
@@ -102,7 +103,11 @@ function BeatsExplainer({ block, adaptation, ...nav }: StageProps<ExplainerBlock
             />
           ))}
 
-          {adaptation.domain && WORLD[seg.lesson] ? (
+          {planLesson(adaptation.plan, seg.lesson)?.inYourWorld.body ? (
+            <Callout tone="worked" label={planLesson(adaptation.plan, seg.lesson)!.inYourWorld.title || t("inYourWorld", { field: adaptation.domain?.label ?? t("yourWork") })} icon={<Globe2 />}>
+              <p className="leading-relaxed">{planLesson(adaptation.plan, seg.lesson)!.inYourWorld.body}</p>
+            </Callout>
+          ) : adaptation.domain && WORLD[seg.lesson] ? (
             <Callout tone="worked" label={t("inYourWorld", { field: adaptation.domain.label })} icon={<Globe2 />}>
               <p className="leading-relaxed">{WORLD[seg.lesson]!(adaptation.domain)}</p>
             </Callout>

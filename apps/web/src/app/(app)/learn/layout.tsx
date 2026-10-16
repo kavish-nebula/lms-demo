@@ -1,6 +1,8 @@
 import { getCourses, getModule } from "@/data";
 import { coursePassages } from "@/lib/companion";
 import { CourseCompanionProvider } from "@/components/learning/course-companion";
+import { FieldAccentSync } from "@/components/learning/field-accent-sync";
+import { ProfileGate } from "@/components/onboarding/profile-gate";
 import type { ModuleContent } from "@/data/types";
 
 export default async function LearningLayout({ children }: { children: React.ReactNode }) {
@@ -9,5 +11,11 @@ export default async function LearningLayout({ children }: { children: React.Rea
     const modules = (await Promise.all(course.modules.map((m) => getModule(course.course_id, m.module_id)))).filter((m): m is ModuleContent => !!m);
     return { course, passages: coursePassages(course, modules) };
   }));
-  return <CourseCompanionProvider catalog={catalog}>{children}</CourseCompanionProvider>;
+  return (
+    <CourseCompanionProvider catalog={catalog}>
+      <ProfileGate />
+      <FieldAccentSync />
+      {children}
+    </CourseCompanionProvider>
+  );
 }

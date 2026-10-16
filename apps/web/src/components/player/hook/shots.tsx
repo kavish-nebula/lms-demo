@@ -12,6 +12,7 @@ import {
   Home,
   Inbox,
   Lock,
+  Package,
   Search,
   SendHorizontal,
   Signal,
@@ -116,6 +117,15 @@ const CHAT_GATES = [700, 3000, 5300];
 const CHAT_REPLY = 1500;
 const CHAT_RUN: [number, number] = [7400, 11600];
 
+/** A plain product tile, for a rewritten story whose shop isn't selling tents. */
+function ProductArt() {
+  return (
+    <div className="hf-tent flex items-center justify-center" aria-hidden>
+      <Package className="size-[30%] text-white/70" strokeWidth={1.25} />
+    </div>
+  );
+}
+
 /** A tent in the mountains at dusk: the product photo on Orbit's shop page. */
 function TentArt() {
   return (
@@ -142,7 +152,11 @@ function TentArt() {
   );
 }
 
-export function SiteChatShot({ shot, t, reduce, sfx, waiting }: ShotProps<"site-chat">) {
+/** The organisation the scenes show: the learner's own once the hook is rewritten for them, else the course's Orbit Outdoor. */
+const brandOf = (block: HookBlock) => block.brand ?? { name: "Orbit Outdoor", short: "Orbit" };
+
+export function SiteChatShot({ shot, t, block, reduce, sfx, waiting }: ShotProps<"site-chat">) {
+  const brand = brandOf(block);
   const sent = CHAT_GATES.filter((g) => t > g).length;
   const replies = CHAT_GATES.filter((g) => t >= g + CHAT_REPLY).length;
   const run = span(t, ...CHAT_RUN);
@@ -165,7 +179,7 @@ export function SiteChatShot({ shot, t, reduce, sfx, waiting }: ShotProps<"site-
         </div>
         <div className="hf-site">
           <div className="hf-site-art">
-            <TentArt />
+            {block.brand ? <ProductArt /> : <TentArt />}
             <div className="hf-site-info">
               <b>{shot.product}</b>
               <span>Add to cart</span>
@@ -174,10 +188,10 @@ export function SiteChatShot({ shot, t, reduce, sfx, waiting }: ShotProps<"site-
           <div className="hf-widget">
             <div className="hf-widget-head">
               <Bot aria-hidden />
-              Orbit help
+              {brand.short} help
             </div>
             <div className="hf-widget-body">
-              {n === 0 ? <div className="hf-bubble bot">Hi! I&apos;m Orbit&apos;s assistant. How can I help?</div> : null}
+              {n === 0 ? <div className="hf-bubble bot">Hi! I&apos;m {brand.short}&apos;s assistant. How can I help?</div> : null}
               {tail.map((i) => {
                 const replied = i >= CHAT_GATES.length || t >= CHAT_GATES[i]! + CHAT_REPLY;
                 return (
@@ -220,7 +234,7 @@ const TICKET_RUN: [number, number] = [700, 5600];
 const NAMES = ["AR", "TK", "JM", "SL", "PD", "RN", "OB", "EK", "MW", "CH", "LF", "DV"];
 const DAYS = ["Sat", "Sun"];
 
-export function TicketsShot({ shot, t, reduce, sfx }: ShotProps<"tickets">) {
+export function TicketsShot({ shot, t, block, reduce, sfx }: ShotProps<"tickets">) {
   const opened = t > TICKET_GATE;
   const n = Math.round(easeOut(span(t, ...TICKET_RUN)) * shot.count);
   useOnIncrease(n, sfx.tick);
@@ -229,7 +243,7 @@ export function TicketsShot({ shot, t, reduce, sfx }: ShotProps<"tickets">) {
   return (
     <div className="hf-win hf-app">
       <aside className="hf-app-side">
-        <div className="hf-app-logo">Orbit Helpdesk</div>
+        <div className="hf-app-logo">{brandOf(block).short} Helpdesk</div>
         <div className="hf-folder on">
           <span>Inbox</span>
           {opened ? <b>{n}</b> : null}
@@ -281,7 +295,7 @@ export function TicketsShot({ shot, t, reduce, sfx }: ShotProps<"tickets">) {
 
 const noteAt = (k: number) => 500 + k * 1900;
 
-export function PhoneShot({ shot, t, reduce, sfx }: ShotProps<"phone">) {
+export function PhoneShot({ shot, t, block, reduce, sfx }: ShotProps<"phone">) {
   const shown = shot.notes.filter((_, k) => t >= noteAt(k)).length;
   const controls = useAnimationControls();
   useOnIncrease(shown, sfx.ping);
@@ -304,7 +318,7 @@ export function PhoneShot({ shot, t, reduce, sfx }: ShotProps<"phone">) {
             </span>
           </div>
           <div className="hf-phone-time">{shot.time}</div>
-          <div className="hf-phone-day">#support · Orbit Outdoor</div>
+          <div className="hf-phone-day">#support · {brandOf(block).name}</div>
           <div className="hf-notes" aria-hidden>
             {shot.notes
               .slice(0, shown)

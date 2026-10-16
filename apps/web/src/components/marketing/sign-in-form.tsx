@@ -11,16 +11,18 @@ import { Label } from "@/components/ui/label";
 
 /**
  * Sign-in UI only. The managed IdP (ARCHITECTURE.pdf section 3) will own the
- * real flow; for now both paths lead into the demo learner account.
+ * real flow (Google, email link, company SSO); for now every path leads into
+ * the demo learner account. A learner without a profile is then taken to
+ * Pip's welcome chat first (ProfileGate).
  */
 export function SignInForm() {
   const t = useTranslations("auth");
   const router = useRouter();
   const [email, setEmail] = React.useState("");
-  const [pending, setPending] = React.useState<"email" | "sso" | null>(null);
+  const [pending, setPending] = React.useState<"google" | "email" | "sso" | null>(null);
   const valid = /^\S+@\S+\.\S+$/.test(email);
 
-  function go(kind: "email" | "sso") {
+  function go(kind: "google" | "email" | "sso") {
     setPending(kind);
     // Crossing root layouts triggers a full page load, which is expected here.
     setTimeout(() => router.push("/learn"), 700);
@@ -28,6 +30,22 @@ export function SignInForm() {
 
   return (
     <div className="flex flex-col gap-5">
+      <Button variant="outline" size="xl" className="bg-white/5" disabled={!!pending} onClick={() => go("google")}>
+        {pending === "google" ? (
+          <Loader2 className="animate-spin" data-icon="inline-start" />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element -- a tiny static brand mark
+          <img src="/brand/google-g.svg" alt="" width={18} height={18} data-icon="inline-start" />
+        )}
+        {t("continueGoogle")}
+      </Button>
+
+      <div className="flex items-center gap-3 text-xs text-ink-faint">
+        <span className="h-px flex-1 bg-line" />
+        {t("or")}
+        <span className="h-px flex-1 bg-line" />
+      </div>
+
       <form
         className="flex flex-col gap-3"
         onSubmit={(e) => {

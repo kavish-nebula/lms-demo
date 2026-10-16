@@ -1,6 +1,7 @@
 import { integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import type { LearnerPlan, PlanChangeT, PlanSource, PlanStatus, PlanVersion } from "@/lib/learner-plan";
 import type { PrecheckResult, SetupAnswers, SupportOverride } from "@/lib/setup";
+import type { ProfileDerived } from "@/lib/profiling/derived";
 import type { ProjectReport } from "@/lib/project-grade";
 import type { EngagementState } from "@/lib/engagement";
 import type { Workflow, WorkflowReport } from "@/lib/workflow-project";
@@ -34,6 +35,23 @@ export const profiles = pgTable("profiles", {
     .references(() => users.id, { onDelete: "cascade" }),
   answers: jsonb("answers").$type<SetupAnswers>().notNull(),
   needs: jsonb("needs").$type<string[]>().notNull(),
+  /** what the language model worked out from a typed field (lib/profiling/derived.ts) */
+  derived: jsonb("derived").$type<ProfileDerived>(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
+ * "About you" while it is being answered: saved after each answer, so the
+ * chat resumes where the learner left it, on any device. Becomes the profile
+ * (and is deleted) when they finish.
+ */
+export const profileDrafts = pgTable("profile_drafts", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  answers: jsonb("answers").$type<SetupAnswers>().notNull(),
+  needs: jsonb("needs").$type<string[]>().notNull(),
+  derived: jsonb("derived").$type<ProfileDerived>(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -106,6 +124,37 @@ export const stepProgress = pgTable(
     completedAt: timestamp("completed_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.enrollmentId, t.moduleId, t.stage] })],
+);
+
+/** One piece of a module rewritten for one learner (content/adapt): the hook, a concept video, or the worked examples. */
+export type AdaptedPiece = "hook" | "worked" | "world" | `video:${string}`;
+export type AdaptedStatus = "writing" | "voicing" | "ready" | "failed";
+
+/**
+ * A module piece rewritten into the learner's own world: the content in the
+ * authored shape, and the narration clips made for it. A piece is shown only
+ * when `ready` (its text and voice match); until then the authored one plays.
+ * `inputs` fingerprints what it was written from, so a changed setup rewrites it.
+ */
+export const adaptedContent = pgTable(
+  "adapted_content",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    enrollmentId: uuid("enrollment_id")
+      .notNull()
+      .references(() => enrollments.id, { onDelete: "cascade" }),
+    moduleId: text("module_id").notNull(),
+    piece: text("piece").$type<AdaptedPiece>().notNull(),
+    status: text("status").$type<AdaptedStatus>().notNull(),
+    inputs: text("inputs").notNull(),
+    content: jsonb("content").$type<Record<string, unknown> | null>(),
+    audio: jsonb("audio").$type<Record<string, string> | null>(),
+    model: text("model"),
+    error: text("error"),
+    createdAt: created(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("adapted_content_piece").on(t.enrollmentId, t.moduleId, t.piece)],
 );
 
 /** The mini project's report: the score from the hidden tickets, kept with the work it graded. */

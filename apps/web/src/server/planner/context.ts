@@ -1,6 +1,6 @@
 import "server-only";
 import { getCourse, getModule, getPrecheck } from "@/data";
-import type { HookBlock } from "@/data/types";
+import type { ExplainerBlock, HookBlock } from "@/data/types";
 
 /**
  * The course as the planner sees it: modules, topics in outline order
@@ -20,7 +20,14 @@ export type ContextModule = {
   hasHook: boolean;
 };
 
-export type CourseContext = { courseId: string; title: string; modules: ContextModule[]; text: string };
+export type CourseContext = {
+  courseId: string;
+  title: string;
+  modules: ContextModule[];
+  text: string;
+  /** lessons whose videos show code: the coding answer sets their starting help */
+  codeLessons: string[];
+};
 
 const cache = new Map<string, Promise<CourseContext>>();
 
@@ -39,6 +46,7 @@ async function build(courseId: string): Promise<CourseContext> {
   if (!course) throw new Error(`Unknown course ${courseId}`);
   const precheck = await getPrecheck(courseId);
   const modules: ContextModule[] = [];
+  const codeLessons = new Set<string>();
   const lines: string[] = [];
 
   lines.push(`COURSE ${course.course_id}: "${course.title}"`);
@@ -50,6 +58,8 @@ async function build(courseId: string): Promise<CourseContext> {
   for (const [i, m] of course.modules.entries()) {
     const content = await getModule(courseId, m.module_id);
     const hook = content?.blocks.find((b) => b.stage === "hook") as HookBlock | undefined;
+    const explainer = content?.blocks.find((b) => b.stage === "explainer") as ExplainerBlock | undefined;
+    for (const v of explainer?.videos ?? []) if (v.slides.some((s) => s.kind === "code")) codeLessons.add(v.lesson);
     const authored = m.authored ?? [];
     modules.push({
       id: m.module_id,
@@ -82,5 +92,5 @@ async function build(courseId: string): Promise<CourseContext> {
 
   lines.push(`AFTER ALL MODULES: ${course.finale.steps.map((s) => `${s.kicker} (${s.title}): ${s.summary}`).join(" | ")}`);
 
-  return { courseId, title: course.title, modules, text: lines.join("\n") };
+  return { courseId, title: course.title, modules, text: lines.join("\n"), codeLessons: [...codeLessons] };
 }

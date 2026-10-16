@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { ChevronLeft, ListOrdered, PanelLeftClose, PanelLeftOpen, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ProgressBar } from "@/components/kit/progress-ring";
 import { TopicContext } from "@/components/player/topic-context";
@@ -30,6 +31,7 @@ import { ReviewStage } from "@/components/player/stages/review-stage";
 import { ScenarioStage } from "@/components/player/stages/scenario-stage";
 import { AdaptedStrip } from "@/components/player/adapted-strip";
 import { getBlock } from "@/data/client";
+import { pieceOf, useAdaptedModule, useSteadyAdapted, withAdapted } from "@/lib/adapted";
 import { useEnrollment } from "@/lib/enrollment";
 import { currentPart, flatParts, moduleOutline, type ModulePart } from "@/lib/module-outline";
 import { stageFromStepId, type StageId } from "@/lib/stages";
@@ -72,6 +74,10 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
   const choice = learning.support[module.module_id] ?? "auto";
   const support = choice === "auto" ? startingAdaptation.override ?? recommendedSupport(learning.attempts, module.module_id, baseline) : choice;
   const adaptation = React.useMemo(() => ({ ...startingAdaptation, support, override: support }), [startingAdaptation, support]);
+  // the hook, concept videos and worked examples rewritten in the learner's own world (server/adapt), once ready
+  const latestAdapted = useAdaptedModule(module.course_id, module.module_id, enrolled);
+  const adapted = useSteadyAdapted(latestAdapted, `${stage}:${video ?? ""}`);
+  const content = React.useMemo(() => withAdapted(module, adapted), [module, adapted]);
   const [railOpen, setRailOpen] = React.useState(false);
   const outlineKey = `lms-outline:v1:${module.course_id}`;
   const outlineHidden = useLocalString(outlineKey) === "hidden";
@@ -155,8 +161,17 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
     return `${moduleHref}/${v ? v.path : (stageFromStepId(stepId) ?? "explainer")}`;
   };
 
+  // is the piece on screen the learner's own, or still being written for them?
+  const piece = pieceOf(stage, part?.video?.id);
+  const pieceStatus = latestAdapted?.pieces[piece]?.status;
+  const personal = {
+    shown: stage === "hook" ? !!adapted?.hook : stage === "worked" ? !!adapted?.worked : !!(part?.video && adapted?.videos[part.video.id]),
+    writing: pieceStatus === "writing" || pieceStatus === "voicing",
+    organisation: latestAdapted?.world?.organisation,
+  };
+
   // The problem hook plays full screen, with no map, tutor or banners around it.
-  const hook = stage === "hook" ? getBlock(module, "hook") : undefined;
+  const hook = stage === "hook" ? getBlock(content, "hook") : undefined;
   if (hook) {
     return (
       <HookCinema
@@ -171,6 +186,7 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
         done={nav.done}
         onComplete={onComplete}
         onExit={() => router.push(courseHref)}
+        personal={personal}
       />
     );
   }
@@ -178,10 +194,10 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
   let body: React.ReactNode;
   switch (stage) {
     case "explainer":
-      body = <ExplainerStage block={getBlock(module, "explainer")!} adaptation={adaptation} videoId={part?.video?.id} nextTitle={nextTitle} {...nav} />;
+      body = <ExplainerStage block={getBlock(content, "explainer")!} adaptation={adaptation} videoId={part?.video?.id} nextTitle={nextTitle} {...nav} />;
       break;
     case "worked":
-      body = <WorkedStage block={getBlock(module, "worked")!} {...nav} />;
+      body = <WorkedStage block={getBlock(content, "worked")!} {...nav} />;
       break;
     case "guided":
       body = <GuidedStage block={getBlock(module, "guided")!} adaptation={adaptation} {...nav} />;
@@ -250,10 +266,6 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
             </span>
           </div>
           <span className="hidden items-center gap-1 rounded-full border border-brand-line bg-brand-soft px-2 py-1 text-[10px] font-semibold text-brand-ink md:flex"><Zap className="size-3" />+{rewardFor(stage, !!part?.video)} XP</span>
-          <Button variant="outline" size="sm" className="hidden min-h-11 nav:inline-flex" aria-expanded={!outlineHidden} aria-controls="module-outline" onClick={() => writeLocal(outlineKey,outlineHidden ? "visible" : "hidden")}>
-            {outlineHidden ? <PanelLeftOpen data-icon="inline-start" /> : <PanelLeftClose data-icon="inline-start" />}
-            {to(outlineHidden ? "showOutline" : "hideOutline")}
-          </Button>
           <Sheet open={railOpen} onOpenChange={setRailOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="sm" className="nav:hidden">
@@ -276,9 +288,34 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
           {map}
         </aside>
         <main id="stage-main" tabIndex={-1} className="min-w-0 flex-1 pb-6 outline-none">
-          <AdaptedStrip stage={stage} adaptation={adaptation} enrolled={enrolled} setupHref={setupHref} />
+          <AdaptedStrip
+            stage={stage}
+            adaptation={adaptation}
+            enrolled={enrolled}
+            setupHref={setupHref}
+            personal={personal}
+            leading={
+              // the outline toggle sits with the lesson's own controls; wide screens only (narrow ones use the sheet)
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="hidden size-8 nav:inline-flex"
+                    aria-label={to(outlineHidden ? "showOutline" : "hideOutline")}
+                    aria-expanded={!outlineHidden}
+                    aria-controls="module-outline"
+                    onClick={() => writeLocal(outlineKey, outlineHidden ? "visible" : "hidden")}
+                  >
+                    {outlineHidden ? <PanelLeftOpen /> : <PanelLeftClose />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{to(outlineHidden ? "showOutline" : "hideOutline")}</TooltipContent>
+              </Tooltip>
+            }
+          />
           <div className="learning-stage-layout">
-            <SignalProvider courseId={module.course_id} enabled={enrolled}><LearningWorkspace key={`${module.module_id}:${stage}:${video ?? ""}`} courseId={module.course_id} moduleId={module.module_id} stage={stage} support={support} done={done} startWithExperiment={adaptation.order[0] === "try"}>
+            <SignalProvider courseId={module.course_id} enabled={enrolled}><LearningWorkspace key={`${module.module_id}:${stage}:${video ?? ""}`} courseId={module.course_id} moduleId={module.module_id} stage={stage} support={support} done={done}>
               <TopicContext.Provider value={header}>{body}</TopicContext.Provider>
             </LearningWorkspace></SignalProvider>
             <LearningFocusDock
@@ -292,7 +329,6 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
               completed={doneKeys.size}
               reward={rewardFor(stage, !!part?.video)}
               support={support}
-              experimentAvailable={module.course_id === "ai-agent" && ["explainer", "worked"].includes(stage)}
             />
           </div>
         </main>

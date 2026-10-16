@@ -1,6 +1,7 @@
 import "server-only";
-import { QUESTIONS, answerLabel } from "@/lib/setup";
+import { interviewLines, profileLines } from "@/lib/setup";
 import { LearnerPlanSchema, type LearnerPlan, type PlanVersion } from "@/lib/learner-plan";
+import { LlmError, aiConfigured, llmHttp, llmModel, llmModels, llmReasoning, type ChatRequest, type ChatResponse, type LlmMessage, type LlmTransport } from "../ai/llm";
 import type { ContextModule, CourseContext } from "./context";
 import type { PlannerInput } from "./baseline";
 
@@ -13,25 +14,16 @@ import type { PlannerInput } from "./baseline";
  * then checks the plan against the real course. The instructions, template
  * and course outline are identical for every learner and sent first, so the
  * provider's context cache can reuse them. While the main model is
- * overloaded, the fallback model is tried.
+ * overloaded, the fallback model is tried. The HTTP client is shared with the
+ * companion and the profiling helpers (../ai/llm.ts), which works with any
+ * provider set in .env.local.
  */
 
-const DEFAULT_BASE_URL = "https://api.z.ai/api/paas/v4";
-/** Free on Z.ai, so a new key works at once; set GLM_MODEL (e.g. glm-5.3) for the paid flagship. */
-const DEFAULT_MODEL = "glm-4.7-flash";
-/** Also free; used while the main model is overloaded (the free tier often answers 429). */
-const DEFAULT_FALLBACK = "glm-4.5-flash";
-
-export const plannerModel = () => process.env.GLM_MODEL?.trim() || DEFAULT_MODEL;
-/** The models to try in order: GLM_MODEL, then GLM_FALLBACK_MODEL ("none" turns the fallback off). */
-function models(): string[] {
-  const fallback = process.env.GLM_FALLBACK_MODEL?.trim() || DEFAULT_FALLBACK;
-  return [...new Set([plannerModel(), ...(fallback.toLowerCase() === "none" ? [] : [fallback])])];
-}
-const baseUrl = () => (process.env.GLM_BASE_URL?.trim() || DEFAULT_BASE_URL).replace(/\/+$/, "");
-export const aiConfigured = () => Boolean(process.env.GLM_API_KEY?.trim());
-/** Thinking makes GLM several times slower (minutes on the flash models); off unless GLM_THINKING=enabled. */
-const thinking = (): "enabled" | "disabled" => (process.env.GLM_THINKING?.trim().toLowerCase() === "enabled" ? "enabled" : "disabled");
+export { aiConfigured };
+export type { ChatRequest, ChatResponse };
+export const plannerModel = llmModel;
+const models = llmModels;
+const thinking = llmReasoning;
 
 /**
  * Why no AI plan was written. `message` is shown to the learner, so it never
@@ -64,73 +56,32 @@ export type PlannerRequest = {
 
 export type PlannerResult = { plan: LearnerPlan; model: string; usage: Record<string, number> };
 
-type Message = { role: "system" | "user" | "assistant"; content: string };
-export type ChatRequest = {
-  model: string;
-  messages: Message[];
-  response_format: { type: "json_object" };
-  thinking: { type: "enabled" | "disabled" };
-  max_tokens: number;
-  temperature: number;
-};
-export type ChatResponse = {
-  model?: string;
-  choices?: { finish_reason?: string; message?: { content?: string | null } }[];
-  usage?: { prompt_tokens?: number; completion_tokens?: number; prompt_tokens_details?: { cached_tokens?: number } };
-};
+type Message = LlmMessage;
 
 /** One chat-completion call. The default goes over HTTP; tests pass a stand-in. */
-export type PlannerTransport = (req: ChatRequest) => Promise<ChatResponse>;
+export type PlannerTransport = LlmTransport;
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const http = llmHttp({ timeoutMs: 240_000, retries: 2, backoffMs: 4000 });
 
+/** The shared client, with its errors worded for the planner. */
 export const httpTransport: PlannerTransport = async (req) => {
-  const key = process.env.GLM_API_KEY?.trim();
-  if (!key) throw new PlannerError(UNAVAILABLE, "GLM_API_KEY is not set.");
-  for (let attempt = 0; ; attempt++) {
-    let res: Response;
-    try {
-      res = await fetch(`${baseUrl()}/chat/completions`, {
-        method: "POST",
-        headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
-        body: JSON.stringify(req),
-        signal: AbortSignal.timeout(240_000),
-      });
-    } catch (e) {
-      if (attempt < 2) {
-        await sleep(1500 * (attempt + 1));
-        continue;
-      }
-      throw new PlannerError(BUSY, `Couldn't reach the GLM API: ${e instanceof Error ? e.message : String(e)}`, true);
-    }
-    if (res.ok) return (await res.json()) as ChatResponse;
-    const body = (await res.json().catch(() => ({}))) as { error?: { code?: string | number; message?: string } };
-    const code = String(body.error?.code ?? "");
-    const detail = `GLM API error ${res.status} (${req.model}): ${body.error?.message ?? res.statusText}`;
-    if (res.status === 401) throw new PlannerError(UNAVAILABLE, "The GLM API key was rejected.");
-    if (code === "1113") throw new PlannerError(UNAVAILABLE, `The GLM account has no balance for ${req.model}. Recharge it, or use a free model such as glm-4.7-flash (GLM_MODEL).`);
-    if (code === "1211") throw new PlannerError(UNAVAILABLE, `GLM doesn't know the model "${req.model}". Check GLM_MODEL.`);
-    // the free models answer 429 while overloaded; after two waits, generatePlan tries the fallback model
-    if (res.status === 429 || res.status >= 500) {
-      if (attempt < 2) {
-        await sleep(4000 * 2 ** attempt);
-        continue;
-      }
-      throw new PlannerError(BUSY, detail, true);
-    }
-    throw new PlannerError(UNAVAILABLE, detail);
+  try {
+    return await http(req);
+  } catch (e) {
+    if (!(e instanceof LlmError)) throw e;
+    throw new PlannerError(e.busy ? BUSY : UNAVAILABLE, e.detail, e.busy);
   }
 };
 
 const INSTRUCTIONS = `You are the course planner for Nebula KnowLab, an online learning platform. You write one learner's plan for one course: the order they take each module's topics in, how much help each lesson gives, how much attention each module deserves, their pacing, and short personalised text. The learner reads everything you write, addressed to them as "you". Write plainly and warmly, and be specific; no marketing tone.
 
 What you decide:
-- topicOrder for each module: include every topic id of the module, written or coming soon. The opening scenario (hook) stays first; the module check (gate) and then the recall topic (review) stay last. You may reorder the topics in between, for example putting the worked example (worked) before the explanation (explainer) for someone who learns best from examples.
+- topicOrder for each module: include every topic id of the module, written or coming soon. The opening scenario (hook) stays first; the module check (gate) and then the recall topic (review) stay last. You may reorder the topics in between, for example putting the worked example (worked) before the explanation (explainer) for someone who learns best from examples. Guided practice (guided) always comes after both the explanation and the worked example.
 - support for each lesson and module: light, standard or extra. Base it on evidence: the quick check (as a starting point, 0 of 2 right suggests extra, 2 of 2 suggests light; a score for a module covers every lesson in it), their stated experience, and their answers inside lessons once those arrive. Each "why" is one sentence citing the evidence.
-- emphasis for each module: skim, standard or deep, from their goal, role and gaps.
+- emphasis for each module: skim, standard or deep, from their goal, role and gaps. A module they say they already know is skim with light help unless the quick check or their answers inside lessons say otherwise; what they asked this course to focus on leans emphasis towards it (deep) and away from what they asked to skip, without dropping anything.
 - hookScene: only for modules that have an opening scenario. Retell its stakes in two or three sentences from the learner's role and field. Keep the scenario's facts (the company, the people, what went wrong) as the course outline gives them; reframe them, do not invent new events or numbers. Null for modules without one.
-- inYourWorld for every lesson: apply that lesson's key idea to the learner's own field and role with a concrete, realistic example from their work that they would recognise. Never contradict the lesson. With no field given, use a general workplace example.
-- capstoneBrief: how to approach the capstone project given their role.
+- inYourWorld for every lesson: apply that lesson's key idea to the learner's own field and role with a concrete, realistic example from their work that they would recognise. Never contradict the lesson. With no field given, use a general workplace example. For a student, use their subject's coursework and student life, never a job they do not have. Where they named the systems they use, the examples may use them; pitch the depth to their years in the field.
+- capstoneBrief: how to approach the capstone project given their role, framed around the first job they would hand to an agent when they named one.
 - pacing: sessions per week and minutes per session that fit their stated pace and goal.
 - summary: two or three sentences on how the course is tuned for them and why.
 
@@ -177,7 +128,17 @@ function templateFor(ctx: CourseContext): string {
 function learnerText(req: PlannerRequest): string {
   const { input, previous, evidence, trigger } = req;
   const lines: string[] = ["LEARNER", `Name: ${input.name}`, "Profile answers:"];
-  for (const q of QUESTIONS) lines.push(`- ${q.label}: ${answerLabel(q, input.answers) ?? "not answered"}`);
+  // only the questions this learner was asked (or that their answers implied): the questions branch on their field
+  for (const l of profileLines(input.answers, input.derived)) lines.push(`- ${l.label}: ${l.answer ?? "not answered"}`);
+  // the interview in their own words, as Pip asked it
+  const said = interviewLines(input.answers);
+  if (said.length) lines.push("Interview (Pip's questions and their answers):", ...said);
+  // asked when they enrolled in this course, on top of the profile
+  const known = (input.answers.known ?? []).filter((x) => x !== "none");
+  lines.push(`Modules of this course they say they already know: ${known.length ? known.join(", ") : input.answers.known ? "none" : "not asked"}`);
+  if (input.answers.expect) lines.push(`What they want this course to focus on or skip (their words): ${input.answers.expect}`);
+  const fit = interviewLines(input.answers, "courseInterview");
+  if (fit.length) lines.push("Enrolment questions for this course (Pip's questions and their answers):", ...fit);
   lines.push(`Help level set by the learner: ${input.supportOverride === "auto" ? "automatic (decide it)" : input.supportOverride}`);
   lines.push(input.pace ? `Study pace they chose: ${input.pace.studyDays.length} days a week, ${input.pace.sessionMinutes} minutes a session` : "Study pace: not set");
 

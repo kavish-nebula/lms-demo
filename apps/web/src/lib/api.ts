@@ -5,6 +5,7 @@ import useSWR, { mutate } from "swr";
 import { useHydrated } from "@/lib/local-store";
 import type { EnrollmentView } from "@/lib/learner-plan";
 import type { SetupAnswers } from "@/lib/setup";
+import type { ProfileDerived } from "@/lib/profiling/derived";
 
 /**
  * The client side of /api/v1. One SWR cache entry holds every enrollment
@@ -41,7 +42,7 @@ export const PROFILE = "/api/v1/profile";
 export const plansKey = (courseId: string) => `/api/v1/enrollments/${courseId}/plans`;
 
 type EnrollmentsResponse = { enrollments: EnrollmentView[] };
-export type ProfileView = { answers: SetupAnswers; needs: string[]; at: string } | null;
+export type ProfileView = { answers: SetupAnswers; needs: string[]; derived?: ProfileDerived | null; at: string } | null;
 
 const fetcher = <T,>(url: string) => api<T>(url);
 
@@ -81,7 +82,8 @@ export const refreshEnrollments = () => mutate(ENROLLMENTS);
 
 export function useProfileData() {
   const { data, error } = useSWR<{ profile: ProfileView }>(PROFILE, fetcher);
-  return { profile: data?.profile ?? null, ready: !!data || !!error };
+  // `loaded`: the server answered (with or without a profile), as opposed to failing
+  return { profile: data?.profile ?? null, ready: !!data || !!error, loaded: !!data };
 }
 
 export const storeProfile = (profile: ProfileView) => mutate(PROFILE, { profile }, { revalidate: false });

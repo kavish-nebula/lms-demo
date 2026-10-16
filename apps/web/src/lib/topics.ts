@@ -15,6 +15,21 @@ export function topicOf(m: HasTopics, stage: StageId): { topic: Topic; n: number
   return i < 0 ? null : { topic: list[i]!, n: i + 1, total: list.length };
 }
 
+/**
+ * Guided practice ("Build it") always comes after the explanation and the
+ * worked example: learners build once they have seen the idea and watched it
+ * run. Any order is repaired by moving it to just after the later of the two.
+ */
+export function practiceAfterExamples<S extends string>(order: readonly S[]): S[] {
+  const g = order.indexOf("guided" as S);
+  if (g < 0) return [...order];
+  const after = Math.max(order.indexOf("worked" as S), order.indexOf("explainer" as S));
+  if (after < g) return [...order];
+  const rest = order.filter((s) => s !== "guided");
+  rest.splice(rest.indexOf(order[after]!) + 1, 0, "guided" as S);
+  return rest;
+}
+
 /** "See a full example first": the watch-it-run topic moves ahead of the explanation. */
 export function orderStages(stages: StageId[], exampleFirst: boolean): StageId[] {
   if (!exampleFirst) return stages;

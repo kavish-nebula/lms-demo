@@ -1,3 +1,4 @@
+import { practiceAfterExamples } from "@/lib/topics";
 import * as z from "zod/v4";
 import type { PrecheckResult, SetupAnswers, SupportOverride } from "@/lib/setup";
 
@@ -104,11 +105,11 @@ export type EnrollmentView = {
   ai: boolean;
 };
 
-/** The plan's topic order for a module, if it is a valid order of these topics. */
+/** The plan's topic order for a module, if it is a valid order of these topics (guided practice kept after the worked example). */
 export function planTopicOrder<S extends string>(plan: LearnerPlan | null | undefined, moduleId: string, stages: readonly S[]): S[] | null {
   const order = planModule(plan, moduleId)?.topicOrder;
   if (!order || order.length !== stages.length || !stages.every((s) => order.includes(s))) return null;
-  return order as S[];
+  return practiceAfterExamples(order as S[]);
 }
 
 export const planModule = (plan: LearnerPlan | null | undefined, moduleId: string) => plan?.modules.find((m) => m.moduleId === moduleId) ?? null;

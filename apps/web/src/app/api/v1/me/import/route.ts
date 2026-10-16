@@ -4,6 +4,7 @@ import * as repo from "@/server/repo";
 import { courseContext } from "@/server/planner/context";
 import { baselinePlan } from "@/server/planner/baseline";
 import { ImportBody } from "@/server/validators";
+import { normalizeAnswers } from "@/lib/setup";
 
 /**
  * One-time import of what the browser stored before the backend existed:
@@ -15,7 +16,7 @@ export const POST = handle(async (req: Request) => {
   const data = await body(req, ImportBody);
   let imported = 0;
   if (data.profile && !(await repo.getProfile(user.id))) {
-    await repo.saveProfile(user.id, data.profile.answers, data.profile.needs);
+    await repo.saveProfile(user.id, normalizeAnswers(data.profile.answers), data.profile.needs);
     imported++;
   }
   for (const en of data.enrollments) {
@@ -23,7 +24,7 @@ export const POST = handle(async (req: Request) => {
     const ctx = await courseContext(en.courseId).catch(() => null);
     if (!ctx) continue;
     const e = await repo.upsertEnrollment(user.id, en.courseId, {
-      answers: en.answers,
+      answers: normalizeAnswers(en.answers),
       supportOverride: en.supportOverride,
       pace: null,
       precheck: en.precheck,

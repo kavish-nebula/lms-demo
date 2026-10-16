@@ -6,7 +6,7 @@ import { execFileSync } from "node:child_process";
 import path from "node:path";
 
 const here = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"));
-const suite = process.argv[2] === "engagement" ? "engagement-test.ts" : process.argv[2] === "workflow" ? "workflow-test.ts" : "backend-test.ts";
+const suite = process.argv[2] === "engagement" ? "engagement-test.ts" : process.argv[2] === "workflow" ? "workflow-test.ts" : process.argv[2] === "companion" ? "companion-test.ts" : process.argv[2] === "profiling" ? "profiling-test.ts" : process.argv[2] === "profiling-api" ? "profiling-api-test.ts" : process.argv[2] === "interview" ? "interview-test.ts" : process.argv[2] === "adapt" ? "adapt-test.ts" : "backend-test.ts";
 // generated files go to the gitignored .data folder
 const out = path.join(here, "..", "..", ".data", "tests");
 mkdirSync(out, { recursive: true });
@@ -27,4 +27,4 @@ await build({
   external: ["@electric-sql/pglite", "pg", "drizzle-orm", "zod", "react", "react-dom"],
   logLevel: "warning",
 });
-execFileSync(process.execPath, [path.join(out, "out.mjs")], { stdio: "inherit", env: { ...process.env, PGLITE_DIR: "memory://", GLM_API_KEY: "", PLATFORM_ENGAGEMENT_ENABLED: suite === "engagement-test.ts" ? "true" : "false" } });
+execFileSync(process.execPath, [path.join(out, "out.mjs")], { stdio: "inherit", env: { ...process.env, PGLITE_DIR: "memory://", GLM_API_KEY: "", LLM_API_KEY: "", AUDIO: "off", AUDIO_API_KEY: "", KOKORO: "off", PLATFORM_ENGAGEMENT_ENABLED: suite === "engagement-test.ts" ? "true" : "false" } });
