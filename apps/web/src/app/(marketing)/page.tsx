@@ -2,7 +2,6 @@ import { getTranslations } from "next-intl/server";
 import { SiteNav } from "@/components/marketing/site-nav";
 import { Hero } from "@/components/marketing/hero";
 import { TickerTape } from "@/components/kit/ticker-tape";
-import { MethodBento } from "@/components/marketing/method-bento";
 import { RulesBento } from "@/components/marketing/rules-bento";
 import { Teams } from "@/components/marketing/teams";
 import { Faq } from "@/components/marketing/faq";
@@ -50,7 +49,6 @@ export default async function HomePage() {
             ].map((m) => ({ id: m, content: <span className="text-ink-muted">{m}</span> }))}
           />
         </div>
-        <MethodBento />
         <RulesBento />
         <Teams />
         <Faq />

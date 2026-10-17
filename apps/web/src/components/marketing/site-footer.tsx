@@ -9,7 +9,7 @@ export async function SiteFooter() {
   const t = await getTranslations("marketing");
   const tc = await getTranslations("common");
   const cols = [
-    { title: t("footProduct"), links: [{ l: t("navMethod"), h: "#method" }, { l: t("navTeams"), h: "#teams" }] },
+    { title: t("footProduct"), links: [{ l: t("navTeams"), h: "#teams" }] },
     { title: t("footCompany"), links: [{ l: t("footAbout"), h: "/" }, { l: t("footContact"), h: "/" }] },
     { title: t("footLegal"), links: [{ l: t("footPrivacy"), h: "/" }, { l: t("footTerms"), h: "/" }, { l: t("footA11y"), h: "/" }] },
   ];

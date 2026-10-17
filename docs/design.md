@@ -86,4 +86,4 @@ Visual Story mode turns authored concept slides into focused scenes with touch, 
 
 Pip uses the updated illustrated mascot and gives brief, phase-aware nudges and reactions to learner actions. Reactions respect reduced-motion preferences.
 
-The landing page's Method section shows the course finale cards without the module-topic example grid (previously headed In every module).
+The landing page omits the Method section and its course finale cards. Its navigation and footer omit Method, and the hero offers the primary sign-in action without a See the method link.

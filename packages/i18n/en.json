@@ -786,7 +786,6 @@
   "marketing": {
     "navLabel": "Main",
     "navProduct": "Product",
-    "navMethod": "Method",
     "navTeams": "For teams",
     "navFaq": "FAQ",
     "openMenu": "Open menu",
@@ -796,7 +795,6 @@
     "heroSubtitle": "Every module starts from a real problem, shows you a real run, lets you build it yourself with hints, and brings the idea back weeks later. A capstone and a final check close the course.",
     "heroPrompt": "What do you want to be able to do?",
     "heroCtaPrimary": "Start free",
-    "heroCtaSecondary": "See the method",
     "statSteps": "modules, then a capstone",
     "statGate": "pass mark on the final check",
     "statReviews": "recall checks per module",
@@ -809,9 +807,6 @@
     "mq_load": "Cognitive load theory",
     "mq_feedback": "Instant feedback",
     "mq_reflection": "Self-reflection",
-    "methodEyebrow": "The method",
-    "methodTitle": "From a real problem to lasting skill",
-    "methodBody": "Every module takes its own topics in the same order. After all modules: one capstone, one final check and a wrap-up.",
     "rulesEyebrow": "Built-in rules",
     "rulesTitle": "Design rules every module follows",
     "ruleFeedback": "Feedback on every practice answer, so mistakes become learning while they are fresh.",
@@ -849,7 +844,7 @@
     "footPrivacy": "Privacy",
     "footTerms": "Terms",
     "footA11y": "Accessibility",
-    "heroAccepted": "Capstone accepted",
+    "heroAccepted": "Capstone accepted"
   },
   "plan": {
     "sessionDetails": "Session details",

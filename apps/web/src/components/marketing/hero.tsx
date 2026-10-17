@@ -104,9 +104,6 @@ export function Hero({ preview }: { preview: HeroPreview | null }) {
             <Button asChild size="lg" variant="brand">
               <Link href="/auth/sign-in">{t("heroCtaPrimary")}</Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="border-brand-line bg-transparent">
-              <a href="#method">{t("heroCtaSecondary")}</a>
-            </Button>
           </motion.div>
 
           <motion.dl custom={5} variants={rise} initial="hidden" animate="show" className="mt-2 grid max-w-md grid-cols-3 gap-6">
