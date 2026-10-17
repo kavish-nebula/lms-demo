@@ -24,7 +24,6 @@ export function SiteNav() {
 
   const links = [
     { href: "#method", label: t("navMethod") },
-    { href: "#teams", label: t("navTeams") },
     { href: "#pricing", label: t("navPricing") },
     { href: "#faq", label: t("navFaq") },
   ];

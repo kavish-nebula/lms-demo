@@ -178,6 +178,13 @@ function learnerText(req: PlannerRequest): string {
   const { input, previous, evidence, trigger } = req;
   const lines: string[] = ["LEARNER", `Name: ${input.name}`, "Profile answers:"];
   for (const q of QUESTIONS) lines.push(`- ${q.label}: ${answerLabel(q, input.answers) ?? "not answered"}`);
+  const a = input.answers;
+  const detail = [
+    a.subRole && `Part of their field: ${a.subRole}`,
+    a.useCase && `Wants to improve or automate: ${a.useCase}`,
+    a.goalDetail && `Goal in their words: ${a.goalDetail}`,
+  ].filter(Boolean);
+  for (const d of detail) lines.push(`- ${d}`);
   lines.push(`Help level set by the learner: ${input.supportOverride === "auto" ? "automatic (decide it)" : input.supportOverride}`);
   lines.push(input.pace ? `Study pace they chose: ${input.pace.studyDays.length} days a week, ${input.pace.sessionMinutes} minutes a session` : "Study pace: not set");
 
@@ -188,6 +195,10 @@ function learnerText(req: PlannerRequest): string {
     lines.push(`Quick check (right answers out of 2, per lesson, or per module where a bare number names the module): ${Object.entries(p.lessons).map(([l, n]) => `${l.includes(".") ? "lesson" : "module"} ${l}: ${n}`).join(", ")}`);
     const dunno = Object.entries(p.responses ?? {}).filter(([, v]) => v === null).map(([k]) => k);
     if (dunno.length) lines.push(`Answered "I don't know yet" on: ${dunno.join(", ")}`);
+    // the Mission records which idea they hold per module, so plans can target the misunderstanding itself
+    const ideas = p.activity?.ideas ?? [];
+    if (ideas.length) lines.push("What their choices in the Mission story showed, per module:");
+    for (const i of ideas) lines.push(`- module ${i.skill} (${i.title}): ${i.accurate ? "holds the accurate idea" : "currently believes"} "${i.held}"${i.sure ? "" : " (unsure)"}`);
   }
 
   if (previous) {

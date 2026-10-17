@@ -10,24 +10,24 @@ export function companionNudge(context: { phase: string; moduleTitle?: string; s
   const modulePrefix = moduleTitle ? `${moduleTitle}: ` : "";
 
   switch (context.phase) {
-    case "profile": return "Choose what fits you so the course can adapt.";
-    case "intro": return "Watch the preview, then continue to the quick check.";
-    case "precheck": return "Answer independently so the course can match your starting level.";
-    case "customize": return "Choose the support and pace that feel right today.";
-    case "build": return "Your learning path is ready. Open the first module.";
-    case "hook": return `${modulePrefix}make a prediction, then reveal what happened.`;
+    case "profile": return "Choose what fits you.";
+    case "intro": return "Watch the preview, then take the quick check.";
+    case "precheck": return "Answer on your own to find your level.";
+    case "customize": return "Choose your support and pace.";
+    case "build": return "Your path is ready. Open the first module.";
+    case "hook": return `${modulePrefix}predict, then reveal what happened.`;
     case "explainer": return stepTitle
-      ? `Play “${stepTitle}” and catch the key idea before the quick check.`
-      : `${modulePrefix}play the concept, then try the quick check.`;
-    case "worked": return `${modulePrefix}predict each move before revealing the solution.`;
-    case "guided": return `${modulePrefix}complete the current checkpoint. Use a hint if you get stuck.`;
-    case "lab": return `${modulePrefix}make one choice, inspect the result, then adjust.`;
-    case "gate": return moduleTitle ? `Complete the ${moduleTitle} quiz independently.` : "Complete this module quiz independently.";
-    case "review": return `${modulePrefix}recall one idea before checking your notes.`;
-    case "capstone": return "Build one part of your final project, test it, then save the evidence.";
-    case "final-check": return "Complete the final assessment independently.";
-    case "wrap-up": return "Capture one thing you can now explain or build.";
-    default: return "Continue from your current step when you are ready.";
+      ? `Play “${stepTitle}” and catch the key idea.`
+      : `${modulePrefix}play the idea, then try the check.`;
+    case "worked": return `${modulePrefix}predict each move, then reveal it.`;
+    case "guided": return `${modulePrefix}finish this checkpoint. Use a hint if stuck.`;
+    case "lab": return `${modulePrefix}make a choice, check the result, adjust.`;
+    case "gate": return moduleTitle ? `Do the ${moduleTitle} quiz on your own.` : "Do this quiz on your own.";
+    case "review": return `${modulePrefix}recall one idea, then check your notes.`;
+    case "capstone": return "Build one part, test it, and save the evidence.";
+    case "final-check": return "Do the final assessment on your own.";
+    case "wrap-up": return "Note one thing you can now build.";
+    default: return "Continue when you’re ready.";
   }
 }
 
@@ -95,24 +95,24 @@ export function companionReply(query: string, context: { phase: string; guidance
   if (/^(next step|what should i do here|help me with this step|how does this work)[?.!]?$/i.test(prompt)) return { text: context.nextStep || context.guidance };
   if (/^(explain this(?: step| slide)?|what does this mean)[?.!]?$/i.test(prompt)) return { text: context.guidance };
   const hit = findPassage(query, context.passages, context.moduleId, context.videoId, context.slideTitle);
-  return hit ? { text: hit.text, source: { title: hit.title, href: hit.href } } : { text: `I couldn’t find a reliable match in ${context.courseTitle}. Try naming the course concept or ask “What should I do here?” I can help with this course only.` };
+  return hit ? { text: hit.text, source: { title: hit.title, href: hit.href } } : { text: `I couldn’t find that in ${context.courseTitle}. Name a course idea or ask “What should I do here?”` };
 }
 
 export const PHASE_GUIDANCE: Record<string, string> = {
-  profile: "Choose the answers that fit you today. You can skip a question or change your preferences later. Your choices set examples, lesson order, and starting support.",
-  intro: "Watch the course preview to see what you will build. You can pause, replay, or read the transcript before continuing to the quick check.",
-  precheck: "This quick check finds your starting point. Choose what you know, or use the unsure option. I can explain the process, but will leave the answers to you.",
-  customize: "Review your starting plan. Choose your guidance level, session length, and study days. You can adjust your guidance in every module.",
-  build: "Your course setup is ready. Open your journey to begin the first problem and meet the Orbit Outdoor team.",
-  hook: "Explore the team's real problem. Make a prediction, watch what happens, and compare it with your initial idea. You can replay the scene.",
-  explainer: "Watch a short explanation, use the transcript when useful, then open the experiment to change one thing and observe the outcome.",
-  worked: "Predict what will happen before running the example. Step through the result and ask why each decision was made.",
-  guided: "Accept the mission, work through one checkpoint at a time, and test your result. Ask for a hint whenever useful; help does not reduce your reward.",
-  lab: "Read the evidence, make your decision, then inspect its consequence. Revise your approach before moving to the next situation.",
-  gate: "This is an independent mastery check. Answer the questions and submit when ready. I can help with navigation, but course explanations are paused here. After submission, use the review links to practise and return.",
-  review: "Write a short reflection, then practise recalling the idea in a new situation. Rate your recall honestly; difficult reviews return sooner.",
-  capstone: "This is your one course mini-project. Use the brief and checklist to assemble what you learned, test the edge cases, and save your project evidence before the final assessment.",
-  "final-check": "Your final assessment follows the mini-project. Work independently and submit when ready. I can explain the process, but cannot provide answers or course hints here.",
-  "wrap-up": "Reflect on what changed in your understanding and what you can now build. Save your reflection and revisit the scheduled practice challenges.",
-  course: "Start with your profile, course preview, and quick check. Then follow the mission trail through the modules. One mini-project comes immediately before the final assessment.",
+  profile: "Choose what fits you. You can skip or change answers later.",
+  intro: "Watch the preview to see what you’ll build. Then take the quick check.",
+  precheck: "This check finds your starting point. Pick “unsure” if you don’t know.",
+  customize: "Review your plan. Pick your guidance, session length, and study days.",
+  build: "You’re set up. Open your journey to meet the Orbit Outdoor team.",
+  hook: "See the team’s real problem. Predict, watch, and compare.",
+  explainer: "Watch the short explainer. Then change one thing in the experiment.",
+  worked: "Predict first, then step through and ask why each choice was made.",
+  guided: "Work one checkpoint at a time and test your result. Hints never cost you.",
+  lab: "Read the evidence, decide, and check the result. Adjust before moving on.",
+  gate: "Answer on your own and submit. Course help is paused until you submit.",
+  review: "Write a short note, then recall the idea. Hard ones come back sooner.",
+  capstone: "Your mini-project. Follow the checklist, test edge cases, and save evidence.",
+  "final-check": "Work on your own and submit when ready. No hints here.",
+  "wrap-up": "Note what you can now build. Then do your scheduled practice.",
+  course: "Set up your profile and take the quick check. Then follow the modules.",
 };

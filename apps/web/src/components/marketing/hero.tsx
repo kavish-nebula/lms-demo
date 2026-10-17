@@ -2,12 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
-import { ArrowRight, Check, MousePointer2, ShieldCheck, Sparkles } from "lucide-react";
+import { Check, MousePointer2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { NumberTicker } from "@/components/kit/number-ticker";
 import { STAGE_META, type StageId } from "@/lib/stages";
 import { cn } from "cn";
 
@@ -26,10 +24,8 @@ export type HeroPreview = { course: string; module: string; modules: number; top
 
 export function Hero({ preview }: { preview: HeroPreview | null }) {
   const t = useTranslations("marketing");
-  const router = useRouter();
   const reduce = useReducedMotion();
   const ref = React.useRef<HTMLElement>(null);
-  const [goal, setGoal] = React.useState("");
 
   function onPointer(e: React.PointerEvent) {
     if (reduce || !ref.current) return;
@@ -66,39 +62,14 @@ export function Hero({ preview }: { preview: HeroPreview | null }) {
             variants={rise}
             initial="hidden"
             animate="show"
-            className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-[64px] lg:leading-[1.02]"
+            className="text-[2.25rem] leading-tight font-semibold tracking-tight text-balance sm:text-[2.75rem] lg:text-[3.25rem]"
           >
             {t("heroLead")} <span className="text-brand-ink">{t("heroAccent")}</span>
           </motion.h1>
-          <motion.p custom={2} variants={rise} initial="hidden" animate="show" className="max-w-xl text-lg text-ink-muted">
+          <motion.p custom={2} variants={rise} initial="hidden" animate="show" className="max-w-lg text-base text-ink-muted">
             {t("heroSubtitle")}
           </motion.p>
 
-          <motion.form
-            custom={3}
-            variants={rise}
-            initial="hidden"
-            animate="show"
-            onSubmit={(e) => {
-              e.preventDefault();
-              router.push("/auth/sign-in");
-            }}
-            className="glass glass-edge flex max-w-xl items-center gap-2 rounded-pill p-1.5 pl-5"
-          >
-            <label htmlFor="goal" className="sr-only">
-              {t("heroPrompt")}
-            </label>
-            <input
-              id="goal"
-              value={goal}
-              onChange={(e) => setGoal(e.target.value)}
-              placeholder={t("heroPrompt")}
-              className="h-11 min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-ink-faint"
-            />
-            <Button type="submit" size="icon-lg" variant="brand" className="rounded-full" aria-label={t("heroCtaPrimary")}>
-              <ArrowRight />
-            </Button>
-          </motion.form>
 
           <motion.div custom={4} variants={rise} initial="hidden" animate="show" className="flex flex-wrap gap-3">
             <Button asChild size="lg" variant="brand">
@@ -109,21 +80,6 @@ export function Hero({ preview }: { preview: HeroPreview | null }) {
             </Button>
           </motion.div>
 
-          <motion.dl custom={5} variants={rise} initial="hidden" animate="show" className="mt-2 grid max-w-md grid-cols-3 gap-6">
-            {[
-              { v: preview?.modules ?? 6, suffix: "", l: t("statSteps") },
-              { v: 80, suffix: "%", l: t("statGate") },
-              { v: 3, suffix: "×", l: t("statReviews") },
-            ].map((s, i) => (
-              <div key={s.l}>
-                <dt className="sr-only">{s.l}</dt>
-                <dd className="text-3xl font-semibold text-brand-ink">
-                  <NumberTicker value={s.v} suffix={s.suffix} delay={0.5 + i * 0.12} />
-                </dd>
-                <dd className="mt-1 text-sm text-ink-muted">{s.l}</dd>
-              </div>
-            ))}
-          </motion.dl>
         </div>
 
         {/* Product preview: assembled from the same stage tokens the app uses. */}
@@ -144,7 +100,7 @@ export function Hero({ preview }: { preview: HeroPreview | null }) {
               <span className="rounded-pill bg-brand-soft px-2.5 py-1 text-xs text-brand-ink">3 / {preview.topics.length}</span>
             </div>
             <ul className="flex flex-col gap-1.5">
-              {preview.topics.map((tp, i) => {
+              {preview.topics.slice(0, 4).map((tp, i) => {
                 const meta = STAGE_META[tp.stage];
                 const Icon = meta.icon;
                 const state = i < 2 ? "done" : i === 2 ? "current" : "todo";
@@ -169,10 +125,6 @@ export function Hero({ preview }: { preview: HeroPreview | null }) {
             </ul>
           </div>
 
-          <div className="glass glass-edge absolute -top-6 -right-2 flex items-center gap-2 rounded-pill px-3.5 py-2 text-sm sm:-right-6">
-            <ShieldCheck className="size-4 text-ok" />
-            {t("heroAccepted")}
-          </div>
           <MousePointer2 className="absolute right-10 bottom-4 size-6 fill-brand text-brand-ink" />
         </motion.div>
         ) : null}

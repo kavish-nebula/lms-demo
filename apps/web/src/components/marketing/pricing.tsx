@@ -37,7 +37,7 @@ export function Pricing() {
       <div className="mx-auto max-w-6xl px-4 md:px-6">
         <div className="flex flex-col items-center text-center">
           <p className="text-sm font-medium text-brand-ink">{t("pricingEyebrow")}</p>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">{t("pricingTitle")}</h2>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight md:text-[2.25rem] md:leading-tight">{t("pricingTitle")}</h2>
           <Segmented<Audience>
             className="mt-6"
             aria-label={t("pricingAudience")}

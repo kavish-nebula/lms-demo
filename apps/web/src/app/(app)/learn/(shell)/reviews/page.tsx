@@ -19,7 +19,7 @@ export default async function ReviewsPage() {
       <ScheduledReviews courses={courses} />
       {learner.due_reviews.length > 0 ? <Surface pad="md" className="max-w-3xl">
         <DueReviewList items={learner.due_reviews} today={FIXTURE_TODAY} />
-      </Surface> : <p className="text-sm text-ink-muted">Complete a module check or open its reflection to schedule your return visits.</p>}
+      </Surface> : <p className="text-sm text-ink-muted">Finish a module quiz to schedule reviews.</p>}
       <p className="max-w-3xl text-sm text-ink-faint">{t("why")}</p>
     </div>
   );

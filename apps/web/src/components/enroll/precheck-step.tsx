@@ -19,7 +19,7 @@ import type { PrecheckItem } from "@/data/types";
  */
 export function PrecheckStep({ items, courseTitle, onDone }: { items: PrecheckItem[]; courseTitle: string; onDone: (r: PrecheckResult) => void }) {
   const t = useTranslations("enroll");
-  useCompanionStep({ title: courseTitle,phase: "precheck",guidance: "Answer independently. Starting checks do not offer hints or answer explanations." });
+  useCompanionStep({ title: courseTitle,phase: "precheck",guidance: "Answer on your own. No hints here." });
   const [i, setI] = React.useState(-1);
   const [responses, setResponses] = React.useState<Record<string, string | null>>({});
   const lessons = [...new Set(items.map((x) => x.lesson))];

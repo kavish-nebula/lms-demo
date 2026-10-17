@@ -12,6 +12,7 @@ import { gradeProject, type RunRecord, type TicketExpect } from "@/lib/project-g
 import { checkProject, projectOf, projectTickets, saveProject } from "@/server/project";
 import projectTests from "@lms/fixtures/project-ai-agent-tests.json";
 import projectClient from "@lms/fixtures/project-ai-agent.json";
+import { ROLE_HOOK } from "@/lib/world";
 
 let failures = 0;
 const check = (label: string, cond: unknown, extra?: unknown) => {
@@ -55,7 +56,7 @@ check("why cites the module's quick check", m1.lessons[0]!.why.includes("this mo
 check("strengths and gaps name modules, not numbers", b1.learner.strengths.includes("Introduction to AI Agents") && !b1.learner.gaps.some((g) => /^\d+$/.test(g)), b1.learner);
 check("IT field → an 'In your world' for 1.1", b1.modules[0]!.lessons[0]!.inYourWorld.body.includes("ticket"), b1.modules[0]!.lessons[0]);
 check("no template for 2.1 → empty 'In your world'", b1.modules[1]!.lessons[0]!.inYourWorld.body === "");
-check("engineer hook line on m1", !!m1.hookScene?.includes("building it"), m1.hookScene);
+check("engineer hook line on m1", m1.hookScene === ROLE_HOOK[1]?.engineer, m1.hookScene);
 check("every module ends with its check, then review", b1.modules.every((m) => m.topicOrder.slice(-2).join() === "gate,review"));
 check("beginner (completely new) → extra everywhere", b2.modules.slice(0, 2).every((m) => m.lessons.every((l) => l.support === "extra")));
 check("beginner level 'new'", b2.learner.level === "new");

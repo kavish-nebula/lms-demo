@@ -1,7 +1,7 @@
 import "server-only";
 import { getCourse, getPrecheck } from "@/data";
 import { scorePrecheck } from "@/data/mock-grader";
-import type { EnrollmentView, PlanSource, PlanVersion } from "@/lib/learner-plan";
+import type { EnrollmentView, LearnerPlan, PlanSource, PlanVersion } from "@/lib/learner-plan";
 import type { PrecheckResult, SetupAnswers, SupportOverride } from "@/lib/setup";
 import type { Pace, StoredPrecheck } from "@/server/db/schema";
 import type { SessionUser } from "@/server/auth";
@@ -12,6 +12,8 @@ import { PlannerError, aiConfigured, generatePlan, plannerModel, type PlannerTra
 import { courseContext } from "./context";
 import { AI_COOLDOWN_MS, replanReason, ruleRevision } from "./policy";
 import { validatePlan } from "./validate";
+import { geminiConfigured, geminiModels } from "@/server/ai/gemini";
+import { generateEvidencePlan, onboardingPlan } from "@/server/adaptive-onboarding";
 
 /**
  * The plan lifecycle. Enrolling stores a baseline plan at once and asks the
@@ -25,7 +27,20 @@ export type Schedule = (task: () => Promise<void>) => void;
 /** A generation older than this was interrupted (for example by a restart). */
 const STALE_MS = 5 * 60_000;
 
-export type PrecheckIn = { skipped?: boolean; isNew?: boolean; responses?: Record<string, string | null> } | null;
+export type PrecheckIn = {
+  assessmentId?: string;
+  skipped?: boolean;
+  isNew?: boolean;
+  responses?: Record<string, string | null>;
+  activity?: {
+    lessons: Record<string, number>;
+    summary?: string;
+    strengths?: string[];
+    focus?: string[];
+    learning?: { firstStep: "example" | "idea" | "try"; style: "short" | "steps"; note: string };
+    ideas?: { skill: string; title: string; held: string; accurate: boolean; sure: boolean }[];
+  };
+} | null;
 
 export type SetupIn = { answers: SetupAnswers; supportOverride: SupportOverride; pace: Pace | null; precheck?: PrecheckIn };
 
@@ -59,7 +74,7 @@ export async function viewOf(e: repo.EnrollmentRow): Promise<EnrollmentView> {
   for (const r of await repo.progressFor(e.id)) (progress[r.moduleId] ??= []).push(r.stage);
   // raw quick-check responses stay on the server
   const precheck: PrecheckResult | null = e.precheck
-    ? { at: e.precheck.at, skipped: e.precheck.skipped, isNew: e.precheck.isNew, lessons: e.precheck.lessons }
+    ? { at: e.precheck.at, assessmentId: e.precheck.assessmentId, source: e.precheck.source, activity: e.precheck.activity, skipped: e.precheck.skipped, isNew: e.precheck.isNew, lessons: e.precheck.lessons }
     : null;
   return {
     courseId: e.courseId,
@@ -72,7 +87,7 @@ export async function viewOf(e: repo.EnrollmentRow): Promise<EnrollmentView> {
     pending: pending ? { version: pending.version, startedAt: pending.createdAt.toISOString() } : null,
     lastError: failed?.error ?? null,
     progress,
-    ai: aiConfigured(),
+    ai: geminiConfigured() || aiConfigured(),
   };
 }
 
@@ -82,6 +97,13 @@ async function scored(courseId: string, p: PrecheckIn | undefined, keep: StoredP
   const at = new Date().toISOString();
   if (p.skipped) return { at, skipped: true, lessons: {} };
   const items = (await getPrecheck(courseId))?.items ?? [];
+  if (p.activity) {
+    // the Mission or the Discovery conversation: keep only real lesson keys; unexplored skills stay unknown
+    const known = new Set(items.map((i) => i.lesson));
+    const lessons = Object.fromEntries(Object.entries(p.activity.lessons).filter(([k]) => known.has(k)));
+    const { summary, strengths, focus, learning, ideas } = p.activity;
+    return { at, source: "activity", lessons, activity: { summary, strengths, focus, learning, ideas: ideas?.filter((i) => known.has(i.skill)) } };
+  }
   if (p.isNew) return { at, isNew: true, lessons: Object.fromEntries([...new Set(items.map((i) => i.lesson))].map((l) => [l, 0])) };
   const responses = p.responses ?? {};
   return { at, lessons: scorePrecheck(items, responses), responses };
@@ -101,6 +123,19 @@ export async function saveSetup(user: SessionUser, courseId: string, setup: Setu
     throw new ApiError(404, "unknown_course", `There is no course "${courseId}".`);
   });
   const existing = await repo.findEnrollment(user.id, courseId);
+  // Connected Google deployments use model decisions throughout. The old
+  // rule-based path remains solely for existing offline demo installations.
+  if ((geminiConfigured() || setup.precheck?.assessmentId || existing?.precheck?.assessmentId) && !api) {
+    const assessmentId = setup.precheck === undefined ? existing?.precheck?.assessmentId : setup.precheck?.assessmentId;
+    const result: { plan: LearnerPlan; model: string; precheck?: StoredPrecheck } = assessmentId
+      ? await onboardingPlan(assessmentId, user.id, courseId, setup.answers, setup.pace, setup.supportOverride)
+      : await generateEvidencePlan(ctx, { profile: setup.answers, preferences: { pace: setup.pace, override: setup.supportOverride },
+        previousAssessment: existing?.precheck?.activity ?? null, note: "No verified activity artifacts available. Do not treat this as failed evidence." });
+    const precheck = result.precheck ?? existing?.precheck ?? null;
+    const e = await repo.upsertEnrollment(user.id, courseId, { answers: setup.answers, supportOverride: setup.supportOverride, pace: setup.pace, precheck });
+    await repo.insertPlan(e.id, { status: "ready", source: "ai", trigger: existing ? "setup" : "enrol", plan: result.plan, model: result.model, changes: result.plan.changes, completedAt: new Date() });
+    return viewOf(e);
+  }
   const precheck = await scored(courseId, setup.precheck, existing?.precheck ?? null);
   const e = await repo.upsertEnrollment(user.id, courseId, { answers: setup.answers, supportOverride: setup.supportOverride, pace: setup.pace, precheck });
   const trigger = existing ? "setup" : "enrol";
@@ -141,6 +176,8 @@ async function mustFind(user: SessionUser, courseId: string) {
 }
 
 async function maybeReplan(user: SessionUser, e: repo.EnrollmentRow, fresh: repo.SignalRow[], schedule: Schedule, api?: PlannerTransport) {
+  // Resource cooldown bounds spend; the model decides whether evidence warrants changes.
+  if ((geminiConfigured() || e.precheck?.assessmentId) && !api) return startAi(user, e, "signals", schedule, undefined, true);
   const unused = await repo.unusedSignals(e.id);
   const reason = replanReason(fresh, unused);
   if (!reason) return false;
@@ -159,14 +196,14 @@ async function maybeReplan(user: SessionUser, e: repo.EnrollmentRow, fresh: repo
 
 /** Ask the AI planner for a plan in the background, unless one is already being written (or one was just written). */
 async function startAi(user: SessionUser, e: repo.EnrollmentRow, trigger: PlanVersion["trigger"], schedule: Schedule, api?: PlannerTransport, cooldown = false): Promise<boolean> {
-  if (!api && !aiConfigured()) return false;
+  if (!api && !aiConfigured() && !geminiConfigured()) return false;
   const plans = await repo.plansFor(e.id);
   if (plans.some((p) => p.status === "generating" && Date.now() - p.createdAt.getTime() < STALE_MS)) return false;
   // the last AI call (rule revisions of an AI plan share its source but record no model)
   const lastAi = plans.find((p) => p.source === "ai" && p.model);
   if (cooldown && lastAi && Date.now() - lastAi.createdAt.getTime() < AI_COOLDOWN_MS) return false;
 
-  const row = await repo.insertPlan(e.id, { status: "generating", source: "ai" satisfies PlanSource, trigger, model: plannerModel() });
+  const row = await repo.insertPlan(e.id, { status: "generating", source: "ai" satisfies PlanSource, trigger, model: geminiConfigured() && !api ? geminiModels("main")[0] : plannerModel() });
   schedule(() => runAi(user, e.id, e.courseId, row, trigger, api));
   return true;
 }
@@ -181,6 +218,13 @@ async function runAi(user: SessionUser, enrollmentId: string, courseId: string, 
     const current = plans.find((p) => p.status === "ready" && p.version < row.version);
     const evidence = trigger === "enrol" ? [] : await repo.unusedSignals(e.id);
     const previous = trigger === "enrol" || !current?.plan ? null : { version: current.version, plan: current.plan };
+    if (geminiConfigured() && !api) {
+      const result = await generateEvidencePlan(ctx, { profile: e.answers, preferences: { pace: e.pace, override: e.supportOverride },
+        activityEvidence: e.precheck?.activity, previous, evidence: evidence.map((s) => ({ at: s.createdAt.toISOString(), kind: s.kind, moduleId: s.moduleId, lesson: s.lesson, payload: s.payload })) });
+      await repo.updatePlan(row.id, { status: "ready", plan: result.plan, changes: result.plan.changes, model: result.model, error: null, completedAt: new Date() });
+      await repo.markSignalsUsed(evidence.map((s) => s.id), row.version);
+      return;
+    }
     const result = await generatePlan(
       {
         ctx,

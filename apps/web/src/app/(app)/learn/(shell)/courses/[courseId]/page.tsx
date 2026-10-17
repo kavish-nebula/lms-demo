@@ -2,7 +2,7 @@ import { CourseJourney } from "@/components/learning/course-journey";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { Award, Clock, Signal, Star } from "lucide-react";
+import { Award, Clock, Signal } from "lucide-react";
 import { getCourse, getModule } from "@/data";
 import { moduleOutline } from "@/lib/module-outline";
 import { Surface } from "@/components/kit/surface";
@@ -48,10 +48,9 @@ export default async function CoursePage({ params }: { params: Promise<Params> }
       <CourseJourney course={course} />
 
       {/* ---------------- stats strip ---------------- */}
-      <Surface pad="none" className="grid grid-cols-1 divide-y divide-line sm:grid-cols-2 sm:divide-y-0 xl:grid-cols-4 xl:divide-x">
+      <Surface pad="none" className="grid grid-cols-1 divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         {[
           { icon: <Award />, title: t("statModules", { count: course.modules.length }), body: t("statModulesBody") },
-          { icon: <Star />, title: t("noRatingsYet"), body: t("statRatingsBody") },
           { icon: <Signal />, title: t("statLevel", { level: course.level }), body: t("statLevelBody") },
           { icon: <Clock />, title: t("statSchedule"), body: t("statScheduleBody", { hours: course.estimated_hours }) },
         ].map((s) => (

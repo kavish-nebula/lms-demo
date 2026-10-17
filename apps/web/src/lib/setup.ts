@@ -8,12 +8,23 @@
  */
 import { DOMAINS, ROLES, customDomain, customRole, type Domain } from "@/lib/world";
 import type { LearnerPlan, PlanSource } from "@/lib/learner-plan";
+import type { SkillEvidence } from "@/lib/adaptive-onboarding";
 
 export type QuestionId = "domain" | "role" | "goal" | "experience" | "firstStep" | "style";
 
 export type SetupAnswers = Partial<Record<QuestionId, string | null>> & {
+  learningContext?: string;
+  learningContextDetail?: string;
   domainOther?: string;
   roleOther?: string;
+  /** from "About you" (lib/profiling.ts), in the learner's own words: the finer detail behind the fields above */
+  subRole?: string;
+  useCase?: string;
+  goalDetail?: string;
+  /** the learner's name for their own agent (lib/agent-build.ts); a name from their task when unset */
+  agentName?: string;
+  /** every answer as a tag, e.g. "domain:healthcare", "usecase:billing-and-claims" */
+  tags?: string[];
 };
 
 export type SetupOption = { v: string; label: string; free?: string };
@@ -36,9 +47,9 @@ export const QUESTIONS: SetupQuestion[] = [
       { v: "it", label: "IT services" },
       { v: "retail", label: "Retail / e-commerce" },
       { v: "finance", label: "Finance" },
-      { v: "other", label: "Something else", free: "Type your field — e.g. Healthcare" },
+      { v: "other", label: "Something else", free: "Your field, like Healthcare" },
     ],
-    ifSkipped: "the course’s own examples only",
+    ifSkipped: "course examples only",
   },
   {
     id: "role",
@@ -49,9 +60,9 @@ export const QUESTIONS: SetupQuestion[] = [
       { v: "lead", label: "Team lead" },
       { v: "manager", label: "Manager" },
       { v: "student", label: "Student" },
-      { v: "other", label: "Something else", free: "Type your role — e.g. Data analyst" },
+      { v: "other", label: "Something else", free: "Your role, like Data analyst" },
     ],
-    ifSkipped: "the course’s general framing",
+    ifSkipped: "general framing",
   },
   {
     id: "goal",
@@ -63,30 +74,30 @@ export const QUESTIONS: SetupQuestion[] = [
       { v: "portfolio", label: "Build a portfolio" },
       { v: "curious", label: "Just curious" },
     ],
-    ifSkipped: "the standard dashboard",
+    ifSkipped: "standard dashboard",
   },
   {
     id: "experience",
-    label: "Experience with this topic",
-    q: "How much have you worked with this topic?",
+    label: "Experience",
+    q: "How much have you used this?",
     options: [
       { v: "never", label: "Never" },
       { v: "little", label: "Tried a little" },
       { v: "sometimes", label: "I use it sometimes" },
       { v: "regularly", label: "I use it regularly" },
     ],
-    ifSkipped: "standard support until the quick check measures it",
+    ifSkipped: "standard support until the quick check",
   },
   {
     id: "firstStep",
-    label: "What helps first",
-    q: "When something is new, what helps you first?",
+    label: "Learning start",
+    q: "What helps you first with new things?",
     options: [
       { v: "example", label: "See a full example" },
       { v: "idea", label: "Understand the idea" },
-      { v: "try", label: "Try it myself first" },
+      { v: "try", label: "Try it myself" },
     ],
-    ifSkipped: "idea first, then the example",
+    ifSkipped: "idea first, then example",
   },
   {
     id: "style",
@@ -94,9 +105,9 @@ export const QUESTIONS: SetupQuestion[] = [
     q: "How do you like explanations?",
     options: [
       { v: "short", label: "Short and direct" },
-      { v: "steps", label: "Step by step, with analogies" },
+      { v: "steps", label: "Step by step" },
     ],
-    ifSkipped: "analogies offered only when a step trips you up",
+    ifSkipped: "analogies only when you’re stuck",
   },
 ];
 
@@ -104,22 +115,22 @@ export const QUESTIONS: SetupQuestion[] = [
 export const COMFORT_QUESTION = {
   id: "needs" as const,
   label: "Comfort",
-  q: "Anything that would make this easier to use?",
+  q: "Anything to make this easier?",
   options: [
     { v: "text", label: "Larger text" },
     { v: "motion", label: "Less motion" },
-    { v: "none", label: "No, it’s fine as it is" },
+    { v: "none", label: "No, it’s fine" },
   ],
-  ifSkipped: "standard text size and motion",
+  ifSkipped: "standard text and motion",
 };
 
 export function comfortChange(needs: string[] | undefined): { text: string; skipped: boolean } {
   const n = needs ?? [];
-  if (!n.length) return { text: `Not set — ${COMFORT_QUESTION.ifSkipped}.`, skipped: true };
-  if (n.includes("none")) return { text: "Text size and motion stay as they are.", skipped: false };
+  if (!n.length) return { text: `Not set: ${COMFORT_QUESTION.ifSkipped}.`, skipped: true };
+  if (n.includes("none")) return { text: "Text and motion stay the same.", skipped: false };
   const parts = [
-    n.includes("text") ? "text is one size larger everywhere" : null,
-    n.includes("motion") ? "background motion and animations are kept to a minimum" : null,
+    n.includes("text") ? "text is larger" : null,
+    n.includes("motion") ? "motion is reduced" : null,
   ].filter(Boolean);
   const s = parts.join(", and ");
   return { text: s.charAt(0).toUpperCase() + s.slice(1) + ".", skipped: false };
@@ -138,8 +149,22 @@ export type Support = "extra" | "standard" | "light";
 /** Result of the ungraded pre-check: right answers per lesson (0-2). */
 export type PrecheckResult = {
   at: string;
+  /** Reference to server-held artifacts and LLM assessment; never trust client-supplied levels. */
+  assessmentId?: string;
   skipped?: boolean;
   isNew?: boolean;
+  /** "activity" when the levels came from the Mission or the Discovery conversation instead of the quiz */
+  source?: "quiz" | "activity";
+  /** the learner-facing profile from the Discovery conversation */
+  activity?: {
+    summary?: string;
+    strengths?: string[];
+    focus?: string[];
+    evidence?: SkillEvidence[];
+    learning?: { firstStep: "example" | "idea" | "try"; style: "short" | "steps"; note: string };
+    /** from the Mission: the idea the learner holds for each module (never shown as right or wrong) */
+    ideas?: { skill: string; title: string; held: string; accurate: boolean; sure: boolean }[];
+  };
   lessons: Record<string, number>;
   /** the raw answers (null = "I don't know yet"), sent to the server, which scores them and keeps them for planning */
   responses?: Record<string, string | null>;
@@ -188,45 +213,45 @@ export function answerLabel(q: SetupQuestion, a: SetupAnswers): string | null {
 const CHANGE: Record<QuestionId, (a: SetupAnswers) => string | null> = {
   role: (a) => {
     const r = roleLabelOf(a);
-    return r ? `The opening of each module and the course capstone brief are framed for ${r}.` : null;
+    return r ? `Module intros and the capstone are framed for ${r}.` : null;
   },
   domain: (a) => {
     const d = domainOf(a);
-    return d ? `Every lesson gets an “In your world” card that restates the idea in ${d.label} terms.` : null;
+    return d ? `Each lesson gets an “In your world” card for ${d.label}.` : null;
   },
   goal: (a) =>
     ({
-      work: "Your dashboard leads with the modules you have completed — each one is a skill you can use at work.",
-      ideas: "Your dashboard leads with the modules you have completed.",
-      portfolio: "Your dashboard leads with the artifacts in your portfolio.",
-      curious: "Your dashboard keeps its usual order — nothing is pushed to the front.",
+      work: "Your dashboard shows finished modules first, as work skills.",
+      ideas: "Your dashboard shows finished modules first.",
+      portfolio: "Your dashboard shows your portfolio first.",
+      curious: "Your dashboard keeps its usual order.",
     })[a.goal ?? ""] ?? null,
   experience: (a) =>
     ({
       never:
-        "Every lesson starts with extra support: the analogy and “why” notes are open, and the “Stuck?” tips in guided practice start open. The quick check can change this module by module.",
-      little: "Lessons start on standard support. The quick check adjusts it lesson by lesson.",
-      sometimes: "Lessons start on standard support. The quick check can lighten the lessons you already know.",
+        "Lessons start with extra support and open tips. The quick check can change this.",
+      little: "Lessons start on standard support. The quick check adjusts it.",
+      sometimes: "Standard support. The quick check lightens what you know.",
       regularly:
-        "Every lesson starts on a light touch: analogy tucked away, narration skippable, build explanations folded — until the quick check says otherwise.",
+        "Lessons start light, with extras folded away. The quick check can change this.",
     })[a.experience ?? ""] ?? null,
   firstStep: (a) =>
     ({
-      example: "Each lesson opens with a full example, then the idea, then a quick try.",
-      idea: "Each lesson opens with the idea, then a full example, then a quick try.",
-      try: "Each lesson opens with a quick try, then the idea, then a full example.",
+      example: "Lessons go: example, idea, then a quick try.",
+      idea: "Lessons go: idea, example, then a quick try.",
+      try: "Lessons go: quick try, idea, then example.",
     })[a.firstStep ?? ""] ?? null,
   style: (a) =>
     ({
-      short: "Analogies stay closed and build explanations are folded — except in lessons on extra support.",
-      steps: "The analogy is open on every beat and each build step is explained first — except in lessons on a light touch.",
+      short: "Analogies and explanations stay folded, unless you need extra support.",
+      steps: "Analogies stay open and each step is explained first.",
     })[a.style ?? ""] ?? null,
 };
 
 /** What an answer changes, or what happens when the question is skipped. */
 export function changeFor(q: SetupQuestion, a: SetupAnswers): { text: string; skipped: boolean } {
   const text = CHANGE[q.id](a);
-  return text ? { text, skipped: false } : { text: `Not set — ${q.ifSkipped}.`, skipped: true };
+  return text ? { text, skipped: false } : { text: `Not set: ${q.ifSkipped}.`, skipped: true };
 }
 
 export type LessonPart = "idea" | "example" | "try";
@@ -309,7 +334,7 @@ export function adaptationFromPlan(
   for (const m of plan.modules) for (const l of m.lessons) lessonSupport[l.lessonId] = l.support;
   const levels = Object.values(lessonSupport);
   const score = levels.reduce<number>((n, l) => n + (l === "extra" ? 0 : l === "standard" ? 1 : 2), 0) / (levels.length || 1);
-  const support: Support = base.override ?? (score < 0.67 ? "extra" : score > 1.5 ? "light" : "standard");
+  const support: Support = base.override ?? (source === "ai" ? plan.modules[0]?.support ?? "standard" : score < 0.67 ? "extra" : score > 1.5 ? "light" : "standard");
   return {
     ...base,
     lessonSupport,

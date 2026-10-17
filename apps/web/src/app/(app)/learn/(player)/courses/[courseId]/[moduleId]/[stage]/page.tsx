@@ -83,6 +83,7 @@ export default async function PlayerPage({ params, searchParams }: { params: Pro
       previous={previous ? { moduleId: previous.module_id, title: previous.title } : undefined}
     >
       <Player
+        course={course}
         module={mod}
         moduleIndex={moduleIndex}
         stage={stage}

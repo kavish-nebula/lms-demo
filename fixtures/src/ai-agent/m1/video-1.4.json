@@ -2,9 +2,9 @@
   "lesson": "1.4",
   "title": "Core components: LLM, tools, memory, planning",
   "notes": [
-    "An agent has four core parts: a language model that decides, tools that act, memory that keeps context, and planning that orders the steps.",
-    "For tools you define, the model only asks; your code runs the tool and sends the result back, so your code has the final say.",
-    "You will build the parts in order: the model in Module 2, tools in Module 3, memory and planning in Module 4."
+    "An agent has four parts: a model that decides, tools, memory and planning.",
+    "The model only asks for a tool. Your code runs it and has the final say.",
+    "You build the model in Module 2, tools in 3, memory and planning in 4."
   ],
   "quizAfter": 3,
   "slides": [
@@ -13,7 +13,7 @@
       "icon": "layers",
       "kicker": "Module 1 · Lesson 4",
       "title": "Core components: LLM, tools, memory, planning",
-      "sub": "Open Scout up and meet the four parts every agent is built from",
+      "sub": "The four parts every agent is built from",
       "sentences": [
         "So far, we have looked at agents from the outside.",
         "Now let's open Scout up and look inside.",
@@ -28,10 +28,10 @@
         { "icon": "brain", "label": "LLM", "sub": "reads, decides, writes", "cue": 1 },
         { "icon": "wrench", "label": "Tools", "sub": "look things up and act", "cue": 2 },
         { "icon": "history", "label": "Memory", "sub": "keeps what matters", "cue": 3 },
-        { "icon": "list-checks", "label": "Planning", "sub": "puts the steps in order", "cue": 4 }
+        { "icon": "list-checks", "label": "Planning", "sub": "puts steps in order", "cue": 4 }
       ],
       "note": {
-        "text": "The model is the brain. Tools are its hands, memory its notebook, planning its to-do list.",
+        "text": "Model is the brain. Tools are hands, memory a notebook, planning a to-do list.",
         "cue": 5
       },
       "sentences": [
@@ -54,7 +54,7 @@
         { "cells": ["Planning", "Order the steps", "Order, then stock, then offer a swap"], "cue": 4 }
       ],
       "note": {
-        "text": "You'll build them in order: the LLM in Module 2, tools in 3, memory and planning in 4.",
+        "text": "You build them in order: LLM in Module 2, tools in 3, memory and planning in 4.",
         "cue": 5
       },
       "sentences": [
@@ -68,7 +68,7 @@
     },
     {
       "kind": "flow",
-      "title": "How a tool call really works",
+      "title": "How a tool call works",
       "run": true,
       "nodes": [
         { "kind": "llm", "icon": "message", "label": "Scout asks", "sub": "get_order, ORB-10482", "cue": 1 },
@@ -76,7 +76,7 @@
         { "kind": "data", "icon": "json", "label": "Result goes back", "sub": "shipped, PP-88213", "cue": 3 },
         { "kind": "llm", "icon": "brain", "label": "Scout continues", "sub": "next tool, or the reply", "cue": 4 }
       ],
-      "note": { "text": "The model only asks. Your code decides what actually runs.", "cue": 5 },
+      "note": { "text": "The model only asks. Your code decides what runs.", "cue": 5 },
       "sentences": [
         "One detail surprises almost everyone, so let's get it right from day one.",
         "For tools you define, the model never runs anything itself: it sends back a request naming the tool and its input.",
@@ -94,21 +94,21 @@
         {
           "role": "agent",
           "label": "Scout",
-          "text": "Hi Ana! Your Trailhead 2P tent has shipped with ParcelPath. Tracking number: PP-88213.",
+          "text": "Hi Ana. Your Trailhead 2P tent has shipped with ParcelPath. Tracking: PP-88213.",
           "cue": 2
         },
-        { "role": "user", "label": "Ana", "text": "Thanks. If it's not right for me, can I send it back?", "cue": 3 },
+        { "role": "user", "label": "Ana", "text": "Thanks. Can I send it back if it's not right?", "cue": 3 },
         {
           "role": "agent",
           "label": "Scout",
-          "text": "Yes. Unused items in their original packaging can go back within 30 days of delivery, and return shipping is free on your order.",
+          "text": "Yes. Unused items in original packaging can go back within 30 days of delivery. Return shipping is free on your order.",
           "cue": 4
         }
       ],
       "aside": {
         "icon": "history",
         "label": "Without memory",
-        "text": "Scout would ask who she is and which order she means, all over again.",
+        "text": "Scout would ask who she is and which order, all over again.",
         "cue": 5
       },
       "sentences": [
@@ -126,12 +126,12 @@
       "scenario": "Owen: My storm shell jacket in L is too big. Can I swap it for an M?",
       "steps": [
         { "time": "Step 1", "icon": "search", "text": "Look up ORB-10588: jacket, size L, delivered 5 days ago", "cue": 2 },
-        { "time": "Step 2", "icon": "book", "text": "Check the policy: size swaps are free if the new size is in stock", "cue": 3 },
+        { "time": "Step 2", "icon": "book", "text": "Policy: size swaps are free if the new size is in stock", "cue": 3 },
         { "time": "Step 3", "icon": "boxes", "text": "Check stock for JKT-STORM-M: 3 left", "cue": 4 },
-        { "time": "Step 4", "icon": "send", "text": "Offer the free swap and explain what happens next", "cue": 5 }
+        { "time": "Step 4", "icon": "send", "text": "Offer the free swap and explain next steps", "cue": 5 }
       ],
       "result": {
-        "text": "Four steps in a sensible order, chosen by Scout for this request, not written in advance.",
+        "text": "Four steps in a sensible order, chosen by Scout, not scripted.",
         "cue": 6
       },
       "sentences": [
@@ -147,17 +147,17 @@
     {
       "kind": "code",
       "title": "A sneak peek at the code",
-      "lead": "Each part shows up in Scout's Python code. You'll write all of it yourself.",
+      "lead": "Each part shows up in Scout's Python. You'll write it all.",
       "rows": [
         { "code": "client.messages.create(model=MODEL, ...)", "out": "LLM: one call to the model", "cue": 1 },
-        { "code": "tools=TOOLS", "out": "Tools: what Scout is allowed to ask for", "cue": 2 },
+        { "code": "tools=TOOLS", "out": "Tools: what Scout may ask for", "cue": 2 },
         { "code": "messages.append(...)", "out": "Memory: the conversation so far", "cue": 3 },
         { "code": "for step in range(MAX_STEPS):", "out": "The loop that plans and acts, with a limit", "cue": 4 }
       ],
       "aside": {
         "icon": "globe",
         "label": "Any provider",
-        "text": "OpenAI, Google and open models use the same four ideas. This course uses Anthropic's SDK.",
+        "text": "Other providers use the same four ideas. This course uses Anthropic's SDK.",
         "cue": 5
       },
       "sentences": [
@@ -174,9 +174,9 @@
       "title": "What to take away",
       "points": [
         { "text": "Four parts: the LLM, tools, memory and planning", "cue": 1 },
-        { "text": "The model asks for a tool; your code runs it and returns the result", "cue": 2 },
-        { "text": "Memory keeps the context; planning puts the steps in order", "cue": 3 },
-        { "text": "You'll build each part, starting with the model in Module 2", "cue": 4 }
+        { "text": "The model asks for a tool, and your code runs it", "cue": 2 },
+        { "text": "Memory keeps context. Planning orders the steps", "cue": 3 },
+        { "text": "You'll build each part, starting in Module 2", "cue": 4 }
       ],
       "sentences": [
         "Time to recap.",
@@ -190,42 +190,42 @@
   ],
   "midQuiz": [
     {
-      "q": "Which of Scout's four parts decides what to do next?",
+      "q": "Which part decides what to do next?",
       "options": ["The LLM", "Memory", "The tools"],
       "correct": 0,
-      "explain": "The language model reads the conversation and decides the next step. Tools carry out actions, and memory holds the context it decides with.",
+      "explain": "The language model reads the conversation and decides. Tools act, and memory holds context.",
       "hint": "Which part did we call the brain?"
     },
     {
-      "q": "When Scout uses get_order, who actually runs the lookup?",
+      "q": "When Scout uses get_order, who runs the lookup?",
       "options": [
         "The language model runs it by itself",
-        "Your code runs it and sends the result back to the model",
+        "Your code runs it and sends back the result",
         "The customer runs it from the website"
       ],
       "correct": 1,
-      "explain": "For tools you define, the model only sends a request naming the tool and its input. Your code runs it and returns the result, so your code has the final say.",
-      "hint": "Scout asks. Then who does the actual work?"
+      "explain": "The model only requests the tool. Your code runs it and returns the result.",
+      "hint": "Scout asks. Who does the work?"
     }
   ],
   "endQuiz": [
     {
-      "q": "Owen asks to swap his jacket for a smaller size. Scout checks his order, then the policy, then the stock. Which part chose that order of steps?",
+      "q": "For Owen's swap, Scout checks his order, then the policy, then stock. Which part chose that order?",
       "options": ["Planning", "Memory", "Tools"],
       "correct": 0,
-      "explain": "Planning breaks a request into steps and puts them in order. Tools carry out each lookup, and memory keeps what was learned along the way.",
+      "explain": "Planning breaks a request into ordered steps. Tools do each lookup, and memory keeps what was learned.",
       "hint": "Which part did we call the to-do list?"
     },
     {
       "q": "In code, what is the simplest form of Scout's memory?",
       "options": [
         "The MODEL name at the top of the file",
-        "The messages list that grows with every turn",
+        "The messages list that grows each turn",
         "The max_tokens setting"
       ],
       "correct": 1,
-      "explain": "Every call sends the messages list, so the model sees the whole conversation so far. The model itself remembers nothing between calls.",
-      "hint": "What gets longer every time Ana sends a message?"
+      "explain": "Every call sends the messages list. The model itself remembers nothing between calls.",
+      "hint": "What grows each time Ana sends a message?"
     }
   ]
 }

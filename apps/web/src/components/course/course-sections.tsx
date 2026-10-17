@@ -12,13 +12,8 @@ import { cn } from "cn";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "motion/react";
 import {
-  Award,
-  BarChart3,
   Check,
   ChevronDown,
-  Clock,
-  Globe2,
-  Languages,
   Lock,
   MessageSquareText,
   Play,
@@ -29,7 +24,6 @@ import {
 import { Surface } from "@/components/kit/surface";
 import { Chip } from "@/components/kit/chip";
 import { NumberTicker } from "@/components/kit/number-ticker";
-import { NebulaMark } from "@/components/kit/logo";
 import { EmptyState } from "@/components/kit/states";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -103,32 +97,7 @@ export function AboutSection({ course }: { course: Course }) {
           ))}
         </ul>
       </div>
-
-      <div className="flex flex-col gap-4">
-        <h3 className="text-lg font-semibold">{t("detailsToKnow")}</h3>
-        <dl className="grid gap-5 sm:grid-cols-3">
-          <Detail icon={<Award />} title={t("detailCredential")} body={t("detailCredentialBody")} />
-          <Detail
-            icon={<Languages />}
-            title={t("detailTaughtIn", { language: course.languages[0]?.name ?? "English" })}
-            body={course.languages.length > 1 ? t("detailMoreLanguages", { list: course.languages.slice(1).map((l) => l.name).join(", ") }) : ""}
-          />
-          <Detail icon={<Clock />} title={t("detailPace")} body={t("detailPaceBody", { hours: course.estimated_hours })} />
-        </dl>
-      </div>
     </section>
-  );
-}
-
-function Detail({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
-  return (
-    <div className="flex gap-3">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-soft text-brand-ink [&_svg]:size-4">{icon}</span>
-      <div>
-        <dt className="font-semibold">{title}</dt>
-        {body ? <dd className="text-sm text-ink-muted">{body}</dd> : null}
-      </div>
-    </div>
   );
 }
 
@@ -406,7 +375,6 @@ export function OutcomesSection({ course }: { course: Course }) {
         </Surface>
         ) : null}
       </div>
-      <EmptyState icon={<BarChart3 />} title={t("careerEmptyTitle")} description={t("careerEmptyBody")} />
     </section>
   );
 }
@@ -453,8 +421,7 @@ export function ModulesSection({ course, outlines }: { course: Course; outlines:
           <span className="text-sm text-ink-muted">{t("modulesDoneOf", { done: progress.modulesDone, total: course.modules.length })}</span>
         ) : null}
       </div>
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
-        <Surface pad="none" className="divide-y divide-line overflow-hidden">
+      <Surface pad="none" className="divide-y divide-line overflow-hidden">
           {progress.modules.map((m) => {
             const id = `module-${m.module_id}`;
             return (
@@ -538,31 +505,6 @@ export function ModulesSection({ course, outlines }: { course: Course; outlines:
             })}
           </div>
         </Surface>
-        <aside className="grid content-start gap-4 sm:grid-cols-2 xl:grid-cols-1">
-          <Surface pad="md" className="flex flex-col gap-3">
-            <h3 className="font-semibold">{t("offeredBy")}</h3>
-            <div className="flex items-center gap-3">
-              <span className="flex size-12 items-center justify-center rounded-xl border border-line bg-panel-2">
-                <NebulaMark size={28} />
-              </span>
-              <div>
-                <div className="font-semibold">{course.provider}</div>
-                <div className="text-sm text-ink-muted">{course.domain}</div>
-              </div>
-            </div>
-          </Surface>
-          <Surface pad="md" className="flex flex-col gap-2 text-sm">
-            <div className="flex items-center gap-2">
-              <Globe2 className="size-4 text-ink-faint" aria-hidden />
-              {course.languages.map((l) => l.native).join(" · ")}
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="size-4 text-ink-faint" aria-hidden />
-              {t("aboutHours", { hours: course.estimated_hours })}
-            </div>
-          </Surface>
-        </aside>
-      </div>
     </section>
   );
 }

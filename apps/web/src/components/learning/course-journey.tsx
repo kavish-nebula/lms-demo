@@ -3,6 +3,8 @@ import * as React from "react";
 import Link from "next/link";
 import { ArrowRight, Check, Flag, FlaskConical, LockKeyhole, MessageCircle, Route, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AgentBlueprint } from "@/components/agent/agent-blueprint";
+import { useAgent } from "@/components/agent/use-agent";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ProgressBar } from "@/components/kit/progress-ring";
 import { moduleFlowStages, useCourseProgress } from "@/lib/course-progress";
@@ -24,30 +26,38 @@ export function CourseJourney({ course }: { course: Course }) {
   const { watched } = useWatchedVideos();
   const hydrated = useHydrated();
   const [preview, setPreview] = React.useState(false);
+  const { agent, rename } = useAgent(course);
   const base = `/learn/courses/${course.course_id}`;
   const resume = state.resume?.href.startsWith(`${base}/`) ? state.resume : progress.resume;
   const due = hydrated ? state.reviews.filter((r) => !r.completedAt && new Date(r.due) <= new Date()) : [];
   const game = deriveGameProgress(course, progress, state, watched, due.length, new Date(), enrolled);
-  const mission = enrolled ? game.quest : { eyebrow: "FIRST MISSION", title: "Create your learner profile", detail: "Tell us your goal, preview the course and take the starting check.", href: `${base}/enroll`, xp: 25, dailyDone: false };
+  const mission = enrolled ? game.quest : { eyebrow: "FIRST MISSION", title: "Create your learner profile", detail: "Share your goal and take the starting check.", href: `${base}/enroll`, xp: 25, dailyDone: false };
   const stairSteps = progress.modules.map((module, index) => ({ module, index })).reverse();
   return <>
     <section id="course-hero" className="journey-hero">
       <div>
         <Link href="/learn/courses" className="journey-kicker"><Route className="size-4" />Your learning adventure</Link>
         <h1>{course.title}</h1>
-        <p className="max-w-lg text-sm leading-relaxed text-ink-muted">Join the team at Orbit Outdoor. Explore real problems, try your ideas, and build Scout into a dependable support agent.</p>
+        <p className="max-w-lg text-sm leading-relaxed text-ink-muted">Join Orbit Outdoor and build Scout into a reliable support agent.</p>
         <GameStatus game={game} />
         <div className="mt-6 flex flex-wrap gap-3">
-          <Button asChild variant="brand" size="lg"><Link href={enrolled ? resume?.href ?? `${base}/m1/hook` : `${base}/enroll`}>{enrolled ? "Continue my journey" : "Make this course mine"}<ArrowRight /></Link></Button>
+          <Button asChild variant="brand" size="lg"><Link href={enrolled ? resume?.href ?? `${base}/m1/hook` : `${base}/enroll`}>{enrolled ? "Continue" : "Start course"}<ArrowRight /></Link></Button>
           <Button size="lg" variant="outline" onClick={() => setPreview(true)}><FlaskConical />Try an experiment</Button>
         </div>
-        <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-ink-muted"><span>{course.modules.length} connected chapters</span><span>One final mini-project</span><span>Your pace. Your path.</span></div>
-        {enrolled && <div className="mt-6 max-w-md"><div className="mb-2 flex justify-between text-xs text-ink-muted"><span>Your course progress</span><span>{progress.topicsDone} / {progress.topicsTotal} phases</span></div><ProgressBar value={progress.ratio} size="sm" /></div>}
+        <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-ink-muted"><span>{course.modules.length} chapters</span><span>One mini-project</span><span>Your pace</span></div>
+        {enrolled && <div className="mt-6 max-w-md"><div className="mb-2 flex justify-between text-xs text-ink-muted"><span>Progress</span><span>{progress.topicsDone} / {progress.topicsTotal} phases</span></div><ProgressBar value={progress.ratio} size="sm" /></div>}
       </div>
       <div className="journey-world">
-        <div className="flex items-center justify-between text-[10px] font-semibold tracking-widest text-ink-muted"><span>ORBIT OUTDOOR · SUPPORT DESK</span><span className="flex items-center gap-1.5"><span className="pip-status-dot" />YOUR MISSION</span></div>
-        <div className="journey-message">“Can Scout help our customers without making things up?”<span className="mt-2 block text-xs text-ink-muted">Maya · Founder</span></div>
-        <div className="journey-answer"><PipMascot className="h-24 w-20" happy /><div><strong className="text-sm">Let’s build the answer together.</strong><p className="mt-2 text-ink-muted">I’m Pip, your course companion. Ask me about an idea, a tricky step, or what to try next.</p><button onClick={() => askPip()} className="mt-2 text-xs font-semibold text-brand-ink">Say hello to Pip <ArrowRight className="inline size-3" /></button></div></div>
+        {hydrated ? null : <div className="flex items-center justify-between text-[10px] font-semibold tracking-widest text-ink-muted"><span>ORBIT OUTDOOR · SUPPORT DESK</span><span className="flex items-center gap-1.5"><span className="pip-status-dot" />YOUR MISSION</span></div>}
+        {/* the learner's own agent, built as they go (components/agent); the story card is the server's first paint */}
+        {hydrated ? (
+          <AgentBlueprint agent={agent} onRename={(name) => void rename(name)} className="mt-3 border-0 bg-transparent p-0" />
+        ) : (
+          <>
+            <div className="journey-message">“Can Scout help our customers without making things up?”<span className="mt-2 block text-xs text-ink-muted">Maya · Founder</span></div>
+            <div className="journey-answer"><PipMascot className="h-24 w-20" happy /><div><strong className="text-sm">Let’s build it together.</strong><p className="mt-2 text-ink-muted">I’m Pip. Ask me about any idea or step.</p><button onClick={() => askPip()} className="mt-2 text-xs font-semibold text-brand-ink">Ask Pip <ArrowRight className="inline size-3" /></button></div></div>
+          </>
+        )}
         <CapabilityRack mastery={game.mastery} />
       </div>
     </section>
@@ -77,6 +87,6 @@ export function CourseJourney({ course }: { course: Course }) {
       </div>
     </section>
     <BadgeCabinet badges={game.badges} />
-    <Dialog open={preview} onOpenChange={setPreview}><DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-4xl"><DialogTitle>Try a little of what you’ll learn</DialogTitle><DialogDescription>Change Scout’s behaviour and see the consequences. Your course progress stays where it is.</DialogDescription><ExperimentLab courseId={course.course_id} moduleId="m1" /></DialogContent></Dialog>
+    <Dialog open={preview} onOpenChange={setPreview}><DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-4xl"><DialogTitle>Try what you’ll learn</DialogTitle><DialogDescription>Change Scout and see what happens. Progress isn’t affected.</DialogDescription><ExperimentLab courseId={course.course_id} moduleId="m1" /></DialogContent></Dialog>
   </>;
 }

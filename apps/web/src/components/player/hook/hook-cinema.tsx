@@ -10,6 +10,7 @@ import { PipelineDiagram } from "@/components/kit/pipeline";
 import { NumberTicker } from "@/components/kit/number-ticker";
 import { DEMO_OPEN } from "@/lib/demo";
 import { useLocalString, writeLocal } from "@/lib/local-store";
+import { stopNarration } from "@/lib/narrator";
 import { ROLE_HOOK } from "@/lib/world";
 import { FilmPlayer } from "./film";
 import { Replay } from "./replay";
@@ -126,7 +127,7 @@ export function HookCinema({
   const [guess, setGuess] = React.useState<string | null>(null);
   const [sure, setSure] = React.useState<Confidence | null>(null);
   const learningContext = useLearningContext();
-  useCompanionStep({ title: block.title, phase: "hook", guidance: scene === "call" ? `${block.prompt} Choose your prediction and how confident you feel. It is fine to be unsure.` : scene === "verdict" ? block.wrap_point : `Explore this problem: ${block.why} Use the scene controls to interact, then continue when ready.` });
+  useCompanionStep({ title: block.title, phase: "hook", guidance: scene === "call" ? `${block.prompt} Pick a guess and how sure you are.` : scene === "verdict" ? block.wrap_point : `${block.why} Continue when ready.` });
   const soundOn = useLocalString(SOUND_KEY) !== "off";
   // the text opening (for a hook without a film) is one clip; the film and the replay speak line by line
   const openClip = useClip(`/audio/hook-${moduleId}-open.mp3`);
@@ -165,6 +166,7 @@ export function HookCinema({
   }, []);
 
   function begin() {
+    stopNarration(); // the film has its own sound
     // the narration starts a moment after this click, once the scene has drawn: let the browser allow it now
     unlockSfx();
     unlock();

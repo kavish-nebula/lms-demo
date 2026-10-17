@@ -31,7 +31,9 @@ export async function saveEnrollment(courseId: string, current: Enrollment | nul
     answers,
     supportOverride: extra.supportOverride ?? current?.supportOverride ?? "auto",
     pace: extra.pace !== undefined ? extra.pace : (current?.pace ?? null),
-    ...(precheckChanged ? { precheck: p ? { skipped: p.skipped, isNew: p.isNew, responses: p.responses } : null } : {}),
+    ...(precheckChanged
+      ? { precheck: p ? { assessmentId: p.assessmentId, skipped: p.skipped, isNew: p.isNew, responses: p.responses, ...(p.source === "activity" ? { activity: { lessons: p.lessons, ...p.activity } } : {}) } : null }
+      : {}),
   };
   const res = current
     ? await api<{ enrollment: Enrollment }>(`/api/v1/enrollments/${courseId}`, { method: "PATCH", body })

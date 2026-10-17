@@ -1,11 +1,17 @@
 # LMS Platform — web UI
 
+**Current Google-powered enrollment:** profile-specific narrated HTML prerequisite slides and a continuous animated scenario workspace in place of the prior-knowledge quiz, and model-authored course plans. See [Adaptive prerequisites and activity](docs/adaptive-onboarding.md) for setup, model/cost choices, architecture and checks. This supersedes the older GLM/baseline descriptions below for the Google-connected flow.
+
+Profiling now runs as a synchronized conversation with Pip. Choose **Start with Pip** to enable narration: question, learner answer, contextual spoken reply, then the next question. Pause, replay and reading mode are available. Prerequisites use the complete saved profile, including the final goal.
+
+The first question now identifies the learner's setting (school, college, teaching/support staff, workplace or independent learning). Follow-up questions and goals fit that setting without career-switch assumptions. Activities present one short task, with optional media and reflection; their actual responses inform the model's plan for every course module and lesson.
+
 UI build for the LMS described in `ARCHITECTURE.pdf`. The plan is in [`ui-plan.md`](./ui-plan.md).
 Course content is mock data in `fixtures/`. Learner data (profile, enrolments, plans, progress) is stored by the backend in `apps/web/src/server`, which has an AI model (GLM, from Z.ai) plan each learner's course. Sign-in is a demo user for now. The demo course is **Build Your First AI Agent** (`/learn/courses/ai-agent`).
 
 ## The demo course
 
-**Build Your First AI Agent**: six modules, each running the same phases (problem hook, concept videos, worked example, guided practice, scenarios, spaced review), then one mini project, a final assessment and a reflection. Enrolling asks the profile questions, plays a course preview video, then asks 12 prior-knowledge questions that set support module by module.
+**Build Your First AI Agent**: six modules, each running the same phases (problem hook, concept videos, worked example, guided practice, scenarios, spaced review), then one mini project, a final assessment and a reflection. Enrolling gathers the learning context, shows personalised HTML slides with narration, then opens one interactive mission. Learners assemble and run workflows; model-evaluated actions shape support and examples throughout the course.
 
 The course is written as compact JSON in `fixtures/src/ai-agent/` (see `AUTHORING.md` there) and built into the fixture files the app reads:
 

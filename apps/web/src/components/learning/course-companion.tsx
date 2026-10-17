@@ -67,8 +67,8 @@ function Companion({ data, moduleId, phase, step }: { data: CompanionCourse; mod
   const reactionTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const answerTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const restricted = ["gate", "final-check", "precheck"].includes(phase);
-  const module = data.course.modules.find((candidate) => candidate.module_id === moduleId);
-  const moduleTitle = module ? courseLabel(data.course.course_id, "modules", module.module_id, module.title) : undefined;
+  const currentModule = data.course.modules.find((candidate) => candidate.module_id === moduleId);
+  const moduleTitle = currentModule ? courseLabel(data.course.course_id, "modules", currentModule.module_id, currentModule.title) : undefined;
   const guidance = restricted ? PHASE_GUIDANCE[phase]! : step?.guidance || PHASE_GUIDANCE[phase] || PHASE_GUIDANCE.course!;
   const nudge = companionNudge({ phase, moduleTitle, stepTitle: step?.title });
 
@@ -86,7 +86,10 @@ function Companion({ data, moduleId, phase, step }: { data: CompanionCourse; mod
     if (reactionTimer.current) clearTimeout(reactionTimer.current);
     if (answerTimer.current) clearTimeout(answerTimer.current);
   }, []);
-  React.useEffect(() => { showReaction("wave", "Ready when you are!"); }, [showReaction]);
+  React.useEffect(() => {
+    const timer = window.setTimeout(() => showReaction("wave", "Ready when you are!"), 0);
+    return () => window.clearTimeout(timer);
+  }, [showReaction]);
 
   const ask = React.useCallback((raw: string) => {
     const text = raw.trim().slice(0, 600);
@@ -135,11 +138,11 @@ function Companion({ data, moduleId, phase, step }: { data: CompanionCourse; mod
           <button id="pip-chat-tab" aria-controls="pip-chat-panel" aria-pressed={tab === "chat"} onClick={() => setTab("chat")} className="pip-tab"><MessageCircle className="size-4" />Help</button>
           <button id="pip-notes-tab" aria-controls="pip-notes-panel" aria-pressed={tab === "notes"} onClick={() => setTab("notes")} className="pip-tab" disabled={restricted}><NotebookPen className="size-4" />Notes</button>
         </div>
-        {restricted ? <div className="p-4 text-sm leading-relaxed" role="status"><ShieldCheck className="mb-2 size-5 text-brand-ink" /><strong className="block mb-1">Try this one yourself.</strong>{nudge}</div> : tab === "notes" ?
+        {restricted ? <div className="p-4 text-sm leading-relaxed" role="status"><ShieldCheck className="mb-2 size-5 text-brand-ink" /><strong className="block mb-1">Try this yourself.</strong>{nudge}</div> : tab === "notes" ?
           <div id="pip-notes-panel" role="region" aria-labelledby="pip-notes-tab" className="p-4">
-            <label htmlFor="pip-notes" className="mb-2 block text-sm font-medium">Ideas to take with you</label>
-            <textarea id="pip-notes" value={state.notes} onChange={(e) => update((s) => ({ ...s, notes: e.target.value.slice(0, 10000) }))} placeholder="An insight, a question, something to try…" className="pip-notes" rows={8} maxLength={10000} />
-            <p className="mt-2 text-xs text-ink-muted">Saved in this browser for this course.</p>
+            <label htmlFor="pip-notes" className="mb-2 block text-sm font-medium">Your notes</label>
+            <textarea id="pip-notes" value={state.notes} onChange={(e) => update((s) => ({ ...s, notes: e.target.value.slice(0, 10000) }))} placeholder="An idea or question…" className="pip-notes" rows={8} maxLength={10000} />
+            <p className="mt-2 text-xs text-ink-muted">Saved in this browser.</p>
           </div> : <>
             <div id="pip-chat-panel" role="region" aria-labelledby="pip-chat-tab" ref={listRef} className="pip-messages">
               <div className="pip-bubble pip-nudge"><strong className="block mb-1">Quick nudge</strong>{nudge}</div>
@@ -151,7 +154,7 @@ function Companion({ data, moduleId, phase, step }: { data: CompanionCourse; mod
                 </div>)}
               </div>
             </div>
-            {messages.at(-1)?.source && <button className="px-4 pb-2 text-left text-xs text-brand-ink" onClick={() => { const message = messages.at(-1)!; update((s) => ({ ...s, notes: `${s.notes}\n\n${message.text}\n${message.source?.title ?? ""}`.trim().slice(0, 10000) })); setSaved(true); }}><Check className="inline size-3.5 mr-1" />{saved ? "Added to your notebook" : "Save this explanation to my notebook"}</button>}
+            {messages.at(-1)?.source && <button className="px-4 pb-2 text-left text-xs text-brand-ink" onClick={() => { const message = messages.at(-1)!; update((s) => ({ ...s, notes: `${s.notes}\n\n${message.text}\n${message.source?.title ?? ""}`.trim().slice(0, 10000) })); setSaved(true); }}><Check className="inline size-3.5 mr-1" />{saved ? "Saved to notes" : "Save to notes"}</button>}
             <form className="pip-input" onSubmit={(e) => { e.preventDefault(); setSaved(false); ask(input); }}>
               <label htmlFor="pip-question" className="sr-only">Ask a question about this course</label>
               <input ref={inputRef} id="pip-question" value={input} onChange={(e) => setInput(e.target.value)} maxLength={600} placeholder="Ask Pip…" autoComplete="off" />

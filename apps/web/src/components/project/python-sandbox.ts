@@ -140,7 +140,7 @@ export class PythonSandbox {
     window.addEventListener("message", this.listen);
     this.frame = frame;
     this.booted = new Promise<void>((resolve, reject) => {
-      const timer = window.setTimeout(() => reject(new SandboxError("Python took too long to load. Check your connection and try again.", "boot")), BOOT_MS);
+      const timer = window.setTimeout(() => reject(new SandboxError("Python took too long to load. Check your connection.", "boot")), BOOT_MS);
       this.bootWaiter = {
         resolve: () => {
           window.clearTimeout(timer);
@@ -170,7 +170,7 @@ export class PythonSandbox {
       const timer = window.setTimeout(() => {
         this.pending.delete(id);
         this.dispose(); // stops the worker; the next run starts a fresh sandbox
-        reject(new SandboxError(`Your code ran for more than ${Math.round(timeoutMs / 1000)} seconds and was stopped. Is there a loop that never ends?`, "timeout"));
+        reject(new SandboxError(`Stopped after ${Math.round(timeoutMs / 1000)} seconds. Check for an endless loop.`, "timeout"));
       }, timeoutMs);
       this.pending.set(id, { resolve, reject, timer });
       this.frame?.contentWindow?.postMessage({ id, files, tickets, seeds }, "*");

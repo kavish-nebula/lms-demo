@@ -93,6 +93,7 @@ export function VideoLesson({
 
   React.useEffect(() => {
     if (!hydrated || restored) return;
+    const timer = window.setTimeout(() => {
     if (storedPosition?.version === 1 && Number.isInteger(storedPosition.slide)) {
       setIdx(Math.max(0, Math.min(last, storedPosition.slide)));
       setPhase(["play", "mid", "end", "done"].includes(storedPosition.phase) ? storedPosition.phase : "play");
@@ -101,6 +102,8 @@ export function VideoLesson({
       setSeen(new Set(Array.isArray(storedPosition.seen) ? storedPosition.seen.filter((i) => Number.isInteger(i) && i >= 0 && i <= last) : []));
     }
     setRestored(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [hydrated, restored, storedPosition, last, video.midQuiz.length, video.endQuiz.length]);
   React.useEffect(() => {
     if (restored) writeLocal(resumeKey, JSON.stringify({ version: 1, slide: idx, phase, mid: midPassed, end: endPassed, seen: [...seen] }));

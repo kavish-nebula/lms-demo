@@ -2,9 +2,9 @@
   "lesson": "1.1",
   "title": "What is an AI agent?",
   "notes": [
-    "An AI agent uses a language model to decide its own next steps, and takes actions with tools until it reaches a goal.",
-    "Every agent runs the same loop: perceive what is in front of it, decide the next step, act, then look at the result.",
-    "Autonomy is a dial, not a switch: give an agent the least power that does the job, and widen it as you trust it."
+    "An AI agent uses a language model to choose its steps and acts with tools toward a goal.",
+    "Every agent loops: perceive, decide, act, then check the result.",
+    "Autonomy is a dial. Give an agent the least power that does the job."
   ],
   "quizAfter": 3,
   "slides": [
@@ -13,7 +13,7 @@
       "icon": "bot",
       "kicker": "Module 1 · Lesson 1",
       "title": "What is an AI agent?",
-      "sub": "From a bot that can only talk to one that can look things up and act",
+      "sub": "From a bot that talks to one that acts",
       "sentences": [
         "Welcome to the course, and welcome to Orbit Outdoor.",
         "Orbit is a small online shop for hiking, camping and climbing gear, and its support team is drowning in tickets.",
@@ -23,14 +23,14 @@
     },
     {
       "kind": "compare",
-      "title": "Same question, two very different answers",
+      "title": "Same question, two answers",
       "left": {
         "label": "Orbit's FAQ chatbot",
         "tone": "bad",
         "cue": 2,
         "points": [
           "Reads Ana's question",
-          "Has no way to see orders",
+          "Can't see orders",
           "Replies: sorry, I can't check that",
           "Ana is still waiting"
         ]
@@ -60,7 +60,7 @@
       "kind": "define",
       "title": "So, what is an AI agent?",
       "term": "AI agent",
-      "definition": "A system that uses a language model to decide its own next steps, and takes actions with tools, until it reaches a goal.",
+      "definition": "A system that uses a language model to choose its steps and acts with tools until it reaches a goal.",
       "parts": [
         { "text": "Built on a language model", "cue": 1 },
         { "text": "Decides its own steps", "cue": 2 },
@@ -69,7 +69,7 @@
       ],
       "analogy": {
         "label": "Think of it as",
-        "text": "A new colleague on the support team: you give them a goal and access to the order system, and they work out the clicks themselves."
+        "text": "A new colleague. You give them a goal and system access, and they work out the clicks."
       },
       "sentences": [
         "Here is the definition we will use for the whole course.",
@@ -86,11 +86,11 @@
       "title": "The agent loop",
       "center": { "label": "Goal", "sub": "answer Ana with real facts" },
       "steps": [
-        { "icon": "eye", "label": "Perceive", "sub": "read the message and results", "cue": 1 },
+        { "icon": "eye", "label": "Perceive", "sub": "read message and results", "cue": 1 },
         { "icon": "brain", "label": "Decide", "sub": "choose the next step", "cue": 2 },
         { "icon": "wrench", "label": "Act", "sub": "call a tool or reply", "cue": 3 }
       ],
-      "note": { "text": "Round again until the goal is met, or until a limit you set says stop.", "cue": 6 },
+      "note": { "text": "Repeat until the goal is met or a limit says stop.", "cue": 6 },
       "sentences": [
         "Under the hood, every agent runs the same simple loop.",
         "First, it perceives: it reads what is in front of it, like Ana's message.",
@@ -109,10 +109,10 @@
         { "kind": "user", "icon": "message", "label": "Ana's question", "sub": "where is my order?", "cue": 1 },
         { "kind": "llm", "icon": "brain", "label": "Scout decides", "sub": "I need the order status", "cue": 2 },
         { "kind": "tool", "icon": "search", "label": "get_order", "sub": "shipped, ParcelPath", "cue": 3 },
-        { "kind": "llm", "icon": "brain", "label": "Scout decides again", "sub": "that's enough to answer", "cue": 4 },
+        { "kind": "llm", "icon": "brain", "label": "Scout decides again", "sub": "enough to answer", "cue": 4 },
         { "kind": "output", "icon": "send", "label": "Reply", "sub": "real status and tracking", "cue": 5 }
       ],
-      "note": { "text": "Two decisions, one tool call, one reply. Nobody wrote these steps in advance.", "cue": 6 },
+      "note": { "text": "Two decisions, one tool call, one reply. Nobody scripted these steps.", "cue": 6 },
       "sentences": [
         "Here is one full run of that loop, step by step.",
         "Ana's question arrives, with her order number in it.",
@@ -125,18 +125,18 @@
     },
     {
       "kind": "bullets",
-      "title": "How much should an agent do alone?",
-      "lead": "Autonomy is a dial, not a switch. You choose where to set it.",
+      "title": "How much should it do alone?",
+      "lead": "Autonomy is a dial, not a switch. You set it.",
       "bullets": [
-        { "icon": "eye", "text": "Read only: look up orders and tracking, change nothing", "cue": 1 },
-        { "icon": "pencil", "text": "Draft: write a reply that a person checks and sends", "cue": 2 },
+        { "icon": "eye", "text": "Read only: look up orders, change nothing", "cue": 1 },
+        { "icon": "pencil", "text": "Draft: a person checks and sends the reply", "cue": 2 },
         { "icon": "hand", "text": "Act with approval: refunds over $200 wait for a person", "cue": 3 },
         { "icon": "zap", "text": "Act alone: only small steps that are easy to undo", "cue": 4 }
       ],
       "aside": {
         "icon": "shield",
         "label": "Rule of thumb",
-        "text": "Give an agent the least power that does the job, and widen it as you learn to trust it.",
+        "text": "Give the least power that does the job. Widen it as trust grows.",
         "cue": 5
       },
       "sentences": [
@@ -152,10 +152,10 @@
       "kind": "recap",
       "title": "What to take away",
       "points": [
-        { "text": "An agent uses a model to decide its own steps and acts with tools", "cue": 1 },
-        { "text": "It loops: perceive, decide, act, then look at the result", "cue": 2 },
+        { "text": "An agent uses a model to choose steps and acts with tools", "cue": 1 },
+        { "text": "It loops: perceive, decide, act, check the result", "cue": 2 },
         { "text": "It stops when the goal is met or a limit says stop", "cue": 3 },
-        { "text": "Autonomy is a dial: start with the least power that does the job", "cue": 4 }
+        { "text": "Autonomy is a dial: start with the least power", "cue": 4 }
       ],
       "sentences": [
         "Let's pull it together.",
@@ -169,50 +169,50 @@
   ],
   "midQuiz": [
     {
-      "q": "What can Scout do that Orbit's FAQ chatbot can't?",
+      "q": "What can Scout do that the FAQ chatbot can't?",
       "options": [
         "Understand what the customer is asking",
-        "Decide to use a tool, like an order lookup, and act on the result",
+        "Use a tool, like an order lookup, and act on the result",
         "Reply in a friendly, natural tone"
       ],
       "correct": 1,
-      "explain": "Both understand Ana's question and both write fluent text. Only Scout can act: it decides to call a tool, gets the real status and uses it.",
-      "hint": "Both bots understood Ana perfectly. What could only one of them do next?"
+      "explain": "Both understand Ana and write fluently. Only Scout can call a tool and use the real status.",
+      "hint": "Both understood Ana. What could only one of them do next?"
     },
     {
-      "q": "In the agent loop, what happens right after Scout calls a tool?",
+      "q": "What happens right after Scout calls a tool?",
       "options": [
-        "The run ends and the tool's raw output goes straight to the customer",
-        "Scout perceives the result and decides the next step",
-        "Scout starts again from Ana's first message and ignores the result"
+        "The run ends and the raw output goes to the customer",
+        "Scout reads the result and decides the next step",
+        "Scout restarts from Ana's first message and ignores the result"
       ],
       "correct": 1,
-      "explain": "A tool's result is new information. Scout reads it and decides again: another step, or the reply. That's why it's a loop.",
-      "hint": "Perceive, decide, act... and then where does the loop go?"
+      "explain": "The result is new information. Scout reads it and decides again, which is why it's a loop.",
+      "hint": "Perceive, decide, act... then where does the loop go?"
     }
   ],
   "endQuiz": [
     {
       "q": "Which of these is an AI agent?",
       "options": [
-        "A bot that answers from a fixed list of FAQ answers",
+        "A bot that answers from a fixed FAQ list",
         "A script that emails every customer the same message at 8 AM",
-        "A system that reads a request, chooses which lookups to make, and replies with the results"
+        "A system that picks which lookups to make and replies with the results"
       ],
       "correct": 2,
-      "explain": "Only the third decides its own steps and acts with tools toward a goal. The first only talks; the second follows steps someone wrote in advance.",
-      "hint": "Look for the one where the system, not a person, chooses what happens next."
+      "explain": "Only the third chooses its own steps and acts with tools. The others only talk or follow fixed steps.",
+      "hint": "Which one chooses what happens next by itself?"
     },
     {
-      "q": "Scout is getting a refund tool. What's the safest starting point?",
+      "q": "Scout is getting a refund tool. What's the safest start?",
       "options": [
-        "Let Scout refund any amount on its own",
-        "Let Scout start refunds, but refunds over $200 wait for a person to approve",
-        "Never give Scout any tools at all"
+        "Let Scout refund any amount alone",
+        "Scout starts refunds, but over $200 waits for a person",
+        "Never give Scout any tools"
       ],
       "correct": 1,
-      "explain": "Autonomy is a dial. Small, reversible steps can run alone; risky ones wait for a person. Orbit's policy already says refunds over $200 need approval.",
-      "hint": "Think about the least power that still does the job, and what is hard to undo."
+      "explain": "Small, reversible steps can run alone. Orbit's policy says refunds over $200 need a person to approve.",
+      "hint": "What is the least power that still does the job?"
     }
   ]
 }

@@ -1,7 +1,7 @@
 import "server-only";
 import * as z from "zod/v4";
 
-/** Request bodies for /api/v1. Answer values are stored as option values, never display text. */
+/** Request bodies for /api/v1 (and the Discovery chat). Answer values are stored as option values, never display text. */
 
 const answer = z.string().max(40).nullable().optional();
 const free = z
@@ -11,6 +11,8 @@ const free = z
   .transform((v) => v ?? undefined);
 
 export const AnswersIn = z.object({
+  learningContext: free,
+  learningContextDetail: free,
   domain: answer,
   role: answer,
   goal: answer,
@@ -19,6 +21,11 @@ export const AnswersIn = z.object({
   style: answer,
   domainOther: free,
   roleOther: free,
+  subRole: free,
+  useCase: free,
+  goalDetail: free,
+  agentName: free,
+  tags: z.array(z.string().max(60)).max(12).optional(),
 });
 
 export const ProfileIn = z.object({ answers: AnswersIn, needs: z.array(z.enum(["text", "motion", "none"])).max(3) });
@@ -29,9 +36,24 @@ export const PaceIn = z
 
 export const PrecheckIn = z
   .object({
+    assessmentId: z.string().uuid().optional(),
     skipped: z.boolean().optional(),
     isNew: z.boolean().optional(),
     responses: z.record(z.string().max(20), z.string().max(10).nullable()).optional(),
+    /** the Discovery conversation's result: best level per module, plus the learner-facing profile */
+    activity: z
+      .object({
+        lessons: z.record(z.string().max(10), z.number().int().min(0).max(2)),
+        summary: z.string().max(300).optional(),
+        strengths: z.array(z.string().max(100)).max(3).optional(),
+        focus: z.array(z.string().max(100)).max(3).optional(),
+        learning: z.object({ firstStep: z.enum(["example", "idea", "try"]), style: z.enum(["short", "steps"]), note: z.string().max(240) }).optional(),
+        ideas: z
+          .array(z.object({ skill: z.string().max(10), title: z.string().max(120), held: z.string().max(200), accurate: z.boolean(), sure: z.boolean() }))
+          .max(12)
+          .optional(),
+      })
+      .optional(),
   })
   .nullable();
 

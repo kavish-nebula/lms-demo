@@ -7,6 +7,11 @@ import { useTranslations } from "next-intl";
 import { ChevronLeft, ListOrdered, PanelLeftClose, PanelLeftOpen, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { AgentChip } from "@/components/agent/agent-chip";
+import { AgentMoment } from "@/components/agent/agent-moment";
+import { useAgent } from "@/components/agent/use-agent";
+import { useAgentVoice } from "@/components/agent/agent-voice";
+import { QUIET_STAGES, stageLine } from "@/lib/guide-lines";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ProgressBar } from "@/components/kit/progress-ring";
 import { TopicContext } from "@/components/player/topic-context";
@@ -35,10 +40,12 @@ import { currentPart, flatParts, moduleOutline, type ModulePart } from "@/lib/mo
 import { stageFromStepId, type StageId } from "@/lib/stages";
 import { orderStages } from "@/lib/topics";
 import { useLocalString,writeLocal } from "@/lib/local-store";
-import { planTopicOrder } from "@/lib/learner-plan";
-import type { ModuleContent, ScenarioBlock, Topic } from "@/data/types";
+import { planModule, planTopicOrder } from "@/lib/learner-plan";
+import type { Course, ModuleContent, ScenarioBlock, Topic } from "@/data/types";
 
 export type PlayerProps = {
+  /** the whole course, for the learner's agent (one part per module) */
+  course: Course;
   module: ModuleContent;
   /** 1-based position of the module in its course */
   moduleIndex: number;
@@ -60,9 +67,15 @@ export type PlayerProps = {
  * video as its own part; every part opens on a click. The capstone, the
  * final check and the wrap-up live in the course finale.
  */
-export function Player({ module, moduleIndex, stage, video, courseHref, initialDone, topics, after }: PlayerProps) {
+export function Player({ course, module, moduleIndex, stage, video, courseHref, initialDone, topics, after }: PlayerProps) {
   const t = useTranslations("player");
   const to = useTranslations("outline");
+  const { agent, rename } = useAgent(course);
+  const { say } = useAgentVoice();
+  React.useEffect(() => {
+    const line = stageLine(stage);
+    if (line) say(line, { once: `${module.course_id}.${module.module_id}.${stage}`, silent: QUIET_STAGES.has(stage) });
+  }, [stage, module.course_id, module.module_id, say]);
   const router = useRouter();
   const { done, complete } = useModuleProgress(module.course_id,module.module_id, initialDone);
   const { watched, markWatched } = useWatchedVideos();
@@ -70,8 +83,9 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
   const { state: learning, update: updateLearning } = useLearning(module.course_id);
   const baseline = supportFor(startingAdaptation, String(moduleIndex));
   const choice = learning.support[module.module_id] ?? "auto";
-  const support = choice === "auto" ? startingAdaptation.override ?? recommendedSupport(learning.attempts, module.module_id, baseline) : choice;
-  const adaptation = React.useMemo(() => ({ ...startingAdaptation, support, override: support }), [startingAdaptation, support]);
+  const modelSupport = startingAdaptation.planSource === "ai" ? planModule(startingAdaptation.plan, module.module_id)?.support : undefined;
+  const support = choice === "auto" ? startingAdaptation.override ?? modelSupport ?? recommendedSupport(learning.attempts, module.module_id, baseline) : choice;
+  const adaptation = React.useMemo(() => ({ ...startingAdaptation, support, override: choice !== "auto" ? choice : startingAdaptation.override ?? (modelSupport ? null : support) }), [startingAdaptation, support, choice, modelSupport]);
   const [railOpen, setRailOpen] = React.useState(false);
   const outlineKey = `lms-outline:v1:${module.course_id}`;
   const outlineHidden = useLocalString(outlineKey) === "hidden";
@@ -250,6 +264,7 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
             </span>
           </div>
           <span className="hidden items-center gap-1 rounded-full border border-brand-line bg-brand-soft px-2 py-1 text-[10px] font-semibold text-brand-ink md:flex"><Zap className="size-3" />+{rewardFor(stage, !!part?.video)} XP</span>
+          <AgentChip agent={agent} onRename={(name) => void rename(name)} className="shrink-0" />
           <Button variant="outline" size="sm" className="hidden min-h-11 nav:inline-flex" aria-expanded={!outlineHidden} aria-controls="module-outline" onClick={() => writeLocal(outlineKey,outlineHidden ? "visible" : "hidden")}>
             {outlineHidden ? <PanelLeftOpen data-icon="inline-start" /> : <PanelLeftClose data-icon="inline-start" />}
             {to(outlineHidden ? "showOutline" : "hideOutline")}
@@ -298,7 +313,7 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
         </main>
       </div>
 
-
+      <AgentMoment courseId={course.course_id} agent={agent} />
     </div>
   );
 }

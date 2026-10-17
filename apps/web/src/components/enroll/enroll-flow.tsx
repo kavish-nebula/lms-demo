@@ -10,9 +10,14 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/kit/logo";
 import { CardSkeleton } from "@/components/kit/states";
-import { ProfileStep } from "@/components/enroll/profile-step";
-import { IntroStep } from "@/components/enroll/intro-step";
-import { PrecheckStep } from "@/components/enroll/precheck-step";
+import { AdaptivePreparation } from "@/components/enroll/adaptive-preparation";
+import { prefetchAdaptiveSession } from "@/lib/adaptive-onboarding-client";
+import { LiveProfileStep } from "@/components/enroll/live-profile-step";
+import { AgentBlueprint } from "@/components/agent/agent-blueprint";
+import { AgentChip } from "@/components/agent/agent-chip";
+import { useAgent } from "@/components/agent/use-agent";
+import { useAgentVoice } from "@/components/agent/agent-voice";
+import { phaseLine } from "@/lib/guide-lines";
 import { CustomizeStep, type Pace } from "@/components/enroll/customize-step";
 import { BuildStep, type BuildServer } from "@/components/enroll/build-step";
 import { useCourseUnits, usePlanState } from "@/components/plan/use-plan";
@@ -21,7 +26,7 @@ import { useEnrollment } from "@/lib/enrollment";
 import { autoFill } from "@/lib/plan";
 import { applyComfort, useProfile } from "@/lib/profile";
 import { adaptationOf, type PrecheckResult, type SetupAnswers, type SupportOverride } from "@/lib/setup";
-import type { ConceptVideo, Course, PrecheckItem } from "@/data/types";
+import type { Course } from "@/data/types";
 
 export type EnrollPhase = "profile" | "intro" | "precheck" | "customize" | "build";
 
@@ -33,24 +38,20 @@ export type EnrollPhase = "profile" | "intro" | "precheck" | "customize" | "buil
  */
 export function EnrollFlow({
   course,
-  introVideo,
-  precheckItems,
   name,
   today,
   authoredModules,
   initialPhase,
 }: {
   course: Course;
-  introVideo?: ConceptVideo;
-  precheckItems: PrecheckItem[];
   name: string;
   today: string;
   authoredModules: string[];
   initialPhase?: EnrollPhase;
 }) {
-  const PHASES: EnrollPhase[] = introVideo ? ["profile", "intro", "precheck", "customize", "build"] : ["profile", "precheck", "customize", "build"];
+  const PHASES: EnrollPhase[] = ["profile", "intro", "precheck", "customize", "build"];
   // what comes right after "About you"
-  const afterProfile: EnrollPhase = introVideo ? "intro" : "precheck";
+  const afterProfile: EnrollPhase = "intro";
   const t = useTranslations("enroll");
   const router = useRouter();
   const learnerReady = useLearnerReady();
@@ -62,7 +63,6 @@ export function EnrollFlow({
   const { byCourse } = useCourseUnits(React.useMemo(() => [course], [course]));
 
   const [phase, setPhase] = React.useState<EnrollPhase | null>(null);
-  const [returnTo, setReturnTo] = React.useState<EnrollPhase | null>(null);
   // a profile from an earlier enrolment skips "About you"; say so on the quick check
   const [reusedProfile, setReusedProfile] = React.useState(false);
   const [answers, setAnswers] = React.useState<SetupAnswers>({});
@@ -117,42 +117,57 @@ export function EnrollFlow({
           ? { status: "planning", since: planningSince }
           : { status: "ready", source: enrollment?.plan?.source ?? "baseline", ai: !!enrollment?.ai, failed: enrollment?.lastError ?? null };
 
-  const adaptation = adaptationOf(answers, { precheck, override });
+  /** The Mission or the chat finished: how they decided sets "what helps first" and explanation style. */
+  function afterActivity(r: PrecheckResult) {
+    const learning = r.activity?.learning;
+    if (learning) setAnswers((a) => ({ ...a, firstStep: learning.firstStep, style: learning.style }));
+    setPrecheck(r);
+    setOverride("auto");
+    setPhase("customize");
+  }
+
+  // the learner's agent takes shape as they set up: job from About you, skills from the Mission, roadmap from the plan
+  const live = React.useMemo(() => ({ answers, precheck, phase }), [answers, precheck, phase]);
+  const { agent } = useAgent(course, live);
+  const renameAgent = (name: string) => setAnswers((a) => ({ ...a, agentName: name }));
+  const agentBeside = phase === "profile";
+  const { say, stop } = useAgentVoice();
+  React.useEffect(() => {
+    // Profiling and prerequisites own their playback sequence.
+    stop();
+    if (phase === "customize") say(phaseLine(phase), { once: `${course.course_id}.enroll.${phase}` });
+  }, [phase, say, stop, course.course_id]);
+
+  // While the model writes, show a neutral assembly view, not inferred help levels.
+  const adaptation = adaptationOf({});
   const editing = enrolled && phase !== "build";
 
   let body: React.ReactNode = <CardSkeleton lines={6} />;
   if (phase === "profile")
     body = (
-      <ProfileStep
+      <LiveProfileStep
+        courseId={course.course_id}
         name={name}
         answers={answers}
         setAnswers={setAnswers}
         needs={needs}
         setNeeds={setNeeds}
-        continueLabel={returnTo === "customize" ? t("backToCustomize") : introVideo ? t("toIntro") : t("toQuickCheck")}
-        onDone={() => {
-          void saveProfile(answers, needs).catch(() => toast.error(t("profileSaveFailed")));
+        continueLabel={t("toIntro")}
+        onDone={async (completedAnswers) => {
+          await saveProfile(completedAnswers, needs);
+          setAnswers(completedAnswers);
+          // Save and generate from the same complete snapshot, including the final answer.
+          prefetchAdaptiveSession(course.course_id, completedAnswers);
+          setPrecheck(null);
           setReusedProfile(false);
-          setPhase(returnTo ?? afterProfile);
-          setReturnTo(null);
+          setPhase(afterProfile);
         }}
       />
     );
-  else if (phase === "intro" && introVideo)
-    body = <IntroStep course={course} video={introVideo} onDone={() => setPhase("precheck")} />;
+  else if (phase === "intro")
+    body = <AdaptivePreparation course={course} answers={answers} mode="video" onPreviewDone={() => setPhase("precheck")} />;
   else if (phase === "precheck")
-    body = (
-      <PrecheckStep
-        items={precheckItems}
-        courseTitle={course.title}
-        onDone={(r) => {
-          setPrecheck(r);
-          setOverride("auto");
-          setPhase("customize");
-          setReturnTo(null);
-        }}
-      />
-    );
+    body = <AdaptivePreparation course={course} answers={answers} mode="activity" onDone={afterActivity} />;
   else if (phase === "customize")
     body = (
       <CustomizeStep
@@ -161,7 +176,6 @@ export function EnrollFlow({
         setAnswers={setAnswers}
         editing={enrolled}
         onEditProfile={() => {
-          setReturnTo("customize");
           setPhase("profile");
         }}
         onSubmit={async () => {
@@ -238,6 +252,7 @@ export function EnrollFlow({
               );
             })}
           </ol>
+          {phase ? <AgentChip agent={agent} onRename={renameAgent} className={cn("shrink-0", agentBeside && "lg:hidden")} /> : null}
           <span className="text-xs text-ink-muted md:hidden">
             {t("phaseOf", { n: current + 1, total: PHASES.length })} · {t(`phase_${phase ?? "profile"}`)}
           </span>
@@ -251,7 +266,6 @@ export function EnrollFlow({
               type="button"
               className="font-medium text-brand-ink underline-offset-4 hover:underline"
               onClick={() => {
-                setReturnTo(afterProfile);
                 setPhase("profile");
               }}
             >
@@ -260,7 +274,18 @@ export function EnrollFlow({
           </p>
         </div>
       ) : null}
-      <main className="mx-auto w-full max-w-6xl flex-1 page-pad py-8 lg:py-12">{body}</main>
+      <main className="mx-auto w-full max-w-6xl flex-1 page-pad py-8 lg:py-12">
+        {agentBeside ? (
+          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-10">
+            <div className="min-w-0">{body}</div>
+            <aside className="sticky top-[calc(var(--nav-h)+24px)] hidden lg:block">
+              <AgentBlueprint agent={agent} onRename={renameAgent} compact />
+            </aside>
+          </div>
+        ) : (
+          body
+        )}
+      </main>
     </div>
   );
 }

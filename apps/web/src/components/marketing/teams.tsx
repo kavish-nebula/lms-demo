@@ -15,7 +15,7 @@ export async function Teams() {
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 md:px-6 lg:grid-cols-2">
         <div>
           <p className="text-sm font-medium text-brand-ink">{t("teamsEyebrow")}</p>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">{t("teamsTitle")}</h2>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight md:text-[2.25rem] md:leading-tight">{t("teamsTitle")}</h2>
           <p className="mt-3 text-lg text-ink-muted">{t("teamsBody")}</p>
           <ul className="mt-8 flex flex-col gap-3">
             {points.map((p) => (

@@ -52,8 +52,8 @@ export function VideoExplainer({
       />
 
       <div className="concept-text-cards" aria-label="Lesson reading cards">
-        {adaptation.support === "extra" && <Callout className="concept-text-card" tone="worked" label="A little guidance before you begin" icon={<Lightbulb />}>
-          <p className="text-sm">{video.notes[0]} Pause whenever you need to, ask Pip about this slide, or try the experiment. Your place is saved.</p>
+        {adaptation.support === "extra" && <Callout className="concept-text-card" tone="worked" label="Before you begin" icon={<Lightbulb />}>
+          <p className="text-sm">{video.notes[0]} Pause anytime or ask Pip. Your place is saved.</p>
         </Callout>}
 
         {world && adaptation.domain ? (

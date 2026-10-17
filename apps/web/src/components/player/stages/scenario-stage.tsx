@@ -32,9 +32,9 @@ export function ScenarioStage({ block, support, ...nav }: StageProps<ScenarioBlo
   const left = block.scenarios.filter((item) => !decisions[item.id]?.committed).length;
   const roleplayDone = !block.roleplay || (roleplaySave?.missionId === block.roleplay.id && roleplaySave.complete);
   useCompanionStep(view === "roleplay" && block.roleplay
-    ? { title: block.roleplay.title, phase: "lab", guidance: block.roleplay.brief, hint: "Gather facts first, respect Scout's limits, and protect the customer." }
-    : { title: s.title, phase: "lab", guidance: `${s.situation} Inspect the evidence, choose an action, and compare its consequence with your expectation.`, hint: s.question.hints[0] });
-  return <StageShell stage="lab" title={view === "roleplay" && block.roleplay ? block.roleplay.title : block.title} intro={view === "roleplay" && block.roleplay ? "Take the supervisor's seat. Every decision changes the customer's outcome." : block.intro} minutes={block.duration_min} bloom={block.bloom} canComplete={roleplayDone || nav.done} completeHint={block.roleplay ? "Finish the roleplay to continue" : t("scenariosLeft", { count: left })} {...nav}>
+    ? { title: block.roleplay.title, phase: "lab", guidance: block.roleplay.brief, hint: "Get the facts, respect Scout’s limits, protect the customer." }
+    : { title: s.title, phase: "lab", guidance: `${s.situation} Check the evidence, choose, and compare the result.`, hint: s.question.hints[0] });
+  return <StageShell stage="lab" title={view === "roleplay" && block.roleplay ? block.roleplay.title : block.title} intro={view === "roleplay" && block.roleplay ? "You’re the supervisor. Each choice changes the outcome." : block.intro} minutes={block.duration_min} bloom={block.bloom} canComplete={roleplayDone || nav.done} completeHint={block.roleplay ? "Finish the roleplay first" : t("scenariosLeft", { count: left })} {...nav}>
     {block.roleplay ? <nav className="flex flex-wrap gap-2" aria-label="Scenario activities">
       <Button size="sm" variant={view === "roleplay" ? "brand" : "outline"} onClick={() => setView("roleplay")} aria-current={view === "roleplay" ? "page" : undefined}>{roleplayDone ? <Check /> : <MessageCircleMore />}Live roleplay</Button>
       <Button size="sm" variant={view === "cases" ? "brand" : "outline"} onClick={() => setView("cases")} aria-current={view === "cases" ? "page" : undefined}><Compass />Bonus cases</Button>
@@ -50,7 +50,7 @@ export function ScenarioStage({ block, support, ...nav }: StageProps<ScenarioBlo
         if (committed && context) recordLearning(context.courseId, { id: s.question.step_id, moduleId: context.moduleId, correct: !!s.question.options.find((o) => o.id === choice)?.correct, helped });
         if (committed && !decisions[s.id]?.committed) signal({ kind: "scenario_answer", moduleId: context?.moduleId ?? block.step_id.split(".")[0], lesson: s.lesson, payload: { stepId: s.question.step_id, correct: !!s.question.options.find((o) => o.id === choice)?.correct } });
       }} />
-      <div className="flex justify-between gap-3"><Button variant="ghost" disabled={index === 0} onClick={() => setIndex(index - 1)}><ArrowLeft />Previous case</Button><Button variant="outline" disabled={index === block.scenarios.length - 1 || !decisions[s.id]?.committed} onClick={() => setIndex(index + 1)}>Next case<ArrowRight /></Button></div>
+      <div className="flex justify-between gap-3"><Button variant="ghost" disabled={index === 0} onClick={() => setIndex(index - 1)}><ArrowLeft />Previous</Button><Button variant="outline" disabled={index === block.scenarios.length - 1 || !decisions[s.id]?.committed} onClick={() => setIndex(index + 1)}>Next<ArrowRight /></Button></div>
     </>}
   </StageShell>;
 }
@@ -67,15 +67,15 @@ function ScenarioCard({ scenario: s, n, total, support, saved, onSave }: { scena
     <section className="focus-pane flex flex-col gap-4 p-5">
       <div className="flex flex-wrap gap-2"><Chip size="sm" tone="lab" icon={<Compass />}>{t("scenarioOf", { n, total })}</Chip><Chip size="sm">{t("scenarioLesson", { lesson: s.lesson })}</Chip></div>
       <div><h2 className="text-xl font-semibold">{s.title}</h2><p className="mt-3 leading-relaxed text-ink-muted">{s.situation}</p></div>
-      {s.context && <details className="rounded-xl border border-line bg-panel-2 p-4" open={evidenceOpen} onToggle={(event) => setEvidenceOpen(event.currentTarget.open)}><summary className="cursor-pointer text-xs font-semibold"><ScrollText className="mr-2 inline size-4" />Inspect the evidence · {s.context.label}</summary><pre className="focus-pane-scroll mt-3 overflow-x-auto whitespace-pre-wrap text-xs leading-relaxed">{s.context.lines.join("\n")}</pre></details>}
+      {s.context && <details className="rounded-xl border border-line bg-panel-2 p-4" open={evidenceOpen} onToggle={(event) => setEvidenceOpen(event.currentTarget.open)}><summary className="cursor-pointer text-xs font-semibold"><ScrollText className="mr-2 inline size-4" />Evidence · {s.context.label}</summary><pre className="focus-pane-scroll mt-3 overflow-x-auto whitespace-pre-wrap text-xs leading-relaxed">{s.context.lines.join("\n")}</pre></details>}
     </section>
     <section className="focus-pane flex flex-col gap-4 border-l border-line bg-panel-2/35 p-5 max-[700px]:border-t max-[700px]:border-l-0">
       <p id={`${s.id}-decision`} className="font-medium">{s.question.stem}</p>
       <ChoiceList name={s.id} labelledBy={`${s.id}-decision`} options={s.question.options} value={choice ? [choice] : []} disabled={!!committed} onChange={(v) => setChoice(v[0] ?? "")} />
-      {!committed ? <><div className="flex flex-wrap gap-2"><Button variant="brand" disabled={!choice} onClick={() => { onSave(choice, true, showHints || seenFeedback); setSeenFeedback(true); }}>Make my decision<ArrowRight /></Button>{!showHints ? <Button variant="ghost" onClick={() => setShowHints(true)}>Give me a nudge</Button> : null}</div>{showHints && <TieredHints hints={s.question.hints} initialShown={support === "extra" ? 1 : 0} />}</> : <>
-        <Callout tone="lab" label={option?.correct ? "Your decision holds up" : "A consequence to think through"} icon={<Compass />}><p className="leading-relaxed">{option?.rationale ?? s.debrief}</p></Callout>
-        <details className="rounded-xl border border-line p-4"><summary className="cursor-pointer text-sm font-medium">Compare with an experienced builder</summary><p className="mt-3 text-sm leading-relaxed text-ink-muted">{s.debrief}</p></details>
-        <Button variant="outline" className="w-fit" onClick={() => onSave(choice, false, showHints)}><RotateCcw />Try another decision</Button>
+      {!committed ? <><div className="flex flex-wrap gap-2"><Button variant="brand" disabled={!choice} onClick={() => { onSave(choice, true, showHints || seenFeedback); setSeenFeedback(true); }}>Decide<ArrowRight /></Button>{!showHints ? <Button variant="ghost" onClick={() => setShowHints(true)}>Hint</Button> : null}</div>{showHints && <TieredHints hints={s.question.hints} initialShown={support === "extra" ? 1 : 0} />}</> : <>
+        <Callout tone="lab" label={option?.correct ? "Good call" : "Think this through"} icon={<Compass />}><p className="leading-relaxed">{option?.rationale ?? s.debrief}</p></Callout>
+        <details className="rounded-xl border border-line p-4"><summary className="cursor-pointer text-sm font-medium">Expert view</summary><p className="mt-3 text-sm leading-relaxed text-ink-muted">{s.debrief}</p></details>
+        <Button variant="outline" className="w-fit" onClick={() => onSave(choice, false, showHints)}><RotateCcw />Try again</Button>
       </>}
     </section>
   </Surface>;
