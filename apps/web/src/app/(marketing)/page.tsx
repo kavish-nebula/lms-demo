@@ -5,7 +5,6 @@ import { TickerTape } from "@/components/kit/ticker-tape";
 import { MethodBento } from "@/components/marketing/method-bento";
 import { RulesBento } from "@/components/marketing/rules-bento";
 import { Teams } from "@/components/marketing/teams";
-import { Pricing } from "@/components/marketing/pricing";
 import { Faq } from "@/components/marketing/faq";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getCourses } from "@/data";
@@ -54,7 +53,6 @@ export default async function HomePage() {
         <MethodBento />
         <RulesBento />
         <Teams />
-        <Pricing />
         <Faq />
       </main>
       <SiteFooter />

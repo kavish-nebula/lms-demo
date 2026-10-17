@@ -77,7 +77,7 @@ As they learn, answers come back as signals (in-video checks, scenario decisions
 
 | Route | Screen |
 |---|---|
-| `/` | Marketing home (Aurora): hero, method bento, design rules, teams, pricing, FAQ, footer |
+| `/` | Marketing home (Aurora): hero, method bento, design rules, teams, FAQ, footer |
 | `/auth/sign-in` | Sign in UI (email link + SSO; both lead into the demo) |
 | `/learn` | Learner home. With an empty catalog: a "No courses yet" state. Before enrolment: course spotlight and how setup works. After: what's up next, the resume card, live KPIs and the course card. The sidebar has Dashboard, Courses, Plan, Profile and Settings |
 | `/learn/courses` | Catalog: one Coursera-style card per course with a draggable module carousel and "View details"; an empty state while there are no courses |
