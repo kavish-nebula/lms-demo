@@ -48,7 +48,7 @@ The palette is set from the saved profile (`FieldAccentSync`) and stored in `lms
 - Pip's typing dots while the server writes the next question (`.typing-dots`, still under reduced motion);
 - beside it on wide screens, "Your profile" (or "For this course") fills in answer by answer with a progress ring, the questions still to come as placeholders, and a note on what the answers change;
 - "Start again" asks before clearing; the end card lists what Pip heard and the way on.
-The server returns `progress` (answered, about how many remain) with every turn for the counters.
+The server returns `progress` (answered, about how many remain) with every turn for the counters. The welcome card introduces the profile topics and offers the start button and time estimate; it does not show a course workflow demo before profiling.
 
 **Pip's welcome tour.** The first time an enrolled learner opens a course page, Pip gives a three-stop tour: progress, the path, and Pip itself (`components/onboarding/pip-tour.tsx`, stops marked with `data-tour`).
 - It dims the page, rings each stop, and moves focus into its card.

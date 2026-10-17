@@ -33,35 +33,18 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PipelineDiagram } from "@/components/kit/pipeline";
 import { AssistantAvatar, type PipReaction } from "@/components/learning/assistant-avatar";
 import { api } from "@/lib/api";
 import { applyFieldAccent, FIELD_ACCENTS, type FieldAccent } from "@/lib/field-accent";
 import { FIELD_GROUPS, type FieldGroup } from "@/lib/field-group";
 import type { InterviewTurn, SetupAnswers } from "@/lib/setup";
 import type { ProfileDerived } from "@/lib/profiling/derived";
-import type { Pipeline } from "@/data/types";
 
 type Option = { label: string; value: string; kind?: string };
 type Question = { slot: string; q: string; options: Option[]; multi?: boolean; source: "ai" | "rules" };
 type Progress = { answered: number; remaining: number };
 export type InterviewState = { answers: SetupAnswers; needs: string[]; derived: ProfileDerived | null; ack: string | null; question: Question | null; done: boolean; progress?: Progress };
 type Last = { slot: string; q: string; value?: string | string[]; label?: string; text?: string; kind?: string; skipped?: boolean };
-
-/** The course's own support story as a tiny workflow: what they will build. */
-const DEMO: Pipeline = {
-  nodes: [
-    { id: "ask", kind: "trigger", label: "Customer asks", sub: "Where is my order?", x: 0, y: 40, state: "ok" },
-    { id: "agent", kind: "logic", label: "Scout reads it", sub: "Agent decides", x: 210, y: 40, state: "ok" },
-    { id: "tool", kind: "http", label: "track_parcel", sub: "Tool call", x: 420, y: 0, state: "running" },
-    { id: "reply", kind: "action", label: "Reply sent", sub: "With the real status", x: 420, y: 90, state: "idle" },
-  ],
-  edges: [
-    { id: "a", source: "ask", target: "agent", state: "ok" },
-    { id: "b", source: "agent", target: "tool", state: "running" },
-    { id: "c", source: "agent", target: "reply", state: "idle" },
-  ],
-};
 
 /** Each fact Pip asks about, as the learner sees it in "Your profile". Follow-ups and unknown slots fall back to the question. */
 const SLOT_ICON = {
@@ -505,7 +488,7 @@ export function InterviewChat({
   );
 }
 
-/** Before the first question: what they'll build, and what Pip will ask. */
+/** Before the first question: what Pip will ask. */
 function Welcome({ onStart }: { onStart: () => void }) {
   const t = useTranslations("enroll");
   const steps: { icon: LucideIcon; label: string }[] = [
@@ -515,13 +498,6 @@ function Welcome({ onStart }: { onStart: () => void }) {
   ];
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-4 rounded-(--r-lg) border border-brand-line bg-panel p-4 sm:ml-10 sm:p-5">
-      <div>
-        <div className="font-semibold">{t("chatDemoTitle")}</div>
-        <p className="mt-1 text-sm text-ink-muted">{t("chatDemoBody")}</p>
-      </div>
-      <div className="overflow-x-auto rounded-(--r) border border-line bg-panel-2/50 p-3">
-        <PipelineDiagram pipeline={DEMO} label={t("chatDemoLabel")} center />
-      </div>
       <div>
         <div className="text-sm font-semibold">{t("chatPlanTitle")}</div>
         <ol className="mt-2 grid gap-2 sm:grid-cols-3">
