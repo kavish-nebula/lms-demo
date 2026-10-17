@@ -90,7 +90,7 @@ export function baselinePlan(input: PlannerInput, ctx: CourseContext): LearnerPl
   const who = [a.roleLabel, a.domain ? `in ${a.domain.label}` : null, years ? `(${years.toLowerCase()})` : null].filter(Boolean).join(" ");
 
   return {
-    summary: `${who ? `Set up for ${who}. ` : ""}${exampleFirst ? "Examples come before explanations. " : ""}${
+    summary: `${who ? `Set up for ${who}. ` : ""}${
       a.supportSource === "precheck" ? "Help is set from your quick check." : a.supportSource === "override" ? "Help follows the level you chose." : "Help follows your experience answer."
     }`,
     learner: { level, strengths, gaps },

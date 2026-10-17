@@ -105,7 +105,7 @@ export type EnrollmentView = {
   ai: boolean;
 };
 
-/** The plan's topic order for a module, if it is a valid order of these topics (guided practice kept after the worked example). */
+/** The plan's valid topic order, repaired to teach ideas before examples and practice. */
 export function planTopicOrder<S extends string>(plan: LearnerPlan | null | undefined, moduleId: string, stages: readonly S[]): S[] | null {
   const order = planModule(plan, moduleId)?.topicOrder;
   if (!order || order.length !== stages.length || !stages.every((s) => order.includes(s))) return null;

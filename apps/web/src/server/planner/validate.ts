@@ -43,7 +43,7 @@ export function validatePlan(
   guard: PlanGuard = { override: "auto", floor: false },
 ): { plan: LearnerPlan; issues: string[] } {
   const issues: string[] = [];
-  const kept = { order: 0, help: 0 };
+  const kept = { help: 0 };
   const override = guard.override === "auto" ? null : guard.override;
 
   const modules: PlanModuleT[] = ctx.modules.map((cm) => {
@@ -64,17 +64,11 @@ export function validatePlan(
       issues.push(`module ${cm.id}: topic order ${JSON.stringify(order)} rejected`);
       order = base.topicOrder;
     }
-    // guided practice comes after the explanation and the worked example, whatever the model chose
+    // Keep concept → worked example → practice, whatever the model chose.
     const repaired = practiceAfterExamples(order);
     if (repaired.join() !== order.join()) {
-      issues.push(`module ${cm.id}: guided practice moved after the worked example`);
+      issues.push(`module ${cm.id}: teaching sequence repaired`);
       order = repaired;
-    }
-    // "see a full example first" is the learner's own choice
-    const exampleFirst = (o: readonly string[]) => o.includes("worked") && o.includes("explainer") && o.indexOf("worked") < o.indexOf("explainer");
-    if (exampleFirst(base.topicOrder) && !exampleFirst(order)) {
-      kept.order++;
-      order = base.topicOrder;
     }
 
     const lessons: PlanLessonT[] = cm.lessons.map((cl) => {
@@ -109,7 +103,6 @@ export function validatePlan(
       lessons,
     };
   });
-  if (kept.order) issues.push(`example-first order kept in ${kept.order} module${kept.order === 1 ? "" : "s"}`);
   if (kept.help) issues.push(`help kept at the learner's level on ${kept.help} lesson${kept.help === 1 ? "" : "s"}`);
   const unknown = plan.modules.filter((m) => !ctx.modules.some((cm) => cm.id === m.moduleId)).map((m) => m.moduleId);
   if (unknown.length) issues.push(`unknown modules ${unknown.join(", ")} dropped`);

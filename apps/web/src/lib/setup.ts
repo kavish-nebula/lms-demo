@@ -651,9 +651,9 @@ const CHANGE: Record<QuestionId, (a: SetupAnswers, d?: ProfileDerived | null) =>
     })[a.coding ?? ""] ?? null,
   firstStep: (a) =>
     ({
-      example: "Each lesson opens with a full example, then the idea, then a quick try.",
+      example: "Each lesson opens with the idea, then a full example, then a quick try.",
       idea: "Each lesson opens with the idea, then a full example, then a quick try.",
-      try: "Each lesson opens with a quick try, then the idea, then a full example.",
+      try: "Each lesson opens with the idea, then a full example, then a quick try.",
     })[a.firstStep ?? ""] ?? null,
   style: (a) =>
     ({
@@ -670,10 +670,9 @@ export function changeFor(q: SetupQuestion, a: SetupAnswers, d?: ProfileDerived 
 
 export type LessonPart = "idea" | "example" | "try";
 
-/** Order of the three parts of a lesson, from "What helps first". */
+/** Teaching sequence, including profiles saved with earlier ordering preferences. */
 export function lessonOrder(a: SetupAnswers): LessonPart[] {
-  if (a.firstStep === "example") return ["example", "idea", "try"];
-  if (a.firstStep === "try") return ["try", "idea", "example"];
+  void a;
   return ["idea", "example", "try"];
 }
 

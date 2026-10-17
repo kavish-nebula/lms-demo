@@ -16,11 +16,18 @@ export function topicOf(m: HasTopics, stage: StageId): { topic: Topic; n: number
 }
 
 /**
- * Guided practice ("Build it") always comes after the explanation and the
- * worked example: learners build once they have seen the idea and watched it
- * run. Any order is repaired by moving it to just after the later of the two.
+ * Teach the idea before its worked example, then let the learner practise.
+ * Repair saved plans too, without changing stage IDs or completion keys.
  */
 export function practiceAfterExamples<S extends string>(order: readonly S[]): S[] {
+  const normalized = [...order];
+  const e = normalized.indexOf("explainer" as S);
+  const w = normalized.indexOf("worked" as S);
+  if (e >= 0 && w >= 0 && w < e) {
+    normalized.splice(w, 1);
+    normalized.splice(normalized.indexOf("explainer" as S) + 1, 0, "worked" as S);
+  }
+  order = normalized;
   const g = order.indexOf("guided" as S);
   if (g < 0) return [...order];
   const after = Math.max(order.indexOf("worked" as S), order.indexOf("explainer" as S));
@@ -30,14 +37,9 @@ export function practiceAfterExamples<S extends string>(order: readonly S[]): S[
   return rest;
 }
 
-/** "See a full example first": the watch-it-run topic moves ahead of the explanation. */
-export function orderStages(stages: StageId[], exampleFirst: boolean): StageId[] {
-  if (!exampleFirst) return stages;
-  const e = stages.indexOf("explainer");
-  const w = stages.indexOf("worked");
-  if (e < 0 || w < 0) return stages;
-  const next = [...stages];
-  next[e] = "worked";
-  next[w] = "explainer";
-  return next;
+/** The teaching sequence also applies when no personalized plan is ready. */
+export function orderStages(stages: StageId[], exampleFirst = false): StageId[] {
+  // Retain the caller signature for existing preferences; sequence is now fixed.
+  void exampleFirst;
+  return practiceAfterExamples(stages);
 }
