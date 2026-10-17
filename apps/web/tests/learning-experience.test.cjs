@@ -28,6 +28,47 @@ function load(file) {
 }
 const rules = load('apps/web/src/lib/learning-rules.ts');
 const companion = load('apps/web/src/lib/companion.ts');
+const { notesPrintHtml, exportNotesPdf } = load('apps/web/src/lib/notes-pdf.ts');
+test('notes PDF print view escapes pasted markup and preserves long Unicode notes', () => {
+  const notes = '<script>alert("notes")</script>\n\nதமிழ் notes & ideas\n' + 'Long note '.repeat(990);
+  const html = notesPrintHtml({ courseTitle: 'Agents <tools> & safety', notes, date: 'October 17, 2026' });
+  assert.ok(!html.includes('<script>'));
+  assert.ok(html.includes('&lt;script&gt;alert(&quot;notes&quot;)&lt;/script&gt;'));
+  assert.ok(html.includes('தமிழ் notes &amp; ideas'));
+  assert.ok(html.includes('Agents &lt;tools&gt; &amp; safety'));
+  assert.equal((html.match(/Long note /g) || []).length, 990);
+  assert.ok(html.includes('white-space: pre-wrap'));
+  assert.ok(html.includes('overflow-wrap: anywhere'));
+});
+test('notes export prints an isolated document and removes it after printing', async () => {
+  const previousDocument = global.document;
+  let afterPrint;
+  let printed = false;
+  let removed = false;
+  const frame = {
+    style: {},
+    setAttribute() {},
+    remove() { removed = true; },
+    contentDocument: { fonts: { ready: Promise.resolve() } },
+    contentWindow: {
+      addEventListener(event, callback) { assert.equal(event, 'afterprint'); afterPrint = callback; },
+      focus() {},
+      print() { printed = true; afterPrint(); },
+    },
+  };
+  global.document = {
+    createElement(tag) { assert.equal(tag, 'iframe'); return frame; },
+    body: { appendChild(node) { assert.equal(node, frame); void frame.onload(); } },
+  };
+  try {
+    await exportNotesPdf({ courseTitle: 'Agents', notes: 'My saved notes', date: 'October 17, 2026' });
+    assert.equal(printed, true);
+    assert.equal(removed, true);
+    assert.ok(frame.srcdoc.includes('My saved notes'));
+  } finally {
+    global.document = previousDocument;
+  }
+});
 const state = load('apps/web/src/lib/learning-state.ts');
 const gameRules = load('apps/web/src/lib/gamification.ts');
 const memory = new Map();

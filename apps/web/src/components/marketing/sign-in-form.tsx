@@ -30,22 +30,6 @@ export function SignInForm() {
 
   return (
     <div className="flex flex-col gap-5">
-      <Button variant="outline" size="xl" className="bg-white/5" disabled={!!pending} onClick={() => go("google")}>
-        {pending === "google" ? (
-          <Loader2 className="animate-spin" data-icon="inline-start" />
-        ) : (
-          // eslint-disable-next-line @next/next/no-img-element -- a tiny static brand mark
-          <img src="/brand/google-g.svg" alt="" width={18} height={18} data-icon="inline-start" />
-        )}
-        {t("continueGoogle")}
-      </Button>
-
-      <div className="flex items-center gap-3 text-xs text-ink-faint">
-        <span className="h-px flex-1 bg-line" />
-        {t("or")}
-        <span className="h-px flex-1 bg-line" />
-      </div>
-
       <form
         className="flex flex-col gap-3"
         onSubmit={(e) => {
@@ -75,6 +59,22 @@ export function SignInForm() {
           {t("continueEmail")}
         </Button>
       </form>
+
+      <div className="flex items-center gap-3 text-xs text-ink-faint">
+        <span className="h-px flex-1 bg-line" />
+        {t("or")}
+        <span className="h-px flex-1 bg-line" />
+      </div>
+
+      <Button variant="outline" size="xl" className="bg-white/5" disabled={!!pending} onClick={() => go("google")}>
+        {pending === "google" ? (
+          <Loader2 className="animate-spin" data-icon="inline-start" />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element -- a tiny static brand mark
+          <img src="/brand/google-g.svg" alt="" width={18} height={18} data-icon="inline-start" />
+        )}
+        {t("continueGoogle")}
+      </Button>
 
       <div className="flex items-center gap-3 text-xs text-ink-faint">
         <span className="h-px flex-1 bg-line" />

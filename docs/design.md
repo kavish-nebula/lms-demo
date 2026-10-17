@@ -87,3 +87,11 @@ Visual Story mode turns authored concept slides into focused scenes with touch, 
 Pip uses the updated illustrated mascot and gives brief, phase-aware nudges and reactions to learner actions. Reactions respect reduced-motion preferences.
 
 The landing page omits the Method section and its course finale cards. Its navigation and footer omit Method, and the hero offers the primary sign-in action without a See the method link.
+
+The landing page ends with a full-width contact footer, replacing the former CTA band and boxed footer, using the supplied Nebula reference layout: brand and Dispatch email request, Explore and Company columns, email/phone/hours/address, copyright, social labels, and a WhatsApp contact button. Footer colors follow the existing theme tokens: panel background, muted text, subtle borders, and indigo accent buttons and icons. There is no separate green palette. Columns stack on mobile and interactive controls have visible focus outlines. Newsletter requests open an email draft; no subscription is claimed. Destinations without supplied URLs remain disabled labels until configured.
+
+Sign-in options appear in this order: email entry and Continue with email, Continue with Google, then company SSO. Dividers separate each sign-in method.
+
+Enrolled lesson pages omit the Tuned for you row, story/field/analogy/support chips, and its Edit setup link. Personalized content still renders normally. When the module outline is hidden, its standalone Show outline button remains above the lesson on wide screens. Unenrolled previews retain their setup invitation.
+
+My Assistant's My notes tab offers Export to PDF beside the notes label, disabled for blank notes. It opens the browser print dialog with a separate A4 document containing the course title, export date, and notes; choose Save as PDF. The print view uses dark text on white paper, preserves line breaks, wraps long text, and omits application chrome. Export stays entirely in the browser.

@@ -300,11 +300,8 @@ export function Player({ module, moduleIndex, stage, video, courseHref, initialD
         </aside>
         <main id="stage-main" tabIndex={-1} className="min-w-0 flex-1 pb-6 outline-none">
           <AdaptedStrip
-            stage={stage}
-            adaptation={adaptation}
             enrolled={enrolled}
             setupHref={setupHref}
-            personal={personal}
             leading={
               // with the outline hidden, it comes back from here; wide screens only (narrow ones use the sheet)
               outlineHidden ? (

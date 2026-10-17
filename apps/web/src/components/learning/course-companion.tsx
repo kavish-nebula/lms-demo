@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUp, BookOpen, Check, Compass, Lightbulb, MessageCircle, NotebookPen, ShieldCheck, Sparkles, X } from "lucide-react";
+import { ArrowUp, BookOpen, Check, Compass, Download, Lightbulb, MessageCircle, NotebookPen, ShieldCheck, Sparkles, X } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { AssistantAvatar, type PipReaction } from "./assistant-avatar";
@@ -11,6 +11,7 @@ import { companionNudge, companionReply, quickReply, PHASE_GUIDANCE, RESTRICTED_
 import { api, ApiRequestError } from "@/lib/api";
 import { courseLabel } from "@/lib/course-labels";
 import { useLearning } from "@/lib/learning-state";
+import { exportNotesPdf } from "@/lib/notes-pdf";
 import "./learning.css";
 
 type Context = { courseId: string; moduleId: string; phase: string; setStep: (step: CompanionStep) => () => void };
@@ -69,6 +70,8 @@ function Companion({ data, moduleId, phase, step }: { data: CompanionCourse; mod
   const [input, setInput] = React.useState("");
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [saved, setSaved] = React.useState(false);
+  const [exporting, setExporting] = React.useState(false);
+  const [exportError, setExportError] = React.useState("");
   // the launcher greets once on arrival, then settles
   const [reaction, setReaction] = React.useState<PipReaction>("wave");
   const [reactionText, setReactionText] = React.useState("Ready when you are!");
@@ -211,9 +214,24 @@ function Companion({ data, moduleId, phase, step }: { data: CompanionCourse; mod
           </div>
         ) : tab === "notes" ? (
           <div id="pip-notes-panel" role="region" aria-labelledby="pip-notes-tab" className="flex min-h-0 flex-1 flex-col gap-2 p-5">
-            <label htmlFor="pip-notes" className="text-sm font-medium">My notes for this course</label>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <label htmlFor="pip-notes" className="text-sm font-medium">My notes for this course</label>
+              <Button variant="outline" size="sm" disabled={!state.notes.trim() || exporting} onClick={async () => {
+                setExporting(true);
+                setExportError("");
+                try {
+                  await exportNotesPdf({ courseTitle: data.course.title, notes: state.notes, date: new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }) });
+                } catch {
+                  setExportError("Could not open the print preview. Please try again.");
+                } finally {
+                  setExporting(false);
+                }
+              }}><Download data-icon="inline-start" />{exporting ? "Opening…" : "Export to PDF"}</Button>
+            </div>
             <textarea id="pip-notes" value={state.notes} onChange={(e) => update((s) => ({ ...s, notes: e.target.value.slice(0, 10000) }))} placeholder="An insight, a question, something to try…" className="pip-notes min-h-0 flex-1 resize-none" maxLength={10000} />
             <p className="text-xs text-ink-muted">Saved in this browser for this course.</p>
+            <p className="text-xs text-ink-muted">To export, choose Save as PDF in the print dialog.</p>
+            {exportError && <p role="alert" className="text-xs text-destructive">{exportError}</p>}
           </div>
         ) : (
           <>

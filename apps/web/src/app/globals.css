@@ -5,6 +5,56 @@
 /* Design tokens: Frosted Aura (light) + Aurora (dark). Single source of truth. */
 @import "@lms/ui/tokens.css";
 
+/* Public footer uses the same surfaces and accent palette as the rest of the app. */
+.site-contact-footer {
+  position: relative;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+}
+.site-contact-footer-inner { max-width: 1240px; margin-inline: auto; padding: 72px 30px 76px; }
+.site-contact-footer-columns { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 100px; }
+.site-contact-footer-brand { max-width: 350px; }
+.site-contact-footer-logo { display: inline-flex; align-items: center; gap: 8px; color: var(--text); font-size: 22px; letter-spacing: -.04em; }
+.site-contact-footer-logo img { height: 44px; max-width: 100%; object-fit: contain; }
+.site-contact-footer-logo sup { font-size: 9px; vertical-align: super; margin-left: 2px; }
+.site-contact-footer-description { margin-top: 26px; }
+.site-contact-footer-newsletter { margin-top: 28px; }
+.site-contact-footer-newsletter label { color: var(--accent-ink); font-size: var(--fs-xs); letter-spacing: .12em; text-transform: uppercase; }
+.site-contact-footer-email { display: flex; align-items: center; margin-top: 10px; padding: 5px; border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--panel2); }
+.site-contact-footer-email input { width: 100%; min-width: 0; padding: 4px 10px; background: transparent; color: var(--text); border: 0; border-radius: var(--r-pill); }
+.site-contact-footer-email input::placeholder { color: var(--muted); opacity: .8; }
+.site-contact-footer-email button { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--accent-deep); color: var(--on-accent); cursor: pointer; }
+.site-contact-footer-newsletter p { margin-top: 10px; font-size: var(--fs-xs); }
+.site-contact-footer-notice:empty { display: none; }
+.site-contact-footer-nav h2 { margin-bottom: 14px; color: var(--muted); font-size: var(--fs-xs); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+.site-contact-footer-nav ul { display: grid; gap: 12px; list-style: none; padding: 0; }
+.site-contact-footer [aria-disabled="true"] { cursor: default; }
+.site-contact-footer a:hover { color: var(--text); text-decoration: underline; text-underline-offset: 4px; }
+.site-contact-footer :is(a, button, input):focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+.site-contact-footer-contact { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; margin-top: 50px; border-top: 1px solid var(--line); padding-block: 36px 42px; font-style: normal; }
+.site-contact-footer-contact > * { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.site-contact-footer-contact svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 4px; color: var(--accent-ink); }
+.site-contact-footer-contact span { overflow-wrap: anywhere; }
+.site-contact-footer-bottom { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-top: 28px; border-top: 1px solid var(--line); font-size: var(--fs-xs); }
+.site-contact-footer-social { display: flex; flex-wrap: wrap; gap: 18px; padding-right: 58px; text-transform: uppercase; }
+.site-contact-footer-whatsapp { position: absolute; right: 20px; bottom: 14px; display: grid; place-items: center; width: 50px; height: 50px; border-radius: 50%; background: var(--accent-deep); color: var(--on-accent); }
+@media (max-width: 900px) {
+  .site-contact-footer-columns { gap: 40px; grid-template-columns: 1.5fr 1fr 1fr; }
+  .site-contact-footer-contact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .site-contact-footer-bottom { flex-direction: column; align-items: flex-start; padding-right: 40px; }
+}
+@media (max-width: 600px) {
+  .site-contact-footer-inner { padding: 44px 24px 76px; }
+  .site-contact-footer-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
+  .site-contact-footer-brand { grid-column: 1 / -1; max-width: none; }
+  .site-contact-footer-description { max-width: 38ch; }
+  .site-contact-footer-contact { grid-template-columns: 1fr; margin-top: 32px; padding-block: 28px; gap: 20px; }
+  .site-contact-footer-social { gap: 14px; }
+}
+
 /* shadcn "dark:" utilities follow the Aurora theme attribute, not a .dark class. */
 @custom-variant dark (&:is([data-theme="aurora"] *));
 

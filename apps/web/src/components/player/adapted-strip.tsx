@@ -3,33 +3,13 @@
 import * as React from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Settings2, Sparkles } from "lucide-react";
-import { Chip } from "@/components/kit/chip";
+import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { Adaptation } from "@/lib/setup";
-import type { StageId } from "@/lib/stages";
 
-/**
- * "This lesson is adapted because…" (prototype AdaptedStrip). Product rule:
- * every adaptation is visible and explained. Before enrolment it becomes a
- * preview banner that invites the learner to set the course up.
- */
-export function AdaptedStrip({
-  stage,
-  adaptation,
-  enrolled,
-  setupHref,
-  personal,
-  leading,
-}: {
-  stage: StageId;
-  adaptation: Adaptation;
+/** Keep preview enrolment guidance and outline access without adaptation status chips. */
+export function AdaptedStrip({ enrolled, setupHref, leading }: {
   enrolled: boolean;
   setupHref: string;
-  /** the topic's story rewritten in the learner's world (shown), or being rewritten */
-  personal?: { shown: boolean; writing: boolean; organisation?: string };
-  /** a control shown at the start of the row (the outline toggle) */
   leading?: React.ReactNode;
 }) {
   const t = useTranslations("player");
@@ -47,46 +27,5 @@ export function AdaptedStrip({
     );
   }
 
-  const chips: { text: string; why: string }[] = [];
-  const a = adaptation;
-  if (personal?.shown) chips.push({ text: personal.organisation ? t("chipStoryAt", { organisation: personal.organisation }) : t("chipStory"), why: t("whyStory") });
-  else if (personal?.writing) chips.push({ text: t("chipStoryWriting"), why: t("whyStoryWriting") });
-  if (stage === "hook" && a.roleLabel) chips.push({ text: t("chipRole", { role: a.roleLabel }), why: t("whyRole") });
-  if (stage === "explainer" && a.domain) chips.push({ text: t("chipWorld", { field: a.domain.label }), why: t("whyWorld") });
-  if (stage === "explainer" && a.analogyOpen) chips.push({ text: t("chipAnalogy"), why: t("whyAnalogy") });
-  if (stage === "explainer" && a.order[0] === "try") chips.push({ text: t("chipTryFirst"), why: t("whyOrder") });
-  if (stage === "worked" && a.order[0] === "example") chips.push({ text: t("chipExampleFirst"), why: t("whyOrder") });
-  if (stage === "guided" && a.support === "extra") chips.push({ text: t("chipTipsOpen"), why: t("whySupport") });
-  if (stage !== "gate" && a.support !== "standard")
-    chips.push({ text: a.support === "extra" ? t("chipExtra") : t("chipLight"), why: t("whySupport") });
-
-  if (!chips.length) return leading ? <div className="mx-auto mb-6 flex w-full max-w-3xl items-center">{leading}</div> : null;
-
-  return (
-    <div className="mx-auto mb-6 flex w-full max-w-3xl flex-wrap items-center gap-2" aria-label={t("adaptedFor")}>
-      {leading}
-      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-faint">
-        <Sparkles className="size-3.5 text-brand-ink" aria-hidden />
-        {t("adaptedFor")}
-      </span>
-      {chips.map((c) => (
-        <Tooltip key={c.text}>
-          <TooltipTrigger asChild>
-            <button type="button" className="rounded-pill outline-none focus-visible:ring-2 focus-visible:ring-ring/60">
-              <Chip size="sm" tone="accent">
-                {c.text}
-              </Chip>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-64">{c.why}</TooltipContent>
-        </Tooltip>
-      ))}
-      <Button asChild variant="ghost" size="xs" className="ml-auto">
-        <Link href={setupHref}>
-          <Settings2 data-icon="inline-start" />
-          {t("editSetup")}
-        </Link>
-      </Button>
-    </div>
-  );
+  return leading ? <div className="mx-auto mb-6 hidden w-full max-w-3xl items-center nav:flex">{leading}</div> : null;
 }
