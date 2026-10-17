@@ -85,3 +85,5 @@ Concept lessons use two sibling surfaces instead of one enclosing lesson card. T
 Visual Story mode turns authored concept slides into focused scenes with touch, keyboard, swipe, and marker navigation. It retains lesson audio, captions, checks, saved position, and completion rules.
 
 Pip uses the updated illustrated mascot and gives brief, phase-aware nudges and reactions to learner actions. Reactions respect reduced-motion preferences.
+
+The landing page's Method section shows the course finale cards without the module-topic example grid (previously headed In every module).
