@@ -11,7 +11,7 @@ export async function Faq() {
       <div className="mx-auto grid max-w-6xl gap-10 px-4 md:px-6 lg:grid-cols-[1fr_1.4fr]">
         <div>
           <p className="text-sm font-medium text-brand-ink">{t("faqEyebrow")}</p>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">{t("faqTitle")}</h2>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight md:text-[2.25rem] md:leading-tight">{t("faqTitle")}</h2>
         </div>
         <Accordion type="single" collapsible className="glass glass-edge rounded-card-lg px-6">
           {KEYS.map((k) => (

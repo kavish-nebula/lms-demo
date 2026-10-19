@@ -85,3 +85,8 @@ Concept lessons use two sibling surfaces instead of one enclosing lesson card. T
 Visual Story mode turns authored concept slides into focused scenes with touch, keyboard, swipe, and marker navigation. It retains lesson audio, captions, checks, saved position, and completion rules.
 
 Pip uses the updated illustrated mascot and gives brief, phase-aware nudges and reactions to learner actions. Reactions respect reduced-motion preferences.
+
+
+### Scenario-based starting activity
+
+The Google-connected enrollment uses simple narrated HTML slides and one evolving mission. The workspace places a fictional incoming request, an editable agent workflow and the last simulated outcome on one canvas. An action tray lets learners add tools/actions, reorder them with keyboard-accessible controls, and run a configuration. A packet follows the chosen actions and highlights the currently illustrated step while the model generates the result; this animation does not claim real tool execution. The next scene continues the same mission and keeps surviving actions plus instructions for revision. There is no question counter or standalone questionnaire. Source facts are part of the incoming request. Audio is optional; system and learner reduced-motion preferences disable packet movement/layout motion. Short events and results supply context without a wall of assessment details.

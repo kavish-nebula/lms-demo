@@ -1,3 +1,4 @@
+import { geminiConfigured } from "@/server/ai/gemini";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { FIXTURE_TODAY, getAuthoredModuleIds, getCourse, getLearner } from "@/data";
@@ -6,7 +7,7 @@ import { EnrollFlow, type EnrollPhase } from "@/components/enroll/enroll-flow";
 type Params = { courseId: string };
 type Search = { step?: string };
 
-const STEPS: EnrollPhase[] = ["fit", "customize"];
+const STEPS: EnrollPhase[] = ["fit", "intro", "precheck", "customize"];
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { courseId } = await params;
@@ -26,6 +27,7 @@ export default async function EnrollPage({ params, searchParams }: { params: Pro
   if (!course) notFound();
   return (
     <EnrollFlow
+      adaptiveEnabled={geminiConfigured()}
       course={course}
       name={learner.user.name.split(" ")[0] ?? learner.user.name}
       today={FIXTURE_TODAY}

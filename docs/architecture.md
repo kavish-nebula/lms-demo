@@ -158,3 +158,6 @@ Learning state is now schema version 2 and adds a bounded list of meaningful act
 The course-player focus sprint uses the course-scoped localStorage key `lms-focus:v1:<courseId>`. Its small state contains the selected duration, seconds remaining when paused, and an absolute `runningSince` timestamp while active. An absolute timestamp keeps the countdown accurate across route changes and background throttling. It is intentionally separate from learning evidence and gamification state: starting or finishing a timer never grants mastery or XP.
 
 The wide learning dock communicates with existing course surfaces through browser events. `pip:notes` opens Pip directly on the notebook tab when assessment rules allow it. Assessment restrictions remain enforced by the companion itself.
+
+
+Adaptive platform integration (2026-10-19): see docs/adaptive-backend-merge.md and docs/adaptive-onboarding.md for the merged preparation, evidence-plan and voice architecture. Existing server persistence and lesson rewriting remain active; profile and course answers stay separately scoped.

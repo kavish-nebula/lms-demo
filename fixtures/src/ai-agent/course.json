@@ -3,8 +3,8 @@
   "course_id": "ai-agent",
   "slug": "build-your-first-ai-agent",
   "title": "Build Your First AI Agent",
-  "tagline": "Orbit Outdoor's support team is drowning: 400 tickets a day, most of them \"where is my order?\". Their FAQ chatbot can talk, but it can't look anything up. Over six modules you build Scout, an AI agent that reads the question, calls the right tools, remembers the conversation and knows when to hand over to a person.",
-  "goal": "Design, build, test and deploy a working AI agent in Python: a language model that plans, calls tools, uses memory and stays inside safe limits.",
+  "tagline": "Orbit Outdoor gets 400 tickets a day, and its chatbot can't look anything up. You build Scout, an AI agent that can.",
+  "goal": "Build, test and deploy a safe, working AI agent in Python.",
   "domain": "Artificial intelligence",
   "provider": "Nebula KnowLab",
   "level": "Beginner",
@@ -30,10 +30,10 @@
     "Deployment"
   ],
   "learn": [
-    "Explain what makes an agent different from a chatbot or a fixed workflow, and when each one is the right tool.",
-    "Call a language model from Python with a clear system prompt and get back structured JSON you can trust.",
-    "Give an agent tools, let it decide when to use them, and handle the errors real APIs throw.",
-    "Add memory, retrieval and a think-act-observe loop, then test, evaluate, guard and deploy the agent you built."
+    "Tell an agent from a chatbot or a workflow, and pick the right one.",
+    "Call a model from Python and get back JSON you can trust.",
+    "Give an agent tools and handle the errors real APIs throw.",
+    "Add memory, retrieval and planning, then test, guard and deploy it."
   ],
   "tools": ["Python 3.11+", "Anthropic Claude API", "JSON Schema", "Pydantic", "FastAPI", "A code editor and terminal"],
   "modules": [
@@ -43,7 +43,7 @@
       "stages": ["hook", "explainer", "worked", "guided", "lab", "review"],
       "state": "available",
       "lite": false,
-      "pain": "Orbit's FAQ chatbot apologised 400 times on Monday. It could talk about orders, but it couldn't look one up.",
+      "pain": "Orbit's FAQ chatbot apologised 400 times on Monday. It could talk about orders but couldn't look one up.",
       "lead_in": null,
       "lessons": [
         { "id": "1.1", "title": "What is an AI agent?" },
@@ -53,18 +53,18 @@
         { "id": "1.5", "title": "Setting up your development environment" }
       ],
       "topics": [
-        { "stage": "hook", "title": "The chatbot that apologised 400 times", "summary": "Orbit's support bot can talk but can't act. Guess what it is missing before you learn the word for it." },
-        { "stage": "explainer", "title": "What makes an agent an agent", "summary": "Agents, chatbots and workflows, real use cases, the four core parts, and your setup, in five short videos." },
-        { "stage": "worked", "title": "Watch a chatbot and an agent answer the same customer", "summary": "Two runs side by side: one that guesses, one that looks it up." },
-        { "stage": "guided", "title": "Set up your machine and make your first model call", "summary": "Python, a virtual environment, an API key and a first reply from the model, step by step." },
-        { "stage": "lab", "title": "Agent, chatbot or workflow?", "summary": "Three real requests from Orbit's team. Decide which kind of system each one needs." },
-        { "stage": "review", "title": "Lock it in: what an agent is", "summary": "Short recall questions that come back after 3, 10 and 30 days." }
+        { "stage": "hook", "title": "The chatbot that apologised 400 times", "summary": "Orbit's bot can talk but can't act. Guess what's missing." },
+        { "stage": "explainer", "title": "What makes an agent an agent", "summary": "What agents are, real uses, core parts and setup, in five videos." },
+        { "stage": "worked", "title": "Watch a chatbot and an agent answer the same customer", "summary": "Two runs side by side: one guesses, one looks it up." },
+        { "stage": "guided", "title": "Set up your machine and make your first model call", "summary": "Set up Python and an API key, then call the model." },
+        { "stage": "lab", "title": "Agent, chatbot or workflow?", "summary": "Three requests from Orbit. Pick the right kind of system for each." },
+        { "stage": "review", "title": "Lock it in: what an agent is", "summary": "Quick recall questions that return after 3, 10 and 30 days." }
       ],
       "outcomes": [
-        "Explain what an AI agent is and what makes it act rather than just reply",
-        "Tell an agent, a chatbot and a fixed workflow apart, and pick the right one",
-        "Name the four core parts of an agent: the model, tools, memory and planning",
-        "Set up Python and an API key and make your first model call"
+        "Explain what an AI agent is and how it acts",
+        "Tell agents, chatbots and workflows apart, and pick one",
+        "Name an agent's four parts: model, tools, memory, planning",
+        "Set up Python and an API key, then call a model"
       ],
       "skills": ["AI agents", "Agent vs. workflow", "Agent components", "Python setup", "API keys"]
     },

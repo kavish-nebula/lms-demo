@@ -51,12 +51,12 @@
     "q6": "a"
   },
   "gate-m1_explain": {
-    "q1": "Autonomy is a dial: give Scout the least power that does the job. A wrong address is hard to undo once the parcel leaves, so a person approves each change at first. A Friday review only finds mistakes after the parcels have gone.",
-    "q2": "Only one step needs judgement: reading the customer's words. The rest never changes, so a workflow can run it and call a model just for the tag. A full agent adds cost and surprises to steps nobody needs to decide, and keyword rules miss messy wording.",
-    "q3": "A good first agent job repeats, needs lookups and forgives mistakes. Both repeat, but the returns address is the same for everyone, so a help page answers it for free. Return status needs a lookup for each customer, and a wrong answer is easy to correct.",
-    "q4": "For tools you define, the model only sends a request naming the tool and its input; your code runs it. With just get_order defined, there's nothing to ask for that deletes data. A prompt guides the model but runs no code, and the model does decide its own steps.",
-    "q5": "Assume a leaked key is already copied: scanners search public code for keys, and Git keeps the old commit. Only deleting the key in the console stops others spending your credit. A new commit, a private repo or .gitignore all leave the old key working.",
-    "q6": "The text has fixed steps, so a workflow sends it fast and cheaply every time. Questions vary and need lookups in the log, so the steps depend on the request: agent work, and it can start read-only. One agent for both adds cost and risk to a job with nothing to decide."
+    "q1": "Give Scout the least power that does the job. A wrong address is hard to undo, so a person approves each change at first.",
+    "q2": "Only the tag needs judgement, so a workflow calls a model just for that. An agent adds cost, and keyword rules miss messy wording.",
+    "q3": "The returns address is the same for everyone, so a help page covers it. Return status needs a lookup per customer, and mistakes are easy to fix.",
+    "q4": "The model only requests a defined tool, and your code runs it. With only get_order, nothing can delete data.",
+    "q5": "Assume a leaked key is already copied, and Git keeps old commits. Only deleting the key in the console stops others using it.",
+    "q6": "The text has fixed steps, so a workflow fits. Questions vary and need log lookups, so an agent fits there."
   },
   "gate-m2": {
     "q1": "a",

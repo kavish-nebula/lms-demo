@@ -8,9 +8,9 @@
       "lesson": "1.1",
       "title": "What is an AI agent?",
       "notes": [
-        "An AI agent uses a language model to decide its own next steps, and takes actions with tools until it reaches a goal.",
-        "Every agent runs the same loop: perceive what is in front of it, decide the next step, act, then look at the result.",
-        "Autonomy is a dial, not a switch: give an agent the least power that does the job, and widen it as you trust it."
+        "An AI agent uses a language model to choose its steps and acts with tools toward a goal.",
+        "Every agent loops: perceive, decide, act, then check the result.",
+        "Autonomy is a dial. Give an agent the least power that does the job."
       ],
       "quizAfter": 3,
       "slides": [
@@ -19,7 +19,7 @@
           "icon": "bot",
           "kicker": "Module 1 · Lesson 1",
           "title": "What is an AI agent?",
-          "sub": "From a bot that can only talk to one that can look things up and act",
+          "sub": "From a bot that talks to one that acts",
           "narration": "Welcome to the course, and welcome to Orbit Outdoor. Orbit is a small online shop for hiking, camping and climbing gear, and its support team is drowning in tickets. Over six modules, you will build Scout, an AI agent that helps them. In this first lesson, you will learn what an agent actually is, and what makes it different from a bot that only talks.",
           "sentences": [
             "Welcome to the course, and welcome to Orbit Outdoor.",
@@ -30,14 +30,14 @@
         },
         {
           "kind": "compare",
-          "title": "Same question, two very different answers",
+          "title": "Same question, two answers",
           "left": {
             "label": "Orbit's FAQ chatbot",
             "tone": "bad",
             "cue": 2,
             "points": [
               "Reads Ana's question",
-              "Has no way to see orders",
+              "Can't see orders",
               "Replies: sorry, I can't check that",
               "Ana is still waiting"
             ]
@@ -68,7 +68,7 @@
           "kind": "define",
           "title": "So, what is an AI agent?",
           "term": "AI agent",
-          "definition": "A system that uses a language model to decide its own next steps, and takes actions with tools, until it reaches a goal.",
+          "definition": "A system that uses a language model to choose its steps and acts with tools until it reaches a goal.",
           "parts": [
             {
               "text": "Built on a language model",
@@ -89,7 +89,7 @@
           ],
           "analogy": {
             "label": "Think of it as",
-            "text": "A new colleague on the support team: you give them a goal and access to the order system, and they work out the clicks themselves."
+            "text": "A new colleague. You give them a goal and system access, and they work out the clicks."
           },
           "narration": "Here is the definition we will use for the whole course. An AI agent is built around a large language model, or LLM: a model that reads and writes text. The model decides the next step itself, instead of following a script that someone wrote in advance. It takes actions through tools, such as looking up an order or searching a policy document. And it keeps going until it reaches a goal, like answering Ana with her real order status. Think of a new colleague on the support team. You give them a goal and access to the order system, and they work out the clicks themselves.",
           "sentences": [
@@ -113,7 +113,7 @@
             {
               "icon": "eye",
               "label": "Perceive",
-              "sub": "read the message and results",
+              "sub": "read message and results",
               "cue": 1
             },
             {
@@ -130,7 +130,7 @@
             }
           ],
           "note": {
-            "text": "Round again until the goal is met, or until a limit you set says stop.",
+            "text": "Repeat until the goal is met or a limit says stop.",
             "cue": 6
           },
           "narration": "Under the hood, every agent runs the same simple loop. First, it perceives: it reads what is in front of it, like Ana's message. Then it decides: given the goal, what is the most useful next step? Then it acts: it calls a tool, such as the order lookup, or it writes the reply. The result of that action is new information, so the loop starts again. Scout perceives the order details, decides it now knows enough, and acts by replying. The loop ends when the goal is met, or when a limit you set tells it to stop.",
@@ -174,7 +174,7 @@
               "kind": "llm",
               "icon": "brain",
               "label": "Scout decides again",
-              "sub": "that's enough to answer",
+              "sub": "enough to answer",
               "cue": 4
             },
             {
@@ -186,7 +186,7 @@
             }
           ],
           "note": {
-            "text": "Two decisions, one tool call, one reply. Nobody wrote these steps in advance.",
+            "text": "Two decisions, one tool call, one reply. Nobody scripted these steps.",
             "cue": 6
           },
           "narration": "Here is one full run of that loop, step by step. Ana's question arrives, with her order number in it. Scout decides it can't answer from what it already knows, and that it needs the order status. It calls the get order tool, and the result comes back: shipped with ParcelPath, tracking number included. Scout looks at that result and decides it now has enough to answer. It replies to Ana with the real status and the tracking number. Two decisions, one tool call and one reply, and nobody wrote those steps in advance.",
@@ -202,17 +202,17 @@
         },
         {
           "kind": "bullets",
-          "title": "How much should an agent do alone?",
-          "lead": "Autonomy is a dial, not a switch. You choose where to set it.",
+          "title": "How much should it do alone?",
+          "lead": "Autonomy is a dial, not a switch. You set it.",
           "bullets": [
             {
               "icon": "eye",
-              "text": "Read only: look up orders and tracking, change nothing",
+              "text": "Read only: look up orders, change nothing",
               "cue": 1
             },
             {
               "icon": "pencil",
-              "text": "Draft: write a reply that a person checks and sends",
+              "text": "Draft: a person checks and sends the reply",
               "cue": 2
             },
             {
@@ -229,7 +229,7 @@
           "aside": {
             "icon": "shield",
             "label": "Rule of thumb",
-            "text": "Give an agent the least power that does the job, and widen it as you learn to trust it.",
+            "text": "Give the least power that does the job. Widen it as trust grows.",
             "cue": 5
           },
           "narration": "Autonomy means how much an agent may do on its own, and it is a dial, not a switch. At the low end, an agent only reads: it looks up orders and tracking, and changes nothing. One step up, it drafts a reply, and a person checks it before it is sent. Higher still, it takes real actions, but risky ones wait for approval, like Orbit's refunds over two hundred dollars. Acting completely alone only makes sense for small steps that are easy to undo, because models can be wrong. A good rule: give an agent the least power that does the job, and widen it as you learn to trust it.",
@@ -247,11 +247,11 @@
           "title": "What to take away",
           "points": [
             {
-              "text": "An agent uses a model to decide its own steps and acts with tools",
+              "text": "An agent uses a model to choose steps and acts with tools",
               "cue": 1
             },
             {
-              "text": "It loops: perceive, decide, act, then look at the result",
+              "text": "It loops: perceive, decide, act, check the result",
               "cue": 2
             },
             {
@@ -259,7 +259,7 @@
               "cue": 3
             },
             {
-              "text": "Autonomy is a dial: start with the least power that does the job",
+              "text": "Autonomy is a dial: start with the least power",
               "cue": 4
             }
           ],
@@ -276,50 +276,50 @@
       ],
       "midQuiz": [
         {
-          "q": "What can Scout do that Orbit's FAQ chatbot can't?",
+          "q": "What can Scout do that the FAQ chatbot can't?",
           "options": [
             "Understand what the customer is asking",
             "Reply in a friendly, natural tone",
-            "Decide to use a tool, like an order lookup, and act on the result"
+            "Use a tool, like an order lookup, and act on the result"
           ],
           "correct": 2,
-          "explain": "Both understand Ana's question and both write fluent text. Only Scout can act: it decides to call a tool, gets the real status and uses it.",
-          "hint": "Both bots understood Ana perfectly. What could only one of them do next?"
+          "explain": "Both understand Ana and write fluently. Only Scout can call a tool and use the real status.",
+          "hint": "Both understood Ana. What could only one of them do next?"
         },
         {
-          "q": "In the agent loop, what happens right after Scout calls a tool?",
+          "q": "What happens right after Scout calls a tool?",
           "options": [
-            "Scout perceives the result and decides the next step",
-            "Scout starts again from Ana's first message and ignores the result",
-            "The run ends and the tool's raw output goes straight to the customer"
+            "Scout reads the result and decides the next step",
+            "Scout restarts from Ana's first message and ignores the result",
+            "The run ends and the raw output goes to the customer"
           ],
           "correct": 0,
-          "explain": "A tool's result is new information. Scout reads it and decides again: another step, or the reply. That's why it's a loop.",
-          "hint": "Perceive, decide, act... and then where does the loop go?"
+          "explain": "The result is new information. Scout reads it and decides again, which is why it's a loop.",
+          "hint": "Perceive, decide, act... then where does the loop go?"
         }
       ],
       "endQuiz": [
         {
           "q": "Which of these is an AI agent?",
           "options": [
-            "A system that reads a request, chooses which lookups to make, and replies with the results",
-            "A bot that answers from a fixed list of FAQ answers",
+            "A system that picks which lookups to make and replies with the results",
+            "A bot that answers from a fixed FAQ list",
             "A script that emails every customer the same message at 8 AM"
           ],
           "correct": 0,
-          "explain": "Only the third decides its own steps and acts with tools toward a goal. The first only talks; the second follows steps someone wrote in advance.",
-          "hint": "Look for the one where the system, not a person, chooses what happens next."
+          "explain": "Only the third chooses its own steps and acts with tools. The others only talk or follow fixed steps.",
+          "hint": "Which one chooses what happens next by itself?"
         },
         {
-          "q": "Scout is getting a refund tool. What's the safest starting point?",
+          "q": "Scout is getting a refund tool. What's the safest start?",
           "options": [
-            "Never give Scout any tools at all",
-            "Let Scout refund any amount on its own",
-            "Let Scout start refunds, but refunds over $200 wait for a person to approve"
+            "Never give Scout any tools",
+            "Let Scout refund any amount alone",
+            "Scout starts refunds, but over $200 waits for a person"
           ],
           "correct": 2,
-          "explain": "Autonomy is a dial. Small, reversible steps can run alone; risky ones wait for a person. Orbit's policy already says refunds over $200 need approval.",
-          "hint": "Think about the least power that still does the job, and what is hard to undo."
+          "explain": "Small, reversible steps can run alone. Orbit's policy says refunds over $200 need a person to approve.",
+          "hint": "What is the least power that still does the job?"
         }
       ]
     },
@@ -329,9 +329,9 @@
       "lesson": "1.2",
       "title": "Agents vs. chatbots vs. workflows",
       "notes": [
-        "A chatbot replies with text, a workflow follows steps a person wrote in advance, and an agent decides its own steps as it goes.",
-        "If you can write the steps down ahead of time, a fixed workflow is usually cheaper, faster and easier to trust than an agent.",
-        "Use an agent when the steps depend on the request and need lookups and judgement; many jobs don't need one."
+        "A chatbot replies, a workflow follows preset steps, and an agent chooses its steps.",
+        "If you can write the steps down, a workflow is usually cheaper and safer.",
+        "Use an agent when steps depend on the request. Many jobs don't need one."
       ],
       "quizAfter": 3,
       "slides": [
@@ -340,7 +340,7 @@
           "icon": "split",
           "kicker": "Module 1 · Lesson 2",
           "title": "Agents vs. chatbots vs. workflows",
-          "sub": "Three ways to automate a job, and the one question that tells them apart",
+          "sub": "Three ways to automate, one question to tell them apart",
           "narration": "Agent is a popular word right now, and it gets stuck on almost everything. In this lesson you will meet three different kinds of system: chatbots, workflows and agents. By the end, you will know the one question that tells them apart, and when each one is the right choice.",
           "sentences": [
             "Agent is a popular word right now, and it gets stuck on almost everything.",
@@ -369,7 +369,7 @@
               "cells": [
                 "Workflow",
                 "A person, in advance",
-                "Yes, the same steps every time"
+                "Yes, same steps every time"
               ],
               "cue": 2
             },
@@ -383,7 +383,7 @@
             }
           ],
           "note": {
-            "text": "The key question: who decides what happens next, a person in advance or the model in the moment?",
+            "text": "Who decides what happens next: a person in advance, or the model?",
             "cue": 5
           },
           "narration": "Here are the three, side by side. A chatbot reads a message and writes a reply, and that's all: no lookups and no actions. A workflow does take actions, but a person wrote every step in advance, and it follows them in order. An agent takes actions too, but the model chooses which steps to take while it runs. So the question that separates them is simple. Who decides what happens next: a person who wrote it down in advance, or the model in the moment?",
@@ -428,7 +428,7 @@
           "aside": {
             "icon": "lightbulb",
             "label": "Good at",
-            "text": "Explaining what it already knows: policies, product care, how-tos. Not facts it can't see.",
+            "text": "Explaining what it already knows. Not facts it can't see.",
             "cue": 5
           },
           "narration": "First, the chatbot, which is what Orbit runs today. Ana asks where her order is. The bot answers politely, with the general shipping times from the FAQ page. Ana asks again, more frustrated this time. And she gets the same apology, because the bot has nothing new to look at. Chatbots are good at explaining what they already know, like policies and product care, but they can't fetch facts they can't see. Once you give a chatbot tools and let it choose when to use them, it is on its way to becoming an agent.",
@@ -444,7 +444,7 @@
         },
         {
           "kind": "flow",
-          "title": "A workflow: steps written in advance",
+          "title": "A workflow: preset steps",
           "run": true,
           "nodes": [
             {
@@ -470,7 +470,7 @@
             }
           ],
           "note": {
-            "text": "Same three steps every time. Nothing to decide, so no model needed.",
+            "text": "Same three steps every time. Nothing to decide, so no model.",
             "cue": 4
           },
           "narration": "Next, a workflow, and Orbit could use one tomorrow. When Sam's warehouse marks an order as shipped, the orders system announces it. A template fills in the customer's name, the item and the tracking number. And the email goes out to the customer. Same three steps, every time, in the same order, with nothing to decide, so no language model is needed. It runs in a second and costs almost nothing, and customers with a tracking number are less likely to ask where their order is.",
@@ -492,7 +492,7 @@
             "cue": 1,
             "points": [
               "Steps known in advance",
-              "Fast and nearly free to run",
+              "Fast and nearly free",
               "Same result every time",
               "Easy to test and explain"
             ]
@@ -505,7 +505,7 @@
               "Steps depend on the request",
               "Needs lookups and judgement",
               "Slower: each step is a model call",
-              "Can be wrong, so needs limits and tests"
+              "Can be wrong, needs limits and tests"
             ]
           },
           "narration": "So when should you use which? If you can write the steps down ahead of time, use a fixed workflow. It is fast and nearly free, it does the same thing every time, and it is easy to test. Reach for an agent when the steps depend on the request. Ana wants tracking, Grace wants a return, Owen wants a different size, and you can't predict the mix. But agents are slower, every step is a paid model call, and they can make mistakes. So they need limits and testing, and that is a big part of this course.",
@@ -533,7 +533,7 @@
               "title": "Shipping email",
               "flow": [
                 "Email when an order ships",
-                "The same steps every time",
+                "Same steps every time",
                 "Workflow"
               ],
               "cue": 1
@@ -543,7 +543,7 @@
               "title": "Boot care question",
               "flow": [
                 "How do I waterproof boots?",
-                "An answer already written down",
+                "An answer already written",
                 "Chatbot or help page"
               ],
               "cue": 2
@@ -573,21 +573,21 @@
         {
           "kind": "bullets",
           "title": "Honest advice: start simple",
-          "lead": "Use the simplest thing that works. Add an agent only when it truly helps.",
+          "lead": "Use the simplest thing that works.",
           "bullets": [
             {
               "icon": "book",
-              "text": "A clear FAQ page answers many repeat questions for free",
+              "text": "A clear FAQ page answers many questions for free",
               "cue": 1
             },
             {
               "icon": "workflow",
-              "text": "Known steps? Build a workflow: cheaper, faster, predictable",
+              "text": "Known steps? Build a workflow",
               "cue": 2
             },
             {
               "icon": "bot",
-              "text": "Use an agent only when the steps depend on the request",
+              "text": "Use an agent only when steps depend on the request",
               "cue": 3
             },
             {
@@ -599,7 +599,7 @@
           "aside": {
             "icon": "dollar",
             "label": "Cost check",
-            "text": "Every agent step is a paid model call. Ten steps on hundreds of tickets a day adds up.",
+            "text": "Every agent step is a paid model call. It adds up fast.",
             "cue": 5
           },
           "narration": "Here is the honest advice experienced builders give. Many repeat questions are answered perfectly well by a clear FAQ page, which costs nothing to run. If the steps are known, build a workflow: it is cheaper, faster and more predictable. Use an agent only when the steps really depend on the request. And you can mix them: a workflow can call a model for a single step, like sorting an email into a category. Keep cost in mind too, because every agent step is a paid model call, and Orbit gets hundreds of tickets a day.",
@@ -621,7 +621,7 @@
               "cue": 1
             },
             {
-              "text": "Workflow: steps a person wrote in advance, the same every time",
+              "text": "Workflow: preset steps, the same every time",
               "cue": 2
             },
             {
@@ -648,48 +648,48 @@
         {
           "q": "What's the key difference between a workflow and an agent?",
           "options": [
-            "In a workflow a person sets the steps in advance; in an agent the model decides them as it runs",
+            "A person sets a workflow's steps, but an agent's model decides them",
             "Workflows can never use a language model",
             "Only agents can send emails or update records"
           ],
           "correct": 0,
-          "explain": "Both can act. The difference is who decides the steps: a person ahead of time, or the model in the moment. A workflow can even call a model for one step.",
-          "hint": "Ask the lesson's one question: who decides what happens next?"
+          "explain": "Both can act. The difference is who decides the steps: a person ahead of time, or the model.",
+          "hint": "Who decides what happens next?"
         },
         {
-          "q": "Why does Orbit's FAQ chatbot keep apologising to Ana?",
+          "q": "Why does the FAQ chatbot keep apologising to Ana?",
           "options": [
             "Ana didn't include her order number",
             "Its language model is too small",
             "It has no way to look up her order"
           ],
           "correct": 2,
-          "explain": "The chatbot understood her, and she gave her order number. It simply has no connection to the orders system, so all it can do is write text.",
-          "hint": "Ana gave everything that was needed. What was missing on the bot's side?"
+          "explain": "It understood her and had her order number. It has no connection to the orders system.",
+          "hint": "Ana gave everything needed. What was the bot missing?"
         }
       ],
       "endQuiz": [
         {
-          "q": "Leo wants a message in the support channel whenever a product review has one star. What fits best?",
+          "q": "Leo wants a support channel alert for every one-star review. What fits best?",
           "options": [
             "An agent that reads every review and decides what to do",
-            "A fixed workflow: new review, check the stars, post the message",
+            "A workflow: new review, check stars, post the message",
             "A chatbot Leo can ask about reviews"
           ],
           "correct": 1,
-          "explain": "The trigger, the check and the action are all known in advance. A workflow does it instantly and cheaply, the same way every time.",
-          "hint": "Could you write every step down before the first review arrives?"
+          "explain": "The trigger, check and action are known in advance. A workflow does it instantly and cheaply.",
+          "hint": "Could you write every step down in advance?"
         },
         {
           "q": "Which is a good reason NOT to use an agent?",
           "options": [
-            "The steps are the same every time and you can write them down",
-            "Customers phrase the same question in many different ways",
-            "The answer depends on lookups that change with each request"
+            "The steps are the same every time and can be written down",
+            "Customers phrase the same question in many ways",
+            "The answer depends on lookups that change per request"
           ],
           "correct": 0,
-          "explain": "Fixed, known steps are a workflow's home ground: cheaper, faster and more predictable. The other two are reasons an agent might help.",
-          "hint": "Two of these make an agent more useful. One makes it unnecessary."
+          "explain": "Fixed steps suit a workflow. The other two are reasons an agent might help.",
+          "hint": "Two make an agent useful. One makes it unnecessary."
         }
       ]
     },
@@ -699,9 +699,9 @@
       "lesson": "1.3",
       "title": "Real-world use cases of AI agents",
       "notes": [
-        "Agents already do real work in customer support, coding, research and operations, usually with a person checking what matters.",
-        "A good first agent job is repetitive, needs lookups to answer, and has mistakes that are easy to spot and cheap to fix.",
-        "Start with one narrow job and add the next only when the last one works reliably; that is how Scout grows in this course."
+        "Agents already work in support, coding, research and operations, often with a person checking.",
+        "A good first agent job repeats, needs lookups and has easy-to-fix mistakes.",
+        "Start with one narrow job. Add the next only when the last one works."
       ],
       "quizAfter": 4,
       "slides": [
@@ -710,7 +710,7 @@
           "icon": "globe",
           "kicker": "Module 1 · Lesson 3",
           "title": "Real-world use cases of AI agents",
-          "sub": "Where agents earn their keep today, and how to spot a good first job for one",
+          "sub": "Where agents work today, and good first jobs",
           "narration": "You know what an agent is, and when a simpler system would do the job better. Now let's look at where agents are actually used, outside of demos. Then you will learn three questions that tell you whether a job is a good first agent project.",
           "sentences": [
             "You know what an agent is, and when a simpler system would do the job better.",
@@ -742,8 +742,8 @@
               "title": "Coding",
               "flow": [
                 "Fix this failing test",
-                "Reads files, edits, reruns tests",
-                "A change for a developer to review"
+                "Reads, edits, reruns tests",
+                "A change for review"
               ],
               "cue": 2
             },
@@ -753,7 +753,7 @@
               "flow": [
                 "Compare three tent suppliers",
                 "Searches, reads, takes notes",
-                "A summary with its sources"
+                "A summary with sources"
               ],
               "cue": 3
             }
@@ -771,35 +771,35 @@
         {
           "kind": "example",
           "title": "Operations: the delayed tents",
-          "scenario": "A supplier emails Orbit: the next batch of green Trailhead tents will arrive two weeks late.",
+          "scenario": "A supplier says the next green Trailhead tents will arrive two weeks late.",
           "steps": [
             {
               "time": "9:00",
               "icon": "mail",
-              "text": "The supplier's email arrives in Orbit's inbox",
+              "text": "The supplier's email arrives",
               "cue": 2
             },
             {
               "time": "9:01",
               "icon": "search",
-              "text": "The agent finds every open order waiting for that tent",
+              "text": "The agent finds every open order for that tent",
               "cue": 3
             },
             {
               "time": "9:02",
               "icon": "pencil",
-              "text": "It drafts a short, personal note to each of those customers",
+              "text": "It drafts a short note to each customer",
               "cue": 4
             },
             {
               "time": "9:10",
               "icon": "hand",
-              "text": "Leo reads the drafts and sends them with one click",
+              "text": "Leo reads the drafts and sends them in one click",
               "cue": 5
             }
           ],
           "result": {
-            "text": "Customers hear the news from Orbit before they have to ask, and a person approves every message.",
+            "text": "Customers hear first, and a person approves every message.",
             "cue": 6
           },
           "narration": "The fourth area is operations: the behind-the-scenes work that keeps a business running. Picture this at Orbit. A supplier emails to say the next batch of green tents will arrive two weeks late. An agent reads the email and finds every open order that is waiting for that tent. For each one, it drafts a short note to the customer, explaining the delay. Leo reads the drafts and sends them with one click. Customers hear the news before they have to ask, and a person still approves every message that goes out.",
@@ -815,16 +815,16 @@
         },
         {
           "kind": "compare",
-          "title": "What agents do well, and where they struggle",
+          "title": "Strengths and struggles",
           "left": {
             "label": "Good at",
             "tone": "ok",
             "cue": 1,
             "points": [
               "Messy requests in plain language",
-              "Choosing which lookup comes next",
+              "Choosing the next lookup",
               "Drafting replies and summaries",
-              "Working at any hour, at scale"
+              "Working any hour, at scale"
             ]
           },
           "right": {
@@ -833,9 +833,9 @@
             "cue": 4,
             "points": [
               "Facts they can't look up",
-              "Sounding sure when they're wrong",
+              "Sounding sure when wrong",
               "Long tasks with many steps",
-              "Judgement calls with real stakes"
+              "High-stakes judgement calls"
             ]
           },
           "narration": "Before we pick a first job, let's be honest about strengths and weaknesses. Agents are good at understanding messy requests written in plain language. They are good at choosing which lookup to make next, and at drafting replies and summaries. And they work at any hour, on hundreds of requests at once. But they struggle with facts they have no way to look up, and they can fill the gap with a confident guess. Long tasks with many steps give more chances for one step to go wrong. And judgement calls with real money or safety at stake still belong with people.",
@@ -851,29 +851,29 @@
         },
         {
           "kind": "bullets",
-          "title": "Three signs of a good first agent job",
-          "lead": "Before you build anything, check the job against three questions.",
+          "title": "Signs of a good first job",
+          "lead": "Check the job against three questions first.",
           "bullets": [
             {
               "icon": "repeat",
-              "text": "Repetitive: it comes up many times a week, each time a bit different",
+              "text": "Repetitive: comes up often, a bit different each time",
               "cue": 1
             },
             {
               "icon": "search",
-              "text": "Needs lookups: the answer lives in a system, not in the question",
+              "text": "Needs lookups: the answer lives in a system",
               "cue": 2
             },
             {
               "icon": "history",
-              "text": "Recoverable: a mistake is easy to spot and cheap to fix",
+              "text": "Recoverable: mistakes are easy to spot and fix",
               "cue": 3
             }
           ],
           "aside": {
             "icon": "lightbulb",
-            "label": "If it fails the test",
-            "text": "A person, a help page or a simple workflow probably does the job better.",
+            "label": "If it fails",
+            "text": "A person, help page or workflow probably does it better.",
             "cue": 4
           },
           "narration": "So how do you choose a good first job for an agent? First, it is repetitive: it comes up many times a week, and each time it is a little different. Second, it needs lookups: the answer lives in a system, like an orders database, not in the question itself. Third, mistakes are recoverable: if the agent gets one wrong, someone can spot it and fix it cheaply. A job that fails these checks is usually better done by a person, a help page or a simple workflow.",
@@ -935,7 +935,7 @@
             }
           ],
           "note": {
-            "text": "Only the order question passes all three, which is why Scout starts there.",
+            "text": "Only the order question passes all three. Scout starts there.",
             "cue": 5
           },
           "narration": "Let's run four of Orbit's jobs through those three questions. Where is my order passes easily: it comes up hundreds of times, needs a lookup, and a mistake is easy to correct. Do you sell gift cards repeats a lot, but the answer is the same for everyone, so a help page is enough. Approving a three hundred and ten dollar refund needs lookups, but once the money is sent, a mistake is hard to undo. And choosing next year's suppliers is rare and high stakes, which makes it a job for people. Only the order question passes all three, which is exactly why Scout starts there.",
@@ -982,7 +982,7 @@
             }
           ],
           "note": {
-            "text": "Add one job at a time, and only when the last one works reliably.",
+            "text": "Add one job at a time, once the last one works.",
             "cue": 5
           },
           "narration": "One last lesson from real projects: start narrow. Scout's first job is order status, and nothing else. Once that works, it learns to answer policy questions about returns and shipping. Then it handles exchanges, checking the stock before it offers a new size. Only later does it touch refunds, and big ones always wait for a person. Each new job is added only when the last one works reliably, and that is the path this course follows.",
@@ -1000,15 +1000,15 @@
           "title": "What to take away",
           "points": [
             {
-              "text": "Agents already work in support, coding, research and operations",
+              "text": "Agents work in support, coding, research and operations",
               "cue": 1
             },
             {
-              "text": "Good first jobs repeat often, need lookups and forgive mistakes",
+              "text": "Good first jobs repeat, need lookups and forgive mistakes",
               "cue": 2
             },
             {
-              "text": "Rare, high-stakes or irreversible decisions stay with people",
+              "text": "High-stakes or irreversible decisions stay with people",
               "cue": 3
             },
             {
@@ -1031,48 +1031,48 @@
         {
           "q": "In the delayed-tents example, what does Leo still do?",
           "options": [
-            "Nothing: the agent sends every note by itself",
+            "Nothing, the agent sends every note itself",
             "He reads the drafted notes and sends them",
             "He writes every note by hand"
           ],
           "correct": 1,
-          "explain": "The agent does the searching and the drafting; Leo approves what goes out. A person still checks the result that matters.",
+          "explain": "The agent searches and drafts. Leo approves what goes out.",
           "hint": "Look at the last step before the result."
         },
         {
-          "q": "Which is one of the three signs of a good first agent job?",
+          "q": "Which is a sign of a good first agent job?",
           "options": [
             "The answer lives in a system and needs a lookup",
-            "It happens rarely, but each case is very important",
+            "It's rare, but each case is very important",
             "Mistakes can't be undone, so speed matters most"
           ],
           "correct": 0,
-          "explain": "Good first jobs are repetitive, need lookups, and have mistakes that are easy to fix. Rare, high-stakes or irreversible jobs are poor first choices.",
-          "hint": "Think about where the answer to \"where is my order?\" actually lives."
+          "explain": "Good first jobs repeat, need lookups and have fixable mistakes. Rare or irreversible jobs are poor first picks.",
+          "hint": "Where does the answer to \"where is my order?\" live?"
         }
       ],
       "endQuiz": [
         {
-          "q": "Which Orbit job is the best first job for an agent?",
+          "q": "Which Orbit job is the best first agent job?",
           "options": [
-            "Approving refunds over $200 on its own",
+            "Approving refunds over $200 alone",
             "Answering where-is-my-order questions",
             "Choosing next year's suppliers"
           ],
           "correct": 1,
-          "explain": "Order questions repeat hundreds of times, need a lookup, and mistakes are easy to correct. Big refunds and supplier choices are rare, costly or hard to undo.",
-          "hint": "Run each one through the three questions: repetitive, needs lookups, recoverable."
+          "explain": "Order questions repeat, need a lookup and are easy to correct. The others are rare, costly or hard to undo.",
+          "hint": "Is it repetitive, does it need lookups, is it recoverable?"
         },
         {
-          "q": "Why does Scout start with order status and add refunds much later?",
+          "q": "Why does Scout start with order status and add refunds later?",
           "options": [
             "Agents can't technically issue refunds",
-            "Start narrow: add a job when the last one works, and keep risky actions for later",
+            "Start narrow, and add risky actions only later",
             "Customers never ask about refunds"
           ],
           "correct": 1,
-          "explain": "Each job is added once the last one works reliably, and actions that move money come last, with a person approving the big ones.",
-          "hint": "Think about which actions are easy to undo, and which aren't."
+          "explain": "Jobs are added once the last one works. Money actions come last, with a person approving big ones.",
+          "hint": "Which actions are hard to undo?"
         }
       ]
     },
@@ -1082,9 +1082,9 @@
       "lesson": "1.4",
       "title": "Core components: LLM, tools, memory, planning",
       "notes": [
-        "An agent has four core parts: a language model that decides, tools that act, memory that keeps context, and planning that orders the steps.",
-        "For tools you define, the model only asks; your code runs the tool and sends the result back, so your code has the final say.",
-        "You will build the parts in order: the model in Module 2, tools in Module 3, memory and planning in Module 4."
+        "An agent has four parts: a model that decides, tools, memory and planning.",
+        "The model only asks for a tool. Your code runs it and has the final say.",
+        "You build the model in Module 2, tools in 3, memory and planning in 4."
       ],
       "quizAfter": 3,
       "slides": [
@@ -1093,7 +1093,7 @@
           "icon": "layers",
           "kicker": "Module 1 · Lesson 4",
           "title": "Core components: LLM, tools, memory, planning",
-          "sub": "Open Scout up and meet the four parts every agent is built from",
+          "sub": "The four parts every agent is built from",
           "narration": "So far, we have looked at agents from the outside. Now let's open Scout up and look inside. Every agent, from a small support bot to a coding assistant, is built from the same four parts, and you will build each one.",
           "sentences": [
             "So far, we have looked at agents from the outside.",
@@ -1131,12 +1131,12 @@
             {
               "icon": "list-checks",
               "label": "Planning",
-              "sub": "puts the steps in order",
+              "sub": "puts steps in order",
               "cue": 4
             }
           ],
           "note": {
-            "text": "The model is the brain. Tools are its hands, memory its notebook, planning its to-do list.",
+            "text": "Model is the brain. Tools are hands, memory a notebook, planning a to-do list.",
             "cue": 5
           },
           "narration": "Here is Scout, with its four core parts around it. The LLM, the language model, reads the conversation, decides what to do and writes the replies. Tools let it look things up and take actions, like fetching an order. Memory keeps what matters, like the customer's name and order number. Planning breaks a request into steps and puts them in a sensible order. Think of the model as the brain, and the other three as its hands, its notebook and its to-do list.",
@@ -1192,7 +1192,7 @@
             }
           ],
           "note": {
-            "text": "You'll build them in order: the LLM in Module 2, tools in 3, memory and planning in 4.",
+            "text": "You build them in order: LLM in Module 2, tools in 3, memory and planning in 4.",
             "cue": 5
           },
           "narration": "Now each part in one line, with Scout as the example. The LLM understands Ana's message and picks a next step, such as looking up her order. A tool does the looking up: the get order tool returns shipped, with a ParcelPath tracking number. Memory means that ten messages later, Scout still knows which order Ana is talking about. Planning means that for Owen's size swap, Scout checks his order, then the stock, and only then offers the swap. You will build them in that order: the model in Module 2, tools in Module 3, and memory and planning in Module 4.",
@@ -1207,7 +1207,7 @@
         },
         {
           "kind": "flow",
-          "title": "How a tool call really works",
+          "title": "How a tool call works",
           "run": true,
           "nodes": [
             {
@@ -1240,7 +1240,7 @@
             }
           ],
           "note": {
-            "text": "The model only asks. Your code decides what actually runs.",
+            "text": "The model only asks. Your code decides what runs.",
             "cue": 5
           },
           "narration": "One detail surprises almost everyone, so let's get it right from day one. For tools you define, the model never runs anything itself: it sends back a request naming the tool and its input. Your own Python code receives that request and runs the real lookup. The result goes back to the model as part of the conversation. Then the model continues: it calls another tool, or writes the final reply. This matters for safety, because your code always has the final say over what actually runs.",
@@ -1266,26 +1266,26 @@
             {
               "role": "agent",
               "label": "Scout",
-              "text": "Hi Ana! Your Trailhead 2P tent has shipped with ParcelPath. Tracking number: PP-88213.",
+              "text": "Hi Ana. Your Trailhead 2P tent has shipped with ParcelPath. Tracking: PP-88213.",
               "cue": 2
             },
             {
               "role": "user",
               "label": "Ana",
-              "text": "Thanks. If it's not right for me, can I send it back?",
+              "text": "Thanks. Can I send it back if it's not right?",
               "cue": 3
             },
             {
               "role": "agent",
               "label": "Scout",
-              "text": "Yes. Unused items in their original packaging can go back within 30 days of delivery, and return shipping is free on your order.",
+              "text": "Yes. Unused items in original packaging can go back within 30 days of delivery. Return shipping is free on your order.",
               "cue": 4
             }
           ],
           "aside": {
             "icon": "history",
             "label": "Without memory",
-            "text": "Scout would ask who she is and which order she means, all over again.",
+            "text": "Scout would ask who she is and which order, all over again.",
             "cue": 5
           },
           "narration": "Memory is easiest to see in a conversation. Ana introduces herself and gives her order number. Scout looks the order up and answers. Then she asks a follow-up, without repeating her order number. Scout still knows which order she means, and that it is over seventy-five dollars, so return shipping is free. Without memory, every message would start from zero, and Ana would have to explain herself all over again.",
@@ -1312,7 +1312,7 @@
             {
               "time": "Step 2",
               "icon": "book",
-              "text": "Check the policy: size swaps are free if the new size is in stock",
+              "text": "Policy: size swaps are free if the new size is in stock",
               "cue": 3
             },
             {
@@ -1324,12 +1324,12 @@
             {
               "time": "Step 4",
               "icon": "send",
-              "text": "Offer the free swap and explain what happens next",
+              "text": "Offer the free swap and explain next steps",
               "cue": 5
             }
           ],
           "result": {
-            "text": "Four steps in a sensible order, chosen by Scout for this request, not written in advance.",
+            "text": "Four steps in a sensible order, chosen by Scout, not scripted.",
             "cue": 6
           },
           "narration": "Planning shows up when a request needs more than one step. Owen says his storm jacket in large is too big, and asks to swap it for a medium. Scout plans its steps, starting with his order, which was delivered five days ago. Next it checks the policy: swapping sizes is free if the new size is in stock. Then it checks the stock, and there are three mediums left. Only then does it offer the free swap, and explain what happens next. Nobody wrote those four steps in advance; Scout worked out the order from the request.",
@@ -1346,7 +1346,7 @@
         {
           "kind": "code",
           "title": "A sneak peek at the code",
-          "lead": "Each part shows up in Scout's Python code. You'll write all of it yourself.",
+          "lead": "Each part shows up in Scout's Python. You'll write it all.",
           "rows": [
             {
               "code": "client.messages.create(model=MODEL, ...)",
@@ -1355,7 +1355,7 @@
             },
             {
               "code": "tools=TOOLS",
-              "out": "Tools: what Scout is allowed to ask for",
+              "out": "Tools: what Scout may ask for",
               "cue": 2
             },
             {
@@ -1372,7 +1372,7 @@
           "aside": {
             "icon": "globe",
             "label": "Any provider",
-            "text": "OpenAI, Google and open models use the same four ideas. This course uses Anthropic's SDK.",
+            "text": "Other providers use the same four ideas. This course uses Anthropic's SDK.",
             "cue": 5
           },
           "narration": "Here is a quick look at how each part shows up in code. The LLM is a single call to the messages create method, with the model's name. Tools are a list of definitions you pass in, so the model knows what it may ask for. Memory, at its simplest, is the list of messages you keep adding to. And the loop that lets Scout plan and act runs inside a step limit, so it can never run forever. The ideas are the same with any provider, including OpenAI, Google and open models; this course uses Anthropic's SDK.",
@@ -1394,15 +1394,15 @@
               "cue": 1
             },
             {
-              "text": "The model asks for a tool; your code runs it and returns the result",
+              "text": "The model asks for a tool, and your code runs it",
               "cue": 2
             },
             {
-              "text": "Memory keeps the context; planning puts the steps in order",
+              "text": "Memory keeps context. Planning orders the steps",
               "cue": 3
             },
             {
-              "text": "You'll build each part, starting with the model in Module 2",
+              "text": "You'll build each part, starting in Module 2",
               "cue": 4
             }
           ],
@@ -1419,50 +1419,50 @@
       ],
       "midQuiz": [
         {
-          "q": "Which of Scout's four parts decides what to do next?",
+          "q": "Which part decides what to do next?",
           "options": [
             "The tools",
             "The LLM",
             "Memory"
           ],
           "correct": 1,
-          "explain": "The language model reads the conversation and decides the next step. Tools carry out actions, and memory holds the context it decides with.",
+          "explain": "The language model reads the conversation and decides. Tools act, and memory holds context.",
           "hint": "Which part did we call the brain?"
         },
         {
-          "q": "When Scout uses get_order, who actually runs the lookup?",
+          "q": "When Scout uses get_order, who runs the lookup?",
           "options": [
             "The customer runs it from the website",
             "The language model runs it by itself",
-            "Your code runs it and sends the result back to the model"
+            "Your code runs it and sends back the result"
           ],
           "correct": 2,
-          "explain": "For tools you define, the model only sends a request naming the tool and its input. Your code runs it and returns the result, so your code has the final say.",
-          "hint": "Scout asks. Then who does the actual work?"
+          "explain": "The model only requests the tool. Your code runs it and returns the result.",
+          "hint": "Scout asks. Who does the work?"
         }
       ],
       "endQuiz": [
         {
-          "q": "Owen asks to swap his jacket for a smaller size. Scout checks his order, then the policy, then the stock. Which part chose that order of steps?",
+          "q": "For Owen's swap, Scout checks his order, then the policy, then stock. Which part chose that order?",
           "options": [
             "Tools",
             "Memory",
             "Planning"
           ],
           "correct": 2,
-          "explain": "Planning breaks a request into steps and puts them in order. Tools carry out each lookup, and memory keeps what was learned along the way.",
+          "explain": "Planning breaks a request into ordered steps. Tools do each lookup, and memory keeps what was learned.",
           "hint": "Which part did we call the to-do list?"
         },
         {
           "q": "In code, what is the simplest form of Scout's memory?",
           "options": [
             "The max_tokens setting",
-            "The messages list that grows with every turn",
+            "The messages list that grows each turn",
             "The MODEL name at the top of the file"
           ],
           "correct": 1,
-          "explain": "Every call sends the messages list, so the model sees the whole conversation so far. The model itself remembers nothing between calls.",
-          "hint": "What gets longer every time Ana sends a message?"
+          "explain": "Every call sends the messages list. The model itself remembers nothing between calls.",
+          "hint": "What grows each time Ana sends a message?"
         }
       ]
     },
@@ -1472,9 +1472,9 @@
       "lesson": "1.5",
       "title": "Setting up your development environment",
       "notes": [
-        "Use Python 3.11 or newer, with one virtual environment per project so its packages stay separate.",
-        "Keep your API key in an environment variable, never in code, and never commit it to Git.",
-        "A model call is a client, the messages create method and the text block from the reply; keep a messages list and you have a chatbot that remembers."
+        "Use Python 3.11 or newer, with one virtual environment per project.",
+        "Keep your API key in an environment variable, never in code or Git.",
+        "A model call needs a client, messages.create and the reply's text block. Add a messages list for memory."
       ],
       "quizAfter": 4,
       "slides": [
@@ -1483,7 +1483,7 @@
           "icon": "terminal",
           "kicker": "Module 1 · Lesson 5",
           "title": "Setting up your development environment",
-          "sub": "Python, a virtual environment, an API key and your first model call",
+          "sub": "Python, a virtual environment, a key, a first call",
           "narration": "Time to put your hands on the keyboard. In this lesson you will see everything Scout needs: Python, a project folder, the Anthropic SDK and an API key. Then you will see your first call to a model, in about ten lines of code. Right after this video, the guided practice walks you through every step on your own machine.",
           "sentences": [
             "Time to put your hands on the keyboard.",
@@ -1495,7 +1495,7 @@
         {
           "kind": "bullets",
           "title": "What you need",
-          "lead": "Four things. The tools are free; only the model calls cost money.",
+          "lead": "Four things. Only the model calls cost money.",
           "bullets": [
             {
               "icon": "terminal",
@@ -1504,24 +1504,24 @@
             },
             {
               "icon": "code",
-              "text": "A code editor, such as VS Code, and a terminal",
+              "text": "A code editor like VS Code, and a terminal",
               "cue": 2
             },
             {
               "icon": "key",
-              "text": "An Anthropic account and an API key from the console",
+              "text": "An Anthropic account and an API key",
               "cue": 3
             },
             {
               "icon": "dollar",
-              "text": "A little API credit: this module's calls cost a few cents",
+              "text": "A little API credit: this module costs a few cents",
               "cue": 4
             }
           ],
           "aside": {
             "icon": "help",
             "label": "Never coded?",
-            "text": "That's fine. Every command and file is given in full: you copy, run and read the result.",
+            "text": "That's fine. Every command is given in full. You copy, run and read.",
             "cue": 5
           },
           "narration": "Here is what you need before you start. Python, version three point eleven or newer, which you can check from the terminal. A code editor, such as VS Code, and a terminal window to run commands. An Anthropic account, where you create an API key: a secret code that lets your programs use the model. And a little API credit, because model calls are paid, though everything in this module costs a few cents. If you have never written code before, that's fine: every command and file is given in full.",
@@ -1537,7 +1537,7 @@
         {
           "kind": "code",
           "title": "A folder and a virtual environment",
-          "lead": "A virtual environment is a private set of Python packages for one project.",
+          "lead": "A virtual environment is a private package set for one project.",
           "rows": [
             {
               "code": "python -m venv .venv",
@@ -1563,7 +1563,7 @@
           "aside": {
             "icon": "check",
             "label": "How to tell",
-            "text": "When it's active, your prompt starts with (.venv). Activate it again in every new terminal.",
+            "text": "Your prompt starts with (.venv). Activate it in every new terminal.",
             "cue": 5
           },
           "narration": "Everything for Scout lives in one folder, called scout. Inside it, you make a virtual environment: a private set of Python packages for this project only, so projects never clash. You create it once, with a tool that comes built into Python. Then you activate it, with one command on Windows and a slightly different one on Mac or Linux. With it active, pip install anthropic adds Anthropic's official SDK, the library your code uses to talk to the model. You can tell it's active because its name appears in brackets at the start of your terminal prompt. Activate it again every time you open a new terminal.",
@@ -1597,8 +1597,8 @@
             "cue": 4,
             "points": [
               "Set once in your terminal",
-              "The SDK finds it by itself",
-              "Never appears in your files",
+              "The SDK finds it itself",
+              "Never in your files",
               "Your code is safe to share"
             ]
           },
@@ -1616,7 +1616,7 @@
         {
           "kind": "code",
           "title": "Setting the key",
-          "lead": "Run one line in the terminal where you'll run Scout, with your own key in place of the dots.",
+          "lead": "Run one line in your terminal, with your key in place of the dots.",
           "rows": [
             {
               "code": "$env:ANTHROPIC_API_KEY = \"sk-ant-...\"",
@@ -1630,14 +1630,14 @@
             },
             {
               "code": "client = anthropic.Anthropic()",
-              "out": "the SDK reads the key by itself",
+              "out": "the SDK reads the key itself",
               "cue": 3
             }
           ],
           "aside": {
             "icon": "timer",
             "label": "Only this terminal",
-            "text": "A key set this way lasts until you close the terminal. Set it again in each new one.",
+            "text": "The key lasts until you close the terminal. Set it in each new one.",
             "cue": 4
           },
           "narration": "Setting the key takes one line in the terminal. On Windows, you set it in PowerShell. On Mac or Linux, you use the export command instead. Then, in Python, creating the client is enough: the SDK finds the key in the environment by itself. One catch: a key set like this lasts only until you close that terminal, so set it again in each new one. The guided practice also shows you how to make it permanent.",
@@ -1653,7 +1653,7 @@
         {
           "kind": "code",
           "title": "Your first model call",
-          "lead": "hello.py sends one message to the model and prints the reply.",
+          "lead": "hello.py sends one message and prints the reply.",
           "rows": [
             {
               "code": "MODEL = \"claude-opus-5-5\"",
@@ -1672,14 +1672,14 @@
             },
             {
               "code": "next(b.text for b in response.content if b.type == \"text\")",
-              "out": "picks the text block out of the reply",
+              "out": "picks the text block from the reply",
               "cue": 4
             }
           ],
           "aside": {
             "icon": "gauge",
             "label": "max_tokens=16000",
-            "text": "A ceiling on the reply's length, not a target. Short questions still get short answers.",
+            "text": "A ceiling, not a target. Short questions still get short answers.",
             "cue": 5
           },
           "narration": "Here is your first model call, in a small script named hello. First, the script creates a client and names the model; this course uses Claude Opus five point five. Then it calls the messages create method with the model, a maximum length, and the conversation so far. Here the conversation is just one user message: a question about AI agents. Finally, it picks the text block out of the reply and prints it. The maximum tokens setting is a ceiling, not a target, so short questions still get short answers.",
@@ -1734,7 +1734,7 @@
             }
           ],
           "note": {
-            "text": "One model call, not an agent yet: no tools and no loop. It can talk, but it can't act.",
+            "text": "One call, not an agent yet. No tools, no loop. It talks but can't act.",
             "cue": 6
           },
           "narration": "Let's follow that call from start to finish. Your script builds the request, with the model name and your message. The SDK attaches your API key and sends the request over the internet to Anthropic's API. The model reads the message, may think it through first, and writes its answer. The reply comes back as a list of content blocks, which is why you pick out the block whose type is text. Your script prints it, and the answer appears in your terminal. That is one model call, not an agent yet: there are no tools and no loop, so it can talk, but it can't act.",
@@ -1761,7 +1761,7 @@
             {
               "role": "agent",
               "label": "Scout",
-              "text": "Hi Ana! How can I help with your gear today?",
+              "text": "Hi Ana. How can I help with your gear today?",
               "cue": 1
             },
             {
@@ -1792,7 +1792,7 @@
           "aside": {
             "icon": "alert",
             "label": "Sound familiar?",
-            "text": "Scout remembers and talks, but can't look anything up. That's Orbit's problem, and Module 3 fixes it.",
+            "text": "Scout remembers but can't look anything up. Module 3 fixes that.",
             "cue": 6
           },
           "narration": "In the guided practice, you will turn that single call into a small chatbot that runs in your terminal. It keeps a list of messages, adding your turn and the model's reply each time round. Because the whole list is sent with every call, it remembers that your name is Ana. The model itself remembers nothing between calls; the list is the memory. Then you ask it about a real order, with the order number. It can't know: there is no orders system anywhere in your code, so the best it can do is apologise. That is Orbit's chatbot problem, recreated on your own machine, and it is exactly what the next modules fix.",
@@ -1815,7 +1815,7 @@
               "cue": 1
             },
             {
-              "text": "anthropic installed; the API key in an environment variable, never in Git",
+              "text": "anthropic installed, the API key in an environment variable",
               "cue": 2
             },
             {
@@ -1823,7 +1823,7 @@
               "cue": 3
             },
             {
-              "text": "A messages list turns one call into a chatbot that remembers",
+              "text": "A messages list turns one call into a chatbot",
               "cue": 4
             }
           ],
@@ -1840,49 +1840,49 @@
       ],
       "midQuiz": [
         {
-          "q": "Why give the scout project its own virtual environment?",
+          "q": "Why give scout its own virtual environment?",
           "options": [
             "It stores your API key safely",
-            "It keeps this project's packages separate from everything else",
+            "It keeps this project's packages separate",
             "It makes Python run faster"
           ],
           "correct": 1,
-          "explain": "A virtual environment is a private set of packages for one project, so installing or upgrading things for Scout never breaks another project.",
-          "hint": "Think about where pip install puts the packages."
+          "explain": "Its packages stay private, so changes for Scout never break another project.",
+          "hint": "Where does pip install put packages?"
         },
         {
           "q": "Where should your Anthropic API key live?",
           "options": [
             "In a comment at the top of chat.py",
-            "In an environment variable that the SDK reads",
+            "In an environment variable the SDK reads",
             "In hello.py, so it's easy to find"
           ],
           "correct": 1,
-          "explain": "The SDK reads ANTHROPIC_API_KEY from the environment, so the key never appears in your files and can't be committed by accident.",
-          "hint": "Which option keeps the key out of every file you might share?"
+          "explain": "The SDK reads ANTHROPIC_API_KEY from the environment, so the key never lands in your files.",
+          "hint": "Which keeps the key out of every file?"
         }
       ],
       "endQuiz": [
         {
-          "q": "A reply holds two content blocks: thinking, then text. How does hello.py get the answer?",
+          "q": "A reply has two blocks: thinking, then text. How does hello.py get the answer?",
           "options": [
             "It takes the first block whose type is text",
             "It prints response.content[0]",
             "It prints the whole response object"
           ],
           "correct": 0,
-          "explain": "The first block may be the model's thinking. next(b.text for b in response.content if b.type == \"text\") picks the text block, wherever it is.",
-          "hint": "Which approach still works if the text isn't the first block?"
+          "explain": "The first block may be thinking. next(b.text for b in response.content if b.type == \"text\") finds the text block anywhere.",
+          "hint": "Which works if text isn't the first block?"
         },
         {
           "q": "chat.py remembers that you're Ana. Why?",
           "options": [
             "The API key links all your calls together",
-            "The script sends the whole messages list with every call",
-            "The model stores every conversation on Anthropic's servers"
+            "The script sends the whole messages list each call",
+            "The model stores chats on Anthropic's servers"
           ],
           "correct": 1,
-          "explain": "The model remembers nothing between calls. chat.py appends each turn to the messages list and sends the whole list every time.",
+          "explain": "The model remembers nothing between calls. chat.py sends the full messages list every time.",
           "hint": "What does chat.py add to after every turn?"
         }
       ]

@@ -105,11 +105,11 @@ function CaseOverview({ block, onBegin }: { block: GuidedBlock; onBegin: () => v
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Surface pad="md" className="border-danger-line bg-danger-soft/30">
-          <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-danger uppercase"><Search className="size-4" aria-hidden />The documented problem</div>
+          <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-danger uppercase"><Search className="size-4" aria-hidden />The problem</div>
           <p className="mt-3 text-lg leading-relaxed">{cs.problem}</p>
         </Surface>
         <Surface pad="md" className="border-ok-line bg-ok-soft/30">
-          <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-ok uppercase"><ShieldCheck className="size-4" aria-hidden />The published solution</div>
+          <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-ok uppercase"><ShieldCheck className="size-4" aria-hidden />The solution</div>
           <p className="mt-3 text-lg leading-relaxed">{cs.solution}</p>
         </Surface>
       </div>
@@ -117,10 +117,10 @@ function CaseOverview({ block, onBegin }: { block: GuidedBlock; onBegin: () => v
       <Surface pad="md" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="flex items-center gap-2 font-semibold"><ListChecks className="size-4 text-stage-guided" aria-hidden />How this walkthrough works</h3>
-            <p className="mt-1 text-sm text-ink-muted">Study the finished implementation in order: decision, code pattern, and verified result.</p>
+            <h3 className="flex items-center gap-2 font-semibold"><ListChecks className="size-4 text-stage-guided" aria-hidden />How it works</h3>
+            <p className="mt-1 text-sm text-ink-muted">Go step by step: decision, code, result.</p>
           </div>
-          <span className="text-sm text-ink-muted">{cs.solution_steps.length} solution decisions</span>
+          <span className="text-sm text-ink-muted">{cs.solution_steps.length} steps</span>
         </div>
         <ol className="grid gap-2 md:grid-cols-5">
           {cs.solution_steps.map((step, index) => (
@@ -131,7 +131,7 @@ function CaseOverview({ block, onBegin }: { block: GuidedBlock; onBegin: () => v
           ))}
         </ol>
         <Button size="lg" variant="brand" className="self-start" onClick={onBegin}>
-          Open the solved implementation
+          Open solution
           <ArrowRight data-icon="inline-end" />
         </Button>
       </Surface>
@@ -161,7 +161,7 @@ function CaseStep({
   return (
     <div className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)]">
       <Surface pad="sm" className="h-fit">
-        <div className="px-2 pb-2 text-xs font-semibold tracking-[0.14em] text-ink-faint uppercase">Solution contents</div>
+        <div className="px-2 pb-2 text-xs font-semibold tracking-[0.14em] text-ink-faint uppercase">Steps</div>
         <ol className="flex flex-col gap-1">
           {allSteps.map((item, itemIndex) => (
             <li key={item.title}>
@@ -184,21 +184,21 @@ function CaseStep({
 
       <div className="flex min-w-0 flex-col gap-4">
         <Surface pad="lg" className="border-stage-guided-line">
-          <div className="text-xs font-semibold tracking-[0.14em] text-stage-guided uppercase">Solution step {index + 1} of {total}</div>
+          <div className="text-xs font-semibold tracking-[0.14em] text-stage-guided uppercase">Step {index + 1} of {total}</div>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight">{step.title}</h2>
           <div className="mt-4 rounded-xl border border-stage-guided-line bg-stage-guided-soft/40 p-4">
-            <div className="text-xs font-semibold text-stage-guided uppercase">Why this decision exists</div>
+            <div className="text-xs font-semibold text-stage-guided uppercase">Why</div>
             <p className="mt-2 leading-relaxed">{step.purpose}</p>
           </div>
           <div className="mt-5">
-            <h3 className="text-sm font-semibold">How the published solution handles it</h3>
+            <h3 className="text-sm font-semibold">How it’s done</h3>
             <p className="mt-2 leading-7 text-ink-muted">{step.explanation}</p>
           </div>
         </Surface>
 
         {step.code ? (
           <Surface pad="none" className="overflow-hidden">
-            <div className="flex items-center gap-2 border-b border-line bg-panel-2 px-4 py-3 text-sm font-semibold"><FileCode2 className="size-4 text-stage-guided" aria-hidden />Implementation pattern</div>
+            <div className="flex items-center gap-2 border-b border-line bg-panel-2 px-4 py-3 text-sm font-semibold"><FileCode2 className="size-4 text-stage-guided" aria-hidden />Code pattern</div>
             <pre className="overflow-x-auto p-5 text-sm leading-7"><code>{step.code}</code></pre>
           </Surface>
         ) : null}
@@ -206,13 +206,13 @@ function CaseStep({
         <Surface pad="md" className="border-ok-line bg-ok-soft/30">
           <div className="flex items-start gap-3">
             <Check className="mt-0.5 size-5 shrink-0 text-ok" aria-hidden />
-            <div><h3 className="font-semibold">What this step accomplishes</h3><p className="mt-1 leading-relaxed text-ink-muted">{step.result}</p></div>
+            <div><h3 className="font-semibold">Result</h3><p className="mt-1 leading-relaxed text-ink-muted">{step.result}</p></div>
           </div>
         </Surface>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Button variant="ghost" onClick={onBack}><ArrowLeft data-icon="inline-start" />Back</Button>
-          <Button size="lg" variant="brand" onClick={onNext}>{index + 1 === total ? "Review the verified result" : "I understand—next decision"}<ArrowRight data-icon="inline-end" /></Button>
+          <Button size="lg" variant="brand" onClick={onNext}>{index + 1 === total ? "See result" : "Next step"}<ArrowRight data-icon="inline-end" /></Button>
         </div>
       </div>
     </div>
@@ -224,8 +224,8 @@ function CaseResult({ block, onReview }: { block: GuidedBlock; onReview: () => v
   return (
     <div className="flex flex-col gap-4">
       <Surface pad="lg" className="border-ok-line bg-ok-soft/20">
-        <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-ok uppercase"><Check className="size-4" aria-hidden />Verified result from the published notebook</div>
-        <h2 className="mt-3 text-2xl font-semibold">The support agent completes all three jobs</h2>
+        <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-ok uppercase"><Check className="size-4" aria-hidden />Verified result</div>
+        <h2 className="mt-3 text-2xl font-semibold">The agent does all three jobs</h2>
         <p className="mt-3 max-w-4xl text-lg leading-relaxed text-ink-muted">{cs.result}</p>
       </Surface>
       <div className="grid gap-3 md:grid-cols-3">
@@ -237,8 +237,8 @@ function CaseResult({ block, onReview }: { block: GuidedBlock; onReview: () => v
         ))}
       </div>
       <Surface pad="md" className="flex flex-wrap items-center justify-between gap-3">
-        <div className="text-sm"><span className="mr-2 text-ink-muted">Inspect the complete implementation:</span><SourceLink label={cs.source_label} url={cs.source_url} /></div>
-        <Button variant="outline" onClick={onReview}>Review from step 1</Button>
+        <div className="text-sm"><span className="mr-2 text-ink-muted">Full code:</span><SourceLink label={cs.source_label} url={cs.source_url} /></div>
+        <Button variant="outline" onClick={onReview}>Start over</Button>
       </Surface>
     </div>
   );

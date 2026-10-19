@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, Check, Flag, LockKeyhole, MessageCircle, Route, Zap } from "lucide-react";
+import { ArrowRight, Check, Flag, LockKeyhole, Route, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/kit/progress-ring";
 import { moduleFlowStages, useCourseProgress } from "@/lib/course-progress";
@@ -11,12 +11,15 @@ import { useHydrated } from "@/lib/local-store";
 import { useWatchedVideos } from "@/components/player/video/watched";
 import { deriveGameProgress } from "@/lib/gamification";
 import type { Course } from "@/data/types";
+import { AgentBlueprint } from "@/components/agent/agent-blueprint";
+import { useAgent } from "@/components/agent/use-agent";
 import { AssistantAvatar } from "./assistant-avatar";
 import { PipTour } from "@/components/onboarding/pip-tour";
 import { DailyMission, GameStatus, MasteryStars } from "./game-ui";
 
 export function CourseJourney({ course }: { course: Course }) {
   const progress = useCourseProgress(course);
+  const { agent, rename } = useAgent(course);
   const { enrolled } = useEnrollment(course.course_id);
   const { state } = useLearning(course.course_id);
   const { watched } = useWatchedVideos();
@@ -41,6 +44,7 @@ export function CourseJourney({ course }: { course: Course }) {
         {enrolled && <div className="mt-6 max-w-md"><div className="mb-2 flex justify-between text-xs text-ink-muted"><span>Your course progress</span><span>{progress.topicsDone} / {progress.topicsTotal} phases</span></div><ProgressBar value={progress.ratio} size="sm" /></div>}
       </div>
     </section>
+    <AgentBlueprint agent={agent} onRename={(name) => void rename(name)} compact />
     <DailyMission quest={mission} />
     <section id="learning-steps" data-tour="roadmap" className="journey-section learning-steps-section">
       <div className="steps-heading"><div><p className="journey-kicker"><Route className="size-4" />Your climb</p><h2>Climb to Launch</h2></div><span>{progress.modules.filter((module) => module.liveState === "done").length}/{progress.modules.length} steps cleared</span></div>

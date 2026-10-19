@@ -52,6 +52,8 @@ export function baselinePlan(input: PlannerInput, ctx: CourseContext): LearnerPl
     if (fromCoding(lesson)) return s === "extra" ? "This lesson has code, and you said you haven't written code yet." : "This lesson has code, and you already write Python.";
     if (pre?.isNew) return "You said you're completely new, so every lesson starts with more help.";
     const score = scoreFor(lesson);
+    if (score !== undefined && pre?.source === "activity")
+      return score >= 2 ? "Your chat showed you already know this." : score === 1 ? "Your chat showed you partly know this." : "Your chat showed this is new to you.";
     if (score !== undefined) return `From your quick check: ${score} of 2 right on ${lesson in pre!.lessons ? "this lesson" : "this module"}.`;
     return a.supportSource === "experience" ? "Based on your experience with this topic." : "Standard help.";
   };
@@ -91,7 +93,7 @@ export function baselinePlan(input: PlannerInput, ctx: CourseContext): LearnerPl
 
   return {
     summary: `${who ? `Set up for ${who}. ` : ""}${exampleFirst ? "Examples come before explanations. " : ""}${
-      a.supportSource === "precheck" ? "Help is set from your quick check." : a.supportSource === "override" ? "Help follows the level you chose." : "Help follows your experience answer."
+      a.supportSource === "precheck" ? (pre?.source === "activity" ? "Help is set from your chat." : "Help is set from your quick check.") : a.supportSource === "override" ? "Help follows the level you chose." : "Help follows your experience answer."
     }`,
     learner: { level, strengths, gaps },
     pacing: { minutesPerSession: minutes, sessionsPerWeek: perWeek, note: `${perWeek} sessions of ${minutes} minutes a week.` },

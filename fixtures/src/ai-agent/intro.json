@@ -8,9 +8,9 @@
     {
       "kind": "title",
       "icon": "bot",
-      "kicker": "Course preview · about 1 minute",
+      "kicker": "Course preview · 1 minute",
       "title": "Picture the end of this course",
-      "sub": "What you'll have built, and what you'll be able to do",
+      "sub": "What you'll build and do",
       "sentences": [
         "Picture the end of this course.",
         "Here is what you will have built."
@@ -59,7 +59,7 @@
       "spokes": [
         { "icon": "plug", "label": "Make it act", "sub": "connect it to real systems", "cue": 1 },
         { "icon": "database", "label": "Make it remember", "sub": "it never asks twice", "cue": 1 },
-        { "icon": "book", "label": "Keep it truthful", "sub": "answers from your own documents", "cue": 2 },
+        { "icon": "book", "label": "Keep it truthful", "sub": "answers from your documents", "cue": 2 },
         { "icon": "flask", "label": "Prove it works", "sub": "tests and a pass rate", "cue": 2 },
         { "icon": "shield", "label": "Keep it safe", "sub": "limits, and a person for big calls", "cue": 3 },
         { "icon": "rocket", "label": "Put it live", "sub": "an endpoint any app can call", "cue": 3 }
@@ -74,7 +74,7 @@
     {
       "kind": "bullets",
       "title": "What it takes",
-      "lead": "You'll read and run Python. That's the only skill you need to bring.",
+      "lead": "You only need to read and run Python.",
       "bullets": [
         { "icon": "cpu", "text": "Python 3.11 or newer", "cue": 1 },
         { "icon": "key", "text": "An API key with a few dollars of credit", "cue": 1 },

@@ -67,9 +67,9 @@ function updateMeters(current: Record<RoleplayMeterId, number>, choice: Roleplay
 }
 
 function endingFor(meters: Record<RoleplayMeterId, number>) {
-  if (meters.goal >= 75 && meters.trust >= 75 && meters.safety >= 75) return { title: "Mission accomplished", label: "TRUSTED RESOLUTION", tone: "great" as const, copy: "Scout protected Nia, used real evidence and handed the urgent request to the right person." };
-  if (meters.safety >= 65) return { title: "Safe recovery", label: "SAFE HANDOFF", tone: "safe" as const, copy: "Scout kept Nia safe. Replay once to make the response more useful and confidence-building." };
-  return { title: "A risky route", label: "REPLAY RECOMMENDED", tone: "retry" as const, copy: "The customer was exposed to avoidable risk. Try a different path and watch the Safety signal." };
+  if (meters.goal >= 75 && meters.trust >= 75 && meters.safety >= 75) return { title: "Mission accomplished", label: "TRUSTED RESOLUTION", tone: "great" as const, copy: "Scout kept Nia safe, used real evidence, and handed off well." };
+  if (meters.safety >= 65) return { title: "Safe recovery", label: "SAFE HANDOFF", tone: "safe" as const, copy: "Scout kept Nia safe. Replay to make it more helpful." };
+  return { title: "A risky route", label: "REPLAY RECOMMENDED", tone: "retry" as const, copy: "Nia was put at risk. Try another path and watch Safety." };
 }
 
 export function RoleplayMission({ mission, support, storageKey, onFinished, onExploreCases }: { mission: Mission; support: Support; storageKey: string; onFinished: (save: RoleplaySave) => void; onExploreCases: () => void }) {
@@ -193,14 +193,14 @@ function RoleplayFilm({ mission, scene, sceneIndex, voice, revealed, decisionOpe
         <div className="roleplay-film-choices" role="group" aria-label={scene.prompt}>
           {scene.choices.map((choice, index) => <button className="roleplay-film-choice" type="button" key={choice.id} onClick={() => onCommit(choice.id)} aria-label={`Play: ${choice.text}`}><ChoiceScene scene={scene} index={index} /><i><Play /></i></button>)}
         </div>
-        <div className="roleplay-overlay-actions"><span>Choose a scene to play it</span>{!showHint ? <Button variant="ghost" onClick={onHint}>Pip nudge</Button> : null}</div>
+        <div className="roleplay-overlay-actions"><span>Pick a scene</span>{!showHint ? <Button variant="ghost" onClick={onHint}>Pip nudge</Button> : null}</div>
         {showHint ? <div className="roleplay-film-hint"><Sparkles /><span><strong>Pip whispers</strong>{scene.hint}</span></div> : null}
       </> : <div className="roleplay-result" data-best={revealed.best ? "true" : "false"}>
         <div className="roleplay-result-icon">{revealed.best ? <Check /> : <Eye />}</div><div><small>{revealed.best ? "THE STORY MOVES FORWARD" : "THE SCENE CHANGES"}</small><h3>{revealed.best ? "Nia feels confident" : "Nia hesitates"}</h3><p>{revealed.feedback}</p></div>
         <div className="roleplay-deltas" aria-label="Effect on mission signals">{METERS.map(({ id, label }) => <span key={id} data-positive={revealed.effects[id] >= 0}>{label} {revealed.effects[id] >= 0 ? "+" : ""}{revealed.effects[id]}</span>)}</div>
-        <Button variant="brand" onClick={onAdvance}>{isLast ? "See the ending" : "Continue the story"}<ArrowRight /></Button>
+        <Button variant="brand" onClick={onAdvance}>{isLast ? "See ending" : "Continue"}<ArrowRight /></Button>
       </div>}
-    </div> : <div className="roleplay-watching"><span><i /><i /><i /></span>Nia is speaking. Your move appears when she finishes.</div>}
+    </div> : <div className="roleplay-watching"><span><i /><i /><i /></span>Nia is speaking. Your turn is next.</div>}
   </div>;
 }
 
@@ -243,11 +243,11 @@ function SceneAction({ scene }: { scene: RoleplayScene }) {
 }
 
 function RoleplayBrief({ mission, onStart }: { mission: Mission; onStart: () => void }) {
-  return <section className="roleplay-brief"><div className="roleplay-brief-art" aria-hidden="true"><div className="roleplay-orbit roleplay-orbit-one" /><div className="roleplay-orbit roleplay-orbit-two" /><div className="roleplay-brief-media"><span><Play />ANIMATED STORY</span><span><Volume2 />Voice + captions</span></div><div className="roleplay-brief-customer"><span>{mission.customer.initials}</span><i /></div><div className="roleplay-brief-scout"><Bot /></div><div className="roleplay-brief-message"><MessageCircleMore /><span>Address change needed</span></div></div><div className="roleplay-brief-copy"><Chip size="sm" tone="lab" icon={<Sparkles />}>{mission.eyebrow}</Chip><h2>{mission.title}</h2><p>{mission.brief}</p><div className="roleplay-role-card"><CircleUserRound /><span><small>YOUR ROLE</small><strong>{mission.learner_role}</strong></span><span className="roleplay-ready">READY</span></div><div className="roleplay-brief-signals"><span><Target />Reach the goal</span><span><HeartHandshake />Keep trust</span><span><ShieldCheck />Protect safety</span></div><Button variant="brand" size="xl" onClick={onStart}><Play />Enter the roleplay</Button></div></section>;
+  return <section className="roleplay-brief"><div className="roleplay-brief-art" aria-hidden="true"><div className="roleplay-orbit roleplay-orbit-one" /><div className="roleplay-orbit roleplay-orbit-two" /><div className="roleplay-brief-media"><span><Play />ANIMATED STORY</span><span><Volume2 />Voice + captions</span></div><div className="roleplay-brief-customer"><span>{mission.customer.initials}</span><i /></div><div className="roleplay-brief-scout"><Bot /></div><div className="roleplay-brief-message"><MessageCircleMore /><span>Address change needed</span></div></div><div className="roleplay-brief-copy"><Chip size="sm" tone="lab" icon={<Sparkles />}>{mission.eyebrow}</Chip><h2>{mission.title}</h2><p>{mission.brief}</p><div className="roleplay-role-card"><CircleUserRound /><span><small>YOUR ROLE</small><strong>{mission.learner_role}</strong></span><span className="roleplay-ready">READY</span></div><div className="roleplay-brief-signals"><span><Target />Reach the goal</span><span><HeartHandshake />Keep trust</span><span><ShieldCheck />Protect safety</span></div><Button variant="brand" size="xl" onClick={onStart}><Play />Start roleplay</Button></div></section>;
 }
 
 function RoleplayEnding({ mission, save, onReplay, onExploreCases }: { mission: Mission; save: RoleplaySave; onReplay: () => void; onExploreCases: () => void }) {
   const ending = endingFor(save.meters);
   const best = save.history.filter((item) => item.best).length;
-  return <section className="roleplay-ending" data-tone={ending.tone}><div className="roleplay-ending-burst" aria-hidden="true"><i /><i /><i /><i /><i /><span><Flag /></span></div><Chip size="sm" tone={ending.tone === "great" ? "ok" : ending.tone === "safe" ? "info" : "warn"}>{ending.label}</Chip><h2>{ending.title}</h2><p>{ending.copy}</p><div className="roleplay-final-score">{METERS.map(({ id, label, icon: Icon }) => <div key={id}><Icon /><span>{label}<strong>{save.meters[id]}</strong></span><i><b style={{ width: `${save.meters[id]}%` }} /></i></div>)}</div><div className="roleplay-ending-summary"><Sparkles /><p><strong>{best}/{mission.scenes.length} strongest decisions</strong>{mission.debrief}</p></div><div className="roleplay-ending-actions"><Button variant="brand" size="lg" onClick={onExploreCases}>Explore bonus cases<ArrowRight /></Button><Button variant="outline" size="lg" onClick={onReplay}><RotateCcw />Replay another path</Button></div></section>;
+  return <section className="roleplay-ending" data-tone={ending.tone}><div className="roleplay-ending-burst" aria-hidden="true"><i /><i /><i /><i /><i /><span><Flag /></span></div><Chip size="sm" tone={ending.tone === "great" ? "ok" : ending.tone === "safe" ? "info" : "warn"}>{ending.label}</Chip><h2>{ending.title}</h2><p>{ending.copy}</p><div className="roleplay-final-score">{METERS.map(({ id, label, icon: Icon }) => <div key={id}><Icon /><span>{label}<strong>{save.meters[id]}</strong></span><i><b style={{ width: `${save.meters[id]}%` }} /></i></div>)}</div><div className="roleplay-ending-summary"><Sparkles /><p><strong>{best}/{mission.scenes.length} strongest decisions</strong>{mission.debrief}</p></div><div className="roleplay-ending-actions"><Button variant="brand" size="lg" onClick={onExploreCases}>Bonus cases<ArrowRight /></Button><Button variant="outline" size="lg" onClick={onReplay}><RotateCcw />Try another path</Button></div></section>;
 }

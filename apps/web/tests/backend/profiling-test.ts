@@ -16,6 +16,13 @@ const check = (label: string, cond: unknown, extra?: unknown) => {
 const ids = (a: SetupAnswers) => questionsFor(a).map((q) => q.id).join();
 const opts = (a: SetupAnswers, id: Parameters<typeof questionById>[0]) => questionById(id, a).options.map((o) => o.v).join();
 
+/* Incoming adaptive fields must survive validation and legacy normalization. */
+const adaptiveAnswers = { domain: "it", role: "engineer", learningContext: "work", learningContextDetail: "Customer support", subRole: "Service desk", useCase: "Resolve order questions", goalDetail: "Save time", agentName: "Order Helper", tags: ["field:it", "usecase:orders", "field:it"] };
+const adaptiveValidated = SetupBody.parse({ answers: adaptiveAnswers });
+const adaptiveNormalized = normalizeAnswers(adaptiveValidated.answers);
+check("adaptive interview: context, task and named agent survive normalization", adaptiveNormalized.learningContext === "work" && adaptiveNormalized.useCase === "Resolve order questions" && adaptiveNormalized.agentName === "Order Helper");
+check("adaptive interview: tags are retained and deduplicated", adaptiveNormalized.tags?.join() === "field:it,usecase:orders");
+
 /* ---------------------------------------------------------------- branching */
 check("no answers: field first, then the general questions", ids({}) === "domain,role,goal,experience,coding,firstStep,style", ids({}));
 check("student: studies, subject and projects instead of role, years, tools", ids({ domain: "student" }) === "domain,studyLevel,studyField,project,goal,experience,coding,firstStep,style", ids({ domain: "student" }));

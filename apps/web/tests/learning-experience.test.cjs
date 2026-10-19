@@ -236,9 +236,9 @@ test('module one guided practice opens as a source-backed solved implementation'
   const html = renderToString(React.createElement(NextIntlClientProvider, { locale: 'en', messages, timeZone: 'UTC' },
     React.createElement(GuidedStage, { block: guided, adaptation: { support: 'extra' }, done: false, onComplete() {} })));
   assert.ok(html.includes('Published solution walkthrough'));
-  assert.ok(html.includes('The documented problem'));
+  assert.ok(html.includes('The problem'));
   assert.ok(html.includes('Anthropic Claude Cookbooks'));
-  assert.ok(html.includes('Open the solved implementation'));
+  assert.ok(html.includes('Open solution'));
   assert.ok(!html.includes('Accept the mission'));
 });
 
@@ -253,7 +253,7 @@ test('scenario delivery opens with roleplay and retains adaptive bonus cases', (
   const roleplay = render(lab, 'extra');
   assert.ok(roleplay.includes('roleplay-brief'));
   assert.ok(roleplay.includes('The address switch'));
-  assert.ok(roleplay.includes('Enter the roleplay'));
+  assert.ok(roleplay.includes('Start roleplay'));
   assert.ok(roleplay.includes('Voice + captions'));
   assert.ok(roleplay.includes('Live roleplay'));
   assert.ok(roleplay.includes('Bonus cases'));
@@ -330,7 +330,7 @@ test('Pip answers the screenshot question with the lesson definition, not its st
   for (const query of ['what is ai agent', 'What is an AI agent?', 'define ai agent']) {
     const answer = companion.companionReply(query, ctx);
     assert.match(answer.text, /^AI agent: A system that uses a language model/);
-    assert.match(answer.text, /takes actions with tools/);
+    assert.match(answer.text, /acts with tools/);
     assert.equal(answer.source.href, '/learn/courses/ai-agent/m1/explainer?v=m1-1');
     assert.doesNotMatch(answer.text, /first Monday|Welcome to the course/);
   }

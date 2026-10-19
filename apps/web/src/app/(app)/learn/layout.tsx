@@ -2,6 +2,7 @@ import { getCourses, getModule } from "@/data";
 import { coursePassages } from "@/lib/companion";
 import { CourseCompanionProvider } from "@/components/learning/course-companion";
 import { FieldAccentSync } from "@/components/learning/field-accent-sync";
+import { AgentVoiceProvider } from "@/components/agent/agent-voice";
 import { ProfileGate } from "@/components/onboarding/profile-gate";
 import type { ModuleContent } from "@/data/types";
 
@@ -15,7 +16,7 @@ export default async function LearningLayout({ children }: { children: React.Rea
     <CourseCompanionProvider catalog={catalog}>
       <ProfileGate />
       <FieldAccentSync />
-      {children}
+      <AgentVoiceProvider>{children}</AgentVoiceProvider>
     </CourseCompanionProvider>
   );
 }

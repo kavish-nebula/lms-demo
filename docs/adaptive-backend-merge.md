@@ -23,3 +23,22 @@ Run `npm run lint`, `npm run typecheck`, `npm run build`, `node fixtures/scripts
 The merge is validated against the adaptive pure/UI suite and the existing backend, engagement and workflow suites. Browser regression checks use a separate preview, leaving the running port-3001 server and existing Python work intact.
 
 Validation completed: lint, typecheck and production build pass; all 31 adaptive tests and the backend, engagement and workflow suites pass. Course authoring validation reports zero errors and nine existing module-5 warnings for manual steps without simulator metadata. Browser checks confirmed server-plan example-first ordering, the experiment workspace, direct module-2 access in demo mode, Python editor readiness, retained saved workflow revision/report, and disabled notebook/course hints during the final assessment.
+
+
+## Adaptive platform integration (2026-10-19)
+
+Merged feature/adaptive-platform into lms-demo's feature/ai-agent-backend. The merge starts from the published backend branch, separately from feature/ai-agent-course.
+
+The incoming adaptive preparation (narrated examples and scenario activities), verified assessment artifacts, Gemini/Vertex transports, provider fallback chains, local voice service, module-one content, and agent blueprint/progress surfaces are integrated with the backend's enrollment, profile, migrations, progress keys, scoped companion and lesson rewriting.
+
+General profiling still runs after login. Course enrollment begins with the course-only interview, followed by adaptive preparation, activity, customization and build. Course answers remain enrollment-scoped. Both the old profiling GET/DELETE API and the incoming slot-question POST API are retained. Normalization preserves the incoming context, task, agent-name and tag fields without discarding the legacy branching answers.
+
+The full-height My Assistant panel and automatic guidance remain. Removed pricing, experiment labs and Python-project interfaces are not restored. The workflow project stays available. Native audio assets remain paired with authored narration; personalized versions use generated clips.
+
+Tests retain both profiling suites (profiling and adaptive-profiling), both learning-experience suites, and add the incoming adaptive backend suite. Backend test runners use fileURLToPath for Windows paths and clear provider credentials in test processes.
+
+The Kokoro companion worker uses a hidden Node spawn with IPC and app-root resolution, matching the backend worker pattern and avoiding Turbopack attempting to bundle the worker entrypoint. Both worker scripts are explicitly included in production tracing.
+
+For zero-network demos with no Google provider configured, enrollment goes directly from course questions to customization/build. Configured deployments enable the incoming narrated preparation and scenario activity. No credentials are copied into the merge checkout.
+
+Validation: production build and typecheck pass; 43 learning-experience tests pass; all ten backend suites pass. The adaptive profile regression checks verify that context, use-case, agent name and deduplicated tags survive validation/normalization. Production build currently reports three non-fatal Turbopack tracing warnings for runtime-generated media files.

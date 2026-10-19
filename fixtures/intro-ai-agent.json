@@ -14,9 +14,9 @@
       {
         "kind": "title",
         "icon": "bot",
-        "kicker": "Course preview · about 1 minute",
+        "kicker": "Course preview · 1 minute",
         "title": "Picture the end of this course",
-        "sub": "What you'll have built, and what you'll be able to do",
+        "sub": "What you'll build and do",
         "narration": "Picture the end of this course. Here is what you will have built.",
         "sentences": [
           "Picture the end of this course.",
@@ -143,7 +143,7 @@
           {
             "icon": "book",
             "label": "Keep it truthful",
-            "sub": "answers from your own documents",
+            "sub": "answers from your documents",
             "cue": 2
           },
           {
@@ -176,7 +176,7 @@
       {
         "kind": "bullets",
         "title": "What it takes",
-        "lead": "You'll read and run Python. That's the only skill you need to bring.",
+        "lead": "You only need to read and run Python.",
         "bullets": [
           {
             "icon": "cpu",

@@ -1,4 +1,5 @@
 // Backend tests: node tests/backend/run.mjs (bundles with esbuild, in-memory PGlite, a stand-in for the GLM API).
+import { ROLE_HOOK } from "@/lib/world";
 import { courseContext } from "@/server/planner/context";
 import { baselinePlan, type PlannerInput } from "@/server/planner/baseline";
 import { validatePlan } from "@/server/planner/validate";
@@ -52,7 +53,7 @@ check("why cites the module's quick check", m1.lessons[0]!.why.includes("this mo
 check("strengths and gaps name modules, not numbers", b1.learner.strengths.includes("Introduction to AI Agents") && !b1.learner.gaps.some((g) => /^\d+$/.test(g)), b1.learner);
 check("IT field → an 'In your world' for 1.1", b1.modules[0]!.lessons[0]!.inYourWorld.body.includes("ticket"), b1.modules[0]!.lessons[0]);
 check("no template for 2.1 → empty 'In your world'", b1.modules[1]!.lessons[0]!.inYourWorld.body === "");
-check("engineer hook line on m1", !!m1.hookScene?.includes("building it"), m1.hookScene);
+check("engineer hook line on m1", m1.hookScene === ROLE_HOOK[1]?.engineer, m1.hookScene);
 check("every module ends with its check, then review", b1.modules.every((m) => m.topicOrder.slice(-2).join() === "gate,review"));
 check("beginner (completely new) → extra everywhere", b2.modules.slice(0, 2).every((m) => m.lessons.every((l) => l.support === "extra")));
 check("beginner level 'new'", b2.learner.level === "new");

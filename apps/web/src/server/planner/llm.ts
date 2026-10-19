@@ -139,6 +139,9 @@ function learnerText(req: PlannerRequest): string {
   if (input.answers.expect) lines.push(`What they want this course to focus on or skip (their words): ${input.answers.expect}`);
   const fit = interviewLines(input.answers, "courseInterview");
   if (fit.length) lines.push("Enrolment questions for this course (Pip's questions and their answers):", ...fit);
+  for (const key of ["learningContext", "learningContextDetail", "subRole", "useCase", "goalDetail"] as const) {
+    if (input.answers[key]) lines.push(key + ": " + input.answers[key]);
+  }
   lines.push(`Help level set by the learner: ${input.supportOverride === "auto" ? "automatic (decide it)" : input.supportOverride}`);
   lines.push(input.pace ? `Study pace they chose: ${input.pace.studyDays.length} days a week, ${input.pace.sessionMinutes} minutes a session` : "Study pace: not set");
 
@@ -149,6 +152,10 @@ function learnerText(req: PlannerRequest): string {
     lines.push(`Quick check (right answers out of 2, per lesson, or per module where a bare number names the module): ${Object.entries(p.lessons).map(([l, n]) => `${l.includes(".") ? "lesson" : "module"} ${l}: ${n}`).join(", ")}`);
     const dunno = Object.entries(p.responses ?? {}).filter(([, v]) => v === null).map(([k]) => k);
     if (dunno.length) lines.push(`Answered "I don't know yet" on: ${dunno.join(", ")}`);
+    // the Mission records which idea they hold per module, so plans can target the misunderstanding itself
+    const ideas = p.activity?.ideas ?? [];
+    if (ideas.length) lines.push("What their choices in the Mission story showed, per module:");
+    for (const i of ideas) lines.push(`- module ${i.skill} (${i.title}): ${i.accurate ? "holds the accurate idea" : "currently believes"} "${i.held}"${i.sure ? "" : " (unsure)"}`);
   }
 
   if (previous) {

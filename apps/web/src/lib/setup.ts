@@ -19,6 +19,7 @@ import { DOMAINS, ROLES, customDomain, customRole, studentDomain, type Domain } 
 import { COMMON_ROLES, GENERAL_JOBS, GENERAL_ROLES, GENERAL_WORK_ROLES, PACKS, packOf, type FieldId, type PackOption, type RoleKey } from "@/lib/profiling/packs";
 import { derivedFor, type ProfileDerived } from "@/lib/profiling/derived";
 import type { LearnerPlan, PlanSource } from "@/lib/learner-plan";
+import type { SkillEvidence } from "@/lib/adaptive-onboarding";
 
 export type QuestionId =
   | "domain"
@@ -43,6 +44,13 @@ export type InterviewTurn = { slot: string; q: string; a: string };
 export type SetupAnswers = Partial<Record<Exclude<QuestionId, "tools">, string | null>> & {
   /** the one question that takes several answers */
   tools?: string[] | null;
+  learningContext?: string;
+  learningContextDetail?: string;
+  subRole?: string;
+  useCase?: string;
+  goalDetail?: string;
+  agentName?: string;
+  tags?: string[];
   domainOther?: string;
   roleOther?: string;
   studyFieldOther?: string;
@@ -314,14 +322,14 @@ export const QUESTION_BANK: BankQuestion[] = [
   },
   {
     id: "firstStep",
-    label: "What helps first",
-    q: "When something is new, what helps you first?",
+    label: "Learning start",
+    q: "What helps you first with new things?",
     options: [
       { v: "example", label: "See a full example" },
       { v: "idea", label: "Understand the idea" },
-      { v: "try", label: "Try it myself first" },
+      { v: "try", label: "Try it myself" },
     ],
-    ifSkipped: "idea first, then the example",
+    ifSkipped: "idea first, then example",
   },
   {
     id: "style",
@@ -329,9 +337,9 @@ export const QUESTION_BANK: BankQuestion[] = [
     q: "How do you like explanations?",
     options: [
       { v: "short", label: "Short and direct" },
-      { v: "steps", label: "Step by step, with analogies" },
+      { v: "steps", label: "Step by step" },
     ],
-    ifSkipped: "analogies offered only when a step trips you up",
+    ifSkipped: "analogies only when you’re stuck",
   },
 ];
 
@@ -416,6 +424,11 @@ function walk(raw: SetupAnswers | null | undefined, d?: ProfileDerived | null): 
   // per course: modules they know, what they want from it
   if (Array.isArray(a.known)) out.known = [...new Set(a.known.filter((k) => typeof k === "string" && /^[\w-]{1,12}$/.test(k)))].slice(0, 20);
   if (typeof a.expect === "string" && a.expect.trim()) out.expect = a.expect.trim().slice(0, 200);
+  // The new adaptive interview supplies bounded free text alongside legacy option values.
+  for (const key of ["learningContext", "learningContextDetail", "subRole", "useCase", "goalDetail", "agentName"] as const) {
+    if (typeof a[key] === "string") out[key] = a[key].trim().slice(0, 80);
+  }
+  if (Array.isArray(a.tags)) out.tags = [...new Set(a.tags.filter((tag) => typeof tag === "string").map((tag) => tag.slice(0, 60)))].slice(0, 12);
   return { answers: out, asked, inferred };
 }
 
@@ -472,22 +485,22 @@ export function withAnswer(q: SetupQuestion, a: SetupAnswers, v: string | null):
 export const COMFORT_QUESTION = {
   id: "needs" as const,
   label: "Comfort",
-  q: "Anything that would make this easier to use?",
+  q: "Anything to make this easier?",
   options: [
     { v: "text", label: "Larger text" },
     { v: "motion", label: "Less motion" },
-    { v: "none", label: "No, it’s fine as it is" },
+    { v: "none", label: "No, it’s fine" },
   ],
-  ifSkipped: "standard text size and motion",
+  ifSkipped: "standard text and motion",
 };
 
 export function comfortChange(needs: string[] | undefined): { text: string; skipped: boolean } {
   const n = needs ?? [];
-  if (!n.length) return { text: `Not set — ${COMFORT_QUESTION.ifSkipped}.`, skipped: true };
-  if (n.includes("none")) return { text: "Text size and motion stay as they are.", skipped: false };
+  if (!n.length) return { text: `Not set: ${COMFORT_QUESTION.ifSkipped}.`, skipped: true };
+  if (n.includes("none")) return { text: "Text and motion stay the same.", skipped: false };
   const parts = [
-    n.includes("text") ? "text is one size larger everywhere" : null,
-    n.includes("motion") ? "background motion and animations are kept to a minimum" : null,
+    n.includes("text") ? "text is larger" : null,
+    n.includes("motion") ? "motion is reduced" : null,
   ].filter(Boolean);
   const s = parts.join(", and ");
   return { text: s.charAt(0).toUpperCase() + s.slice(1) + ".", skipped: false };
@@ -506,8 +519,22 @@ export type Support = "extra" | "standard" | "light";
 /** Result of the ungraded pre-check: right answers per lesson (0-2). */
 export type PrecheckResult = {
   at: string;
+  /** Reference to server-held artifacts and LLM assessment; never trust client-supplied levels. */
+  assessmentId?: string;
   skipped?: boolean;
   isNew?: boolean;
+  /** "activity" when the levels came from the Mission or the Discovery conversation instead of the quiz */
+  source?: "quiz" | "activity";
+  /** the learner-facing profile from the Discovery conversation */
+  activity?: {
+    summary?: string;
+    strengths?: string[];
+    focus?: string[];
+    evidence?: SkillEvidence[];
+    learning?: { firstStep: "example" | "idea" | "try"; style: "short" | "steps"; note: string };
+    /** from the Mission: the idea the learner holds for each module (never shown as right or wrong) */
+    ideas?: { skill: string; title: string; held: string; accurate: boolean; sure: boolean }[];
+  };
   lessons: Record<string, number>;
   /** the raw answers (null = "I don't know yet"), sent to the server, which scores them and keeps them for planning */
   responses?: Record<string, string | null>;
@@ -651,14 +678,14 @@ const CHANGE: Record<QuestionId, (a: SetupAnswers, d?: ProfileDerived | null) =>
     })[a.coding ?? ""] ?? null,
   firstStep: (a) =>
     ({
-      example: "Each lesson opens with a full example, then the idea, then a quick try.",
-      idea: "Each lesson opens with the idea, then a full example, then a quick try.",
-      try: "Each lesson opens with a quick try, then the idea, then a full example.",
+      example: "Lessons go: example, idea, then a quick try.",
+      idea: "Lessons go: idea, example, then a quick try.",
+      try: "Lessons go: quick try, idea, then example.",
     })[a.firstStep ?? ""] ?? null,
   style: (a) =>
     ({
-      short: "Analogies stay closed and build explanations are folded — except in lessons on extra support.",
-      steps: "The analogy is open on every beat and each build step is explained first — except in lessons on a light touch.",
+      short: "Analogies and explanations stay folded, unless you need extra support.",
+      steps: "Analogies stay open and each step is explained first.",
     })[a.style ?? ""] ?? null,
 };
 
@@ -749,7 +776,7 @@ export function adaptationFromPlan(
   for (const m of plan.modules) for (const l of m.lessons) lessonSupport[l.lessonId] = l.support;
   const levels = Object.values(lessonSupport);
   const score = levels.reduce<number>((n, l) => n + (l === "extra" ? 0 : l === "standard" ? 1 : 2), 0) / (levels.length || 1);
-  const support: Support = base.override ?? (score < 0.67 ? "extra" : score > 1.5 ? "light" : "standard");
+  const support: Support = base.override ?? (source === "ai" ? plan.modules[0]?.support ?? "standard" : score < 0.67 ? "extra" : score > 1.5 ? "light" : "standard");
   return {
     ...base,
     lessonSupport,

@@ -44,7 +44,7 @@ const PRACTICE_PHASES: PracticePhase[] = [
     id: "understand",
     label: "Understand",
     title: "Read the signal",
-    body: "Meet the failure in context, find the real constraint, and accept a mission with a visible outcome.",
+    body: "See the failure and find the real problem.",
     outcome: "A clear problem to solve",
     icon: Crosshair,
   },
@@ -52,7 +52,7 @@ const PRACTICE_PHASES: PracticePhase[] = [
     id: "configure",
     label: "Configure",
     title: "Pitch base camp",
-    body: "Prepare a clean workspace where every later part of Scout has a reliable place to live.",
+    body: "Set up a clean workspace for Scout.",
     outcome: "Workspace online",
     icon: Wrench,
   },
@@ -60,7 +60,7 @@ const PRACTICE_PHASES: PracticePhase[] = [
     id: "connect",
     label: "Connect",
     title: "Open a safe line",
-    body: "Connect the capability Scout needs while keeping credentials and project boundaries protected.",
+    body: "Connect what Scout needs and keep keys safe.",
     outcome: "Secure connection",
     icon: Cable,
   },
@@ -68,7 +68,7 @@ const PRACTICE_PHASES: PracticePhase[] = [
     id: "test",
     label: "Test",
     title: "Send the first signal",
-    body: "Run the smallest useful test and use the evidence on screen to decide what works.",
+    body: "Run a small test and check what works.",
     outcome: "First response received",
     icon: CirclePlay,
   },
@@ -76,7 +76,7 @@ const PRACTICE_PHASES: PracticePhase[] = [
     id: "repair",
     label: "Repair",
     title: "Turn replies into progress",
-    body: "Find the missing behaviour, change one thing, and run again until Scout holds the thread.",
+    body: "Change one thing and run again until it works.",
     outcome: "Conversation restored",
     icon: ShieldCheck,
   },
@@ -84,7 +84,7 @@ const PRACTICE_PHASES: PracticePhase[] = [
     id: "launch",
     label: "Launch",
     title: "Face the real request",
-    body: "Put Scout in front of the problem that started the mission and observe what it can—and still cannot—do.",
+    body: "Try Scout on the real problem and see its limits.",
     outcome: "Field test complete",
     icon: RadioTower,
   },
@@ -302,9 +302,9 @@ function MissionHud({
         </span>
         <span className={cn("flex items-center gap-1.5", streak > 1 ? "font-semibold text-warn" : "text-ink-faint")}>
           <Flame className="size-4" aria-hidden />
-          {streak} checkpoints completed
+          {streak} checkpoints done
         </span>
-        <span className="ml-auto text-ink-muted">{doneCount} of {steps.length} tasks complete</span>
+        <span className="ml-auto text-ink-muted">{doneCount} of {steps.length} tasks done</span>
       </div>
       <PhaseRail current={activePhase} completed={completedPhases} onSelect={onSelectPhase} />
     </Surface>
@@ -366,8 +366,8 @@ function ScoutBuild({ active, completed }: { active: number; completed: Set<numb
       <div className="relative flex items-start justify-between gap-4">
         <div>
           <span className="text-[10px] font-semibold tracking-[0.18em] text-stage-guided uppercase">Scout build status</span>
-          <h3 className="mt-1 text-lg font-semibold">Bring one system online at a time</h3>
-          <p className="mt-1 text-sm text-ink-muted">Every completed phase becomes part of the agent you launch.</p>
+          <h3 className="mt-1 text-lg font-semibold">One system at a time</h3>
+          <p className="mt-1 text-sm text-ink-muted">Each phase adds a part to your agent.</p>
         </div>
         <motion.div
           animate={reduce ? undefined : active > 0 ? { scale: [1, 1.05, 1] } : undefined}
@@ -433,7 +433,7 @@ function Briefing({ block, mission, maxXp, onAccept }: { block: GuidedBlock; mis
           <ScoutBuild active={0} completed={completed} />
           <Surface pad="md" className="flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
-              <h3 className="flex items-center gap-2 text-sm font-semibold"><Backpack className="size-4 text-stage-guided" aria-hidden />Pre-flight check</h3>
+              <h3 className="flex items-center gap-2 text-sm font-semibold"><Backpack className="size-4 text-stage-guided" aria-hidden />Before you start</h3>
               <span className="text-xs font-medium text-ink-faint">{packed.length}/{block.before.items.length} ready</span>
             </div>
             <ul className="grid gap-2 sm:grid-cols-2">
@@ -446,7 +446,7 @@ function Briefing({ block, mission, maxXp, onAccept }: { block: GuidedBlock; mis
           </Surface>
           <Surface pad="md" className="flex flex-wrap items-center gap-x-5 gap-y-3 border-stage-guided-line bg-stage-guided-soft/40">
             <Reward icon={<Flag />} text="6 mission phases" /><Reward icon={<Zap />} text={t("rewardXp", { xp: maxXp })} /><Reward icon={<Award />} text={t("rewardBadge", { badge: mission.badge })} />
-            <Button size="lg" variant="brand" className="w-full" onClick={onAccept}>Begin the build<ArrowRight data-icon="inline-end" /></Button>
+            <Button size="lg" variant="brand" className="w-full" onClick={onAccept}>Start building<ArrowRight data-icon="inline-end" /></Button>
           </Surface>
         </section>
       </div>
@@ -573,7 +573,7 @@ function Waypoint({
         <div className="focus-split">
           <section className="focus-pane flex flex-col gap-4">
             {header}
-            {!done ? <div className="flex flex-wrap items-center gap-3"><Button variant="outline" className="bg-transparent" onClick={help}><LifeBuoy data-icon="inline-start" />{asked ? t("askAgain", { name: mentor.who.split(" ")[0]! }) : t("askMentor", { name: mentor.who.split(" ")[0]! })}</Button>{!asked && !slipped && !helped ? <span className="text-xs text-ink-faint">Hints are part of learning. Your XP stays the same.</span> : null}</div> : null}
+            {!done ? <div className="flex flex-wrap items-center gap-3"><Button variant="outline" className="bg-transparent" onClick={help}><LifeBuoy data-icon="inline-start" />{asked ? t("askAgain", { name: mentor.who.split(" ")[0]! }) : t("askMentor", { name: mentor.who.split(" ")[0]! })}</Button>{!asked && !slipped && !helped ? <span className="text-xs text-ink-faint">Hints never cost XP.</span> : null}</div> : null}
             {guidance}
           </section>
           <section className="focus-pane flex flex-col gap-4">
@@ -680,7 +680,7 @@ function Waypoint({
               <LifeBuoy data-icon="inline-start" />
               {asked ? t("stillStuck") : t("notQuite")}
             </Button>
-            {!asked ? <span className="text-xs text-ink-faint">Hints are part of learning. Your XP stays the same.</span> : null}
+            {!asked ? <span className="text-xs text-ink-faint">Hints never cost XP.</span> : null}
           </div>
         )}
       </Surface>

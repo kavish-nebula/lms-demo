@@ -18,7 +18,7 @@ export async function SiteFooter() {
       <div className="mx-auto max-w-6xl px-4 md:px-6">
         <div className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,var(--accent-deep),#2b2177_60%,#160f33)] p-8 md:p-14">
           <div aria-hidden className="absolute -top-24 -right-24 size-72 rounded-full bg-coral/30 blur-3xl" />
-          <h2 className="relative max-w-xl text-3xl font-semibold tracking-tight text-white md:text-4xl">{t("ctaTitle")}</h2>
+          <h2 className="relative max-w-xl text-2xl font-semibold tracking-tight text-white md:text-[2.25rem] md:leading-tight">{t("ctaTitle")}</h2>
           <p className="relative mt-3 max-w-lg text-lg text-white/75">{t("ctaBody")}</p>
           <div className="relative mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg" className="bg-white text-[#1b1440] hover:bg-white/90">

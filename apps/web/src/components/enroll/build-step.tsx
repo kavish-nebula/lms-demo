@@ -6,6 +6,8 @@ import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowRight, Check, Clock, Loader2, RotateCcw, Sparkles, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAgentVoice } from "@/components/agent/agent-voice";
+import { BUILD_READY_LINE } from "@/lib/guide-lines";
 import { Chip } from "@/components/kit/chip";
 import { Surface } from "@/components/kit/surface";
 import { FinaleArt, ModuleArt } from "@/components/course/module-art";
@@ -74,6 +76,10 @@ export function BuildStep({
 
   const waiting = server.status === "saving" || (server.status === "planning" && !gaveUp);
   const ready = animDone && !waiting && server.status !== "error";
+  const { say } = useAgentVoice();
+  React.useEffect(() => {
+    if (ready) say(BUILD_READY_LINE, { queue: true });
+  }, [ready, say]);
   const plan = adaptation.plan;
 
   const who = adaptation.roleLabel && adaptation.domain
